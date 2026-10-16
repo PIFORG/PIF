@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mtrs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mtrs
+      POSTGRES_PASSWORD: mtrs_dev_password
+      POSTGRES_DB: mtrs
+    ports:
+      - "5432:5432"
+    volumes:
+      - mtrs_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mtrs -d mtrs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mtrs-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  redis:
+    image: redis:7-alpine
+    container_name: mtrs-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    profiles:
+      - redis
+
+volumes:
+  mtrs_pg_data:

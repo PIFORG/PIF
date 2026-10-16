@@ -1,0 +1,198 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--mtr-canvas);
+}
+
+/* ---------- Brand pane ---------- */
+
+.brandPane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-7);
+  padding: clamp(2rem, 4vw, 3.5rem);
+  border-right: 1px solid var(--mtr-border);
+  overflow: hidden;
+  background:
+    radial-gradient(640px 360px at 100% 0%, color-mix(in srgb, var(--mtr-brand) 20%, transparent), transparent 70%),
+    linear-gradient(var(--mtr-grid) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, var(--mtr-grid) 1px, transparent 1px) 0 0 / 40px 40px,
+    var(--mtr-surface);
+}
+
+.brandLink {
+  align-self: flex-start;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brandLink:hover {
+  text-decoration: none;
+}
+
+.statement {
+  max-width: 34rem;
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(1.9rem, 1.2rem + 1.8vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 660;
+  color: var(--mtr-text);
+}
+
+.headline span {
+  color: var(--mtr-brand-text);
+}
+
+.tagline {
+  margin: var(--space-4) 0 0;
+  max-width: 44ch;
+  font-size: 0.9375rem;
+  color: var(--mtr-text-2);
+}
+
+.illustration {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--space-7);
+}
+
+.illustration line {
+  stroke: var(--mtr-text-3);
+  stroke-width: 1.4;
+}
+
+.illustration g[data-up='true'] rect {
+  fill: var(--mtr-pos);
+  opacity: 0.75;
+}
+
+.illustration g[data-up='false'] rect {
+  fill: var(--mtr-neg);
+  opacity: 0.7;
+}
+
+.trend {
+  fill: none;
+  stroke: var(--mtr-cyan);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+  stroke-linecap: round;
+}
+
+.assurances {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  max-width: 34rem;
+}
+
+.assurances li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.assurances strong {
+  display: block;
+  color: var(--mtr-text);
+  font-weight: 600;
+}
+
+.assuranceIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--mtr-brand-text);
+  background: var(--mtr-brand-soft);
+}
+
+/* ---------- Form pane ---------- */
+
+.formPane {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5) clamp(1.25rem, 4vw, 3rem);
+  min-width: 0;
+}
+
+.formTop {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.mobileBrand {
+  display: none;
+  margin-right: auto;
+  color: inherit;
+  text-decoration: none;
+}
+
+.formInner {
+  width: min(100%, var(--auth-max));
+  margin: auto;
+  padding: var(--space-7) 0;
+}
+
+.formTitle {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.625rem, 1.3rem + 0.8vw, 1.875rem);
+  letter-spacing: -0.025em;
+  font-weight: 650;
+}
+
+.formLead {
+  margin: 0 0 var(--space-6);
+  color: var(--mtr-text-2);
+}
+
+.footerLinks {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--mtr-border);
+  font-size: 0.875rem;
+  color: var(--mtr-text-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.legal {
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+@media (max-width: 960px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .brandPane {
+    display: none;
+  }
+
+  .mobileBrand {
+    display: inline-flex;
+  }
+
+  .formInner {
+    padding: var(--space-6) 0;
+  }
+}
