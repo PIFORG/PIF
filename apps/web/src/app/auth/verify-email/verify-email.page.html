@@ -1,0 +1,27 @@
+<mtr-auth-layout
+  [title]="'Vérifiez votre courriel'"
+  lead="Confirmez la propriété de votre boîte de réception. La vérification ne s'exécute que lorsque vous cliquez sur le bouton ci-dessous — jamais automatiquement au chargement de la page."
+  [showFooter]="true"
+>
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+  @if (!success()) {
+    <p>
+      {{
+        token()
+          ? 'Un jeton de vérification est prêt. Cliquez sur confirmer pour terminer la vérification.'
+          : 'Aucun jeton de vérification n\'a été trouvé dans l\'URL de cette page.'
+      }}
+    </p>
+    <button type="button" class="btn btn-primary" style="width: 100%" (click)="confirm()" [disabled]="busy() || !token()">
+      {{ busy() ? 'Vérification…' : 'Confirmer la vérification du courriel' }}
+    </button>
+  } @else {
+    <a routerLink="/login" class="btn btn-primary" style="width: 100%">Continuer vers la connexion</a>
+  }
+
+  <ng-container ngProjectAs="[authFooter]">
+    <a routerLink="/login">Retour à la connexion</a>
+    <a routerLink="/resend-verification">Renvoyer le courriel de vérification</a>
+  </ng-container>
+</mtr-auth-layout>

@@ -1,0 +1,75 @@
+<section class="adm-section" aria-labelledby="admin-users-heading">
+  <div class="adm-sectionHead">
+    <div>
+      <h2 id="admin-users-heading">Comptes utilisateurs</h2>
+      <p>Recherchez, filtrez et ouvrez des comptes pour les actions d'administration.</p>
+    </div>
+  </div>
+
+  <form class="toolbar adm-toolbar" role="search" (submit)="onSearch($event)">
+    <label class="field" style="flex: 1 1 200px">
+      <span class="sr-only">Rechercher un nom ou un courriel</span>
+      <input
+        type="search"
+        [value]="q()"
+        (input)="q.set($any($event.target).value)"
+        placeholder="Rechercher un nom ou un courriel"
+        maxlength="120"
+      />
+    </label>
+    <label>
+      <span class="sr-only">Filtrer par statut</span>
+      <select [value]="status()" (change)="setStatus($any($event.target).value)">
+        <option value="">Tous les statuts</option>
+        <option value="ACTIVE">Actif</option>
+        <option value="PENDING_VERIFICATION">Vérification en attente</option>
+        <option value="SUSPENDED">Suspendu</option>
+        <option value="DEACTIVATED">Désactivé</option>
+      </select>
+    </label>
+    <label>
+      <span class="sr-only">Filtrer par rôle</span>
+      <select [value]="role()" (change)="setRole($any($event.target).value)">
+        <option value="">Tous les rôles</option>
+        <option value="INVESTOR">Investisseur</option>
+        <option value="ADMIN">Administrateur</option>
+      </select>
+    </label>
+    <label>
+      <span class="sr-only">Filtrer par vérification du courriel</span>
+      <select [value]="emailVerified()" (change)="setEmailVerified($any($event.target).value)">
+        <option value="">Toute vérification</option>
+        <option value="true">Courriel vérifié</option>
+        <option value="false">Courriel non vérifié</option>
+      </select>
+    </label>
+    <button type="submit" class="btn btn-secondary">Rechercher</button>
+  </form>
+
+  <mtr-form-error [message]="error()" />
+  <div aria-live="polite" [attr.aria-busy]="loading()">
+    @if (loading()) {
+      <p role="status">Chargement des utilisateurs…</p>
+    }
+    @if (loaded(); as data) {
+      <mtr-admin-user-table [users]="data.items" />
+      @if (data.total === 0) {
+        <p>Aucun compte ne correspond à ces filtres.</p>
+      }
+    }
+  </div>
+
+  @if (loaded(); as data) {
+    @if (data.total > 0) {
+      <nav class="adm-pagination" aria-label="Pagination">
+        <button type="button" class="btn btn-ghost" [disabled]="page() <= 1" (click)="page.set(max(1, page() - 1))">
+          Précédent
+        </button>
+        <span>Page {{ page() }} sur {{ totalPages() }} ({{ data.total }} au total)</span>
+        <button type="button" class="btn btn-ghost" [disabled]="page() >= totalPages()" (click)="page.set(page() + 1)">
+          Suivant
+        </button>
+      </nav>
+    }
+  }
+</section>

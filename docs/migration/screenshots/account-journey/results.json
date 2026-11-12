@@ -1,0 +1,227 @@
+{
+  "ranAt": "2026-11-11T18:04:04.501Z",
+  "database": "PIF_spring_test",
+  "mode": "account",
+  "results": [
+    {
+      "name": "A1. resend verification: known and unknown addresses get the same answer",
+      "ok": true,
+      "detail": "If an unverified account exists for this email, a new verification message has been sent when allowed."
+    },
+    {
+      "name": "   a verification e-mail is captured for the pending account only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   verification: the e-mailed link targets the configured Angular origin, unmodified",
+      "ok": true,
+      "detail": "http://localhost:4200/verify-email?token=<redacted>"
+    },
+    {
+      "name": "   verification: no URL in the message sends the token to another origin",
+      "ok": true,
+      "detail": "1 URL(s) in the message"
+    },
+    {
+      "name": "   the token is removed from the address bar before anything is sent",
+      "ok": true,
+      "detail": "/verify-email"
+    },
+    {
+      "name": "   the resent link verifies and activates the account",
+      "ok": true,
+      "detail": "Email verified successfully. You can now sign in."
+    },
+    {
+      "name": "A2. password change: a wrong current password is refused and changes nothing",
+      "ok": true,
+      "detail": "Current password is incorrect"
+    },
+    {
+      "name": "   the correct current password changes it",
+      "ok": true,
+      "detail": "Password changed. Every other device was signed out; this device continues with a new session."
+    },
+    {
+      "name": "   the other device is signed out",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   this device continues on its new session after a reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the old password is refused and the new one signs in",
+      "ok": true,
+      "detail": "401 INVALID_CREDENTIALS / 200"
+    },
+    {
+      "name": "   a password-changed notice was sent",
+      "ok": true,
+      "detail": "password-changed"
+    },
+    {
+      "name": "A3. e-mail change: the request is accepted and nothing changes yet",
+      "ok": true,
+      "detail": "If the new address can be used, a confirmation link has been sent to it. Your current address stays active until you confirm."
+    },
+    {
+      "name": "   the confirmation goes to the new address and a notice to the current one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   e-mail change: the e-mailed link targets the configured Angular origin, unmodified",
+      "ok": true,
+      "detail": "http://localhost:4200/confirm-email-change?token=<redacted>"
+    },
+    {
+      "name": "   e-mail change: no URL in the message sends the token to another origin",
+      "ok": true,
+      "detail": "1 URL(s) in the message"
+    },
+    {
+      "name": "   the token is removed from the address bar before anything is sent",
+      "ok": true,
+      "detail": "/confirm-email-change"
+    },
+    {
+      "name": "   confirming moves the account to the new address",
+      "ok": true,
+      "detail": "Your email address was changed. Sign in again with the new address."
+    },
+    {
+      "name": "   every session is signed out",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   both addresses are notified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the new address signs in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A4. recovery codes: regeneration with password and code shows 10 new codes",
+      "ok": true,
+      "detail": "10 codes"
+    },
+    {
+      "name": "   regenerating again replaces the set (10 unused codes stored, all different)",
+      "ok": true,
+      "detail": "10 unused"
+    },
+    {
+      "name": "   the codes are gone from the page after acknowledgement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a notice was sent for each regeneration",
+      "ok": true,
+      "detail": "mfa-recovery-codes-regenerated, mfa-recovery-codes-regenerated"
+    },
+    {
+      "name": "   a code from the replaced set no longer signs in",
+      "ok": true,
+      "detail": "That code was not accepted, or the sign-in attempt expired. Sign in again to get a new verification step."
+    },
+    {
+      "name": "   a code from the current set signs in and is consumed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a second device signs in with password and code",
+      "ok": true,
+      "detail": "200 "
+    },
+    {
+      "name": "A5. MFA disable: a wrong authenticator code keeps it on",
+      "ok": true,
+      "detail": "Invalid authenticator code"
+    },
+    {
+      "name": "   password and a fresh code turn it off and erase the secret and recovery codes",
+      "ok": true,
+      "detail": "Two-step verification is off. Other devices were signed out."
+    },
+    {
+      "name": "   the other device is signed out",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   an MFA-disabled notice was sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A6. deactivation: a wrong password is refused",
+      "ok": true,
+      "detail": "Reauthentication failed"
+    },
+    {
+      "name": "   the account is deactivated, every session revoked, and the page returns to sign-in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a deactivation notice was sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   signing in again is refused",
+      "ok": true,
+      "detail": "Account is not available for sign-in"
+    },
+    {
+      "name": "A7. deletion: the confirmation word must be typed exactly",
+      "ok": true,
+      "detail": "Type DELETE to confirm."
+    },
+    {
+      "name": "   the account is pending deletion with name and e-mail removed",
+      "ok": true,
+      "detail": "PENDING_DELETION"
+    },
+    {
+      "name": "   every session is revoked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the notice went to the original address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the old address can no longer sign in",
+      "ok": true,
+      "detail": "401 INVALID_CREDENTIALS"
+    },
+    {
+      "name": "no request was rate-limited during the journeys",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "screenshots taken while secrets were on screen were masked",
+      "ok": true,
+      "detail": "1 masked capture(s)"
+    },
+    {
+      "name": "S1. no TOTP secret or recovery code appears in screenshots, results or captured e-mails",
+      "ok": true,
+      "detail": "21 value(s) checked in 416 file(s)"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+<ng-template #navGroups let-collapsed="collapsed" let-inDrawer="inDrawer">
+  @for (group of groups(); track group.id) {
+    <div class="group">
+      <p class="groupLabel" [id]="'nav-' + group.id">{{ group.label }}</p>
+      <ul class="list" [attr.aria-labelledby]="'nav-' + group.id">
+        @for (item of group.items; track item.href) {
+          <li>
+            <a
+              [routerLink]="item.href"
+              class="link"
+              [attr.aria-current]="isActive(item) ? 'page' : null"
+              [attr.title]="linkTitle(item, collapsed)"
+              (click)="inDrawer && drawerOpen.set(false)"
+            >
+              <svg mtrIcon [name]="item.icon" class="linkIcon"></svg>
+              <span class="linkLabel">{{ item.label }}</span>
+              @if (item.status !== 'LIVE_INTEGRATED') {
+                <span class="preview">
+                  <svg mtrIcon name="clock" [size]="12"></svg>
+                  <span class="sr-only">{{ statusLabel[item.status] }} — moteur pas encore disponible</span>
+                </span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</ng-template>
+
+<div class="shell" [attr.data-collapsed]="collapsed() ? 'true' : 'false'">
+  <a href="#main-content" class="skip-link">Aller au contenu</a>
+
+  <aside class="sidebar" aria-label="Espace de travail">
+    <span class="railEdge" aria-hidden="true"></span>
+    <div class="sidebarTop">
+      <a routerLink="/dashboard" class="brand" aria-label="Market Trading Room — vue d'ensemble">
+        <mtr-brand-lockup [compact]="collapsed()" [size]="30" />
+      </a>
+    </div>
+    <nav class="nav" aria-label="Navigation principale">
+      <ng-container *ngTemplateOutlet="navGroups; context: { collapsed: collapsed(), inDrawer: false }" />
+    </nav>
+    <div class="sidebarFoot">
+      @if (!collapsed()) {
+        <p class="sidebarLegend" aria-hidden="true">
+          <span class="preview"><svg mtrIcon name="clock" [size]="11"></svg></span>
+          Aperçu — moteur en attente
+        </p>
+        <p class="footNote"><svg mtrIcon name="lock" [size]="14"></svg> Environnement simulé. Pas d'argent réel ni d'ordres réels.</p>
+      }
+      <button
+        type="button"
+        class="collapse"
+        (click)="toggleCollapsed()"
+        [attr.aria-pressed]="collapsed()"
+        [attr.aria-label]="collapsed() ? 'Développer la barre latérale' : 'Réduire la barre latérale'"
+      >
+        <svg mtrIcon [name]="collapsed() ? 'chevron-right' : 'chevron-left'" [size]="16"></svg>
+        @if (!collapsed()) {
+          <span>Réduire</span>
+        }
+      </button>
+    </div>
+  </aside>
+
+  <div class="column">
+    <header class="topbar">
+      <button
+        #menuButton
+        type="button"
+        class="menuButton"
+        (click)="drawerOpen.set(true)"
+        aria-label="Ouvrir la navigation"
+        [attr.aria-expanded]="drawerOpen()"
+        aria-controls="workspace-drawer"
+      >
+        <svg mtrIcon name="menu"></svg>
+      </button>
+      <nav aria-label="Fil d'Ariane" class="breadcrumb">
+        <ol>
+          <li>{{ location()?.group?.label ?? 'Espace de travail' }}</li>
+          <li aria-current="page">{{ location()?.item?.label ?? "Vue d'ensemble" }}</li>
+        </ol>
+      </nav>
+      <div class="topActions">
+        <span class="chip env" title="Toute activité de trading et de portefeuille est simulée">Simulé</span>
+        @if (health(); as h) {
+          <span class="chip" [attr.data-health]="h" role="status">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="healthText">{{ healthText[h] }}</span>
+          </span>
+        }
+        <span class="chip clock num" [attr.title]="clockTitle()">
+          <svg mtrIcon name="clock" [size]="14"></svg>
+          <time [attr.datetime]="now().toISOString()">{{ clockText() }}</time>
+        </span>
+        <mtr-theme-toggle />
+        <mtr-profile-dropdown />
+      </div>
+    </header>
+
+    <main id="main-content" class="main" tabindex="-1">
+      <ng-content />
+    </main>
+  </div>
+
+  @if (drawerOpen()) {
+    <div class="drawerLayer">
+      <button type="button" class="drawerBackdrop" aria-label="Fermer la navigation" tabindex="-1" (click)="drawerOpen.set(false)"></button>
+      <div id="workspace-drawer" #drawer class="drawer" role="dialog" aria-modal="true" aria-label="Navigation">
+        <div class="drawerHead">
+          <mtr-brand-lockup [size]="28" />
+          <button type="button" class="menuButton" (click)="closeDrawer(true)" aria-label="Fermer la navigation">
+            <svg mtrIcon name="close"></svg>
+          </button>
+        </div>
+        <nav aria-label="Navigation principale (mobile)" class="nav">
+          <ng-container *ngTemplateOutlet="navGroups; context: { collapsed: false, inDrawer: true }" />
+        </nav>
+      </div>
+    </div>
+  }
+
+  <nav class="bottomNav" aria-label="Navigation rapide">
+    @for (item of mobileItems(); track item.href) {
+      <a [routerLink]="item.href" class="bottomLink" [attr.aria-current]="isActive(item) ? 'page' : null">
+        <svg mtrIcon [name]="item.icon"></svg>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</div>

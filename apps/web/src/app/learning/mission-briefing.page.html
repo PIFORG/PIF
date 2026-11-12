@@ -1,0 +1,170 @@
+<div class="page-shell lr-briefingShell">
+  <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)"><a routerLink="/learn">MarketQuest</a> / Mission briefing</nav>
+  <mtr-page-heading
+    [eyebrow]="mission() ? levelLabel[mission()!.level] : 'Mission'"
+    [title]="mission()?.title ?? 'Mission briefing'"
+    [description]="mission()?.summary"
+  >
+    @if (mission(); as m) {
+      <ng-container mtrHeadingActions>
+        <span mtr-availability-badge [availability]="m.availability"></span>
+        @if (activeId()) {
+          <a [routerLink]="'/learn/sessions/' + activeId()" class="btn btn-primary">Resume mission <svg mtrIcon name="arrow-right" [size]="16" /></a>
+        } @else {
+          <button type="button" class="btn btn-primary" (click)="start()" [disabled]="starting() || !playable()">{{ starting() ? 'Starting…' : playable() ? 'Start mission' : 'Not playable yet' }}@if (playable() && !starting()) {<svg mtrIcon name="arrow-right" [size]="16" />}</button>
+        }
+      </ng-container>
+    }
+  </mtr-page-heading>
+
+  @if (error()) {
+    <div class="notice form-error-banner" role="alert">{{ error() }}</div>
+  }
+
+  @if (mission(); as m) {
+    <div class="lr-briefingHero" role="presentation">
+      <div class="lr-briefingHeroGlow" aria-hidden="true"></div>
+      <p class="lr-briefingHook">{{ m.summary }}</p>
+    </div>
+    <div class="lr-layout lr-briefingGrid">
+      <div class="lr-col">
+        <section mtr-panel panelId="context" heading="Contexte opérationnel">
+          <p style="margin: 0; line-height: 1.6">{{ m.briefing.context }}</p>
+        </section>
+
+        <div class="lr-twoUp">
+          <section mtr-panel panelId="start" heading="Starting portfolio">
+            <dl class="lr-metricGrid">
+              <div>
+                <dt>Cash</dt>
+                <dd>{{ formatDT(m.initialCash, 0) }}</dd>
+              </div>
+              <div>
+                <dt>Duration</dt>
+                <dd>{{ m.steps }} trading {{ m.stepLabel }}s</dd>
+              </div>
+              @for (p of positions(); track p.symbol) {
+                <div>
+                  <dt>{{ p.name }}</dt>
+                  <dd>{{ p.quantity }} × {{ p.symbol }}</dd>
+                </div>
+              }
+            </dl>
+            <p class="lr-muted" style="margin-top: var(--space-3)">Tradable: {{ tradable() }}.</p>
+          </section>
+
+          <section mtr-panel panelId="rules" heading="Rules">
+            <ul class="lr-bullets">
+              @for (r of m.briefing.rules; track r) {
+                <li>{{ r }}</li>
+              }
+              <li>Order types: {{ orderTypes() }}.</li>
+              <li>Commission {{ (m.rules.feeBps / 100).toFixed(2) }} % per fill, minimum {{ formatDT(m.rules.minFee) }}.</li>
+              @if (m.rules.maxPositionWeightPct) {
+                <li>Buys above {{ m.rules.maxPositionWeightPct }} % of equity in one asset are rejected.</li>
+              }
+              @if (maxLoss()) {
+                <li>
+                  <strong>The mission ends immediately if you lose {{ maxLoss() }} % of your starting value.</strong>
+                </li>
+              }
+            </ul>
+          </section>
+        </div>
+
+        <section mtr-panel panelId="objectives" heading="Objectives" description="Required objectives must be met to pass. Optional ones improve your score.">
+          <ul class="lr-list">
+            @for (o of m.objectives; track o.id) {
+              <li class="lr-objective">
+                <span class="lr-objectiveIcon" aria-hidden="true"><svg mtrIcon [name]="o.required ? 'check' : 'info'" [size]="12" /></span>
+                <div>
+                  <strong>{{ o.label }}</strong>
+                  <span>{{ o.required ? 'Required' : 'Optional' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <section mtr-panel panelId="outcomes" heading="What you will practise">
+          <ul class="lr-bullets">
+            @for (o of m.learningOutcomes; track o) {
+              <li>{{ o }}</li>
+            }
+          </ul>
+          @if (m.briefing.tips.length) {
+            <h3 class="eyebrow" style="margin: var(--space-4) 0 var(--space-2)">Tips</h3>
+            <ul class="lr-bullets">
+              @for (t of m.briefing.tips; track t) {
+                <li>{{ t }}</li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <div class="lr-col">
+        <section mtr-panel panelId="scoring" heading="How you are assessed" [description]="scoringDescription()">
+          <div class="lr-stack">
+            @for (key of weightKeys; track key) {
+              <div class="lr-competency">
+                <div class="lr-competencyHead">
+                  <strong>{{ weightLabel[key] }}</strong>
+                  <span class="num">{{ m.scoring.weights[key] }} %</span>
+                </div>
+                <div mtr-meter [value]="m.scoring.weights[key]" [label]="weightLabel[key] + ' weight'"></div>
+              </div>
+            }
+          </div>
+          <p class="lr-muted" style="margin-top: var(--space-3)">Competencies: {{ competencies() }}.</p>
+        </section>
+
+        <section
+          mtr-panel
+          panelId="mentor"
+          heading="Mentor style"
+          description="The mentor is rule-based (no AI provider is configured). Asking it for help marks the attempt as assisted, which counts for less in your profile."
+        >
+          <fieldset style="border: 0; padding: 0; margin: 0" [disabled]="!!activeId()">
+            <legend class="sr-only">Mentor style</legend>
+            <div class="lr-stack">
+              @for (mm of mentorModes; track mm.value) {
+                <div class="lr-objective">
+                  <input
+                    [id]="'mentor-mode-' + mm.value"
+                    type="radio"
+                    name="mentor-mode"
+                    [value]="mm.value"
+                    [checked]="selectedMode() === mm.value"
+                    (change)="mode.set(mm.value)"
+                  />
+                  <label [for]="'mentor-mode-' + mm.value" style="cursor: pointer">
+                    <strong>{{ mm.label }}{{ mm.value === m.mentorMode ? ' (default for this mission)' : '' }}</strong>
+                    <span>{{ mm.detail }}</span>
+                  </label>
+                </div>
+              }
+            </div>
+          </fieldset>
+          @if (activeId()) {
+            <p class="lr-muted">Your attempt in progress keeps the style you chose when you started.</p>
+          }
+        </section>
+
+        @if (m.relatedStorySlug) {
+          <section mtr-panel panelId="story" heading="Watch first" description="A one-minute FinStory on the same idea.">
+            <a routerLink="/stories" [queryParams]="{ story: m.relatedStorySlug }" class="btn btn-secondary"><svg mtrIcon name="play" [size]="14" /> Open the FinStory</a>
+          </section>
+        }
+
+        <p class="lr-muted">{{ m.provenance }}</p>
+      </div>
+    </div>
+  } @else if (error()) {
+    <div mtr-empty-state tone="error" heading="Mission unavailable" description="Check the link or go back to the mission list.">
+      <a mtrEmptyAction routerLink="/learn" class="btn btn-secondary">Back to MarketQuest</a>
+    </div>
+  } @else {
+    <div mtr-panel-skeleton [rows]="8"></div>
+  }
+</div>

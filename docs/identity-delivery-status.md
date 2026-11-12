@@ -1,3 +1,8 @@
+# Documentation historique — stack remplacée
+
+> **État actuel :** l'application active est **Angular** (pps/web) + **Spring Boot** (pps/api) + **PostgreSQL**.
+> NestJS / Next.js / React / Prisma Client ne font plus partie du runtime applicatif.
+> Voir README.md, docs/architecture/LEGACY_CLEANUP_AUDIT.md et docs/ui/DESIGN_SYSTEM.md.
 # Identity delivery status — Market Trading Room Simulator
 
 This document reports only what was executed. "Unit" means Jest or Vitest with mocked I/O. "Component" means a Vitest + jsdom render of real React components with the API mocked. "E2E" means the Supertest suite against a real PostgreSQL database, **which has never been run** (blocker B1). Phase-by-phase detail lives in `IMPLEMENTATION_PROGRESS.md`.

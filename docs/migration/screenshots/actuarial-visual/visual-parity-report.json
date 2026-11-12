@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-11-11T23:43:55.243Z",
+  "apps": {
+    "next": "http://localhost:3000",
+    "angular": "http://localhost:4200"
+  },
+  "channelTolerance": 32,
+  "pageErrors": [],
+  "results": [
+    {
+      "scenario": "actuarial-overview",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2488",
+      "angularSize": "1440x2488",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x2488",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 319,
+      "maxChannelDelta": 29,
+      "differenceBox": null
+    },
+    {
+      "scenario": "actuarial-overview",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x3052",
+      "angularSize": "768x3052",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x3052",
+      "differingPixels": 7,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 224,
+      "maxChannelDelta": 51,
+      "differenceBox": {
+        "x": 699,
+        "y": 1056,
+        "width": 1,
+        "height": 7
+      }
+    },
+    {
+      "scenario": "actuarial-overview",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4392",
+      "angularSize": "375x4392",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x4392",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 258,
+      "maxChannelDelta": 29,
+      "differenceBox": null
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x3705",
+      "angularSize": "1440x3705",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x3705",
+      "differingPixels": 25,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 736,
+      "maxChannelDelta": 58,
+      "differenceBox": {
+        "x": 421,
+        "y": 1197,
+        "width": 917,
+        "height": 911
+      }
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x5642",
+      "angularSize": "768x5642",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x5642",
+      "differingPixels": 7,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 577,
+      "maxChannelDelta": 51,
+      "differenceBox": {
+        "x": 699,
+        "y": 3407,
+        "width": 1,
+        "height": 7
+      }
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x6000",
+      "angularSize": "375x6000",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x6000",
+      "differingPixels": 15,
+      "differingPercent": 0.001,
+      "exactlyDifferingPixels": 612,
+      "maxChannelDelta": 41,
+      "differenceBox": {
+        "x": 157,
+        "y": 1994,
+        "width": 25,
+        "height": 336
+      }
+    },
+    {
+      "scenario": "actuarial-overview",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x2488",
+      "angularSize": "1440x2488",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x2488",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 318,
+      "maxChannelDelta": 26,
+      "differenceBox": null
+    },
+    {
+      "scenario": "actuarial-overview",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x3052",
+      "angularSize": "768x3052",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x3052",
+      "differingPixels": 9,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 221,
+      "maxChannelDelta": 47,
+      "differenceBox": {
+        "x": 78,
+        "y": 1054,
+        "width": 626,
+        "height": 94
+      }
+    },
+    {
+      "scenario": "actuarial-overview",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x4392",
+      "angularSize": "375x4392",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x4392",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 253,
+      "maxChannelDelta": 26,
+      "differenceBox": null
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x3705",
+      "angularSize": "1440x3705",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x3705",
+      "differingPixels": 19,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 726,
+      "maxChannelDelta": 60,
+      "differenceBox": {
+        "x": 421,
+        "y": 1195,
+        "width": 917,
+        "height": 1816
+      }
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x5642",
+      "angularSize": "768x5642",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x5642",
+      "differingPixels": 13,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 568,
+      "maxChannelDelta": 47,
+      "differenceBox": {
+        "x": 78,
+        "y": 2934,
+        "width": 626,
+        "height": 2014
+      }
+    },
+    {
+      "scenario": "actuarial-pricing",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x6000",
+      "angularSize": "375x6000",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x6000",
+      "differingPixels": 13,
+      "differingPercent": 0.001,
+      "exactlyDifferingPixels": 604,
+      "maxChannelDelta": 60,
+      "differenceBox": {
+        "x": 81,
+        "y": 149,
+        "width": 102,
+        "height": 5090
+      }
+    }
+  ]
+}

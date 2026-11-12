@@ -1,0 +1,311 @@
+{
+  "ranAt": "2026-11-11T16:56:10.884Z",
+  "database": "PIF_spring_test",
+  "results": [
+    {
+      "name": "J1. registration: empty submit shows field errors and sends nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   registration shows the generic confirmation and creates a pending account",
+      "ok": true,
+      "detail": "If this email can be registered, you will receive a verification message shortly."
+    },
+    {
+      "name": "   a verification e-mail is captured by the preview transport (never delivered)",
+      "ok": true,
+      "detail": "link origin http://localhost:3000"
+    },
+    {
+      "name": "   sign-in before verification is refused with a resend option",
+      "ok": true,
+      "detail": "Your email is not verified yet. Resend a verification link to continue."
+    },
+    {
+      "name": "   the verification token is removed from the address bar before anything is sent",
+      "ok": true,
+      "detail": "/verify-email"
+    },
+    {
+      "name": "   nothing is verified on page load",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   confirming verifies the e-mail and activates the account",
+      "ok": true,
+      "detail": "Email verified successfully. You can now sign in."
+    },
+    {
+      "name": "   the link cannot be used twice",
+      "ok": true,
+      "detail": "This link is invalid, has expired or was already used"
+    },
+    {
+      "name": "   the verified account signs in and lands on the workspace",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a welcome e-mail followed verification",
+      "ok": true,
+      "detail": "verify-email, welcome"
+    },
+    {
+      "name": "J3. recovery: known and unknown addresses get the same answer",
+      "ok": true,
+      "detail": "If an account exists for this email, password reset instructions have been sent when allowed."
+    },
+    {
+      "name": "   a reset link is captured for the real account only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the reset token is removed from the address bar",
+      "ok": true,
+      "detail": "/reset-password"
+    },
+    {
+      "name": "   a weak password is rejected without consuming the link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the new password is saved",
+      "ok": true,
+      "detail": "Password updated. Please sign in with your new password."
+    },
+    {
+      "name": "   the old password no longer works",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the new password signs in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a password-changed notice was sent",
+      "ok": true,
+      "detail": "reset-password, password-changed"
+    },
+    {
+      "name": "J5. MFA: a wrong password does not start enrolment",
+      "ok": true,
+      "detail": "Reauthentication failed"
+    },
+    {
+      "name": "   enrolment shows a secret that is stored only encrypted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a wrong code keeps MFA off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a valid code turns MFA on and shows 10 recovery codes once",
+      "ok": true,
+      "detail": "10 codes"
+    },
+    {
+      "name": "   the codes are gone from the page after acknowledgement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a recovery code completes sign-in and is consumed",
+      "ok": true,
+      "detail": "1 used"
+    },
+    {
+      "name": "   the same recovery code cannot be used twice",
+      "ok": true,
+      "detail": "That code was not accepted, or the sign-in attempt expired. Sign in again to get a new verification step."
+    },
+    {
+      "name": "   MFA-enabled notice sent",
+      "ok": true,
+      "detail": "mfa-enabled"
+    },
+    {
+      "name": "J6. sessions: both sessions are listed and exactly one is marked as this device",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the other device is signed in before revocation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   revoking it from the page denies its token on Spring and on NestJS",
+      "ok": true,
+      "detail": "401 SESSION_REVOKED / 401 SESSION_REVOKED"
+    },
+    {
+      "name": "   the session is revoked in PostgreSQL with reason USER_REVOKE",
+      "ok": true,
+      "detail": "USER_REVOKE"
+    },
+    {
+      "name": "MT1. a second tab opens signed in from the shared HttpOnly cookie",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     no token is readable from Web Storage or document.cookie in either tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     both tabs refreshed after the simultaneous reload",
+      "ok": true,
+      "detail": "tab A 200 · tab B 200"
+    },
+    {
+      "name": "MT6. simultaneous reloads (concurrent refresh) keep both tabs signed in without a reuse alarm",
+      "ok": true,
+      "detail": "1 live session(s), 0 reuse event(s)"
+    },
+    {
+      "name": "MT8. a reload restores the session in both tabs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "MT2/3. signing out in one tab sends the other tab to sign-in without user action",
+      "ok": true,
+      "detail": "/login?returnTo=%2Fsettings%2Fprofile"
+    },
+    {
+      "name": "MT4. after sign-out a reload cannot refresh: the tab stays signed out",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     the refresh endpoint answers 401 for that browser",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "MT5. the other tab's last access token is rejected by Spring and NestJS",
+      "ok": true,
+      "detail": "401 SESSION_REVOKED / 401 SESSION_REVOKED"
+    },
+    {
+      "name": "MT7. a new sign-in in one tab restores a valid session in the other",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "MT9. the Next.js app (NestJS) accepts the session started in Angular (Spring)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     after signing out in Next.js, Angular cannot resume the session",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "J8. an investor opening /admin/users is sent to /unauthorized",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the administration UI is never rendered for them",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   a direct API call bypassing Angular is refused by Spring (403) and changes nothing",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "   a signed-out visitor opening /admin is sent to sign-in with a returnTo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "J9. an administrator reaches the administration overview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   suspending a user from the detail page updates PostgreSQL",
+      "ok": true,
+      "detail": "Account status set to Suspended. The user was notified by email."
+    },
+    {
+      "name": "   the suspended user's token stops working immediately",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the user is notified (captured) and the change is audited",
+      "ok": true,
+      "detail": "account-suspended"
+    },
+    {
+      "name": "   reactivation restores ACTIVE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   promoting with password step-up makes the user an administrator",
+      "ok": true,
+      "detail": "Role updated. The account must sign in again for the change to apply everywhere."
+    },
+    {
+      "name": "   the audit log page lists events",
+      "ok": true,
+      "detail": "25 rows"
+    },
+    {
+      "name": "   another administrator demotes the first one",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "   the demoted administrator can no longer open /admin",
+      "ok": true,
+      "detail": "/unauthorized"
+    },
+    {
+      "name": "J10. a NestJS sign-in (Next.js) is resumed by Angular through a Spring refresh",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    Next.js resumes again with the cookie Spring rotated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the round trip keeps a single session",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "    signing out in Angular (Spring) signs the Next.js app (NestJS) out too",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the session is revoked in PostgreSQL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no request was rate-limited during the journeys",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

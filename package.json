@@ -2,37 +2,33 @@
   "name": "market-trading-room-simulator",
   "version": "0.1.0",
   "private": true,
-  "description": "Market Trading Room Simulator — identity, auth, and administration platform",
+  "description": "PIF MarketLab \u2014 Angular (apps/web) + Spring Boot (apps/api) + PostgreSQL.",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/web",
+    "packages/*",
+    "tools/db-harness"
   ],
   "scripts": {
-    "dev:api": "npm run start:dev -w @mtrs/api",
-    "dev:web": "npm run dev -w @mtrs/web",
-    "build": "npm run build -w @mtrs/api && npm run build -w @mtrs/web",
-    "build:api": "npm run build -w @mtrs/api",
+    "dev:web": "npm start -w @mtrs/web",
+    "dev:api": "cd apps/api && .\\\\mvnw.cmd spring-boot:run",
+    "build": "npm run build -w @mtrs/web",
     "build:web": "npm run build -w @mtrs/web",
-    "test": "npm run test -w @mtrs/api && npm run test -w @mtrs/web",
-    "test:api": "npm run test -w @mtrs/api",
+    "build:api": "cd apps/api && .\\\\mvnw.cmd -q -DskipTests package",
+    "test": "npm run test -w @mtrs/web",
     "test:web": "npm run test -w @mtrs/web",
-    "test:e2e": "npm run test:e2e -w @mtrs/api",
-    "lint": "npm run lint -w @mtrs/api && npm run lint -w @mtrs/web",
-    "typecheck": "npm run typecheck -w @mtrs/api && npm run typecheck -w @mtrs/web",
+    "test:api": "cd apps/api && .\\\\mvnw.cmd -B -P database-tests test",
+    "lint": "npm run lint -w @mtrs/web",
+    "typecheck": "npm run typecheck -w @mtrs/web",
     "verify": "npm run typecheck && npm run lint && npm run test",
-    "prisma:generate": "npm run prisma:generate -w @mtrs/api",
-    "prisma:migrate": "npm run prisma:migrate -w @mtrs/api",
-    "prisma:migrate:dev": "npm run prisma:migrate:dev -w @mtrs/api",
-    "seed:admin": "npm run seed:admin -w @mtrs/api",
-    "mail:inbox": "npm run mail:inbox -w @mtrs/api",
-    "mail:verify": "npm run mail:verify -w @mtrs/api --",
-    "mail:setup": "npm run mail:setup -w @mtrs/api",
-    "test:e2e:email": "node scripts/e2e/email-flows.mjs"
+    "test:journey:auth": "node scripts/migration/angular-auth-journey.mjs",
+    "test:journey:trading": "node scripts/migration/angular-trading-journey.mjs",
+    "test:journey:learning": "node scripts/migration/angular-learning-journey.mjs",
+    "test:journey:actuarial": "node scripts/migration/angular-actuarial-journey.mjs",
+    "test:openapi": "node scripts/migration/openapi-compare.mjs",
+    "test:visual": "node scripts/migration/visual-parity.mjs",
+    "harness:generate": "npm run harness:generate -w @pif/db-harness"
   },
   "engines": {
     "node": ">=20"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.5.0"
   }
 }

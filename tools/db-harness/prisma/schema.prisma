@@ -1,0 +1,694 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  INVESTOR
+  ADMIN
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  PENDING_DELETION
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  EMAIL_CHANGE
+  REFRESH_TOKEN
+  MFA_LOGIN_CHALLENGE
+}
+
+enum AuditOutcome {
+  SUCCESS
+  FAILURE
+  DENIED
+}
+
+model User {
+  id                        String          @id @default(uuid()) @db.Uuid
+  email                     String          @unique @db.Citext
+  firstName                 String          @map("first_name") @db.VarChar(80)
+  lastName                  String          @map("last_name") @db.VarChar(80)
+  passwordHash              String          @map("password_hash")
+  role                      UserRole        @default(INVESTOR)
+  experienceLevel           ExperienceLevel @default(BEGINNER) @map("experience_level")
+  emailVerified             Boolean         @default(false) @map("email_verified")
+  emailVerifiedAt           DateTime?       @map("email_verified_at")
+  passwordChangedAt         DateTime?       @map("password_changed_at")
+  status                    UserStatus      @default(PENDING_VERIFICATION)
+  failedLoginCount          Int             @default(0) @map("failed_login_count")
+  lockedUntil               DateTime?       @map("locked_until")
+  mfaEnabled                Boolean         @default(false) @map("mfa_enabled")
+  mfaVerifiedAt             DateTime?       @map("mfa_verified_at")
+  mfaSecretEncrypted        String?         @map("mfa_secret_encrypted")
+  mfaSecretKeyVersion       Int?            @map("mfa_secret_key_version")
+  mfaPendingSecretEncrypted String?         @map("mfa_pending_secret_encrypted")
+  mfaPendingCreatedAt       DateTime?       @map("mfa_pending_created_at")
+  mfaLastAcceptedStep       BigInt?         @map("mfa_last_accepted_step")
+  securityVersion           Int             @default(0) @map("security_version")
+  deletedAt                 DateTime?       @map("deleted_at")
+  createdAt                 DateTime        @default(now()) @map("created_at")
+  updatedAt                 DateTime        @updatedAt @map("updated_at")
+  lastLoginAt               DateTime?       @map("last_login_at")
+  lastActiveAt              DateTime?       @map("last_active_at")
+
+  preferences            UserPreferences?
+  sessions               AuthSession[]
+  tokens                 AuthToken[]
+  recoveryCodes          MfaRecoveryCode[]
+  auditEventsAsActor     AuditEvent[]             @relation("AuditActor")
+  auditEventsAsSubject   AuditEvent[]             @relation("AuditSubject")
+  learningSessions       LearningSession[]
+  competencyObservations CompetencyObservation[]
+  mentorInteractions     MentorInteraction[]
+  storyProgress          StoryProgress[]
+  tradingPortfolios      TradingPortfolio[]
+  watchlistItems         WatchlistItem[]
+  actuarialScenarios     ActuarialScenario[]
+  actuarialSimulations   ActuarialSimulationRun[]
+  actuarialReservingRuns ActuarialReservingRun[]
+
+  @@index([status])
+  @@index([role])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model UserPreferences {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @unique @map("user_id") @db.Uuid
+  preferredCurrency   String   @default("USD") @map("preferred_currency") @db.VarChar(3)
+  timezone            String   @default("UTC") @db.VarChar(64)
+  chartTheme          String   @default("trading_desk") @map("chart_theme") @db.VarChar(32)
+  notifyEmailSecurity Boolean  @default(true) @map("notify_email_security")
+  notifyMarketDigest  Boolean  @default(false) @map("notify_market_digest")
+  trainingDifficulty  String   @default("adaptive") @map("training_difficulty") @db.VarChar(32)
+  reduceMotion        Boolean  @default(false) @map("reduce_motion")
+  highContrast        Boolean  @default(false) @map("high_contrast")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model AuthSession {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastSeenAt    DateTime  @default(now()) @map("last_seen_at")
+  expiresAt     DateTime  @map("expires_at")
+  revokedAt     DateTime? @map("revoked_at")
+  revokedReason String?   @map("revoked_reason") @db.VarChar(120)
+  userAgent     String?   @map("user_agent") @db.VarChar(512)
+  ipDigest      String?   @map("ip_digest") @db.VarChar(64)
+  deviceLabel   String?   @map("device_label") @db.VarChar(120)
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens AuthToken[]
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AuthToken {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  sessionId    String?       @map("session_id") @db.Uuid
+  type         AuthTokenType
+  tokenHash    String        @unique @map("token_hash")
+  expiresAt    DateTime      @map("expires_at")
+  usedAt       DateTime?     @map("used_at")
+  revokedAt    DateTime?     @map("revoked_at")
+  replacedById String?       @map("replaced_by_id") @db.Uuid
+  pendingEmail String?       @map("pending_email") @db.Citext
+  lastUsedAt   DateTime?     @map("last_used_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session    AuthSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  replacedBy AuthToken?   @relation("TokenRotation", fields: [replacedById], references: [id])
+  replaces   AuthToken[]  @relation("TokenRotation")
+
+  @@index([userId, type])
+  @@index([sessionId, type])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+model MfaRecoveryCode {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, usedAt])
+  @@map("mfa_recovery_codes")
+}
+
+model AuditEvent {
+  id            String       @id @default(uuid()) @db.Uuid
+  actorUserId   String?      @map("actor_user_id") @db.Uuid
+  subjectUserId String?      @map("subject_user_id") @db.Uuid
+  eventType     String       @map("event_type") @db.VarChar(80)
+  outcome       AuditOutcome
+  correlationId String?      @map("correlation_id") @db.VarChar(64)
+  context       Json?
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  actor   User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  subject User? @relation("AuditSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, createdAt])
+  @@index([subjectUserId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("audit_events")
+}
+
+// ---------------------------------------------------------------- Learning module (MarketQuest, FinStories)
+// Mission and story definitions live in versioned, validated source catalogs
+// (src/learning/missions, src/learning/stories). These tables hold learner data only.
+
+enum LearningSessionStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  ABANDONED
+}
+
+enum LearningSessionKind {
+  MISSION
+  REPLAY
+}
+
+/// One attempt at a mission. State is rebuilt by replaying `commands` through the engine.
+model LearningSession {
+  id              String                @id @default(uuid()) @db.Uuid
+  userId          String                @map("user_id") @db.Uuid
+  missionSlug     String                @map("mission_slug") @db.VarChar(80)
+  missionVersion  Int                   @map("mission_version")
+  kind            LearningSessionKind   @default(MISSION)
+  status          LearningSessionStatus @default(ACTIVE)
+  /// Time Machine: the session this replay branched from, and the first command it replaced.
+  parentSessionId String?               @map("parent_session_id") @db.Uuid
+  branchFromSeq   Int?                  @map("branch_from_seq")
+  lastSeq         Int                   @default(0) @map("last_seq")
+  currentStep     Int                   @default(0) @map("current_step")
+  /// Cached for listings; the engine replay is authoritative.
+  equityMillimes  BigInt?               @map("equity_millimes")
+  mentorMode      String                @map("mentor_mode") @db.VarChar(16)
+  assisted        Boolean               @default(false)
+  startedAt       DateTime              @default(now()) @map("started_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+  endedAt         DateTime?             @map("ended_at")
+
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent             LearningSession?        @relation("SessionBranches", fields: [parentSessionId], references: [id], onDelete: SetNull)
+  branches           LearningSession[]       @relation("SessionBranches")
+  commands           LearningCommand[]
+  events             LearningEvent[]
+  assessment         LearningAssessment?
+  observations       CompetencyObservation[]
+  mentorInteractions MentorInteraction[]
+
+  @@index([userId, status])
+  @@index([userId, missionSlug])
+  @@index([parentSessionId])
+  @@map("learning_sessions")
+}
+
+/// Append-only command log. (sessionId, seq) gives optimistic concurrency; the idempotency key makes retries safe.
+model LearningCommand {
+  id             String   @id @default(uuid()) @db.Uuid
+  sessionId      String   @map("session_id") @db.Uuid
+  seq            Int
+  type           String   @db.VarChar(32)
+  payload        Json
+  idempotencyKey String   @map("idempotency_key") @db.VarChar(80)
+  outcome        String   @db.VarChar(16)
+  step           Int
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, seq])
+  @@unique([sessionId, idempotencyKey])
+  @@map("learning_commands")
+}
+
+/// Domain events derived from commands (fills, rejections, market events). Audit and analytics only.
+model LearningEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  ordinal    Int
+  commandSeq Int      @map("command_seq")
+  type       String   @db.VarChar(40)
+  step       Int
+  data       Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, ordinal])
+  @@index([sessionId, type])
+  @@map("learning_events")
+}
+
+model LearningAssessment {
+  id             String   @id @default(uuid()) @db.Uuid
+  sessionId      String   @unique @map("session_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  missionSlug    String   @map("mission_slug") @db.VarChar(80)
+  missionVersion Int      @map("mission_version")
+  engineVersion  String   @map("engine_version") @db.VarChar(32)
+  total          Float
+  passed         Boolean
+  assisted       Boolean
+  result         Json
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, missionSlug])
+  @@map("learning_assessments")
+}
+
+/// Evidence for the competency profile. Replay sessions never create observations (hindsight).
+model CompetencyObservation {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  competency String   @db.VarChar(40)
+  score      Float
+  weight     Float
+  assisted   Boolean
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, competency])
+  @@index([userId, competency, createdAt])
+  @@map("competency_observations")
+}
+
+model MentorInteraction {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  mode      String   @db.VarChar(16)
+  source    String   @db.VarChar(16)
+  ruleId    String   @map("rule_id") @db.VarChar(64)
+  step      Int
+  response  Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@map("mentor_interactions")
+}
+
+model StoryProgress {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  storySlug        String    @map("story_slug") @db.VarChar(80)
+  storyVersion     Int       @map("story_version")
+  positionMs       Int       @default(0) @map("position_ms")
+  /// Scene at `positionMs`; lets playback resume at the same scene after the story is edited.
+  sceneId          String?   @map("scene_id") @db.VarChar(40)
+  completed        Boolean   @default(false)
+  completedAt      DateTime? @map("completed_at")
+  /// Highest story version watched to the end, kept when a newer version is started.
+  completedVersion Int?      @map("completed_version")
+  reflection       String?   @db.VarChar(32)
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storySlug])
+  @@map("story_progress")
+}
+
+// ---------------------------------------------------------------- Virtual trading and portfolios
+// Amounts are integer thousandths of the currency unit (millimes for TND), stored as BIGINT.
+// Prices come from a market-data provider; the provider id and the quote used are stored with
+// each order and execution, so every fill can be traced to the price it used.
+
+enum InstrumentAssetClass {
+  EQUITY
+  FUND
+}
+
+enum InstrumentStatus {
+  ACTIVE
+  HALTED
+}
+
+enum TradingPortfolioStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum TradingOrderSide {
+  BUY
+  SELL
+}
+
+enum TradingOrderType {
+  MARKET
+  LIMIT
+  STOP
+}
+
+enum TradingOrderStatus {
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  CANCELLED
+  REJECTED
+  EXPIRED
+}
+
+enum CashEntryType {
+  DEPOSIT
+  WITHDRAWAL
+  BUY
+  SELL
+}
+
+enum ValuationSnapshotKind {
+  OPENING
+  CASH_FLOW
+  POST_TRADE
+}
+
+/// Instrument master. Trading rules (precision, lot size, status) are per instrument, not global.
+model Instrument {
+  id               String               @id @default(uuid()) @db.Uuid
+  symbol           String               @unique @db.VarChar(16)
+  name             String               @db.VarChar(120)
+  assetClass       InstrumentAssetClass @map("asset_class")
+  sector           String               @db.VarChar(60)
+  quoteCurrency    String               @default("TND") @map("quote_currency") @db.VarChar(3)
+  status           InstrumentStatus     @default(ACTIVE)
+  priceDecimals    Int                  @default(3) @map("price_decimals")
+  quantityDecimals Int                  @default(0) @map("quantity_decimals")
+  lotSize          Int                  @default(1) @map("lot_size")
+  providerId       String               @map("provider_id") @db.VarChar(40)
+  providerSymbol   String               @map("provider_symbol") @db.VarChar(32)
+  fictional        Boolean              @default(true)
+  metadata         Json?
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+
+  positions  PortfolioPosition[]
+  orders     TradingOrder[]
+  executions TradingExecution[]
+  watchers   WatchlistItem[]
+
+  @@index([assetClass])
+  @@map("instruments")
+}
+
+/// A user's virtual portfolio. Balances are written only by the trading service, inside a
+/// transaction that locks this row; `version` increases on every change (stale-request check).
+model TradingPortfolio {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  userId                   String                 @map("user_id") @db.Uuid
+  name                     String                 @db.VarChar(60)
+  baseCurrency             String                 @default("TND") @map("base_currency") @db.VarChar(3)
+  status                   TradingPortfolioStatus @default(ACTIVE)
+  initialCapitalMillimes   BigInt                 @map("initial_capital_millimes")
+  cashMillimes             BigInt                 @map("cash_millimes")
+  netContributionsMillimes BigInt                 @map("net_contributions_millimes")
+  realizedPnlMillimes      BigInt                 @default(0) @map("realized_pnl_millimes")
+  feesPaidMillimes         BigInt                 @default(0) @map("fees_paid_millimes")
+  spreadCostMillimes       BigInt                 @default(0) @map("spread_cost_millimes")
+  maxPositionWeightPct     Int                    @default(50) @map("max_position_weight_pct")
+  version                  Int                    @default(0)
+  /// Resting orders have been matched against every quote up to this instant.
+  matchedThrough           DateTime               @map("matched_through")
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime               @updatedAt @map("updated_at")
+
+  user        User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  positions   PortfolioPosition[]
+  cashEntries PortfolioCashEntry[]
+  orders      TradingOrder[]
+  executions  TradingExecution[]
+  snapshots   PortfolioValuationSnapshot[]
+
+  @@unique([userId, name])
+  @@index([userId, status])
+  @@map("trading_portfolios")
+}
+
+/// Long holding at average cost; cost basis includes buy commissions. Rows are removed at zero.
+model PortfolioPosition {
+  id                String   @id @default(uuid()) @db.Uuid
+  portfolioId       String   @map("portfolio_id") @db.Uuid
+  instrumentId      String   @map("instrument_id") @db.Uuid
+  quantity          Int
+  costBasisMillimes BigInt   @map("cost_basis_millimes")
+  openedAt          DateTime @default(now()) @map("opened_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  portfolio  TradingPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  instrument Instrument       @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+
+  @@unique([portfolioId, instrumentId])
+  @@map("portfolio_positions")
+}
+
+/// Append-only cash ledger. Deposits and withdrawals are external flows; buys and sells are trades.
+/// `sequence` is the entry's position in the portfolio's ledger (1, 2, …), assigned under the portfolio row lock.
+model PortfolioCashEntry {
+  id                   String        @id @default(uuid()) @db.Uuid
+  portfolioId          String        @map("portfolio_id") @db.Uuid
+  sequence             Int
+  type                 CashEntryType
+  amountMillimes       BigInt        @map("amount_millimes")
+  balanceAfterMillimes BigInt        @map("balance_after_millimes")
+  executionId          String?       @unique @map("execution_id") @db.Uuid
+  description          String        @db.VarChar(160)
+  occurredAt           DateTime      @map("occurred_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+
+  portfolio TradingPortfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  execution TradingExecution? @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, sequence])
+  @@index([portfolioId, occurredAt])
+  @@map("portfolio_cash_entries")
+}
+
+/// An order and the quote it was decided on. (portfolioId, clientOrderId) makes submissions idempotent.
+/// `sequence` is the order's arrival position in the portfolio (1, 2, …); resting orders are matched by
+/// (submittedAt, sequence), so orders submitted in the same millisecond keep their arrival order.
+model TradingOrder {
+  id                   String             @id @default(uuid()) @db.Uuid
+  portfolioId          String             @map("portfolio_id") @db.Uuid
+  sequence             Int
+  instrumentId         String             @map("instrument_id") @db.Uuid
+  clientOrderId        String             @map("client_order_id") @db.VarChar(80)
+  requestHash          String             @map("request_hash") @db.VarChar(64)
+  side                 TradingOrderSide
+  type                 TradingOrderType
+  quantity             Int
+  limitPriceMillimes   BigInt?            @map("limit_price_millimes")
+  stopPriceMillimes    BigInt?            @map("stop_price_millimes")
+  triggered            Boolean            @default(false)
+  status               TradingOrderStatus
+  filledQuantity       Int                @default(0) @map("filled_quantity")
+  averagePriceMillimes BigInt?            @map("average_price_millimes")
+  rejectionCode        String?            @map("rejection_code") @db.VarChar(40)
+  statusReason         String?            @map("status_reason") @db.VarChar(240)
+  quoteMidMillimes     BigInt             @map("quote_mid_millimes")
+  quoteBidMillimes     BigInt             @map("quote_bid_millimes")
+  quoteAskMillimes     BigInt             @map("quote_ask_millimes")
+  quoteAsOf            DateTime           @map("quote_as_of")
+  providerId           String             @map("provider_id") @db.VarChar(40)
+  expiresAt            DateTime?          @map("expires_at")
+  submittedAt          DateTime           @map("submitted_at")
+  closedAt             DateTime?          @map("closed_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  portfolio  TradingPortfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  instrument Instrument         @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  executions TradingExecution[]
+
+  @@unique([portfolioId, clientOrderId])
+  @@unique([portfolioId, sequence])
+  @@index([portfolioId, status])
+  @@index([portfolioId, submittedAt])
+  @@map("trading_orders")
+}
+
+/// One fill. Three distinct notions of order and time:
+/// - `executedAt`: financial execution time on the market clock (the quote it used, never before submission);
+/// - `sequence`: the fill's position in the portfolio's execution history (1, 2, …), assigned under the
+///   portfolio row lock; it orders fills that share `executedAt`;
+/// - `recordedAt`: when the row was written to the database (audit only; no calculation reads it).
+model TradingExecution {
+  id                  String           @id @default(uuid()) @db.Uuid
+  orderId             String           @map("order_id") @db.Uuid
+  portfolioId         String           @map("portfolio_id") @db.Uuid
+  sequence            Int
+  instrumentId        String           @map("instrument_id") @db.Uuid
+  side                TradingOrderSide
+  quantity            Int
+  priceMillimes       BigInt           @map("price_millimes")
+  notionalMillimes    BigInt           @map("notional_millimes")
+  feeMillimes         BigInt           @map("fee_millimes")
+  spreadCostMillimes  BigInt           @map("spread_cost_millimes")
+  realizedPnlMillimes BigInt           @map("realized_pnl_millimes")
+  quoteMidMillimes    BigInt           @map("quote_mid_millimes")
+  quoteBidMillimes    BigInt           @map("quote_bid_millimes")
+  quoteAskMillimes    BigInt           @map("quote_ask_millimes")
+  providerId          String           @map("provider_id") @db.VarChar(40)
+  executedAt          DateTime         @map("executed_at")
+  recordedAt          DateTime         @default(now()) @map("recorded_at")
+
+  order      TradingOrder        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  portfolio  TradingPortfolio    @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  instrument Instrument          @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  cashEntry  PortfolioCashEntry?
+
+  @@unique([portfolioId, sequence])
+  @@index([portfolioId, executedAt])
+  @@index([orderId])
+  @@map("trading_executions")
+}
+
+/// Equity recorded at portfolio events. `externalFlowMillimes` is the deposit (+) or withdrawal (−)
+/// applied right after `equityMillimes` was measured, as time-weighted return needs.
+model PortfolioValuationSnapshot {
+  id                       String                @id @default(uuid()) @db.Uuid
+  portfolioId              String                @map("portfolio_id") @db.Uuid
+  kind                     ValuationSnapshotKind
+  equityMillimes           BigInt                @map("equity_millimes")
+  cashMillimes             BigInt                @map("cash_millimes")
+  positionsValueMillimes   BigInt                @map("positions_value_millimes")
+  netContributionsMillimes BigInt                @map("net_contributions_millimes")
+  externalFlowMillimes     BigInt                @default(0) @map("external_flow_millimes")
+  asOf                     DateTime              @map("as_of")
+  createdAt                DateTime              @default(now()) @map("created_at")
+
+  portfolio TradingPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, asOf])
+  @@map("portfolio_valuation_snapshots")
+}
+
+model WatchlistItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  instrumentId String   @map("instrument_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instrument Instrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, instrumentId])
+  @@map("watchlist_items")
+}
+
+// ---------------------------------------------------------------------------
+// Actuarial lab (non-life insurance pricing; fictional, user-owned scenarios)
+// ---------------------------------------------------------------------------
+
+enum ActuarialScenarioKind {
+  PRICING
+}
+
+/// Saved actuarial assumptions with the aggregated results the server computed from them.
+/// Results are recomputed on save (never taken from the client) and stamped with the model version.
+model ActuarialScenario {
+  id           String                @id @default(uuid()) @db.Uuid
+  userId       String                @map("user_id") @db.Uuid
+  name         String                @db.VarChar(80)
+  kind         ActuarialScenarioKind
+  modelVersion String                @map("model_version") @db.VarChar(40)
+  currency     String                @default("TND") @db.VarChar(3)
+  inputs       Json
+  results      Json
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId, updatedAt])
+  @@map("actuarial_scenarios")
+}
+
+/// A completed Monte Carlo run: inputs, seed and summarised results (never the individual samples).
+/// Rerunning the inputs with the same seed and engine version reproduces the results exactly.
+/// Only completed runs are stored; the most recent runs per user are kept (see the service).
+model ActuarialSimulationRun {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  label         String?  @db.VarChar(80)
+  engineVersion String   @map("engine_version") @db.VarChar(40)
+  currency      String   @default("TND") @db.VarChar(3)
+  seed          Int
+  simulations   Int
+  durationMs    Int      @map("duration_ms")
+  inputs        Json
+  results       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("actuarial_simulation_runs")
+}
+
+/// A saved reserving analysis: the triangles and assumptions as submitted, and the results the server
+/// computed from them, stamped with the model version. Runs are never edited: a change is a new run.
+/// `dataChecksum` (SHA-256 of the triangles and premiums) groups runs made on the same data.
+/// The most recent runs per user are kept (see the service).
+model ActuarialReservingRun {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  label         String   @db.VarChar(80)
+  modelVersion  String   @map("model_version") @db.VarChar(40)
+  currency      String   @default("TND") @db.VarChar(3)
+  firstOrigin   Int      @map("first_origin")
+  originCount   Int      @map("origin_count")
+  valuationYear Int      @map("valuation_year")
+  dataChecksum  String   @map("data_checksum") @db.Char(64)
+  inputs        Json
+  results       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("actuarial_reserving_runs")
+}

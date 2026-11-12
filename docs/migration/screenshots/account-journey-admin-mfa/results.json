@@ -1,0 +1,62 @@
+{
+  "ranAt": "2026-11-11T18:05:29.665Z",
+  "database": "PIF_spring_test",
+  "mode": "admin-mfa",
+  "results": [
+    {
+      "name": "M1. admin MFA policy: an administrator without MFA is refused by Spring (403 ADMIN_MFA_REQUIRED)",
+      "ok": true,
+      "detail": "403 ADMIN_MFA_REQUIRED"
+    },
+    {
+      "name": "   the dashboard context asks the administrator to enrol",
+      "ok": true,
+      "detail": "[\"ENROLL_MFA_FOR_ADMIN\"]"
+    },
+    {
+      "name": "   investors are not affected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the Angular admin overview shows the enrolment requirement instead of data",
+      "ok": true,
+      "detail": "Administrator tools require two-step verification. Enable it under Settings → Security, then try again."
+    },
+    {
+      "name": "   the security page explains why administrator tools are locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "M2. enrolling turns MFA on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "   the same administrator now reaches the overview with live data",
+      "ok": true,
+      "detail": "7 tiles"
+    },
+    {
+      "name": "   Spring serves the admin API to the same session once MFA is on",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "no request was rate-limited during the journeys",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "screenshots taken while secrets were on screen were masked",
+      "ok": true,
+      "detail": "1 masked capture(s)"
+    },
+    {
+      "name": "S1. no TOTP secret or recovery code appears in screenshots, results or captured e-mails",
+      "ok": true,
+      "detail": "11 value(s) checked in 409 file(s)"
+    }
+  ]
+}

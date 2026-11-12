@@ -1,0 +1,341 @@
+/* apps/web/src/components/workspace/ModulePreviewPage.module.css with an mp- prefix. */
+
+.mp-notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--mtr-border);
+  border-left: 3px solid var(--mtr-brand);
+  border-radius: var(--radius-md);
+  background: var(--mtr-brand-soft);
+  font-size: 0.875rem;
+  color: var(--mtr-text);
+}
+
+.mp-notice > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mtr-brand-text);
+}
+
+.mp-safeguard {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--mtr-text-2);
+}
+
+.mp-section {
+  margin-bottom: var(--space-6);
+}
+
+.mp-sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.mp-sectionHead h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.mp-layoutTag {
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+  border: 1px dashed var(--mtr-border-strong);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.mp-blueprint {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.mp-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 180px;
+  padding: var(--space-5);
+  border: 1px dashed var(--mtr-border-strong);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--mtr-grid) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--mtr-grid) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--mtr-surface);
+}
+
+.mp-block[data-span='2'] {
+  grid-column: span 2;
+}
+
+.mp-block[data-span='3'] {
+  grid-column: 1 / -1;
+}
+
+.mp-blockHead h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 620;
+}
+
+.mp-blockHead span {
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+/* Static placeholder shapes (not loading skeletons, not data). */
+.mp-wfChart,
+.mp-wfTable,
+.mp-wfKpis,
+.mp-wfHeat,
+.mp-wfForm,
+.mp-wfList {
+  flex: 1;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mp-wfChart {
+  align-content: space-between;
+  min-height: 110px;
+  border-left: 1px solid var(--mtr-border-strong);
+  border-bottom: 1px solid var(--mtr-border-strong);
+}
+
+.mp-wfChart span {
+  height: 1px;
+  border-top: 1px dashed var(--mtr-border);
+}
+
+.mp-wfTable span,
+.mp-wfList span,
+.mp-wfForm span {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--mtr-skeleton);
+}
+
+.mp-wfTable span[data-head='true'] {
+  background: var(--mtr-elevated);
+  border: 1px solid var(--mtr-border);
+}
+
+.mp-wfList span {
+  height: 38px;
+  border-radius: 8px;
+}
+
+.mp-wfForm span {
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-canvas);
+}
+
+.mp-wfForm span[data-button='true'] {
+  background: var(--mtr-brand-soft);
+  border-color: transparent;
+}
+
+.mp-wfKpis {
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+}
+
+.mp-wfKpis span {
+  height: 64px;
+  border-radius: 10px;
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-canvas);
+}
+
+.mp-wfHeat {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-content: start;
+}
+
+.mp-wfHeat span {
+  min-width: 0;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--mtr-skeleton);
+}
+
+.mp-wfHeat span:nth-child(3n) {
+  background: var(--mtr-brand-soft);
+}
+
+/* ---------- Order ticket ---------- */
+
+.mp-ticket {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.mp-ticketFields {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.mp-ticketFields .field {
+  margin: 0;
+}
+
+.mp-ticketFields:disabled {
+  opacity: 0.62;
+}
+
+.mp-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--mtr-elevated);
+}
+
+.mp-side {
+  height: 32px;
+  border: 0;
+  border-radius: 7px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--mtr-text-2);
+}
+
+.mp-side[data-side='buy'] {
+  background: var(--mtr-pos-soft);
+  color: var(--mtr-pos);
+}
+
+.mp-ticketRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.mp-ticketNote {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.mp-ticketNote svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ---------- Details ---------- */
+
+.mp-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.mp-capabilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  font-size: 0.875rem;
+}
+
+.mp-capabilities li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: var(--space-2);
+}
+
+.mp-capabilities svg {
+  margin-top: 3px;
+  color: var(--mtr-brand-text);
+}
+
+.mp-concepts {
+  margin: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.mp-concepts dt {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.mp-concepts dd {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.mp-method {
+  display: inline-block;
+  min-width: 56px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--mtr-elevated);
+  color: var(--mtr-text-2);
+}
+
+.mp-method[data-method='GET'] {
+  color: var(--mtr-cyan);
+  background: var(--mtr-cyan-soft);
+}
+
+.mp-method[data-method='POST'] {
+  color: var(--mtr-pos);
+  background: var(--mtr-pos-soft);
+}
+
+.mp-method[data-method='DELETE'] {
+  color: var(--mtr-neg);
+  background: var(--mtr-neg-soft);
+}
+
+.mp-contractPanel .table-wrap {
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 1023px) {
+  .mp-blueprint {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mp-block[data-span='2'],
+  .mp-block[data-span='3'] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .mp-blueprint,
+  .mp-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mp-block {
+    grid-column: 1 / -1;
+  }
+}

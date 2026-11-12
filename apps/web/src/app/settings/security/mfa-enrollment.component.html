@@ -1,0 +1,103 @@
+<section class="card-panel" aria-labelledby="mfa-heading">
+  <h2 id="mfa-heading">Vérification en deux étapes</h2>
+  <p>Statut : <strong>{{ enabled() ? 'Activée' : 'Désactivée' }}</strong>{{ remainingText() }}</p>
+  @if (remaining() !== null && remaining()! <= 2) {
+    <p class="form-error-banner" role="status">
+      Il vous reste peu de codes de récupération. Générez un nouveau jeu pour ne pas être bloqué si vous perdez votre appareil.
+    </p>
+  }
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+
+  @if (recoveryCodes(); as codes) {
+    <div role="region" aria-label="Nouveaux codes de récupération">
+      <p>
+        <strong>Enregistrez ces codes de récupération maintenant.</strong> Chacun ne fonctionne qu'une fois si vous perdez
+        votre authentificateur. Ils ne seront plus affichés, et les anciens codes ne fonctionnent plus.
+      </p>
+      <ul>
+        @for (code of codes; track code) {
+          <li><code>{{ code }}</code></li>
+        }
+      </ul>
+      <button type="button" class="btn btn-secondary" (click)="recoveryCodes.set(null)">J'ai enregistré ces codes</button>
+    </div>
+  }
+
+  @if (!enabled() && !enrolling()) {
+    <form (submit)="startEnroll($event)" novalidate>
+      <p>Protégez la connexion avec un code issu d'une application d'authentification.</p>
+      <mtr-password-field
+        fieldId="mfaSetupPassword"
+        label="Confirmez votre mot de passe pour commencer"
+        autocomplete="current-password"
+        name="password"
+        [error]="setupForm.errors().password"
+        [value]="setupForm.values().password"
+        (valueChange)="setupForm.set('password', $event)"
+      />
+      <button type="submit" class="btn btn-secondary" [disabled]="busy()">
+        {{ busy() ? 'Démarrage…' : 'Configurer l\'authentificateur' }}
+      </button>
+    </form>
+  }
+
+  @if (enrolling()) {
+    <div>
+      <ol>
+        <li>Ajoutez ce compte à votre application d'authentification avec le secret ou le lien ci-dessous.</li>
+        <li>Saisissez le code à 6 chiffres affiché par l'application.</li>
+      </ol>
+      @if (secret()) {
+        <p>Secret : <code aria-label="Secret d'authentification">{{ secret() }}</code></p>
+      }
+      @if (otpauthUrl(); as url) {
+        <p><a [href]="url">Ouvrir dans l'application d'authentification</a></p>
+      }
+      @if (expiresInMinutes()) {
+        <p class="field-hint">Cette configuration expire dans {{ expiresInMinutes() }} minutes.</p>
+      }
+      <form (submit)="onConfirm($event)" novalidate>
+        <mtr-form-field
+          fieldId="mfaEnableCode"
+          label="Code d'authentification"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          name="code"
+          [error]="confirmForm.errors().code"
+          [value]="confirmForm.values().code"
+          (valueChange)="confirmForm.set('code', $event)"
+        />
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap">
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">
+            {{ busy() ? 'Activation…' : 'Activer la vérification en deux étapes' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="cancelEnrollment()" [disabled]="busy()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (enabled()) {
+    <button type="button" class="btn btn-secondary" (click)="openRegenerate()">Générer de nouveaux codes de récupération</button>
+  }
+
+  <mtr-confirm-dialog
+    [open]="regenOpen()"
+    heading="Générer de nouveaux codes de récupération ?"
+    description="Vos codes de récupération actuels cessent immédiatement de fonctionner."
+    confirmLabel="Générer les codes"
+    [busy]="busy()"
+    [error]="regenError()"
+    [hasFields]="true"
+    (cancelled)="cancelRegenerate()"
+    (confirmed)="regenerate()"
+  >
+    <mtr-step-up-fields
+      idPrefix="regen"
+      [mfaEnabled]="true"
+      [values]="regenStepUp.values()"
+      (changed)="regenStepUp.patch($event)"
+    />
+  </mtr-confirm-dialog>
+</section>

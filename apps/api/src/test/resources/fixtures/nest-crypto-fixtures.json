@@ -1,0 +1,116 @@
+{
+  "generatedBy": "apps/api-spring/contract/generate-crypto-fixtures.mjs (NestJS dist utilities, node v22.23.1)",
+  "note": "Test-only random keys. Not related to any environment secret.",
+  "argon2": [
+    {
+      "password": "Correct-Horse-1",
+      "hash": "$argon2id$v=19$m=19456,t=2,p=1$9UvIjNLTgHFYA4tmmtA6WQ$by/BhhiqssxY0Vpn2oqZw/Ko96cJU6sTumU7LzSS4cI"
+    },
+    {
+      "password": "Pässwörd-✓-2024",
+      "hash": "$argon2id$v=19$m=19456,t=2,p=1$Zt50O1E7Xd67uYcPcH89jA$2SINlZqXBdPXJ27gyNpMkyjfSTCNBiPXJFOEngx3v98"
+    },
+    {
+      "password": "a1!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "hash": "$argon2id$v=19$m=19456,t=2,p=1$dwFuAKFWLih8Cb0vhs+J8g$WvpepD6FWW0TqhSxmUQ0ocAGls+vKc48kWb8PUBFSEg"
+    }
+  ],
+  "hmac": {
+    "pepper": "GeiY8njD47XAg9slq-cH4L6YLIG0ICNb",
+    "tokens": [
+      {
+        "token": "e0b706bc612f7de89f7c24faabcdd37de18c11a2cc70ded9d1a17c354242a901",
+        "hash": "fbedcb86f941bda12d55cc556147aa0e3501e7b954df9e5083f43b263b5ac2a5"
+      },
+      {
+        "token": "1a7696a1b70f7e4b462e4455116f9c0f8aa30803d8d819b136024c38b82fb5ed",
+        "hash": "ce61a95d2853c234b1c5ddba64c5155ac1d3c332d8677b3fcbf7b37032c799a7"
+      },
+      {
+        "token": "f1d0a79130694fa4eeccfc0c2ae995d47aa1948ac49766f2931781d97b1d2ed5",
+        "hash": "94abb2721ff3cfda562b2a6504ce8998b18f04e3aa405cfd876af180a2fed5ce"
+      }
+    ],
+    "ips": [
+      {
+        "ip": "::ffff:127.0.0.1",
+        "digest": "8fdc7968835bb32392138c23b2ee5943320878f3ba19a656f062173a6b241710"
+      },
+      {
+        "ip": "::1",
+        "digest": "4ab496d18140b9885f0330355c818a80e1cac1f919a2437c2229aa973c14947c"
+      },
+      {
+        "ip": " 10.0.0.1 ",
+        "digest": "dd02b38713f0a33540e7be8ed7e9ca99cb8a2b4ecc132db69c26bb74b4a91a81"
+      },
+      {
+        "ip": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "digest": "abeda31cb628380bfd385116851dfc3bbd38bac26f591a63c594f63cfbd31ceb"
+      }
+    ],
+    "userAgents": [
+      {
+        "ua": "Mozilla/5.0 (Windows NT 10.0)",
+        "sanitized": "Mozilla/5.0 (Windows NT 10.0)"
+      },
+      {
+        "ua": "evil\r\nheader\u0000 ",
+        "sanitized": "evilheader"
+      },
+      {
+        "ua": "   ",
+        "sanitized": null
+      },
+      {
+        "ua": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+        "sanitized": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+      }
+    ]
+  },
+  "mfa": {
+    "key": "1fe4e6bc63c3a3aafa317f3d4598fe3b386bcc04517872ead14f2a40a78a84f2",
+    "plaintext": "AVGCWVBDIF4TOWLY",
+    "ciphertext": "v1:hOogzyKblUqQj2Tc1WxVF8gxcSQ/jm2DnM/7Bibu+x4zO1IhxDk35I3aeB0="
+  },
+  "totp": {
+    "secret": "AVGCWVBDIF4TOWLY",
+    "vectors": [
+      {
+        "epochMs": 0,
+        "code": "161539"
+      },
+      {
+        "epochMs": 59000,
+        "code": "491056"
+      },
+      {
+        "epochMs": 1111111109000,
+        "code": "825239"
+      },
+      {
+        "epochMs": 1234567890000,
+        "code": "270342"
+      },
+      {
+        "epochMs": 1794312000000,
+        "code": "289852"
+      }
+    ]
+  },
+  "jwt": {
+    "secret": "BH_yy8MmTzneD43nC4P8nr4vwsdGOJn_0-xosGoDfIs",
+    "issuer": "mtrs-api",
+    "audience": "mtrs-web",
+    "claims": {
+      "sub": "3f1c1a52-6d1e-4b8e-9a51-0e6f2d6e4c11",
+      "sid": "9a7d3b0c-2c44-4f0a-8d9e-5b1f0c7a2e33",
+      "sv": 3
+    },
+    "valid": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjFjMWE1Mi02ZDFlLTRiOGUtOWE1MS0wZTZmMmQ2ZTRjMTEiLCJzaWQiOiI5YTdkM2IwYy0yYzQ0LTRmMGEtOGQ5ZS01YjFmMGM3YTJlMzMiLCJzdiI6MywiaWF0IjoxNzk0MzM2NTcxLCJleHAiOjIxMDk2OTY1NzEsImF1ZCI6Im10cnMtd2ViIiwiaXNzIjoibXRycy1hcGkifQ.FGy6Z-BqroOIz_LOGpR2MZspyTC1kwm77i87zTIXHOE",
+    "expired": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjFjMWE1Mi02ZDFlLTRiOGUtOWE1MS0wZTZmMmQ2ZTRjMTEiLCJzaWQiOiI5YTdkM2IwYy0yYzQ0LTRmMGEtOGQ5ZS01YjFmMGM3YTJlMzMiLCJzdiI6MywiaWF0IjoxMDAwMDAwMDAwLCJleHAiOjEwMDAwMDA5MDAsImF1ZCI6Im10cnMtd2ViIiwiaXNzIjoibXRycy1hcGkifQ.oLCwHwMkAkBAIfFzR0UYeaZw4yf0YXo7VqETDC7xc0w",
+    "wrongAudience": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjFjMWE1Mi02ZDFlLTRiOGUtOWE1MS0wZTZmMmQ2ZTRjMTEiLCJzaWQiOiI5YTdkM2IwYy0yYzQ0LTRmMGEtOGQ5ZS01YjFmMGM3YTJlMzMiLCJzdiI6MywiaWF0IjoxNzk0MzM2NTcxLCJleHAiOjE3OTQ0MjI5NzEsImF1ZCI6Im90aGVyIiwiaXNzIjoibXRycy1hcGkifQ.SZJGRYXruTRYGSHYaolTwOzPEq0hDy3bURRFpWCENF8",
+    "wrongIssuer": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjFjMWE1Mi02ZDFlLTRiOGUtOWE1MS0wZTZmMmQ2ZTRjMTEiLCJzaWQiOiI5YTdkM2IwYy0yYzQ0LTRmMGEtOGQ5ZS01YjFmMGM3YTJlMzMiLCJzdiI6MywiaWF0IjoxNzk0MzM2NTcxLCJleHAiOjE3OTQ0MjI5NzEsImF1ZCI6Im10cnMtd2ViIiwiaXNzIjoib3RoZXIifQ.YdnHU5uuBhCnskqRSSbT-mCF-9faWE2fGRE5n4T8DHY",
+    "wrongSecret": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjFjMWE1Mi02ZDFlLTRiOGUtOWE1MS0wZTZmMmQ2ZTRjMTEiLCJzaWQiOiI5YTdkM2IwYy0yYzQ0LTRmMGEtOGQ5ZS01YjFmMGM3YTJlMzMiLCJzdiI6MywiaWF0IjoxNzk0MzM2NTcxLCJleHAiOjE3OTQ0MjI5NzEsImF1ZCI6Im10cnMtd2ViIiwiaXNzIjoibXRycy1hcGkifQ.gKUgYp7pVa4xR_J53PuFA6RLk6xU14YDB95u6OZRQVo"
+  }
+}

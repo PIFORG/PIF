@@ -1,0 +1,178 @@
+<div class="page-shell tr-labShell tr-backtestShell">
+  <mtr-page-heading
+    [eyebrow]="nav.groupResearch"
+    [title]="copy.title"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="copy.pageDescription"
+  />
+
+  @if (loadError()) {
+    <p class="form-error-banner" role="alert">{{ loadError() }}</p>
+  }
+
+  <section mtr-panel heading="Configuration de la stratégie" description="Les signaux après chaque clôture s'exécutent à l'ouverture de la barre suivante (convention documentée « next-open »).">
+    <form class="tr-formStack" (ngSubmit)="run()">
+      <label>
+        Stratégie
+        <select class="input" name="strategy" [ngModel]="strategy()" (ngModelChange)="strategy.set($event)">
+          @for (s of strategies; track s.id) {
+            <option [value]="s.id">{{ s.label }}</option>
+          }
+        </select>
+      </label>
+      <p class="field-hint">{{ strategies.find((s) => s.id === strategy())?.hint }}</p>
+
+      @if (showMaParams()) {
+        <div class="tr-formRow">
+          <label>
+            Short SMA
+            <input class="input" type="number" min="2" [ngModel]="shortPeriod()" (ngModelChange)="shortPeriod.set(+$event)" name="short" />
+          </label>
+          <label>
+            Long SMA
+            <input class="input" type="number" min="3" [ngModel]="longPeriod()" (ngModelChange)="longPeriod.set(+$event)" name="long" />
+          </label>
+        </div>
+      }
+      @if (showRebalanceParams()) {
+        <label>
+          Rebalance every N bars
+          <input class="input" type="number" min="1" [ngModel]="rebalanceEvery()" (ngModelChange)="rebalanceEvery.set(+$event)" name="reb" />
+        </label>
+      }
+
+      <div class="tr-formRow">
+        <label>
+          Start (UTC)
+          <input class="input" [ngModel]="start()" (ngModelChange)="start.set($event)" name="start" />
+        </label>
+        <label>
+          End (UTC)
+          <input class="input" [ngModel]="end()" (ngModelChange)="end.set($event)" name="end" />
+        </label>
+      </div>
+
+      <div class="tr-formRow">
+        <label>
+          Initial cash (DT)
+          <input class="input" type="number" min="1000" [ngModel]="initialCash()" (ngModelChange)="initialCash.set(+$event)" name="cash" />
+        </label>
+        <label>
+          Fee (bps)
+          <input class="input" type="number" min="0" [ngModel]="feeBps()" (ngModelChange)="feeBps.set(+$event)" name="fee" />
+        </label>
+        <label>
+          Slippage (bps)
+          <input class="input" type="number" min="0" [ngModel]="slippageBps()" (ngModelChange)="slippageBps.set(+$event)" name="slip" />
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>Instruments</legend>
+        @if (instruments() === null) {
+          <div mtr-panel-skeleton [rows]="2"></div>
+        } @else {
+          <div class="tr-chipRow">
+            @for (inst of instruments()!; track inst.symbol) {
+              <label class="tr-chip">
+                <input type="checkbox" [checked]="isSelected(inst.symbol)" (change)="toggleSymbol(inst.symbol, $any($event.target).checked)" />
+                {{ inst.symbol }}
+              </label>
+            }
+          </div>
+        }
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary" [disabled]="running()">{{ running() ? 'Exécution…' : 'Lancer le backtest' }}</button>
+    </form>
+    @if (runError()) {
+      <p class="form-error-banner" role="alert">{{ runError() }}</p>
+    }
+  </section>
+
+  @if (result(); as r) {
+    <p mtr-provenance-note [provenance]="r.provenance" [asOf]="r.end"></p>
+
+    <div class="tr-kpis">
+      <div mtr-kpi label="Rendement total" icon="strategy">{{ pct(r.metrics.totalReturn, true) }}</div>
+      <div mtr-kpi label="Drawdown max." icon="risk">{{ pct(r.metrics.maxDrawdown) }}</div>
+      <div mtr-kpi label="Sharpe" icon="risk">{{ r.metrics.sharpe === null ? '—' : twoDecimals(r.metrics.sharpe) }}</div>
+      <div mtr-kpi label="Transactions" icon="trading">{{ r.metrics.tradeCount }}</div>
+    </div>
+
+    <div class="tr-twoUp">
+      <section mtr-panel heading="Equity curve" [description]="r.executionConvention">
+        @if (equityChart(); as c) {
+          @if (c.enough) {
+            <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="twoDecimals" [xLabels]="c.xLabels" [minSpan]="c.minSpan"></figure>
+          } @else {
+            <div mtr-empty-state heading="No equity path" description="The run did not return enough points."></div>
+          }
+        }
+      </section>
+      <section mtr-panel heading="Drawdown" description="Peak-to-trough on the strategy equity curve.">
+        @if (drawdownChart(); as c) {
+          @if (c.enough) {
+            <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="plainPct" [xLabels]="c.xLabels" [minSpan]="c.minSpan"></figure>
+          } @else {
+            <div mtr-empty-state heading="No drawdown path" description="Not enough points."></div>
+          }
+        }
+      </section>
+    </div>
+
+    <section mtr-panel heading="Performance metrics" [description]="r.metrics.annualization">
+      <dl class="tr-metricGrid">
+        <div><dt>Annualized return</dt><dd>{{ r.metrics.annualizedReturn === null ? '—' : pct(r.metrics.annualizedReturn, true) }}</dd></div>
+        <div><dt>Volatility (ann.)</dt><dd>{{ r.metrics.volatilityAnnualized === null ? '—' : pct(r.metrics.volatilityAnnualized) }}</dd></div>
+        <div><dt>Fees</dt><dd>{{ dt(r.metrics.totalFees) }}</dd></div>
+        <div><dt>Slippage cost</dt><dd>{{ dt(r.metrics.totalSlippageCost) }}</dd></div>
+        <div><dt>Win rate</dt><dd>{{ r.metrics.winRate === null ? '—' : pct(r.metrics.winRate) }}</dd></div>
+        <div><dt>Benchmark (buy &amp; hold)</dt><dd>{{ r.metrics.benchmarkTotalReturn === null ? '—' : pct(r.metrics.benchmarkTotalReturn, true) }}</dd></div>
+        <div><dt>Excess vs benchmark</dt><dd>{{ r.metrics.excessReturnVsBenchmark === null ? '—' : pct(r.metrics.excessReturnVsBenchmark, true) }}</dd></div>
+        <div><dt>Bars</dt><dd>{{ r.barCount }} · {{ r.metrics.calendarDays }} calendar days</dd></div>
+      </dl>
+    </section>
+
+    <section mtr-panel heading="Trades" description="Chronological simulated fills at next-open mid with fees and slippage.">
+      @if (r.trades.length === 0) {
+        <div mtr-empty-state heading="No trades" description="This strategy stayed in cash or held without rebalancing fills."></div>
+      } @else {
+        <div class="table-wrap tr-rows">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">When</th>
+                <th scope="col">Symbol</th>
+                <th scope="col">Side</th>
+                <th scope="col" class="num">Qty</th>
+                <th scope="col" class="num">Price</th>
+                <th scope="col" class="num">Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of r.trades; track t.at + t.symbol + t.side + t.quantity) {
+                <tr>
+                  <td>{{ dateTime(t.at) }}</td>
+                  <td>{{ t.symbol }}</td>
+                  <td>{{ t.side }}</td>
+                  <td class="num">{{ t.quantity }}</td>
+                  <td class="num">{{ dt(t.price) }}</td>
+                  <td class="num">{{ dt(t.fee) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section mtr-panel heading="Assumptions and limitations">
+      <ul>
+        @for (a of r.assumptions; track a) {
+          <li>{{ a }}</li>
+        }
+      </ul>
+    </section>
+  }
+</div>

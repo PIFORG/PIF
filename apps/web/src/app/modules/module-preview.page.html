@@ -1,0 +1,91 @@
+@let m = module();
+<div class="page-shell">
+  <mtr-page-heading [eyebrow]="m.group" [title]="m.title" [description]="m.summary" status="DESIGNED_PENDING_BACKEND">
+    <a mtrHeadingActions routerLink="/dashboard" class="btn btn-secondary">{{ backToOverview }}</a>
+  </mtr-page-heading>
+
+  <div class="mp-notice" role="note">
+    <svg mtrIcon name="info" [size]="18" />
+    <div>
+      <strong>Designed, not yet connected.</strong> This screen shows the planned layout only. It does not generate prices, orders, balances, scores or results, and nothing here is saved.@if (m.safeguard) {<span class="mp-safeguard">{{ m.safeguard }}</span>}
+    </div>
+  </div>
+
+  <section aria-labelledby="layout-title" class="mp-section">
+    <div class="mp-sectionHead">
+      <h2 id="layout-title">Designed layout</h2>
+      <span class="mp-layoutTag">Layout preview · no data</span>
+    </div>
+    <div class="mp-blueprint">
+      @for (block of m.blueprint; track block.title) {
+        <div class="mp-block" [attr.data-span]="block.span">
+          <div class="mp-blockHead">
+            <h3>{{ block.title }}</h3>
+            <span>{{ block.note }}</span>
+          </div>
+          @if (m.slug === 'trading' && block.kind === 'form') {
+            <form mtr-order-ticket-preview></form>
+          } @else {
+            <mtr-module-wireframe [kind]="block.kind" />
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="mp-columns">
+    <section mtr-panel panelId="capabilities" heading="What this module will do">
+      <ul class="mp-capabilities">
+        @for (item of m.capabilities; track item) {
+          <li><svg mtrIcon name="check" [size]="14" />{{ item }}</li>
+        }
+      </ul>
+    </section>
+    <section mtr-panel panelId="concepts" heading="Key concepts" description="Read these before the module goes live.">
+      <dl class="mp-concepts">
+        @for (c of m.concepts; track c.term) {
+          <div>
+            <dt>{{ c.term }}</dt>
+            <dd>{{ c.definition }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+  </div>
+
+  <section
+    mtr-panel
+    class="mp-contractPanel"
+    panelId="contract"
+    heading="Backend contract required"
+    description="Proposed endpoints this screen needs. None of them exist in the API yet."
+  >
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="sr-only">Proposed API endpoints for {{ m.title }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Method</th>
+            <th scope="col">Path</th>
+            <th scope="col">Purpose</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of m.contracts; track c.method + ' ' + c.path) {
+            <tr>
+              <td>
+                <span class="mp-method" [attr.data-method]="c.method">{{ c.method }}</span>
+              </td>
+              <td class="mono">{{ c.path }}</td>
+              <td>{{ c.purpose }}</td>
+              <td>
+                <span class="badge badge-muted">Proposed</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

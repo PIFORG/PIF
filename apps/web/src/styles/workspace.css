@@ -1,0 +1,290 @@
+/*
+ * apps/web/src/components/workspace/workspace.module.css with a ws- prefix (the page heading lives in
+ * shared/page-heading). Global because panels and KPI cards project content styled by these classes.
+ */
+
+/* ---------- Status & demo labels ---------- */
+
+.ws-status,
+.ws-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.ws-status[data-status='LIVE_INTEGRATED'] {
+  color: var(--mtr-pos);
+  background: var(--mtr-pos-soft);
+  border-color: color-mix(in srgb, var(--mtr-pos) 30%, transparent);
+}
+
+.ws-status[data-status='DESIGNED_PENDING_BACKEND'] {
+  color: var(--mtr-text-2);
+  background: var(--mtr-elevated);
+  border: 1px dashed var(--mtr-border-strong);
+}
+
+.ws-status[data-status='DEMO_EXPLICITLY_LABELLED'],
+.ws-demo {
+  color: var(--mtr-amber);
+  background: var(--mtr-amber-soft);
+  border-color: color-mix(in srgb, var(--mtr-amber) 40%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Panel ---------- */
+
+.ws-panel {
+  min-width: 0;
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.ws-panel[data-demo='true'] {
+  background:
+    repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--mtr-amber) 3%, transparent) 14px 15px),
+    var(--mtr-surface);
+  border-color: color-mix(in srgb, var(--mtr-amber) 28%, var(--mtr-border));
+}
+
+.ws-panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.ws-panelTitles {
+  min-width: 0;
+}
+
+.ws-panelTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ws-panelTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--mtr-text);
+}
+
+.ws-panelDescription {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--mtr-text-2);
+}
+
+.ws-panelActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ---------- KPI ---------- */
+
+.ws-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--mtr-border-strong);
+}
+
+.ws-kpiTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ws-kpiLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.ws-kpiIcon {
+  color: var(--mtr-text-3);
+}
+
+.ws-kpi[data-tone='positive'] {
+  border-left-color: var(--mtr-pos);
+}
+
+.ws-kpi[data-tone='positive'] .ws-kpiIcon {
+  color: var(--mtr-pos);
+}
+
+.ws-kpi[data-tone='negative'] {
+  border-left-color: var(--mtr-neg);
+}
+
+.ws-kpi[data-tone='negative'] .ws-kpiIcon {
+  color: var(--mtr-neg);
+}
+
+.ws-kpi[data-tone='warning'] {
+  border-left-color: var(--mtr-amber);
+}
+
+.ws-kpi[data-tone='warning'] .ws-kpiIcon {
+  color: var(--mtr-amber);
+}
+
+.ws-kpi[data-tone='brand'] {
+  border-left-color: var(--mtr-brand);
+}
+
+.ws-kpi[data-tone='brand'] .ws-kpiIcon {
+  color: var(--mtr-brand-text);
+}
+
+.ws-kpiValue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--mtr-text);
+  overflow-wrap: anywhere;
+}
+
+.ws-kpiFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+}
+
+.ws-kpiHint {
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Change ---------- */
+
+.ws-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 600;
+  color: var(--mtr-text-2);
+}
+
+.ws-change[data-direction='up'] {
+  color: var(--mtr-pos);
+}
+
+.ws-change[data-direction='down'] {
+  color: var(--mtr-neg);
+}
+
+/* ---------- Empty / error ---------- */
+
+.ws-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--mtr-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--mtr-sunken);
+}
+
+.ws-emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--mtr-elevated);
+  color: var(--mtr-text-2);
+  border: 1px solid var(--mtr-border);
+}
+
+.ws-empty[data-tone='error'] {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--mtr-neg) 40%, var(--mtr-border));
+  background: var(--mtr-neg-soft);
+}
+
+.ws-empty[data-tone='error'] .ws-emptyIcon {
+  color: var(--mtr-neg);
+  background: var(--mtr-surface);
+  border-color: color-mix(in srgb, var(--mtr-neg) 35%, var(--mtr-border));
+}
+
+.ws-empty[data-tone='pending'] {
+  border-color: color-mix(in srgb, var(--mtr-amber) 35%, var(--mtr-border));
+  background: var(--mtr-amber-soft);
+}
+
+.ws-empty[data-tone='pending'] .ws-emptyIcon {
+  color: var(--mtr-amber);
+  background: var(--mtr-surface);
+}
+
+.ws-emptyTitle {
+  margin: var(--space-1) 0 0;
+  font-size: 0.9375rem;
+  font-weight: 620;
+  color: var(--mtr-text);
+}
+
+.ws-emptyText {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--mtr-text-2);
+}
+
+.ws-emptyAction {
+  margin-top: var(--space-3);
+}
+
+.ws-skeletonStack {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+/* Dense tables inside workspace panels */
+.ws-panel .table-wrap {
+  margin-top: var(--space-1);
+}
+
+.ws-panel table.data-table th,
+.ws-panel table.data-table td {
+  padding: 0.55rem 0.75rem;
+}

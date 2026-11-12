@@ -1,0 +1,130 @@
+<section class="adm-section" aria-labelledby="admin-user-heading" [attr.aria-busy]="loading()">
+  <p>
+    <a routerLink="/admin/users">← Retour aux utilisateurs</a>
+  </p>
+  <div class="adm-sectionHead">
+    <div>
+      <h2 id="admin-user-heading">
+        {{ user() ? user()!.firstName + ' ' + user()!.lastName : 'Détail du compte' }}
+      </h2>
+      @if (user(); as user) {
+        <p>
+          {{ user.email }} · <mtr-account-status-badge [status]="user.status" /> · {{ user.role === 'ADMIN' ? 'Administrateur' : 'Investisseur'
+          }}{{ user.emailVerified ? ' · courriel vérifié' : ' · courriel non vérifié' }}
+        </p>
+      }
+    </div>
+  </div>
+  @if (loading()) {
+    <p role="status">Chargement du compte…</p>
+  }
+
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+
+  @if (isSelf() && user()) {
+    <p class="form-error-banner" role="status">
+      Il s'agit de votre propre compte. Les administrateurs ne peuvent pas modifier leur propre statut ou rôle ; utilisez
+      Paramètres pour votre compte.
+    </p>
+  }
+
+  @if (user(); as user) {
+    <div class="grid-two" style="display: grid; gap: 1.25rem">
+      <form class="card-panel" (submit)="openStatusDialog($event)">
+        <h3>Statut du compte</h3>
+        <fieldset [disabled]="isSelf() || busy()" style="border: none; padding: 0; margin: 0">
+          <label class="field">
+            <span>Statut</span>
+            <select [value]="status()" (change)="status.set($any($event.target).value)" required>
+              <option value="ACTIVE">Actif</option>
+              <option value="SUSPENDED">Suspendu</option>
+              <option value="DEACTIVATED">Désactivé</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Motif (obligatoire, consigné dans le journal d'audit)</span>
+            <input [value]="reason()" (input)="reason.set($any($event.target).value)" minlength="3" maxlength="200" required />
+          </label>
+          <button type="submit" class="btn btn-primary" [disabled]="statusUnchanged()">Changer le statut…</button>
+        </fieldset>
+      </form>
+
+      <form class="card-panel" (submit)="openRoleDialog($event)">
+        <h3>Rôle</h3>
+        <p style="font-size: 0.9rem">
+          Nécessite votre mot de passe, plus un code d'authentification si vous utilisez la vérification en deux étapes.
+          Rétrograder le dernier administrateur actif est bloqué.
+        </p>
+        <fieldset [disabled]="isSelf() || busy()" style="border: none; padding: 0; margin: 0">
+          <label class="field">
+            <span>Rôle</span>
+            <select [value]="role()" (change)="role.set($any($event.target).value)" required>
+              <option value="INVESTOR">Investisseur</option>
+              <option value="ADMIN">Administrateur</option>
+            </select>
+          </label>
+          <button type="submit" class="btn btn-primary" [disabled]="roleUnchanged()">Changer le rôle…</button>
+        </fieldset>
+      </form>
+
+      <div class="card-panel">
+        <h3>Synthèse sécurité</h3>
+        <p>{{ securitySummary() }}</p>
+        <h3>Événements de sécurité récents</h3>
+        @if (data()?.auditSummary?.length) {
+          <ul>
+            @for (event of data()!.auditSummary; track event.id) {
+              <li>
+                {{ event.eventType }} · {{ event.outcome }} · {{ formatDateTime(event.createdAt)
+                }}{{ event.byAdministrator ? ' · par un administrateur' : '' }}
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>Aucun événement d'audit récent pour ce compte.</p>
+        }
+      </div>
+    </div>
+  }
+
+  <mtr-confirm-dialog
+    [open]="dialog() === 'status'"
+    [heading]="'Définir le statut sur ' + (statusLabels[status()] ?? status()) + ' ?'"
+    [description]="
+      status() === 'ACTIVE'
+        ? 'L\'utilisateur retrouve l\'accès (ou repasse en vérification en attente si son courriel n\'est pas vérifié) et est notifié par courriel.'
+        : 'Toutes les sessions de cet utilisateur se terminent immédiatement, les liens en cours cessent de fonctionner, et l\'utilisateur est notifié par courriel.'
+    "
+    confirmLabel="Changer le statut"
+    [danger]="status() !== 'ACTIVE'"
+    [busy]="busy()"
+    [error]="dialogError()"
+    (cancelled)="!busy() && dialog.set(null)"
+    (confirmed)="confirmStatus()"
+  />
+
+  <mtr-confirm-dialog
+    [open]="dialog() === 'role'"
+    [heading]="'Faire de ce compte ' + (role() === 'ADMIN' ? 'un administrateur' : 'un investisseur') + ' ?'"
+    [description]="
+      role() === 'ADMIN'
+        ? 'Les administrateurs peuvent gérer tous les comptes et lire le journal d\'audit.'
+        : 'Le compte perd l\'accès aux outils d\'administration.'
+    "
+    confirmLabel="Changer le rôle"
+    [danger]="role() === 'ADMIN'"
+    [busy]="busy()"
+    [error]="dialogError()"
+    [hasFields]="true"
+    (cancelled)="cancelRoleDialog()"
+    (confirmed)="confirmRole()"
+  >
+    <mtr-step-up-fields
+      idPrefix="role-change"
+      [mfaEnabled]="mfaEnabled()"
+      [values]="stepUp.values()"
+      (changed)="stepUp.patch($event)"
+    />
+  </mtr-confirm-dialog>
+</section>

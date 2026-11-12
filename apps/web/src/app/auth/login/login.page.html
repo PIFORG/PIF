@@ -1,0 +1,108 @@
+@if (status() === 'authenticated' && !mfaToken()) {
+  <mtr-auth-layout title="Se connecter" lead="Vous êtes déjà connecté. Redirection…" />
+} @else {
+  <mtr-auth-layout
+    [title]="mfaToken() ? 'Vérification en deux étapes' : 'Se connecter'"
+    [lead]="
+      mfaToken()
+        ? 'Saisissez le code de votre application d\'authentification ou un code de récupération.'
+        : 'Bon retour. Connectez-vous à votre espace de marché simulé.'
+    "
+    [showFooter]="true"
+  >
+    <mtr-form-error [message]="error()" />
+    <mtr-form-success [message]="info()" />
+
+    @if (unverifiedEmail(); as unverified) {
+      <p>
+        <a [href]="resendHref(unverified)">Renvoyer le courriel de vérification</a>
+      </p>
+    }
+
+    @if (!mfaToken()) {
+      <form (submit)="onLogin($event)" novalidate>
+        <div class="field">
+          <label for="email">Courriel</label>
+          <input
+            id="email"
+            name="email"
+            class="input"
+            type="email"
+            autocomplete="email"
+            [attr.aria-invalid]="loginErrors().email ? true : null"
+            [attr.aria-describedby]="loginErrors().email ? 'email-error' : null"
+            [value]="email()"
+            (input)="onEmailInput($any($event.target).value)"
+          />
+          @if (loginErrors().email; as message) {
+            <span id="email-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <div class="password-wrap">
+            <input
+              #passwordInput
+              id="password"
+              name="password"
+              class="input"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              autocomplete="current-password"
+              [attr.aria-invalid]="loginErrors().password ? true : null"
+              [attr.aria-describedby]="loginErrors().password ? 'password-error' : null"
+              [value]="password()"
+              (input)="onPasswordInput($any($event.target).value)"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="passwordVisible.set(!passwordVisible())"
+              [attr.aria-pressed]="passwordVisible()"
+              [attr.aria-label]="passwordVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              {{ passwordVisible() ? 'Masquer' : 'Afficher' }}
+            </button>
+          </div>
+          @if (loginErrors().password; as message) {
+            <span id="password-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="loginSubmitting()">
+          {{ loginSubmitting() ? 'Connexion…' : 'Se connecter' }}
+        </button>
+      </form>
+    } @else {
+      <form (submit)="onMfa($event)" novalidate>
+        <div class="field">
+          <label for="code">Code d'authentification ou de récupération</label>
+          <input
+            id="code"
+            name="code"
+            class="input"
+            autocomplete="one-time-code"
+            [attr.aria-invalid]="codeError() ? true : null"
+            [attr.aria-describedby]="codeError() ? 'code-hint code-error' : 'code-hint'"
+            [value]="code()"
+            (input)="onCodeInput($any($event.target).value)"
+          />
+          <span id="code-hint" class="field-hint">Une seule tentative par connexion.</span>
+          @if (codeError(); as message) {
+            <span id="code-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="mfaSubmitting()">
+          {{ mfaSubmitting() ? 'Vérification…' : 'Vérifier et continuer' }}
+        </button>
+      </form>
+    }
+
+    <ng-container ngProjectAs="[authFooter]">
+      @if (mfaToken()) {
+        <button type="button" class="btn btn-ghost" (click)="backToPassword()">Retour à la connexion par mot de passe</button>
+      } @else {
+        <span>Pas encore de compte ? <a routerLink="/register">S'inscrire</a></span>
+        <span><a routerLink="/forgot-password">Mot de passe oublié ?</a></span>
+      }
+    </ng-container>
+  </mtr-auth-layout>
+}

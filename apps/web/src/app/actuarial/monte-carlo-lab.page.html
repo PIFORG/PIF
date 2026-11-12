@@ -1,0 +1,144 @@
+<div class="page-shell ac-labShell ac-monteShell">
+  <mtr-page-heading
+    [eyebrow]="copy.eyebrow"
+    [title]="copy.monteCarloTitle"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="copy.monteCarloDescription"
+  />
+  <nav mtr-actuarial-tabs></nav>
+
+  @if (loadError()) {
+    <div mtr-empty-state tone="error" icon="alert" heading="The Monte Carlo lab could not load" [description]="loadError()"></div>
+  } @else {
+    <p mtr-simulated-note></p>
+    @if (run(); as r) {
+      <div mtr-run-kpis [run]="r"></div>
+    }
+    <hr class="ac-labRule" aria-hidden="true" />
+    <div class="ac-studio ac-researchDesk">
+      <div class="ac-formColumn ac-specColumn">
+        <div class="ac-stack" style="margin-bottom: 0">
+          <section mtr-panel panelId="simulation-settings" heading="Configuration de l'expérience" description="Exécution serveur ; même graine et mêmes entrées → mêmes résultats.">
+            <form class="ac-form" novalidate aria-describedby="mc-status" (submit)="submit($event)">
+              <div class="ac-fieldRow">
+                <div
+                  mtr-number-field
+                  fieldId="mc-simulations"
+                  label="Simulated periods"
+                  hint="1,000 to 200,000"
+                  [value]="settings().simulations"
+                  [error]="settingErrors().simulations"
+                  (changed)="setSetting('simulations', $event)"
+                ></div>
+                <div class="ac-seedField">
+                  <div mtr-number-field fieldId="mc-seed" label="Seed" [value]="settings().seed" [error]="settingErrors().seed" (changed)="setSetting('seed', $event)"></div>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="newSeed()"><svg mtrIcon name="refresh" [size]="14" /> New seed</button>
+                </div>
+              </div>
+              <div class="ac-fieldRow">
+                <div
+                  mtr-number-field
+                  fieldId="mc-capital"
+                  label="Initial capital"
+                  suffix="DT"
+                  hint="Held at the start of the period"
+                  [value]="settings().initialCapital"
+                  [error]="settingErrors().initialCapital"
+                  (changed)="setSetting('initialCapital', $event)"
+                ></div>
+                <div
+                  mtr-number-field
+                  fieldId="mc-premium"
+                  label="Premium charged"
+                  suffix="DT"
+                  hint="Leave empty to use the model gross premium"
+                  placeholder="Model premium"
+                  [value]="settings().premiumCharged"
+                  [error]="settingErrors().premiumCharged"
+                  (changed)="setSetting('premiumCharged', $event)"
+                ></div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="mc-label">Run label (optional)</label>
+                <input
+                  id="mc-label"
+                  class="input"
+                  maxlength="80"
+                  autocomplete="off"
+                  [value]="settings().label"
+                  [attr.aria-invalid]="settingErrors().label ? true : null"
+                  [attr.aria-describedby]="settingErrors().label ? 'mc-label-error' : null"
+                  (input)="setSetting('label', $any($event.target).value)"
+                />
+                @if (settingErrors().label) {
+                  <p id="mc-label-error" class="field-error">{{ settingErrors().label }}</p>
+                }
+              </div>
+              <button type="submit" class="btn btn-primary" [disabled]="running() || invalid()">
+                <svg mtrIcon name="play" [size]="14" /> {{ running() ? 'Simulating…' : 'Run simulation' }}
+              </button>
+              <p id="mc-status" class="ac-status" role="status" aria-live="polite">
+                @if (running()) {
+                  <svg mtrIcon name="refresh" [size]="14" /> Simulating {{ runningPeriods() }} periods on the server…
+                } @else if (invalid()) {
+                  <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to run the simulation.
+                } @else if (outdated()) {
+                  <svg mtrIcon name="info" [size]="14" /> Inputs changed since the run shown. Run again to update.
+                } @else if (run(); as r) {
+                  <svg mtrIcon name="check" [size]="14" /> Showing the run with seed {{ r.seed }}.
+                } @else {
+                  <svg mtrIcon name="info" [size]="14" /> No run yet.
+                }
+              </p>
+            </form>
+          </section>
+          <section mtr-panel panelId="assumptions" heading="Portfolio assumptions" description="The same models as the pricing studio.">
+            @if (form() && presets()) {
+              <form
+                mtr-assumptions-form
+                [form]="form()!"
+                [errors]="assumptionErrors()"
+                [presets]="presets()!"
+                [presetId]="presetId()"
+                (preset)="applyPreset($event)"
+                (changed)="update($event)"
+              ></form>
+            } @else {
+              <div mtr-panel-skeleton [rows]="8"></div>
+            }
+          </section>
+        </div>
+      </div>
+
+      <div class="ac-results" [attr.data-busy]="running() ? 'true' : null" [attr.aria-busy]="running()">
+        @if (error()) {
+          <div class="form-error-banner" role="alert">{{ error() }}</div>
+        }
+        @if (run(); as r) {
+          <mtr-run-results [run]="r" [outdated]="outdated()" />
+        } @else {
+          <section mtr-panel heading="Results">
+            @if (running()) {
+              <div mtr-panel-skeleton [rows]="6"></div>
+            } @else {
+              <div
+                mtr-empty-state
+                icon="info"
+                heading="No simulation yet"
+                description="Choose the assumptions and press Run simulation. Nothing is shown until the server has finished the run."
+              ></div>
+            }
+          </section>
+        }
+        <mtr-simulation-runs-panel
+          [history]="history()"
+          [message]="historyMessage()"
+          [activeId]="run()?.id ?? null"
+          (loadRun)="loadRun($event)"
+          (deleteRun)="deleteRun($event)"
+        />
+        <mtr-simulation-method-panel />
+      </div>
+    </div>
+  }
+</div>

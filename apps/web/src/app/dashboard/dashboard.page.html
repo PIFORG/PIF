@@ -1,0 +1,360 @@
+@if (user(); as user) {
+  <div class="page-shell db-cockpit">
+    <mtr-page-heading [eyebrow]="greeting" [title]="'Bon retour, ' + user.firstName">
+      <span mtrHeadingDescription class="db-identity">
+        <mtr-account-status-badge [status]="user.status" />
+        <span class="badge badge-muted">{{ user.role === 'ADMIN' ? 'Administrateur' : 'Investisseur' }}</span>
+        <span class="badge badge-muted">{{ experienceLabel[user.experienceLevel] }}</span>
+        @if (context()?.experienceLevelNotice) {
+          <span class="db-identityNote"
+            >Le niveau d'expérience adapte uniquement le contenu pédagogique — pas une certification de trading.</span
+          >
+        }
+      </span>
+      <button
+        mtrHeadingActions
+        type="button"
+        [class]="sample() ? 'btn btn-secondary' : 'btn btn-primary'"
+        [attr.aria-pressed]="sample()"
+        (click)="sample.set(!sample())"
+      >
+        <svg mtrIcon name="flask" [size]="16" />{{ sample() ? 'Quitter l\'espace d\'exemple' : 'Explorer l\'espace d\'exemple' }}
+      </button>
+    </mtr-page-heading>
+
+    @if (!user.emailVerified) {
+      <div class="form-error-banner" role="status">
+        Vérifiez votre courriel pour débloquer toutes les capacités du compte. <a routerLink="/resend-verification">Renvoyer la vérification</a>
+      </div>
+    }
+
+    @if (adminMfaRequired()) {
+      <div class="form-error-banner" role="status">
+        Les outils administrateur sont verrouillés tant que la vérification en deux étapes n'est pas activée.
+        <a routerLink="/settings/security">Configurer maintenant</a>
+      </div>
+    }
+
+    @if (sample()) {
+      <div class="db-sampleBanner" role="status">
+        <span mtr-demo-label>Espace d'exemple</span>
+        <p>{{ sampleNotice() }}</p>
+      </div>
+    }
+
+    <!-- Hero: financial intelligence overview -->
+    <header class="db-hero" aria-labelledby="db-hero-title">
+      <div class="db-heroHead">
+        <div class="db-heroBrand">
+          <span class="db-heroEyebrow">Poste de pilotage</span>
+          <h2 id="db-hero-title" class="db-heroTitle">Intelligence financière</h2>
+          <p class="db-heroSubtitle">Vue synthétique du portefeuille simulé, de la performance et du risque.</p>
+        </div>
+        <nav class="db-heroActions" aria-label="Actions rapides">
+          <a routerLink="/markets" class="btn btn-ghost btn-sm"><svg mtrIcon name="markets" [size]="14" /> Marchés</a>
+          <a routerLink="/trading" class="btn btn-ghost btn-sm"><svg mtrIcon name="trading" [size]="14" /> Trading</a>
+          <a routerLink="/portfolios" class="btn btn-ghost btn-sm"><svg mtrIcon name="portfolio" [size]="14" /> Portefeuilles</a>
+          <a routerLink="/learn" class="btn btn-ghost btn-sm"><svg mtrIcon name="academy" [size]="14" /> MarketQuest</a>
+        </nav>
+      </div>
+
+      <div class="db-heroGrid">
+        <div class="db-heroValue" aria-label="Valeur et variation">
+          <div class="db-heroPrimary">
+            <span class="db-heroLabel">Capitaux propres simulés</span>
+            <p class="db-heroEquity num">
+              @if (sample()) {
+                {{ equity }}
+              } @else {
+                <span mtr-pending-value></span>
+              }
+            </p>
+            @if (sample()) {
+              <span class="db-heroReturn" mtr-change [value]="summary.totalReturnPct"></span>
+            }
+            <div mtr-kpi class="db-heroKpi db-srKpi" label="Valeur du portefeuille simulé" icon="portfolio" [hint]="sample() ? 'depuis le début · exemple' : 'Moteur portefeuille non connecté'">
+              @if (sample()) {
+                {{ equity }}
+              } @else {
+                <span mtr-pending-value></span>
+              }
+              @if (sample()) {
+                <span mtrKpiChange mtr-change [value]="summary.totalReturnPct"></span>
+              }
+            </div>
+          </div>
+          <div class="db-heroPulse">
+            <div
+              mtr-kpi
+              class="db-heroKpi"
+              label="Variation du jour"
+              icon="markets"
+              [tone]="sample() ? (summary.dayChange >= 0 ? 'positive' : 'negative') : 'default'"
+              [hint]='sample() ? "exemple" : "Aucune position simulée pour le moment"'
+            >
+              @if (sample()) {
+                <span mtr-change [value]="summary.dayChange" kind="money" [currency]="currency"></span>
+              } @else {
+                <span mtr-pending-value></span>
+              }
+              @if (sample()) {
+                <span mtrKpiChange mtr-change [value]="summary.dayChangePct"></span>
+              }
+            </div>
+            <div class="db-heroOps">
+              <div class="db-heroOpsLabel">Opérations</div>
+              <div mtr-kpi class="db-heroKpi db-heroKpiCompact" label="Sessions actives" icon="sessions">
+                @if (sessions(); as list) {
+                  <span class="db-heroSessionCount num">{{ list.length }}</span>
+                } @else if (sessionsError()) {
+                  <span mtr-pending-value></span>
+                } @else {
+                  <span class="skeleton" [style.height.px]="24" [style.width.px]="40"></span>
+                }
+                <span mtrKpiHint class="ws-kpiHint"
+                  >Opérationnel ·
+                  @if (user.mfaEnabled) {
+                    vérification en deux étapes activée
+                  } @else {
+                    <a routerLink="/settings/security">activer la vérification en deux étapes</a>
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-heroChart">
+          <section
+            mtr-panel
+            class="db-heroPanel"
+            panelId="performance"
+            heading="Performance"
+            [description]="sample() ? 'Portefeuille d\'exemple face à un indice de référence type, 64 séances.' : 'Votre courbe de capitaux propres simulée.'"
+            [demo]="sample()"
+          >
+            @if (sample()) {
+              <span mtrPanelBadge mtr-demo-label></span>
+            } @else {
+              <span mtrPanelBadge mtr-status-badge status="DESIGNED_PENDING_BACKEND"></span>
+            }
+            @if (sample()) {
+              <figure
+                mtr-line-chart
+                class="db-heroLineChart"
+                [height]="280"
+                [summary]="performanceSummary"
+                [formatY]="performanceAxis"
+                [xLabels]="sessionLabels"
+                [series]="performanceSeries"
+              ></figure>
+            } @else {
+              <div
+                mtr-empty-state
+                icon="markets"
+                heading="Pas encore de portefeuille simulé"
+                description="Votre courbe de capitaux propres apparaîtra ici une fois le moteur portefeuille connecté. Explorez l'espace d'exemple pour voir le fonctionnement de cet écran."
+              >
+                <button mtrEmptyAction type="button" class="btn btn-secondary btn-sm" (click)="sample.set(true)">
+                  <svg mtrIcon name="flask" [size]="14" /> Afficher l'espace d'exemple
+                </button>
+              </div>
+            }
+          </section>
+        </div>
+
+        <div class="db-heroRisk" aria-label="Risque">
+          <div class="db-riskPod">
+            <div class="db-riskHead">
+              <svg mtrIcon name="risk" [size]="18" />
+              <span>Profil de risque</span>
+              @if (sample()) {
+                <span mtr-demo-label class="db-riskDemo"></span>
+              }
+            </div>
+            <div mtr-kpi class="db-heroKpi db-heroKpiRisk" label="VaR 1 jour (95 %)" icon="risk" [tone]="sample() ? 'warning' : 'default'" [hint]="sample() ? varHint : 'Moteur de risque non connecté'">
+              @if (sample()) {
+                {{ varValue }}
+              } @else {
+                <span mtr-pending-value></span>
+              }
+            </div>
+            @if (sample()) {
+              <dl class="db-riskStats">
+                <div>
+                  <dt>Volatilité annuelle</dt>
+                  <dd class="num">{{ varVolatility }}</dd>
+                </div>
+                <div>
+                  <dt>Bêta</dt>
+                  <dd class="num">{{ formatNumber(risk.beta, 2) }}</dd>
+                </div>
+                <div>
+                  <dt>Sharpe</dt>
+                  <dd class="num">{{ formatNumber(risk.sharpe, 2) }}</dd>
+                </div>
+                <div>
+                  <dt>Drawdown max.</dt>
+                  <dd class="num">{{ varDrawdown }}</dd>
+                </div>
+              </dl>
+            } @else {
+              <p class="db-riskPending">Les indicateurs de risque s'afficheront lorsque le moteur portefeuille sera connecté.</p>
+            }
+            <div class="db-readinessRing" [attr.data-level]="readinessPct() >= 100 ? 'complete' : 'progress'" title="Complétude du compte">
+              <span class="db-readinessPct num">{{ readinessPct() }}%</span>
+              <span class="db-readinessLabel">Compte prêt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Market intelligence strip -->
+    <section class="db-marketStrip" aria-label="Intelligence de marché">
+      <div class="db-marketStripHead">
+        <span class="db-marketStripTitle"><svg mtrIcon name="markets" [size]="16" /> Flux de marché</span>
+        <a routerLink="/markets" class="btn btn-ghost btn-sm">Carnet complet</a>
+      </div>
+      @if (sample()) {
+        <ul class="db-ticker">
+          @for (q of watchlist; track q.symbol) {
+            <li>
+              <span class="mono db-tickerSym">{{ q.symbol }}</span>
+              <span class="db-tickerName">{{ q.name }}</span>
+              <svg mtr-sparkline [values]="q.spark" [width]="64" [height]="20" [label]="q.symbol + ' tendance exemple'"></svg>
+              <span class="num db-tickerLast">{{ formatNumber(q.last) }}</span>
+              <span mtr-change [value]="q.change"></span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="db-marketStripEmpty">Les cotations en direct apparaîtront ici lorsque le service de données de marché sera connecté.</p>
+      }
+    </section>
+
+    <!-- Analytical canvas: varied panel geometry -->
+    <div class="db-canvas" aria-label="Canevas analytique">
+      <section mtr-panel class="db-canvasCell db-canvasWide" panelId="watchlist" heading="Liste de suivi" [demo]="sample()">
+        @if (sample()) {
+          <span mtrPanelBadge mtr-demo-label></span>
+        }
+        <a mtrPanelActions routerLink="/markets" class="btn btn-ghost btn-sm">Marchés</a>
+        @if (sample()) {
+          <table class="data-table db-compactTable">
+            <caption class="sr-only">Liste de suivi d'exemple — instruments fictifs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Symbole</th>
+                <th scope="col">Tendance</th>
+                <th scope="col" class="num">Dernier</th>
+                <th scope="col" class="num">Variation</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (q of watchlist; track q.symbol) {
+                <tr>
+                  <td><span class="mono">{{ q.symbol }}</span></td>
+                  <td><svg mtr-sparkline [values]="q.spark" [width]="72" [height]="22" [label]="q.symbol + ' tendance exemple'"></svg></td>
+                  <td class="num">{{ formatNumber(q.last) }}</td>
+                  <td class="num"><span mtr-change [value]="q.change"></span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div mtr-empty-state icon="markets" heading="Données de marché non connectées" description="Les cotations apparaissent lorsque le service de données de marché est disponible."></div>
+        }
+      </section>
+
+      <section mtr-panel class="db-canvasCell db-canvasTall" panelId="allocation" heading="Allocation" [demo]="sample()">
+        @if (sample()) {
+          <span mtrPanelBadge mtr-demo-label></span>
+        }
+        @if (sample()) {
+          <div mtr-allocation-bar [items]="allocation" label="Allocation d'exemple par classe d'actifs"></div>
+        } @else {
+          <div mtr-empty-state icon="portfolio" heading="Pas d'allocation pour l'instant" description="Les pondérations par classe d'actifs apparaissent dès que vous détenez des positions simulées."></div>
+        }
+      </section>
+
+      <section mtr-panel class="db-canvasCell db-canvasInsights" panelId="insights" heading="Signaux contextuels" description="Recommandations issues de votre profil et de la plateforme.">
+        <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
+        @if (error()) {
+          <div mtr-empty-state tone="error" heading="Contexte indisponible" [description]="error()"></div>
+        } @else if (!context()) {
+          <div mtr-panel-skeleton [rows]="3"></div>
+        } @else if (contextualInsights().length === 0) {
+          <div mtr-empty-state icon="overview" heading="Aucun signal particulier" description="Votre espace est configuré. Explorez les modules de la station de travail ci-dessous."></div>
+        } @else {
+          <ul class="db-insights">
+            @for (item of contextualInsights(); track item.title) {
+              <li>
+                <span class="db-insightIcon"><svg mtrIcon [name]="item.icon" [size]="16" /></span>
+                <span class="db-insightText">
+                  <strong>{{ item.title }}</strong>
+                  <span>{{ item.detail }}</span>
+                </span>
+                @if (item.href && item.action) {
+                  <a [routerLink]="item.href" class="btn btn-secondary btn-sm">{{ item.action }}</a>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <div class="db-canvasCell db-canvasSide">
+        <mtr-readiness-panel [user]="user" />
+      </div>
+
+      <div class="db-canvasCell db-canvasSide">
+        <mtr-sessions-panel [sessions]="sessions()" [error]="sessionsError()" [timeZone]="timeZone()" />
+      </div>
+
+      <div class="db-canvasCell db-canvasLearning">
+        <mtr-learning-panel />
+      </div>
+    </div>
+
+    @if (sample()) {
+      <section mtr-panel class="db-canvasCell db-canvasFull" panelId="positions" heading="Positions" [demo]="true">
+        <span mtrPanelBadge mtr-demo-label></span>
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption class="sr-only">Positions d'exemple — instruments fictifs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Instrument</th>
+                <th scope="col">Classe</th>
+                <th scope="col" class="num">Qté</th>
+                <th scope="col" class="num">Prix moy.</th>
+                <th scope="col" class="num">Dernier</th>
+                <th scope="col" class="num">Valeur</th>
+                <th scope="col" class="num">P&amp;L latent</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of positions; track p.symbol) {
+                <tr>
+                  <td>
+                    <span class="mono">{{ p.symbol }}</span>
+                    <span class="db-muted">{{ p.name }}</span>
+                  </td>
+                  <td>{{ p.assetClass }}</td>
+                  <td class="num">{{ p.quantity }}</td>
+                  <td class="num">{{ formatNumber(p.avgPrice) }}</td>
+                  <td class="num">{{ formatNumber(p.lastPrice) }}</td>
+                  <td class="num">{{ p.marketValue }}</td>
+                  <td class="num"><span mtr-change [value]="p.unrealised" kind="money" [currency]="currency"></span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <mtr-modules-panel [context]="context()" [error]="error()" [user]="user" />
+  </div>
+}

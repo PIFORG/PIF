@@ -1,0 +1,119 @@
+<div class="page-shell ac-labShell ac-reserveShell">
+  <mtr-page-heading
+    [eyebrow]="copy.eyebrow"
+    [title]="copy.reservingTitle"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="copy.reservingDescription"
+  />
+  <nav mtr-actuarial-tabs></nav>
+
+  @if (loadError()) {
+    <div mtr-empty-state tone="error" icon="alert" heading="The reserving studio could not load" [description]="loadError()"></div>
+  } @else {
+    @let f = form();
+    @let c = catalogue();
+    @let r = results();
+    <p class="ac-provenance">
+      <svg mtrIcon name="info" [size]="16" />
+      <span>
+        <strong>Deterministic best estimates.</strong> Computed on the server from the triangles and assumptions entered; undiscounted, without a risk margin, and not a regulatory technical
+        provision. The examples are fictional.
+      </span>
+    </p>
+    @if (r) {
+      <mtr-reserve-kpis [results]="r" [method]="method()" [methods]="methods()" (methodChange)="setMethod($event)" />
+    }
+    <hr class="ac-labRule" aria-hidden="true" />
+    <div class="ac-studio ac-researchDesk">
+      <div class="ac-formColumn ac-specColumn">
+        <div class="ac-stack" style="margin-bottom: 0">
+          <section mtr-panel panelId="reserving-data" heading="Claims data" description="Cumulative amounts in dinars, valued at the end of the latest accident year.">
+            @if (f && c) {
+              <form
+                mtr-reserving-data-form
+                [form]="f"
+                [errors]="errors()"
+                [catalogue]="c"
+                [exampleId]="exampleId()"
+                [exampleText]="exampleText()"
+                (example)="applyExample($event)"
+                (changed)="change($event)"
+              ></form>
+            } @else {
+              <div mtr-panel-skeleton [rows]="8"></div>
+            }
+          </section>
+          <section mtr-panel panelId="reserving-assumptions" heading="Assumptions">
+            @if (f && c) {
+              <form mtr-reserving-assumptions [form]="f" [errors]="errors()" (changed)="change($event)">
+                <p id="rs-status" class="ac-status" role="status" aria-live="polite">
+                  @if (busy()) {
+                    <svg mtrIcon name="refresh" [size]="14" /> Calculating on the server…
+                  } @else if (invalid()) {
+                    <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to update the reserves.
+                  } @else if (error()) {
+                    <svg mtrIcon name="alert" [size]="14" /> The server could not use these inputs.
+                  } @else if (shown() && !outdated()) {
+                    <svg mtrIcon name="check" [size]="14" />
+                    {{ shown()?.run ? 'Showing the stored results of “' + shown()?.run?.label + '”.' : 'Results match the inputs.' }}
+                  } @else {
+                    <svg mtrIcon name="info" [size]="14" /> Waiting for valid inputs.
+                  }
+                </p>
+              </form>
+            } @else {
+              <div mtr-panel-skeleton [rows]="5"></div>
+            }
+          </section>
+        </div>
+      </div>
+
+      <div class="ac-results" [attr.data-busy]="busy() ? 'true' : null" [attr.aria-busy]="busy()">
+        @if (error()) {
+          <div class="form-error-banner" role="alert">{{ error() }}</div>
+        }
+        @if (results() && outdated()) {
+          <div class="form-error-banner" role="status">
+            The results below were computed for earlier inputs. They update once the current inputs are valid and calculated.
+          </div>
+        }
+        @if (shown()?.run?.stale) {
+          <div class="form-error-banner" role="status">
+            This run was computed with an older model version ({{ shown()?.run?.modelVersion }}). Change any input to recompute it with the current model.
+          </div>
+        }
+        @if (r && f) {
+          <mtr-checks-panel [results]="r" />
+          <mtr-triangle-panel [results]="r" />
+          <mtr-factors-panel [results]="r" [form]="f" [errors]="errors()" (selectFactor)="selectFactor($event)" (clear)="clearSelections($event)" />
+          <mtr-reserves-panel [results]="r" [method]="method()" />
+          <mtr-methods-panel [results]="r" [method]="method()" [labels]="methods()" />
+          <div class="ac-twoUp">
+            <mtr-paid-incurred-panel [results]="r" />
+            <mtr-curves-panel [results]="r" />
+          </div>
+          <mtr-reserving-sensitivity-panel [results]="r" [method]="method()" [labels]="methods()" />
+          <mtr-cash-flow-panel [results]="r" />
+        } @else {
+          <section mtr-panel heading="Results">
+            @if (busy() || !c) {
+              <div mtr-panel-skeleton [rows]="6"></div>
+            } @else {
+              <div mtr-empty-state icon="info" heading="No reserves yet" description="Enter a triangle or pick an example. Results appear once the server has calculated them."></div>
+            }
+          </section>
+        }
+        <mtr-reserving-runs-panel
+          [history]="history()"
+          [message]="historyMessage()"
+          [activeId]="shown()?.run?.id ?? null"
+          [canSave]="canSave()"
+          [save]="saveRun"
+          (loadRun)="loadRun($event)"
+          (deleteRun)="deleteRun($event)"
+        />
+        <mtr-reserving-method-notes />
+      </div>
+    </div>
+  }
+</div>

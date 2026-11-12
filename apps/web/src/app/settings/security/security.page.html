@@ -1,0 +1,208 @@
+@if (user(); as user) {
+  <div style="display: grid; gap: 1.25rem">
+    <mtr-form-error [message]="error()" />
+    <mtr-form-success [message]="success()" />
+
+    @if (adminMfaRequired()) {
+      <p class="form-error-banner" role="status">
+        Les outils d'administration restent verrouillés tant que vous n'avez pas activé la vérification en deux étapes ci-dessous.
+      </p>
+    }
+
+    <section class="card-panel" aria-labelledby="sessions-summary-heading">
+      <h2 id="sessions-summary-heading">Appareils connectés</h2>
+      <p>{{ sessionSummary() }} {{ lastSignIn() }}</p>
+      <a routerLink="/settings/sessions" class="btn btn-secondary">Consulter les sessions</a>
+    </section>
+
+    <section class="card-panel" aria-labelledby="password-heading">
+      <h2 id="password-heading">Changer le mot de passe</h2>
+      <form (submit)="onChangePassword($event)" novalidate>
+        <mtr-password-field
+          fieldId="currentPassword"
+          label="Mot de passe actuel"
+          autocomplete="current-password"
+          name="currentPassword"
+          [error]="passwordForm.errors().currentPassword"
+          [value]="passwordForm.values().currentPassword"
+          (valueChange)="passwordForm.set('currentPassword', $event)"
+        />
+        <mtr-password-field
+          fieldId="newPassword"
+          label="Nouveau mot de passe"
+          autocomplete="new-password"
+          [hint]="passwordHint"
+          name="newPassword"
+          [error]="passwordForm.errors().newPassword"
+          [value]="passwordForm.values().newPassword"
+          (valueChange)="passwordForm.set('newPassword', $event)"
+        />
+        <mtr-password-field
+          fieldId="confirmPassword"
+          label="Confirmer le nouveau mot de passe"
+          autocomplete="new-password"
+          name="confirmPassword"
+          [error]="passwordForm.errors().confirmPassword"
+          [value]="passwordForm.values().confirmPassword"
+          (valueChange)="passwordForm.set('confirmPassword', $event)"
+        />
+        @if (mfaEnabled()) {
+          <mtr-form-field
+            fieldId="changePasswordTotp"
+            label="Code d'authentification"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            [maxlength]="6"
+            name="totpCode"
+            [error]="passwordForm.errors().totpCode"
+            [value]="passwordForm.values().totpCode"
+            (valueChange)="passwordForm.set('totpCode', $event)"
+          />
+        }
+        <button type="submit" class="btn btn-primary" [disabled]="passwordForm.submitting()">
+          {{ passwordForm.submitting() ? 'Mise à jour…' : 'Mettre à jour le mot de passe' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="card-panel" aria-labelledby="email-heading">
+      <h2 id="email-heading">Changer le courriel</h2>
+      <p>Courriel actuel : {{ user.email }}</p>
+      <p class="field-hint">
+        Nous envoyons un lien de confirmation à la nouvelle adresse et une notification à l'adresse actuelle. Le
+        changement n'a lieu qu'après ouverture du lien ; vous serez alors déconnecté partout.
+      </p>
+      <form (submit)="onEmailChange($event)" novalidate>
+        <mtr-form-field
+          fieldId="newEmail"
+          label="Nouveau courriel"
+          type="email"
+          autocomplete="email"
+          name="newEmail"
+          [error]="emailForm.errors().newEmail"
+          [value]="emailForm.values().newEmail"
+          (valueChange)="emailForm.set('newEmail', $event)"
+        />
+        <mtr-password-field
+          fieldId="emailPassword"
+          label="Confirmer avec le mot de passe"
+          autocomplete="current-password"
+          name="password"
+          [error]="emailForm.errors().password"
+          [value]="emailForm.values().password"
+          (valueChange)="emailForm.set('password', $event)"
+        />
+        @if (mfaEnabled()) {
+          <mtr-form-field
+            fieldId="emailTotp"
+            label="Code d'authentification"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            [maxlength]="6"
+            name="totpCode"
+            [error]="emailForm.errors().totpCode"
+            [value]="emailForm.values().totpCode"
+            (valueChange)="emailForm.set('totpCode', $event)"
+          />
+        }
+        <button type="submit" class="btn btn-primary" [disabled]="emailForm.submitting()">
+          {{ emailForm.submitting() ? 'Envoi…' : 'Demander le changement de courriel' }}
+        </button>
+      </form>
+    </section>
+
+    <mtr-mfa-enrollment [enabled]="mfaEnabled()" [changed]="refreshUser" />
+
+    @if (mfaEnabled()) {
+      <section class="card-panel" aria-labelledby="disable-mfa-heading">
+        <h2 id="disable-mfa-heading">Désactiver la vérification en deux étapes</h2>
+        <p>
+          Nécessite votre mot de passe et un code d'authentification, ou un code de récupération si vous avez perdu votre
+          appareil. Les autres appareils seront déconnectés.
+        </p>
+        <button type="button" class="btn btn-danger" (click)="openDialog('disableMfa')">Désactiver la vérification en deux étapes</button>
+      </section>
+    }
+
+    <section class="card-panel" aria-labelledby="lifecycle-heading">
+      <h2 id="lifecycle-heading">Cycle de vie du compte</h2>
+      <p>
+        <strong>Désactiver</strong> vous déconnecte partout et bloque la connexion jusqu'à ce qu'un administrateur
+        rétablisse l'accès. <strong>Supprimer</strong> retire immédiatement votre nom et votre courriel du compte et le
+        désactive définitivement ; cette action est irréversible.
+      </p>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap">
+        <button type="button" class="btn btn-secondary" (click)="openDialog('deactivate')">Désactiver le compte</button>
+        <button type="button" class="btn btn-danger" (click)="openDialog('delete')">Supprimer le compte</button>
+      </div>
+    </section>
+
+    <mtr-confirm-dialog
+      [open]="dialog() === 'disableMfa'"
+      heading="Désactiver la vérification en deux étapes ?"
+      description="La connexion ne demandera que votre mot de passe jusqu'à une nouvelle configuration."
+      confirmLabel="Désactiver"
+      [danger]="true"
+      [busy]="busyDialog()"
+      [error]="dialogError()"
+      [hasFields]="true"
+      (cancelled)="closeDialog()"
+      (confirmed)="runDialogAction()"
+    >
+      <mtr-step-up-fields
+        [idPrefix]="dialog() ?? 'dialog'"
+        [mfaEnabled]="mfaEnabled()"
+        [values]="stepUp.values()"
+        (changed)="stepUp.patch($event)"
+        [allowRecoveryCode]="true"
+      />
+    </mtr-confirm-dialog>
+
+    <mtr-confirm-dialog
+      [open]="dialog() === 'deactivate'"
+      heading="Désactiver ce compte ?"
+      description="Vous serez déconnecté sur tous les appareils et ne pourrez plus vous connecter tant qu'un administrateur n'aura pas rétabli l'accès."
+      confirmLabel="Désactiver"
+      [danger]="true"
+      [busy]="busyDialog()"
+      [error]="dialogError()"
+      [hasFields]="true"
+      (cancelled)="closeDialog()"
+      (confirmed)="runDialogAction()"
+    >
+      <mtr-step-up-fields
+        [idPrefix]="dialog() ?? 'dialog'"
+        [mfaEnabled]="mfaEnabled()"
+        [values]="stepUp.values()"
+        (changed)="stepUp.patch($event)"
+      />
+    </mtr-confirm-dialog>
+
+    <mtr-confirm-dialog
+      [open]="dialog() === 'delete'"
+      heading="Supprimer ce compte ?"
+      description="Votre nom et votre courriel sont retirés immédiatement, toutes les sessions se terminent et le compte ne pourra plus jamais être utilisé."
+      confirmLabel="Supprimer le compte"
+      [danger]="true"
+      [busy]="busyDialog()"
+      [error]="dialogError()"
+      [hasFields]="true"
+      (cancelled)="closeDialog()"
+      (confirmed)="runDialogAction()"
+    >
+      <mtr-step-up-fields
+        [idPrefix]="dialog() ?? 'dialog'"
+        [mfaEnabled]="mfaEnabled()"
+        [values]="stepUp.values()"
+        (changed)="stepUp.patch($event)"
+      />
+      <mtr-form-field
+        fieldId="deleteConfirmation"
+        label="Saisissez DELETE pour confirmer"
+        autocomplete="off"
+        [value]="deleteConfirmation()"
+        (valueChange)="deleteConfirmation.set($event)"
+      />
+    </mtr-confirm-dialog>
+  </div>
+}

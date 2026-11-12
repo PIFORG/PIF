@@ -1,0 +1,200 @@
+/* Administration — navy command OS (adm- prefix). Uses workspace tokens only. */
+
+.adm-commandShell {
+  position: relative;
+}
+
+.adm-commandShell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(900px 480px at 92% -6%, color-mix(in srgb, var(--mtr-brand) 14%, transparent), transparent 70%),
+    radial-gradient(640px 380px at 0% 28%, color-mix(in srgb, var(--mtr-brand-strong) 10%, transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--mtr-sunken) 40%, transparent), transparent 32%);
+}
+
+.adm-commandShell .subnav {
+  gap: 0;
+  padding: var(--space-1);
+  margin-bottom: var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--mtr-sunken) 55%, var(--mtr-surface));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 8%, transparent);
+}
+
+.adm-commandShell .subnav .nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.adm-commandShell .subnav .nav-link[aria-current='page'] {
+  color: var(--mtr-brand-text);
+  background: color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-surface));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--mtr-brand) 35%, transparent),
+    var(--mtr-glow, 0 0 12px color-mix(in srgb, var(--mtr-brand) 25%, transparent));
+}
+
+/* ---------- Section chrome ---------- */
+
+.adm-section {
+  padding: var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-border));
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--mtr-brand) 5%, var(--mtr-surface)),
+    var(--mtr-surface)
+  );
+  box-shadow: var(--shadow-sm);
+}
+
+.adm-section + .adm-section {
+  margin-top: var(--space-4);
+}
+
+.adm-sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.adm-sectionHead h2 {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.adm-sectionHead p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mtr-text-2);
+  max-width: 52ch;
+}
+
+.adm-section h3 {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mtr-brand-text);
+}
+
+.adm-sectionBlock {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid color-mix(in srgb, var(--mtr-brand) 12%, var(--mtr-border));
+}
+
+/* ---------- Stats grid (overview) ---------- */
+
+.adm-commandShell .grid-stats {
+  gap: var(--space-3);
+}
+
+.adm-commandShell .stat-tile {
+  border-color: color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--mtr-sunken) 30%, var(--mtr-surface)),
+    var(--mtr-surface)
+  );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 6%, transparent);
+}
+
+.adm-commandShell .stat-tile .value {
+  color: var(--mtr-brand-text);
+}
+
+/* ---------- Toolbar & filters ---------- */
+
+.adm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-sunken);
+}
+
+.adm-toolbar .field {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.adm-toolbar label:not(.field) {
+  display: grid;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Event feeds & lists ---------- */
+
+.adm-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--mtr-border);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.adm-feed li {
+  padding: var(--space-2) var(--space-3);
+  background: var(--mtr-surface);
+  color: var(--mtr-text-2);
+}
+
+.adm-feed li:hover {
+  background: color-mix(in srgb, var(--mtr-hover) 60%, var(--mtr-surface));
+}
+
+/* ---------- Tables & pagination ---------- */
+
+.adm-commandShell .table-wrap {
+  border-color: color-mix(in srgb, var(--mtr-brand) 16%, var(--mtr-border));
+}
+
+.adm-commandShell table.data-table th {
+  background: color-mix(in srgb, var(--mtr-sunken) 70%, var(--mtr-elevated));
+  color: var(--mtr-brand-text);
+}
+
+.adm-pagination {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--mtr-border);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}

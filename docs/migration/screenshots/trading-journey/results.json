@@ -1,0 +1,196 @@
+{
+  "ranAt": "2026-11-12T00:30:05.132Z",
+  "database": "PIF_spring_test",
+  "results": [
+    {
+      "name": "T1. login lands on the Angular dashboard",
+      "ok": true,
+      "detail": "Welcome back, Journey"
+    },
+    {
+      "name": "    the dashboard shows no simulated figures until the sample is requested",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    dashboard learning panel shows real progress from Spring (missions passed, Live integrated, no \"not migrated\")",
+      "ok": true,
+      "detail": "0 of 10 missions passed; status LIVE_INTEGRATED"
+    },
+    {
+      "name": "    a new account starts with an empty watchlist",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T2. markets lists every instrument of the fictional universe",
+      "ok": true,
+      "detail": "7 rows / 7 instruments"
+    },
+    {
+      "name": "    prices are labelled fictional and simulated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    every instrument in the database is marked fictional",
+      "ok": true,
+      "detail": "ATL CTB GOV MDX OLV SFX TEK"
+    },
+    {
+      "name": "T3. selecting an instrument opens the trading desk for it",
+      "ok": true,
+      "detail": "/trading?symbol=ATL"
+    },
+    {
+      "name": "    without a portfolio the desk offers to create one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    creating a portfolio records 100,000 DT of opening capital once",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the KPI shows the stored cash",
+      "ok": true,
+      "detail": "100,000.000 DT"
+    },
+    {
+      "name": "    Web Storage holds only the active portfolio id, never a token",
+      "ok": true,
+      "detail": "{\"pif.activePortfolioId\":\"<id>\"}{}"
+    },
+    {
+      "name": "T4. preview shows the server review for the chosen order",
+      "ok": true,
+      "detail": "Review: buy 10 ATL · Market"
+    },
+    {
+      "name": "    fee and total shown are the server estimate",
+      "ok": true,
+      "detail": "{\"Ask price now\":\"16.886 DT\",\"Units that fill now\":\"10\",\"Estimated amount\":\"168.860 DT\",\"Estimated fee\":\"0.500 DT\",\"Estimated total cost\":\"169.360 DT\",\"Cash available\":\"100,000.000 DT\"}"
+    },
+    {
+      "name": "    a preview writes nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T5. placing the order fills it once at the quoted ask",
+      "ok": true,
+      "detail": "1 order(s), 1 fill(s), 2 submission(s)"
+    },
+    {
+      "name": "    the confirmation states the stored fill",
+      "ok": true,
+      "detail": "This order was already placed; here is its result. Bought 10 ATL at 16.886 DT on average (fees 0.500 DT)."
+    },
+    {
+      "name": "    a double click sends one order reference; the repeat is replayed, not executed again",
+      "ok": true,
+      "detail": "2 request(s)"
+    },
+    {
+      "name": "    the cash ledger matches the portfolio and debits notional plus fee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T6. the trade appears in recent trades",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the position shows 10 units",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the cash KPI equals the stored cash",
+      "ok": true,
+      "detail": "99,830.640 DT"
+    },
+    {
+      "name": "T7. resending the same order is replayed with the original result",
+      "ok": true,
+      "detail": "201 replayed=true"
+    },
+    {
+      "name": "    the replay writes nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    the same reference with different terms is refused",
+      "ok": true,
+      "detail": "409 IDEMPOTENCY_KEY_REUSED"
+    },
+    {
+      "name": "T8. selling an instrument not held is refused at preview, with no confirm button",
+      "ok": true,
+      "detail": "You hold 0 CTB; you cannot sell more than you hold. Change the order and preview it again."
+    },
+    {
+      "name": "    a submitted rejected order is stored as REJECTED and moves no cash",
+      "ok": true,
+      "detail": "201 REJECTED"
+    },
+    {
+      "name": "T9. a limit buy below the market rests as a working order",
+      "ok": true,
+      "detail": "Your limit buy of 5 CTB at 31.735 DT is working. It expires 12 Dec 2026, 01:30 if not filled. Dismiss"
+    },
+    {
+      "name": "    its cash is reserved, not spent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "    cancelling releases the reservation and stores CANCELLED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T10. the portfolio page shows the server equity and cash",
+      "ok": true,
+      "detail": "99,999.370 DT · Cash 99,830.640 DT · positions 168.730 DT"
+    },
+    {
+      "name": "     the reconciliation says the cash matches the ledger",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     the order history lists every stored order with its status",
+      "ok": true,
+      "detail": "Cancelled, Rejected, Filled"
+    },
+    {
+      "name": "     the trades tab lists the single fill",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "     the cash tab lists the opening deposit and the buy",
+      "ok": true,
+      "detail": "Buy, Deposit"
+    },
+    {
+      "name": "T11. after logout the trading desk requires sign-in again",
+      "ok": true,
+      "detail": "/login?returnTo=%2Ftrading"
+    },
+    {
+      "name": "     logout revoked the browser session (only the separate API session of step 7 remains)",
+      "ok": true,
+      "detail": "1 live session(s)"
+    },
+    {
+      "name": "no server error or rate limit during the journey",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

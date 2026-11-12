@@ -1,0 +1,262 @@
+{
+  "generatedAt": "2026-11-11T23:42:30.106Z",
+  "apps": {
+    "next": "http://localhost:3000",
+    "angular": "http://localhost:4200"
+  },
+  "channelTolerance": 32,
+  "pageErrors": [],
+  "results": [
+    {
+      "scenario": "learn-hub",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x1651",
+      "angularSize": "1440x1651",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x1651",
+      "differingPixels": 106,
+      "differingPercent": 0.004,
+      "exactlyDifferingPixels": 751,
+      "maxChannelDelta": 47,
+      "differenceBox": {
+        "x": 345,
+        "y": 586,
+        "width": 929,
+        "height": 958
+      }
+    },
+    {
+      "scenario": "learn-hub",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x3455",
+      "angularSize": "768x3455",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x3455",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 866,
+      "maxChannelDelta": 28,
+      "differenceBox": null
+    },
+    {
+      "scenario": "learn-hub",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4359",
+      "angularSize": "375x4359",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x4359",
+      "differingPixels": 63,
+      "differingPercent": 0.004,
+      "exactlyDifferingPixels": 696,
+      "maxChannelDelta": 46,
+      "differenceBox": {
+        "x": 81,
+        "y": 1244,
+        "width": 13,
+        "height": 1504
+      }
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x946",
+      "angularSize": "1440x946",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x946",
+      "differingPixels": 41,
+      "differingPercent": 0.003,
+      "exactlyDifferingPixels": 189,
+      "maxChannelDelta": 176,
+      "differenceBox": {
+        "x": 923,
+        "y": 26,
+        "width": 167,
+        "height": 521
+      }
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x1120",
+      "angularSize": "768x1120",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x1120",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 8,
+      "maxChannelDelta": 14,
+      "differenceBox": null
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x1086",
+      "angularSize": "375x1086",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x1086",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 15,
+      "maxChannelDelta": 12,
+      "differenceBox": null
+    },
+    {
+      "scenario": "learn-hub",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x1651",
+      "angularSize": "1440x1651",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x1651",
+      "differingPixels": 57,
+      "differingPercent": 0.002,
+      "exactlyDifferingPixels": 735,
+      "maxChannelDelta": 42,
+      "differenceBox": {
+        "x": 345,
+        "y": 590,
+        "width": 928,
+        "height": 954
+      }
+    },
+    {
+      "scenario": "learn-hub",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x3455",
+      "angularSize": "768x3455",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x3455",
+      "differingPixels": 17,
+      "differingPercent": 0.001,
+      "exactlyDifferingPixels": 854,
+      "maxChannelDelta": 44,
+      "differenceBox": {
+        "x": 284,
+        "y": 1945,
+        "width": 3,
+        "height": 167
+      }
+    },
+    {
+      "scenario": "learn-hub",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x4359",
+      "angularSize": "375x4359",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x4359",
+      "differingPixels": 48,
+      "differingPercent": 0.003,
+      "exactlyDifferingPixels": 690,
+      "maxChannelDelta": 42,
+      "differenceBox": {
+        "x": 81,
+        "y": 1244,
+        "width": 13,
+        "height": 1504
+      }
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x946",
+      "angularSize": "1440x946",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "1440x946",
+      "differingPixels": 16,
+      "differingPercent": 0.001,
+      "exactlyDifferingPixels": 139,
+      "maxChannelDelta": 47,
+      "differenceBox": {
+        "x": 923,
+        "y": 537,
+        "width": 3,
+        "height": 10
+      }
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x1120",
+      "angularSize": "768x1120",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "768x1120",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 8,
+      "maxChannelDelta": 14,
+      "differenceBox": null
+    },
+    {
+      "scenario": "stories-feed",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x1086",
+      "angularSize": "375x1086",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "comparedArea": "375x1086",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 11,
+      "maxChannelDelta": 12,
+      "differenceBox": null
+    }
+  ]
+}
