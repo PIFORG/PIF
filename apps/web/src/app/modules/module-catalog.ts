@@ -159,7 +159,7 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   strategies: {
     slug: 'strategies',
-    title: 'Stratégies et backtesting',
+    title: 'Stratégies et tests historiques',
     group: 'Recherche et IA',
     icon: 'strategy',
     summary: 'Définir des stratégies fondées sur des règles et les rejouer sur des scénarios historiques pour voir comment elles se seraient comportées.',
@@ -189,7 +189,7 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   backtesting: {
     slug: 'backtesting',
-    title: 'Backtesting',
+    title: 'Tests historiques',
     group: 'Recherche et IA',
     icon: 'strategy',
     summary: 'Exécuter une stratégie enregistrée sur une fenêtre historique et inspecter chaque trade simulé.',

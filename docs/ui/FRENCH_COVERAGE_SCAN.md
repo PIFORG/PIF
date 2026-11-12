@@ -1,12 +1,12 @@
 # French coverage scan (heuristic)
 
-Angular template hits: 0
+Angular template hits: 10
 
 ## Spring / learning resource bundles
 
 - `messages.properties`: **153** keys
 - `messages_fr.properties`: **153** keys
-- `learning_fr.properties`: **221** keys
+- `learning_fr.properties`: **224** keys
 
 ### MarketQuest overlay (`learning_fr.properties`)
 
@@ -25,3 +25,13 @@ Angular template hits: 0
 
 ## Angular English hits
 
+- `app\core\api\learning-api.ts`: **FinStories** — /* ---------------------------------------------------------------- FinStories */
+- `app\core\api\learning-api.ts`: **FinStories** — /** The FinStories feed shown on the MarketQuest hub (GET /learning/stories). */
+- `app\core\demo\sample-workspace.ts`: **Deterministic** — /** Deterministic pseudo-random generator so fixtures are stable across renders and tests. */
+- `app\core\demo\sample-workspace.ts`: **Fixed income** — { symbol: 'GOV', name: 'Treasury Bond Fund', assetClass: 'Fixed income', quantity: 250, avgPrice: 99.4, lastPrice: 100 },
+- `app\core\demo\sample-workspace.ts`: **Utilities** — quote('ATL', 'Atlas Utilities', 14.6, 13, -0.0003, 0.004),
+- `app\core\demo\sample-workspace.ts`: **Fixed income** — const ALLOCATION_LABEL: Record<string, string> = { Equity: 'Actions', 'Fixed income': 'Obligations' };
+- `app\trading\trading-format.ts`: **Banking** — Banking: 'Secteur bancaire',
+- `app\trading\trading-format.ts`: **Utilities** — Utilities: 'Services aux collectivités',
+- `app\trading\trading-format.ts`: **Fixed income** — 'Fixed income': 'Obligations',
+- `app\trading\trading-tables.components.ts`: **Sell** — /** Shows the per-row Sell action (the Next.js `onTrade` prop). */

@@ -46,13 +46,13 @@ function splitLine(line: string): string[] {
 
 export function parseTriangle(text: string): { rows: Cell[][] } | { error: string } {
   const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
-  if (lines.length === 0) return { error: 'Paste one line of cumulative amounts per accident year.' };
+  if (lines.length === 0) return { error: 'Collez une ligne de montants cumulés par année de survenance.' };
   const rows: Cell[][] = [];
   for (const [i, line] of lines.entries()) {
     const row: Cell[] = [];
     for (const [j, token] of splitLine(line).entries()) {
       const value = parseAmount(token === '' ? '-' : token);
-      if (value === undefined) return { error: `Line ${i + 1}, amount ${j + 1}: “${token}” is not a number. Write a missing amount as -.` };
+      if (value === undefined) return { error: `Ligne ${i + 1}, montant ${j + 1} : « ${token} » n'est pas un nombre. Écrivez un montant manquant avec -.` };
       row.push(value);
     }
     rows.push(row);
@@ -65,7 +65,7 @@ function parseList(text: string): { values: number[] } | { error: string } {
   const values: number[] = [];
   for (const [i, token] of tokens.entries()) {
     const value = parseAmount(token);
-    if (value === undefined || value === null) return { error: `Amount ${i + 1}: “${token}” is not a number.` };
+    if (value === undefined || value === null) return { error: `Montant ${i + 1} : « ${token} » n'est pas un nombre.` };
     values.push(value);
   }
   return { values };
@@ -95,13 +95,13 @@ export function validateReservingForm(form: ReservingForm, limits: ReservingLimi
     const raw = String(form[key]).trim();
     const value = Number(raw);
     if (raw === '' || !Number.isFinite(value) || (integer && !Number.isInteger(value)) || value < min || value > max) {
-      errors[key] = `${label} must be ${integer ? 'a whole number' : 'a number'} from ${min} to ${max}.`;
+      errors[key] = `${label} doit être ${integer ? 'un nombre entier' : 'un nombre'} compris entre ${min} et ${max}.`;
       return null;
     }
     return value;
   };
 
-  const firstOrigin = number('firstOrigin', 'The first accident year', limits.minFirstOrigin, limits.maxFirstOrigin, true);
+  const firstOrigin = number('firstOrigin', "La première année de survenance", limits.minFirstOrigin, limits.maxFirstOrigin, true);
   const paid = parseTriangle(form.paid);
   if ('error' in paid) errors['paid'] = paid.error;
   let incurred: Cell[][] | null = null;
@@ -117,12 +117,12 @@ export function validateReservingForm(form: ReservingForm, limits: ReservingLimi
     else premiums = parsed.values;
   }
   const n = 'rows' in paid ? paid.rows.length : 0;
-  const latestDiagonals = form.average === 'LATEST_DIAGONALS' ? number('latestDiagonals', 'The number of latest calendar years', 1, Math.max(1, n - 1), true) : null;
-  const tailPaid = number('tailPaid', 'The paid tail factor', limits.minTail, limits.maxTail);
-  const tailIncurred = number('tailIncurred', 'The incurred tail factor', limits.minTail, limits.maxTail);
+  const latestDiagonals = form.average === 'LATEST_DIAGONALS' ? number('latestDiagonals', 'Le nombre de dernières années calendaires', 1, Math.max(1, n - 1), true) : null;
+  const tailPaid = number('tailPaid', 'Le facteur de queue des paiements', limits.minTail, limits.maxTail);
+  const tailIncurred = number('tailIncurred', 'Le facteur de queue des survenus', limits.minTail, limits.maxTail);
   let expectedLossRatio: number | null = null;
   if (form.lossRatioPct.trim() !== '') {
-    const pct = number('lossRatioPct', 'The expected loss ratio', limits.minLossRatio * 100, limits.maxLossRatio * 100);
+    const pct = number('lossRatioPct', 'Le ratio de sinistralité attendu', limits.minLossRatio * 100, limits.maxLossRatio * 100);
     expectedLossRatio = pct === null ? null : pct / 100;
   }
 
@@ -132,7 +132,7 @@ export function validateReservingForm(form: ReservingForm, limits: ReservingLimi
       if (raw.trim() === '') return null;
       const value = Number(raw);
       if (!Number.isFinite(value) || value < limits.minFactor || value > limits.maxFactor) {
-        errors[`${key}-${j}`] = `Enter a factor from ${limits.minFactor} to ${limits.maxFactor}, or leave it empty to use the estimate.`;
+        errors[`${key}-${j}`] = `Saisissez un facteur compris entre ${limits.minFactor} et ${limits.maxFactor}, ou laissez vide pour utiliser l'estimation.`;
         return null;
       }
       return value;

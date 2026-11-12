@@ -13,7 +13,7 @@ final class ActuarialView {
   static double money(double x) { return Money.fromAmount(Money.toAmount(x)); }
   static Double money(Double x) { return x == null ? null : money(x.doubleValue()); }
   static double round(double x, int digits) { return new BigDecimal(x).setScale(digits, RoundingMode.HALF_UP).doubleValue(); }
-  static Map<String,Object> provenance() { return obj("kind", "ESTIMATED", "basis", "Model estimate from user-entered fictional assumptions; no observed claims data.", "modelVersion", Presets.MODEL_VERSION, "currency", Presets.CURRENCY); }
+  static Map<String,Object> provenance() { return obj("kind", "ESTIMATED", "basis", "Estimation modèle à partir d'hypothèses fictives saisies ; aucune donnée de sinistres observée.", "modelVersion", Presets.MODEL_VERSION, "currency", Presets.CURRENCY); }
   static Map<String,Object> frequency(Frequency.Model m) {
     var t = Frequency.countTable(m); double[] p = t.probabilities(); double max = Arrays.stream(p).max().orElse(0);
     int first=0,last=p.length-1; while(first<last && p[first]<max*1e-6) first++; while(last>first && p[last]<max*1e-6) last--;
@@ -44,10 +44,10 @@ final class ActuarialView {
   }
   static Map<String,Object> pricing(Pricing.Assumptions a) {
     var m=Pricing.build(a,true);var p=m.premium();double n=m.frequency().policies;List<String>warnings=new ArrayList<>();
-    if(p.ratios().combined()>=1)warnings.add("The expected combined ratio is 100% or more: claims and expenses absorb the whole premium.");
-    if(m.probabilityOfUnderwritingLoss()!=null&&m.probabilityOfUnderwritingLoss()>.5)warnings.add("An underwriting loss is more likely than not under these assumptions.");
-    if("NONE".equals(a.riskLoadingMethod())&&a.profitMarginRate()==0)warnings.add("With no risk loading and no profit margin, the premium only covers expected costs; losses occur roughly half the time.");
-    if(!m.distribution().available())warnings.add("The full loss distribution is unavailable for this portfolio size; probabilities and quantiles are not shown.");
+    if(p.ratios().combined()>=1)warnings.add("Le ratio combiné attendu atteint 100 % ou plus : sinistres et frais absorbent toute la prime.");
+    if(m.probabilityOfUnderwritingLoss()!=null&&m.probabilityOfUnderwritingLoss()>.5)warnings.add("Sous ces hypothèses, une perte de souscription est plus probable qu'improbable.");
+    if("NONE".equals(a.riskLoadingMethod())&&a.profitMarginRate()==0)warnings.add("Sans chargement de risque ni marge, la prime ne couvre que les coûts attendus ; des pertes surviennent environ une fois sur deux.");
+    if(!m.distribution().available())warnings.add("La distribution complète des pertes est indisponible pour cette taille de portefeuille ; probabilités et quantiles non affichés.");
     var totals=obj("purePremium",money(p.expectedClaims()),"riskLoading",money(p.riskLoading()),"fixedExpenses",money(p.fixedExpenses()),"technicalPremium",money(p.technicalPremium()),"variableExpenses",money(p.variableExpenses()),"profitMargin",money(p.profitMargin()),"grossPremium",money(p.grossPremium()),"expectedUnderwritingResult",money(p.expectedUnderwritingResult()),"claimsBudget",money(p.claimsBudget()));
     var per=obj("purePremium",money(p.expectedClaims()/n),"riskLoading",money(p.riskLoading()/n),"fixedExpenses",money(p.fixedExpenses()/n),"technicalPremium",money(p.technicalPremium()/n),"variableExpenses",money(p.variableExpenses()/n),"profitMargin",money(p.profitMargin()/n),"grossPremium",money(p.grossPremium()/n));
     return obj("provenance",provenance(),"assumptions",a.toJson(),"trendFactor",round(m.trend(),8),"frequency",frequency(m.frequency()),"severity",severity(m.severity(),List.of()),"aggregate",aggregate(m.frequency(),m.severity(),List.of(p.claimsBudget(),p.grossPremium()),m.distribution()),
@@ -62,7 +62,7 @@ final class ActuarialView {
   static Map<String,Object> simulation(Simulation.Output o) {
     var t=o.thresholds();var s=o.statistics();var a=o.analytic();
     var risk=o.risk().stream().map(r->{var e=a.risk().stream().filter(v->v.level()==r.level()).findFirst().orElseThrow();return obj("level",r.level(),"valueAtRisk",money(r.valueAtRisk()),"valueAtRiskInterval",interval(r.valueAtRiskInterval()),"tailValueAtRisk",money(r.tailValueAtRisk()),"tailValueAtRiskInterval",interval(r.tailValueAtRiskInterval()),"exactValueAtRisk",money(e.valueAtRisk()),"exactTailValueAtRisk",money(e.tailValueAtRisk()),"exactWithinInterval",e.valueAtRisk()==null?null:e.valueAtRisk()>=r.valueAtRiskInterval().lower()&&e.valueAtRisk()<=r.valueAtRiskInterval().upper());}).toList();
-    return obj("provenance",obj("kind","SIMULATED","basis","Monte Carlo simulation from user-entered fictional assumptions, seed "+(long)o.seed()+"; rerunning with the same seed reproduces these figures.","modelVersion",Simulation.ENGINE_VERSION,"currency",Presets.CURRENCY),"engineVersion",o.engineVersion(),"rng",o.rng(),"seed",o.seed(),"simulations",o.simulations(),
+    return obj("provenance",obj("kind","SIMULATED","basis","Simulation Monte-Carlo à partir d'hypothèses fictives saisies, graine "+(long)o.seed()+" ; relancer avec la même graine reproduit ces chiffres.","modelVersion",Simulation.ENGINE_VERSION,"currency",Presets.CURRENCY),"engineVersion",o.engineVersion(),"rng",o.rng(),"seed",o.seed(),"simulations",o.simulations(),
       "thresholds",obj("premiumCharged",money(t.premiumCharged()),"premiumSource",t.premiumSource(),"modelGrossPremium",money(t.modelGrossPremium()),"fixedExpenses",money(t.fixedExpenses()),"variableExpenses",money(t.variableExpenses()),"claimsBudget",money(t.claimsBudget()),"initialCapital",money(t.initialCapital()),"capitalThreshold",money(t.capitalThreshold())),
       "claimCount",obj("mean",round(o.claimCount().mean(),4),"analyticMean",round(o.claimCount().analyticMean(),4),"max",o.claimCount().max()),
       "statistics",obj("mean",money(s.mean()),"meanInterval",interval(s.meanInterval()),"sd",money(s.sd()),"median",money(s.median()),"min",money(s.min()),"max",money(s.max()),"skewness",s.skewness()==null?null:round(s.skewness(),4)),"risk",risk,

@@ -32,7 +32,7 @@ export class SignedAmountComponent {
   selector: 'mtr-metric-value',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
-  template: `@if (formatted(); as text) {<ng-container>{{ text }}</ng-container>} @else {<span aria-hidden="true">{{ dash }}</span><span class="tr-unavailable">Not available: {{ metric().unavailableReason ?? 'not enough data yet.' }}</span>}`,
+  template: `@if (formatted(); as text) {<ng-container>{{ text }}</ng-container>} @else {<span aria-hidden="true">{{ dash }}</span><span class="tr-unavailable">Indisponible : {{ metric().unavailableReason ?? 'pas encore assez de données.' }}</span>}`,
 })
 export class MetricValueComponent {
   readonly metric = input.required<Metric>();
@@ -57,7 +57,7 @@ const STATUS_BADGE: Record<TradeOrderStatus, string> = {
   selector: 'span[mtr-order-status]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': "'badge ' + badge()" },
-  template: `{{ label() }}{{ partial() ? ' after partial fill' : '' }}`,
+  template: `{{ label() }}{{ partial() ? ' après exécution partielle' : '' }}`,
 })
 export class OrderStatusBadgeComponent {
   readonly status = input.required<TradeOrderStatus>();
@@ -75,20 +75,20 @@ export class OrderStatusBadgeComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconComponent],
   host: { class: 'tr-provenance' },
-  template: `<svg mtrIcon name="flask" [size]="16" /><span><strong>{{ kind() }}</strong> · {{ provenance().description }} Prices in {{ currency() }}{{ quoted() }}. Virtual money only; nothing here is a real transaction.</span>`,
+  template: `<svg mtrIcon name="flask" [size]="16" /><span><strong>{{ kind() }}</strong> · {{ provenance().description }} Prix en {{ currency() }}{{ quoted() }}. Argent virtuel uniquement ; rien ici n'est une transaction réelle.</span>`,
 })
 export class ProvenanceNoteComponent {
   readonly provenance = input.required<Provenance>();
   readonly asOf = input<string | undefined>(undefined);
   protected readonly kind = computed(() =>
-    this.provenance().kind === 'FICTIONAL' ? 'Fictional simulated prices' : this.provenance().kind,
+    this.provenance().kind === 'FICTIONAL' ? 'Prix simulés fictifs' : this.provenance().kind,
   );
   protected readonly currency = computed(() =>
-    this.provenance().currency === 'TND' ? 'Tunisian dinars (DT)' : this.provenance().currency,
+    this.provenance().currency === 'TND' ? 'dinars tunisiens (DT)' : this.provenance().currency,
   );
   protected readonly quoted = computed(() => {
     const asOf = this.asOf();
-    return asOf ? `, quoted ${dateTime(asOf)}` : '';
+    return asOf ? `, cotés le ${dateTime(asOf)}` : '';
   });
 }
 
@@ -98,7 +98,7 @@ export class ProvenanceNoteComponent {
   host: { style: 'display: contents' },
   template: `
     <label class="tr-picker">
-      <span class="sr-only">Portfolio</span>
+      <span class="sr-only">Portefeuille</span>
       <select class="select" (change)="changed.emit($any($event.target).value)">
         @for (portfolio of portfolios(); track portfolio.id) {
           <option [value]="portfolio.id" [selected]="portfolio.id === activeId()">{{ portfolio.name }} · {{ equity(portfolio) }}</option>

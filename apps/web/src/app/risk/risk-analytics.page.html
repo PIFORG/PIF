@@ -64,44 +64,44 @@
     }
 
     <div class="tr-twoUp">
-      <section mtr-panel heading="Equity history" [description]="detail()?.history?.convention">
+      <section mtr-panel heading="Historique de valeur" [description]="detail()?.history?.convention">
         @if (!detail()) {
           <div mtr-panel-skeleton [rows]="4"></div>
         } @else if (equityChart(); as c) {
           @if (c.enough) {
             <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="twoDecimals" [xLabels]="c.xLabels" [minSpan]="c.minSpan"></figure>
-            <p class="tr-muted">Solid line: equity. Dashed line: money you put in. Drawdown KPIs use a flow-adjusted index from the server.</p>
+            <p class="tr-muted">Trait plein : valeur. Trait pointillé : argent apporté. Les indicateurs de drawdown utilisent un indice ajusté des flux, fourni par le serveur.</p>
           } @else {
-            <div mtr-empty-state icon="clock" heading="History builds up daily" [description]="c.description"></div>
+            <div mtr-empty-state icon="clock" heading="L'historique se construit chaque jour" [description]="c.description"></div>
           }
         }
       </section>
 
-      <section mtr-panel heading="Drawdown (illustrative)" description="Peak-to-trough on raw equity — not the server KPI.">
+      <section mtr-panel heading="Repli (illustratif)" description="Du pic au creux sur la valeur brute — ce n'est pas l'indicateur du serveur.">
         @if (!detail()) {
           <div mtr-panel-skeleton [rows]="4"></div>
         } @else if (drawdownChart(); as d) {
           @if (d.enough) {
             <figure mtr-line-chart [series]="d.series" [summary]="d.summary" [formatY]="plainPct" [xLabels]="d.xLabels" [minSpan]="d.minSpan"></figure>
           } @else {
-            <div mtr-empty-state icon="clock" heading="History builds up daily" description="Needs more than two daily points."></div>
+            <div mtr-empty-state icon="clock" heading="L'historique se construit chaque jour" description="Il faut plus de deux points quotidiens."></div>
           }
         }
       </section>
     </div>
 
     <div class="tr-twoUp">
-      <section mtr-panel heading="Allocation" description="Share of equity at mid prices — where risk is concentrated today.">
+      <section mtr-panel heading="Allocation" description="Part de la valeur aux cours médians — là où le risque se concentre aujourd'hui.">
         @if (analytics(); as a) {
-          <div mtr-allocation-bar label="Allocation by instrument and cash" [items]="allocationItems()"></div>
+          <div mtr-allocation-bar label="Allocation par instrument et espèces" [items]="allocationItems()"></div>
           <div class="table-wrap tr-rows">
             <table class="data-table">
-              <caption class="sr-only">Allocation by instrument</caption>
+              <caption class="sr-only">Allocation par instrument</caption>
               <thead>
                 <tr>
                   <th scope="col">Instrument</th>
-                  <th scope="col" class="num">Value</th>
-                  <th scope="col" class="num">Weight</th>
+                  <th scope="col" class="num">Valeur</th>
+                  <th scope="col" class="num">Poids</th>
                 </tr>
               </thead>
               <tbody>
@@ -113,7 +113,7 @@
                   </tr>
                 }
                 <tr>
-                  <th scope="row">Cash</th>
+                  <th scope="row">Espèces</th>
                   <td class="num">{{ dt(a.allocation.cash.value) }}</td>
                   <td class="num">{{ pct(a.allocation.cash.weight) }}</td>
                 </tr>
@@ -121,20 +121,20 @@
             </table>
           </div>
           @if (assetClassItems().length > 0) {
-            <div mtr-allocation-bar label="Allocation by asset class" [items]="assetClassItems()"></div>
+            <div mtr-allocation-bar label="Allocation par classe d'actifs" [items]="assetClassItems()"></div>
           }
         } @else {
           <div mtr-panel-skeleton [rows]="4"></div>
         }
       </section>
 
-      <section mtr-panel heading="Concentration" description="How much of equity sits in a few names.">
+      <section mtr-panel heading="Concentration" description="Quelle part de la valeur est concentrée sur quelques lignes.">
         @if (analytics(); as a) {
           <dl class="tr-metricGrid">
-            <div mtr-risk-metric-row label="Largest holding" [metric]="a.concentration.largestWeight" [format]="plainPct"></div>
-            <div mtr-risk-metric-row label="Invested share" [metric]="a.concentration.exposure" [format]="plainPct"></div>
-            <div mtr-risk-metric-row label="Herfindahl index (HHI)" [metric]="a.concentration.hhi" [format]="twoDecimals"></div>
-            <div mtr-risk-metric-row label="Effective number of holdings" [metric]="a.concentration.effectiveHoldings" [format]="twoDecimals"></div>
+            <div mtr-risk-metric-row label="Plus grosse ligne" [metric]="a.concentration.largestWeight" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="Part investie" [metric]="a.concentration.exposure" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="Indice de Herfindahl (HHI)" [metric]="a.concentration.hhi" [format]="twoDecimals"></div>
+            <div mtr-risk-metric-row label="Nombre effectif de lignes" [metric]="a.concentration.effectiveHoldings" [format]="twoDecimals"></div>
           </dl>
         } @else {
           <div mtr-panel-skeleton [rows]="4"></div>
@@ -143,15 +143,15 @@
     </div>
 
     @if (analytics()?.riskContributions; as rc) {
-      <section mtr-panel heading="Risk contributions" description="Marginal tail loss by holding when enough history exists.">
+      <section mtr-panel heading="Contributions au risque" description="Part de la perte de queue par ligne, lorsqu'il y a assez d'historique.">
         @if (rc.available && rc.byInstrument.length > 0) {
           <div class="table-wrap tr-rows">
             <table class="data-table">
-              <caption class="sr-only">Risk contributions by instrument</caption>
+              <caption class="sr-only">Contributions au risque par instrument</caption>
               <thead>
                 <tr>
-                  <th scope="col">Symbol</th>
-                  <th scope="col" class="num">Tail loss share</th>
+                  <th scope="col">Symbole</th>
+                  <th scope="col" class="num">Part de la perte de queue</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,7 +165,7 @@
             </table>
           </div>
         } @else {
-          <div mtr-empty-state heading="Contributions unavailable" [description]="rc.unavailableReason ?? 'Not enough aligned history yet.'"></div>
+          <div mtr-empty-state heading="Contributions indisponibles" [description]="rc.unavailableReason ?? 'Pas encore assez d\'historique aligné.'"></div>
         }
       </section>
     }
@@ -173,36 +173,36 @@
     <div class="tr-twoUp">
       <section
         mtr-panel
-        heading="Risk metrics"
+        heading="Indicateurs de risque"
         [description]="analytics() ? 'Simulation historique sur les positions actuelles · ' + analytics()!.risk.observations + ' fenêtres de rendement quotidien' : undefined"
       >
         @if (analytics(); as a) {
           <dl class="tr-metricGrid">
-            <div mtr-risk-metric-row label="1-day VaR (95%)" [metric]="a.risk.valueAtRisk95" [format]="dt"></div>
-            <div mtr-risk-metric-row label="1-day expected shortfall (95%)" [metric]="a.risk.expectedShortfall95" [format]="dt"></div>
-            <div mtr-risk-metric-row label="Holdings volatility (daily)" [metric]="a.risk.holdingsVolatilityDaily" [format]="plainPct"></div>
-            <div mtr-risk-metric-row label="Realized volatility (daily)" [metric]="a.risk.realizedVolatilityDaily" [format]="plainPct"></div>
-            <div mtr-risk-metric-row label="Realized volatility (annualized)" [metric]="a.risk.realizedVolatilityAnnualized" [format]="plainPct"></div>
-            <div mtr-risk-metric-row label="Maximum drawdown" [metric]="a.risk.maxDrawdown" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="VaR 1 jour (95 %)" [metric]="a.risk.valueAtRisk95" [format]="dt"></div>
+            <div mtr-risk-metric-row label="Perte attendue 1 jour (95 %)" [metric]="a.risk.expectedShortfall95" [format]="dt"></div>
+            <div mtr-risk-metric-row label="Volatilité des positions (quotidienne)" [metric]="a.risk.holdingsVolatilityDaily" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="Volatilité réalisée (quotidienne)" [metric]="a.risk.realizedVolatilityDaily" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="Volatilité réalisée (annualisée)" [metric]="a.risk.realizedVolatilityAnnualized" [format]="plainPct"></div>
+            <div mtr-risk-metric-row label="Drawdown maximal" [metric]="a.risk.maxDrawdown" [format]="plainPct"></div>
           </dl>
         } @else {
           <div mtr-panel-skeleton [rows]="6"></div>
         }
       </section>
 
-      <section mtr-panel heading="Stress tests" description="Hypothetical instant shocks to current holdings. Not forecasts.">
+      <section mtr-panel heading="Tests de résistance" description="Chocs instantanés hypothétiques sur les positions actuelles. Ce ne sont pas des prévisions.">
         @if (analytics(); as a) {
           @if (a.stress.length === 0) {
-            <div mtr-empty-state heading="No stress scenarios" description="The server did not return any hypothetical shocks for this portfolio."></div>
+            <div mtr-empty-state heading="Aucun scénario de résistance" description="Le serveur n'a renvoyé aucun choc hypothétique pour ce portefeuille."></div>
           } @else {
             <div class="table-wrap tr-rows">
               <table class="data-table">
-                <caption class="sr-only">Hypothetical stress scenarios</caption>
+                <caption class="sr-only">Scénarios de résistance hypothétiques</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Scenario</th>
+                    <th scope="col">Scénario</th>
                     <th scope="col" class="num">Impact</th>
-                    <th scope="col" class="num">Equity after</th>
+                    <th scope="col" class="num">Valeur après</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -232,43 +232,43 @@
     </div>
 
     <div class="tr-twoUp">
-      <section mtr-panel heading="Methodology and assumptions" description="Aligned with the server Analytics engine.">
+      <section mtr-panel heading="Méthode et hypothèses" description="Aligné sur le moteur d'analyse du serveur.">
         <dl class="tr-reviewRows">
           <div>
-            <dt>Horizon and confidence</dt>
-            <dd>1-day horizon, 95% confidence level.</dd>
+            <dt>Horizon et confiance</dt>
+            <dd>Horizon d'un jour, niveau de confiance de 95 %.</dd>
           </div>
           <div>
-            <dt>VaR and expected shortfall</dt>
+            <dt>VaR et perte attendue</dt>
             <dd>
-              Historical simulation on current holdings: each day replays concurrent instrument returns (up to 250 days). Requires at least 20 aligned daily returns per held
-              instrument. Cash-only portfolios report zero price risk.
+              Simulation historique sur les positions actuelles : chaque jour rejoue les rendements simultanés des instruments (jusqu'à 250 jours). Il faut au moins 20 rendements
+              quotidiens alignés par instrument détenu. Un portefeuille uniquement en espèces indique un risque de prix nul.
             </dd>
           </div>
           <div>
-            <dt>Holdings volatility</dt>
-            <dd>Standard deviation of the simulated daily P&amp;L of current holdings, as a share of equity.</dd>
+            <dt>Volatilité des positions</dt>
+            <dd>Écart-type du résultat quotidien simulé des positions actuelles, en part de la valeur.</dd>
           </div>
           <div>
-            <dt>Realized volatility</dt>
-            <dd>Sample standard deviation of daily portfolio returns with deposits and withdrawals removed; annualized with √365.</dd>
+            <dt>Volatilité réalisée</dt>
+            <dd>Écart-type empirique des rendements quotidiens du portefeuille, dépôts et retraits retirés ; annualisé avec √365.</dd>
           </div>
           <div>
-            <dt>Maximum drawdown</dt>
-            <dd>Largest peak-to-trough fall of the time-weighted value index (flows removed).</dd>
+            <dt>Drawdown maximal</dt>
+            <dd>Plus forte baisse du pic au creux de l'indice de valeur pondéré dans le temps (flux retirés).</dd>
           </div>
           <div>
-            <dt>Data</dt>
-            <dd>Fictional simulated prices only; virtual money. Nothing here is investment advice or a real-market forecast.</dd>
+            <dt>Données</dt>
+            <dd>Prix simulés fictifs uniquement ; argent virtuel. Rien ici n'est un conseil en investissement ni une prévision de marché réel.</dd>
           </div>
           @if (analytics()?.methodology; as m) {
             <div>
-              <dt>Method (server)</dt>
+              <dt>Méthode (serveur)</dt>
               <dd>{{ m.calculationMethod }} · {{ m.horizon }} · {{ m.confidenceLevel * 100 }}% · {{ m.dataPeriod }}</dd>
             </div>
             @for (item of m.limitations; track item) {
               <div>
-                <dt>Limitation</dt>
+                <dt>Limite</dt>
                 <dd>{{ item }}</dd>
               </div>
             }
@@ -276,22 +276,22 @@
         </dl>
       </section>
 
-      <section mtr-panel heading="Pre-trade risk" description="Hypothetical market order — server-side snapshot; the trading desk preview remains authoritative for execution.">
+      <section mtr-panel heading="Risque avant négociation" description="Ordre au marché hypothétique — instantané côté serveur ; l'aperçu de la salle de trading reste la référence pour l'exécution.">
         <p class="tr-muted">
-          Evaluate how a single market order would shift exposure and cash before you trade. For fees, fill assumptions and the live order ticket, use the trading desk.
+          Estimez comment un ordre au marché modifierait l'exposition et les espèces avant de négocier. Pour les frais, les hypothèses d'exécution et le ticket d'ordre, utilisez la salle de trading.
         </p>
         <a routerLink="/trading" class="btn btn-primary">Ouvrir la salle de trading</a>
-        <form class="tr-ticket tr-formRow" (submit)="runPreTrade(); $event.preventDefault()" novalidate aria-label="Pre-trade risk check">
+        <form class="tr-ticket tr-formRow" (submit)="runPreTrade(); $event.preventDefault()" novalidate aria-label="Contrôle de risque avant négociation">
           <div class="field">
-            <label class="field-label" for="pre-symbol">Symbol</label>
+            <label class="field-label" for="pre-symbol">Symbole</label>
             <input id="pre-symbol" class="input" [ngModel]="preSymbol()" (ngModelChange)="preSymbol.set($event)" name="preSymbol" autocomplete="off" />
           </div>
-          <div class="tr-segmented" role="group" aria-label="Side">
+          <div class="tr-segmented" role="group" aria-label="Sens">
             <button type="button" [attr.aria-pressed]="preSide() === 'BUY'" (click)="preSide.set('BUY')">Achat</button>
             <button type="button" [attr.aria-pressed]="preSide() === 'SELL'" (click)="preSide.set('SELL')">Vente</button>
           </div>
           <div class="field">
-            <label class="field-label" for="pre-qty">Quantity</label>
+            <label class="field-label" for="pre-qty">Quantité</label>
             <input id="pre-qty" class="input num" inputmode="numeric" [ngModel]="preQuantity()" (ngModelChange)="preQuantity.set($event)" name="preQuantity" />
           </div>
           @if (preTradeError()) {
@@ -304,16 +304,16 @@
           @if (r.proposed && r.delta) {
             <dl class="tr-reviewRows">
               <div>
-                <dt>Cash after</dt>
-                <dd>{{ dt(r.proposed.cash) }} ({{ signedPct(r.delta.cash) }} vs now)</dd>
+                <dt>Espèces après</dt>
+                <dd>{{ dt(r.proposed.cash) }} ({{ signedPct(r.delta.cash) }} par rapport à maintenant)</dd>
               </div>
               <div>
-                <dt>Exposure after</dt>
+                <dt>Exposition après</dt>
                 <dd>{{ plainPct(r.proposed.exposure) }} ({{ signedPct(r.delta.exposure) }})</dd>
               </div>
               <div>
-                <dt>Largest weight</dt>
-                <dd>{{ plainPct(r.proposed.largestWeight) }} after trade</dd>
+                <dt>Poids le plus élevé</dt>
+                <dd>{{ plainPct(r.proposed.largestWeight) }} après l'opération</dd>
               </div>
             </dl>
           }

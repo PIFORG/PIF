@@ -54,7 +54,7 @@
           <a routerLink="/markets" class="btn btn-ghost btn-sm"><svg mtrIcon name="markets" [size]="14" /> Marchés</a>
           <a routerLink="/trading" class="btn btn-ghost btn-sm"><svg mtrIcon name="trading" [size]="14" /> Trading</a>
           <a routerLink="/portfolios" class="btn btn-ghost btn-sm"><svg mtrIcon name="portfolio" [size]="14" /> Portefeuilles</a>
-          <a routerLink="/learn" class="btn btn-ghost btn-sm"><svg mtrIcon name="academy" [size]="14" /> MarketQuest</a>
+          <a routerLink="/learn" class="btn btn-ghost btn-sm"><svg mtrIcon name="academy" [size]="14" /> Parcours d'apprentissage</a>
         </nav>
       </div>
 
@@ -341,7 +341,7 @@
                     <span class="mono">{{ p.symbol }}</span>
                     <span class="db-muted">{{ p.name }}</span>
                   </td>
-                  <td>{{ p.assetClass }}</td>
+                  <td>{{ sectorLabel(p.assetClass) }}</td>
                   <td class="num">{{ p.quantity }}</td>
                   <td class="num">{{ formatNumber(p.avgPrice) }}</td>
                   <td class="num">{{ formatNumber(p.lastPrice) }}</td>

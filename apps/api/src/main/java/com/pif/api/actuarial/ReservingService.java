@@ -48,7 +48,7 @@ public class ReservingService {
   public Map<String,Object> run(UUID user,UUID id){var values=jdbc.query("SELECT * FROM actuarial_reserving_runs WHERE id=? AND user_id=?",(rs,n)->view(rs,true),id,user);if(values.isEmpty())throw notFound();return values.getFirst();}
   public void deleteRun(UUID user,UUID id){if(jdbc.update("DELETE FROM actuarial_reserving_runs WHERE id=? AND user_id=?",id,user)==0)throw notFound();}
 
-  static Map<String,Object> provenance(){return obj("kind","MODEL_ESTIMATE","currency",Presets.CURRENCY,"modelVersion",Reserving.VERSION,"note","Deterministic best estimates from the triangle and assumptions entered. Undiscounted, without a risk margin; not a regulatory technical provision.");}
+  static Map<String,Object> provenance(){return obj("kind","MODEL_ESTIMATE","currency",Presets.CURRENCY,"modelVersion",Reserving.VERSION,"note","Estimations déterministes « meilleures » à partir du triangle et des hypothèses saisies. Non actualisées, sans marge de risque ; ne constituent pas une provision technique réglementaire.");}
   static Map<String,Object> compute(Reserving.Data data,Reserving.Assumptions assumptions){
     try{return Reserving.analyze(data,assumptions);}
     catch(Reserving.InputError e){throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY,e.code,e.code.equals("FACTOR_UNDEFINED")?com.pif.api.web.Messages.format("actuarial.factor_missing",e.getMessage()):com.pif.api.web.Messages.format("actuarial.invalid_triangle",e.getMessage()));}

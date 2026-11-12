@@ -253,13 +253,13 @@ public class SecurityService {
     boolean isAdmin = "ADMIN".equals(user.role());
     boolean adminMfaEnrollmentRequired = isAdmin && !user.mfaEnabled() && props.adminMfaRequired();
     List<Map<String, Object>> modules = List.of(
-        module("portfolio", "Virtual portfolio", true, true),
-        module("orders", "Order desk", true, true),
-        module("learning", "Learning path", true, true),
-        module("ai", "AI analysis", true, false),
-        module("stress", "Bank stress testing", true, false),
-        module("actuarial", "Actuarial tools", true, true),
-        module("admin", "User administration", isAdmin && !adminMfaEnrollmentRequired, true));
+        module("portfolio", "Portefeuille virtuel", true, true),
+        module("orders", "Salle des ordres", true, true),
+        module("learning", "Parcours pédagogique", true, true),
+        module("ai", "Analyse IA", true, false),
+        module("stress", "Tests de résistance bancaire", true, false),
+        module("actuarial", "Outils actuariels", true, true),
+        module("admin", "Administration des comptes", isAdmin && !adminMfaEnrollmentRequired, true));
     Map<String, Object> capabilities = new LinkedHashMap<>();
     capabilities.put("trading", usable(modules, "orders"));
     capabilities.put("portfolio", usable(modules, "portfolio"));
@@ -273,8 +273,8 @@ public class SecurityService {
     body.put("user", UserJson.serializeWithoutPreferences(user));
     body.put("role", user.role());
     body.put("experienceLevel", user.experienceLevel());
-    body.put("experienceLevelNotice", "Experience level tailors learning content only. It is not an investment "
-        + "suitability assessment or a trading certification.");
+    body.put("experienceLevelNotice", "Le niveau d'expérience sert uniquement à adapter le contenu pédagogique. "
+        + "Ce n'est ni une évaluation d'adéquation à l'investissement ni une certification de trading.");
     body.put("capabilities", capabilities);
     body.put("requiredActions", adminMfaEnrollmentRequired ? List.of("ENROLL_MFA_FOR_ADMIN") : List.of());
     body.put("modules", modules);

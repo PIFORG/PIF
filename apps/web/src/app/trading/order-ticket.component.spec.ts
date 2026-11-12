@@ -126,9 +126,9 @@ describe('OrderTicket', () => {
 
   it('shows field errors instead of calling the server for an invalid quantity', async () => {
     await render();
-    await type('Units', '2.5');
-    await click('Preview order');
-    expect(root.textContent).toContain('Enter a whole number of units, at least 1.');
+    await type('Quantité', '2.5');
+    await click("Aperçu de l'ordre");
+    expect(root.textContent).toContain("Saisissez un nombre entier d'unités, au moins 1.");
     expect(api.preview).not.toHaveBeenCalled();
   });
 
@@ -138,15 +138,15 @@ describe('OrderTicket', () => {
     api.submit.mockResolvedValue(result);
     await render();
 
-    await type('Units', '50');
-    await click('Preview order');
-    expect(root.querySelector('.tr-review h3')?.textContent).toBe('Review: buy 50 CTB · Market');
+    await type('Quantité', '50');
+    await click("Aperçu de l'ordre");
+    expect(root.querySelector('.tr-review h3')?.textContent).toBe('Aperçu : achat 50 CTB · Marché');
     expect(api.preview).toHaveBeenCalledWith('p1', { symbol: 'CTB', side: 'BUY', type: 'MARKET', quantity: 50 });
     const values = Array.from(root.querySelectorAll('.tr-reviewRows dd')).map((dd) => dd.textContent?.trim());
     expect(values).toContain('1,251 DT');
     expect(values).toContain('501,751 DT');
 
-    await click('Confirm buy');
+    await click("Confirmer l'achat");
     expect(fixture.componentInstance.onResult).toHaveBeenCalledWith(result);
     const [, body] = api.submit.mock.calls[0];
     expect(body).toMatchObject({ symbol: 'CTB', quantity: 50, expectedVersion: 3, quoteAsOf: quote.asOf });
@@ -163,11 +163,11 @@ describe('OrderTicket', () => {
       }),
     );
     await render();
-    await type('Units', '200');
-    await click('Preview order');
-    expect(root.querySelector('.tr-review h3')?.textContent).toBe('This order would be rejected');
+    await type('Quantité', '200');
+    await click("Aperçu de l'ordre");
+    expect(root.querySelector('.tr-review h3')?.textContent).toBe('Cet ordre serait rejeté');
     expect(root.textContent).toMatch(/only 1,000.000 DT is available/);
-    expect(button(/Confirm/)).toBeUndefined();
+    expect(button(/Confirmer/)).toBeUndefined();
   });
 
   it('re-previews when the quote moved, keeping the same order reference', async () => {
@@ -177,16 +177,16 @@ describe('OrderTicket', () => {
     api.submit.mockRejectedValueOnce(new ApiError(409, 'The price has moved.', 'QUOTE_CHANGED'));
     await render();
 
-    await type('Units', '50');
-    await click('Preview order');
-    await click('Confirm buy');
+    await type('Quantité', '50');
+    await click("Aperçu de l'ordre");
+    await click("Confirmer l'achat");
 
-    expect(root.textContent).toMatch(/The price moved to a new quote before you confirmed/);
+    expect(root.textContent).toMatch(/Le prix a changé avant votre confirmation/);
     expect(api.preview).toHaveBeenCalledTimes(2);
     expect(fixture.componentInstance.onStale).toHaveBeenCalled();
 
     api.submit.mockResolvedValueOnce({ replayed: false, order: { status: 'FILLED' }, executions: [], evaluation: null, portfolio });
-    await click('Confirm buy');
+    await click("Confirmer l'achat");
     expect(api.submit).toHaveBeenCalledTimes(2);
     expect(api.submit.mock.calls[1][1].clientOrderId).toBe(api.submit.mock.calls[0][1].clientOrderId);
     expect(api.submit.mock.calls[1][1].quoteAsOf).toBe('2026-11-09T10:05:00.000Z');
@@ -194,11 +194,11 @@ describe('OrderTicket', () => {
 
   it('only allows stop orders on the sell side', async () => {
     await render();
-    await click('Stop-loss');
-    await type('Units', '5');
-    await type('Stop price (DT)', '9.5');
-    await click('Preview order');
-    expect(root.textContent).toMatch(/Stop orders are protective sells/);
+    await click('Stop');
+    await type('Quantité', '5');
+    await type('Cours stop (DT)', '9.5');
+    await click("Aperçu de l'ordre");
+    expect(root.textContent).toMatch(/Les ordres stop sont des ventes de protection/);
     expect(api.preview).not.toHaveBeenCalled();
   });
 
@@ -206,7 +206,7 @@ describe('OrderTicket', () => {
     await render();
     fixture.componentInstance.portfolio.set(null);
     await fixture.whenStable();
-    expect(root.textContent).toContain('Create a portfolio to trade');
+    expect(root.textContent).toContain('Créez un portefeuille pour négocier');
     expect(root.querySelector('form')).toBeNull();
   });
 });

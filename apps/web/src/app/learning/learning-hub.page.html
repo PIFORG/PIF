@@ -6,7 +6,7 @@
     [description]="copy.hubDescription"
   >
     <ng-container mtrHeadingActions>
-      <a routerLink="/stories" class="btn btn-secondary"><svg mtrIcon name="stories" [size]="16" /> FinStories</a>
+      <a routerLink="/stories" class="btn btn-secondary"><svg mtrIcon name="stories" [size]="16" /> Histoires financières</a>
       @if (showcase()?.playable) {
         <a [routerLink]="'/learn/missions/' + showcase()!.slug" class="btn btn-primary">{{ showcase()!.title }} <svg mtrIcon name="arrow-right" [size]="16" /></a>
       }
@@ -14,22 +14,22 @@
   </mtr-page-heading>
 
   @if (error()) {
-    <div mtr-empty-state tone="error" heading="Learning data unavailable" [description]="error()">
+    <div mtr-empty-state tone="error" heading="Données d'apprentissage indisponibles" [description]="error()">
       <button mtrEmptyAction type="button" class="btn btn-secondary" (click)="load()">Réessayer</button>
     </div>
   }
 
   <div class="lr-kpis">
-    <div mtr-kpi label="Recommended level" icon="academy" hint="Levels open when you pass the core missions below.">
+    <div mtr-kpi label="Niveau recommandé" icon="academy" hint="Les paliers s'ouvrent lorsque vous réussissez les missions essentielles ci-dessous.">
       {{ profile() ? levelLabel[profile()!.unlockedLevel] : '—' }}
     </div>
-    <div mtr-kpi label="Missions passed" icon="challenge" hint="Playable missions">
+    <div mtr-kpi label="Missions réussies" icon="challenge" hint="Missions jouables">
       {{ profile() ? profile()!.stats.missionsPassed + ' / ' + profile()!.stats.playableMissions : '—' }}
     </div>
-    <div mtr-kpi label="Assessed attempts" icon="xai" hint="Practice replays never count.">
+    <div mtr-kpi label="Tentatives évaluées" icon="xai" hint="Les rejeux d'entraînement ne comptent jamais.">
       {{ profile() ? profile()!.stats.assessedSessions : '—' }}
     </div>
-    <div mtr-kpi label="Confidence calibration" icon="risk" [hint]="calibrationHint()">{{ calibrationValue() }}</div>
+    <div mtr-kpi label="Calibration de la confiance" icon="risk" [hint]="calibrationHint()">{{ calibrationValue() }}</div>
   </div>
 
   <div class="lr-layout">
@@ -40,9 +40,9 @@
             @for (s of profile()!.activeSessions; track s.id) {
               <li class="lr-spread">
                 <span class="lr-small"
-                  ><strong>{{ s.missionTitle }}</strong>{{ s.kind === 'REPLAY' ? ' · Time Machine replay' : '' }} · step {{ s.currentStep }}</span
+                  ><strong>{{ s.missionTitle }}</strong>{{ s.kind === 'REPLAY' ? ' · rejeu' : '' }} · étape {{ s.currentStep }}</span
                 >
-                <a [routerLink]="'/learn/sessions/' + s.id" class="btn btn-primary btn-sm">Resume</a>
+                <a [routerLink]="'/learn/sessions/' + s.id" class="btn btn-primary btn-sm">Reprendre</a>
               </li>
             }
           </ul>
@@ -58,7 +58,7 @@
         @if (!data()) {
           <div mtr-panel-skeleton [rows]="6"></div>
         } @else {
-          <div class="lr-questMap" role="img" aria-label="Progression MarketQuest — trois paliers, dix missions">
+          <div class="lr-questMap" role="img" aria-label="Progression du parcours — trois paliers, dix missions">
             <div class="lr-questAtmosphere" aria-hidden="true"></div>
             <svg class="lr-questGrid" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
@@ -95,7 +95,7 @@
                       @if (!m.playable) {
                         <div class="lr-mission lr-questNode" [attr.data-availability]="m.availability" aria-disabled="true">
                           <ng-container [ngTemplateOutlet]="missionBody" [ngTemplateOutletContext]="{ $implicit: m }" />
-                          <p class="lr-muted">Designed and listed in the catalog; the scenario is not playable yet.</p>
+                          <p class="lr-muted">Conçue et listée au catalogue ; le scénario n'est pas encore jouable.</p>
                         </div>
                       } @else {
                         <a [routerLink]="'/learn/missions/' + m.slug" class="lr-mission lr-questNode" [attr.data-availability]="m.availability">
@@ -116,8 +116,8 @@
       <section
         mtr-panel
         panelId="competencies"
-        heading="Competency profile"
-        description="Built only from assessed missions. Attempts where you asked the mentor count for less and are shown separately."
+        heading="Profil de compétences"
+        description="Construit uniquement à partir des missions évaluées. Les tentatives où vous avez interrogé le mentor comptent moins et sont affichées à part."
       >
         @if (profile(); as p) {
           <div mtr-competency-list [competencies]="p.competencies"></div>
@@ -144,17 +144,17 @@
             }
           </ul>
         } @else {
-          <p class="lr-muted">You have passed every playable mission. Try a Time Machine replay to explore alternatives.</p>
+          <p class="lr-muted">Vous avez réussi toutes les missions jouables. Essayez un rejeu pour explorer d'autres choix.</p>
         }
       </section>
 
       @if (nextStory(); as story) {
-        <section mtr-panel panelId="finstories" heading="FinStories" description="One-minute stories: one decision, two outcomes, one lesson.">
+        <section mtr-panel panelId="finstories" heading="Histoires financières" description="Histoires d'une minute : une décision, deux issues, une leçon.">
           <a routerLink="/stories" [queryParams]="{ story: story.slug }" class="lr-mission">
             <div class="lr-spread">
               <span class="eyebrow">{{ characterName[story.character] }}</span>
               @if (story.recommended) {
-                <span class="badge badge-info">For your weakest skill</span>
+                <span class="badge badge-info">Pour votre compétence la plus faible</span>
               }
             </div>
             <h4>{{ story.title }}</h4>
@@ -167,16 +167,16 @@
       }
 
       @if (profile()?.recentAssessments?.length) {
-        <section mtr-panel panelId="history" heading="Recent results">
+        <section mtr-panel panelId="history" heading="Résultats récents">
           <ul class="lr-list">
             @for (a of profile()!.recentAssessments; track a.sessionId) {
               <li class="lr-spread">
                 <span class="lr-small"
-                  ><strong>{{ a.missionTitle }}</strong><br /><span class="lr-muted">{{ formatDateTime(a.createdAt) }}{{ a.assisted ? ' · with mentor' : '' }}</span></span
+                  ><strong>{{ a.missionTitle }}</strong><br /><span class="lr-muted">{{ formatDateTime(a.createdAt) }}{{ a.assisted ? ' · avec le mentor' : '' }}</span></span
                 >
                 <span class="lr-row">
-                  <span [class]="a.passed ? 'badge badge-active' : 'badge badge-danger'">{{ a.passed ? 'Passed' : 'Not passed' }} · {{ a.total }}</span>
-                  <a [routerLink]="'/learn/sessions/' + a.sessionId + '/review'" class="btn btn-ghost btn-sm">Review</a>
+                  <span [class]="a.passed ? 'badge badge-active' : 'badge badge-danger'">{{ a.passed ? 'Réussie' : 'Non réussie' }} · {{ a.total }}</span>
+                  <a [routerLink]="'/learn/sessions/' + a.sessionId + '/review'" class="btn btn-ghost btn-sm">Bilan</a>
                 </span>
               </li>
             }
@@ -197,15 +197,15 @@
   <div class="lr-missionMeta">
     <span><svg mtrIcon name="clock" [size]="12" /> {{ mission.estimatedMinutes }} min</span>
     @if (mission.progress.passed) {
-      <span class="badge badge-active"><svg mtrIcon name="check" [size]="10" /> Passed · best {{ mission.progress.bestScore }}</span>
+      <span class="badge badge-active"><svg mtrIcon name="check" [size]="10" /> Réussie · meilleur {{ mission.progress.bestScore }}</span>
     } @else if (mission.progress.attempts > 0 && mission.progress.bestScore !== null) {
-      <span class="badge badge-pending">Best score {{ mission.progress.bestScore }}</span>
+      <span class="badge badge-pending">Meilleur score {{ mission.progress.bestScore }}</span>
     }
     @if (mission.progress.activeSessionId) {
-      <span class="badge badge-info">In progress</span>
+      <span class="badge badge-info">En cours</span>
     }
     @if (mission.levelLocked && mission.playable) {
-      <span class="badge badge-muted"><svg mtrIcon name="lock" [size]="10" /> Recommended later</span>
+      <span class="badge badge-muted"><svg mtrIcon name="lock" [size]="10" /> Recommandé plus tard</span>
     }
   </div>
 </ng-template>

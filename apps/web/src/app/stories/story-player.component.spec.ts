@@ -73,7 +73,7 @@ describe('StoryPlayer', () => {
   it('resumes at the saved scene and never asks the viewer to press A or B', async () => {
     const { root } = await renderPlayer();
     expect(root.querySelector('.st-caption')?.textContent).toBe('What would YOU do? A or B?');
-    expect(Array.from(root.querySelectorAll('.st-reel')).map((r) => r.textContent)).toContain('Reel 1 · The decision');
+    expect(Array.from(root.querySelectorAll('.st-reel')).map((r) => r.textContent)).toContain('Épisode 1 · La décision');
     const labels = Array.from(root.querySelectorAll('button')).map((b) => b.getAttribute('aria-label') ?? b.textContent ?? '');
     expect(labels.some((label) => /^(A|B)$|choose/i.test(label.trim()))).toBe(false);
   });
@@ -82,11 +82,11 @@ describe('StoryPlayer', () => {
     const { fixture, root } = await renderPlayer();
     buttonNamed(root, 'Scène suivante').click();
     fixture.detectChanges();
-    expect(root.querySelector('.st-reel')?.textContent).toBe('Reel 2 · If you chose A');
+    expect(root.querySelector('.st-reel')?.textContent).toBe('Épisode 2 · Si vous choisissiez A');
     expect(root.querySelector('.st-reel')?.getAttribute('data-path')).toBe('A');
     buttonNamed(root, 'Scène suivante').click();
     fixture.detectChanges();
-    expect(root.querySelector('.st-reel')?.textContent).toBe("Reel 3 · Let's rewind");
+    expect(root.querySelector('.st-reel')?.textContent).toBe('Épisode 3 · Remontons le temps');
     expect(root.querySelector('.st-rewindTitle')?.textContent).toBe("Let's rewind!");
     buttonNamed(root, 'Scène précédente').click();
     fixture.detectChanges();
@@ -112,7 +112,7 @@ describe('StoryPlayer', () => {
   it('answers the keyboard shortcuts on the player region', async () => {
     const { fixture, root } = await renderPlayer();
     expect(root.getAttribute('role')).toBe('region');
-    expect(root.getAttribute('aria-roledescription')).toBe('story player');
+    expect(root.getAttribute('aria-roledescription')).toBe("lecteur d'histoire");
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
     expect(root.querySelector('.st-caption')?.textContent).toBe('If you chose A: Sarah sells.');

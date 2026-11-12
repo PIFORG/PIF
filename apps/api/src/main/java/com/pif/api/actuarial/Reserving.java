@@ -9,7 +9,7 @@ final class Reserving {
   static final String VERSION="pif-reserving-1.0.0";
   static final List<String> AVERAGES=List.of("VOLUME_WEIGHTED","SIMPLE_AVERAGE","LATEST_DIAGONALS");
   static final List<String> METHODS=List.of("CHAIN_LADDER_PAID","CHAIN_LADDER_INCURRED","EXPECTED_LOSS_RATIO","BORNHUETTER_FERGUSON_PAID","BORNHUETTER_FERGUSON_INCURRED");
-  static final List<String> LABELS=List.of("Chain ladder (paid)","Chain ladder (incurred)","Expected loss ratio","Bornhuetter–Ferguson (paid)","Bornhuetter–Ferguson (incurred)");
+  static final List<String> LABELS=List.of("Chain ladder (paiements)","Chain ladder (survenus)","Ratio sinistres/primes attendu","Bornhuetter–Ferguson (paiements)","Bornhuetter–Ferguson (survenus)");
   static final Map<String,Object> LIMITS=obj("minOrigins",3,"maxOrigins",25,"minFirstOrigin",1950,"maxFirstOrigin",2100,"maxAmount",1e12,"minFactor",.1,"maxFactor",100,"minTail",.5,"maxTail",3,"minLossRatio",.01,"maxLossRatio",5);
   static final class InputError extends RuntimeException { final String code;InputError(String message){this(message,"INVALID_TRIANGLE");}InputError(String message,String code){super(message);this.code=code;} }
   record Data(int firstOrigin,List<List<Double>> paid,List<List<Double>> incurred,List<Double> premiums) { Map<String,Object> json(){return obj("firstOrigin",firstOrigin,"paid",paid,"incurred",incurred,"premiums",premiums);} }

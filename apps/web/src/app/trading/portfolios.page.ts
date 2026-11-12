@@ -17,7 +17,7 @@ import { formatNumber } from '../core/format/finance';
 import { AllocationBarComponent, LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
-import { dateTime, describeTradingError, dt, pct } from './trading-format';
+import { dateTime, describeTradingError, dt, pct, sectorLabel } from './trading-format';
 import {
   CreatePortfolioFormComponent,
   MetricValueComponent,
@@ -185,6 +185,7 @@ export class PortfoliosPage {
   protected readonly message = signal<string | null>(null);
 
   protected readonly dt = dt;
+  protected readonly sectorLabel = sectorLabel;
   protected readonly pct = pct;
   protected readonly dateTime = dateTime;
   protected readonly signedPct = (v: number) => pct(v, true);

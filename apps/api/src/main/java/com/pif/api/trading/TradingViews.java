@@ -5,6 +5,7 @@ import com.pif.api.finance.JsSemantics;
 import com.pif.api.finance.Money;
 import com.pif.api.finance.PreTrade.FeeSchedule;
 import com.pif.api.market.MarketQuote;
+import com.pif.api.market.MarketDisplay;
 import com.pif.api.market.Provenance;
 import com.pif.api.market.SimulatedMarketProvider;
 import com.pif.api.trading.Engine.Evaluation;
@@ -53,6 +54,7 @@ final class TradingViews {
     m.put("name", instrument.name());
     m.put("assetClass", instrument.assetClass());
     m.put("sector", instrument.sector());
+    m.put("sectorLabel", MarketDisplay.sectorLabel(instrument.sector()));
     m.put("currency", instrument.quoteCurrency());
     m.put("status", instrument.status());
     m.put("priceDecimals", instrument.priceDecimals());

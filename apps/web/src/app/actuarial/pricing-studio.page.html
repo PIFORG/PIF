@@ -8,7 +8,7 @@
   <nav mtr-actuarial-tabs></nav>
 
   @if (loadError()) {
-    <div mtr-empty-state tone="error" icon="alert" heading="The pricing studio could not load" [description]="loadError()"></div>
+    <div mtr-empty-state tone="error" icon="alert" heading="Le studio de tarification n'a pas pu se charger" [description]="loadError()"></div>
   } @else {
     <p mtr-estimate-note></p>
     @if (result(); as r) {
@@ -29,11 +29,11 @@
               (changed)="update($event)"
             >
               @if (hasErrors()) {
-                <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to recalculate.
+                <svg mtrIcon name="alert" [size]="14" /> Corrigez les champs signalés pour recalculer.
               } @else if (busy()) {
-                <svg mtrIcon name="refresh" [size]="14" /> Calculating…
+                <svg mtrIcon name="refresh" [size]="14" /> Calcul…
               } @else {
-                <svg mtrIcon name="check" [size]="14" /> Results are up to date.
+                <svg mtrIcon name="check" [size]="14" /> Les résultats sont à jour.
               }
             </form>
           } @else {
@@ -65,7 +65,7 @@
           <mtr-scenarios-panel [form]="form()" (loaded)="loadScenario($event)" />
           <mtr-pricing-formula-panel />
         } @else {
-          <section mtr-panel heading="Results">
+          <section mtr-panel heading="Résultats">
             <div mtr-panel-skeleton [rows]="6"></div>
           </section>
         }

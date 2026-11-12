@@ -1,17 +1,17 @@
 <div class="page-shell lr-briefingShell">
-  <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)"><a routerLink="/learn">MarketQuest</a> / Mission briefing</nav>
+  <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)"><a routerLink="/learn">Parcours d'apprentissage</a> / Briefing de mission</nav>
   <mtr-page-heading
     [eyebrow]="mission() ? levelLabel[mission()!.level] : 'Mission'"
-    [title]="mission()?.title ?? 'Mission briefing'"
+    [title]="mission()?.title ?? 'Briefing de mission'"
     [description]="mission()?.summary"
   >
     @if (mission(); as m) {
       <ng-container mtrHeadingActions>
         <span mtr-availability-badge [availability]="m.availability"></span>
         @if (activeId()) {
-          <a [routerLink]="'/learn/sessions/' + activeId()" class="btn btn-primary">Resume mission <svg mtrIcon name="arrow-right" [size]="16" /></a>
+          <a [routerLink]="'/learn/sessions/' + activeId()" class="btn btn-primary">Reprendre la mission <svg mtrIcon name="arrow-right" [size]="16" /></a>
         } @else {
-          <button type="button" class="btn btn-primary" (click)="start()" [disabled]="starting() || !playable()">{{ starting() ? 'Starting…' : playable() ? 'Start mission' : 'Not playable yet' }}@if (playable() && !starting()) {<svg mtrIcon name="arrow-right" [size]="16" />}</button>
+          <button type="button" class="btn btn-primary" (click)="start()" [disabled]="starting() || !playable()">{{ starting() ? 'Démarrage…' : playable() ? 'Commencer la mission' : 'Pas encore jouable' }}@if (playable() && !starting()) {<svg mtrIcon name="arrow-right" [size]="16" />}</button>
         }
       </ng-container>
     }
@@ -33,15 +33,15 @@
         </section>
 
         <div class="lr-twoUp">
-          <section mtr-panel panelId="start" heading="Starting portfolio">
+          <section mtr-panel panelId="start" heading="Portefeuille de départ">
             <dl class="lr-metricGrid">
               <div>
-                <dt>Cash</dt>
+                <dt>Espèces</dt>
                 <dd>{{ formatDT(m.initialCash, 0) }}</dd>
               </div>
               <div>
-                <dt>Duration</dt>
-                <dd>{{ m.steps }} trading {{ m.stepLabel }}s</dd>
+                <dt>Durée</dt>
+                <dd>{{ durationLabel() }}</dd>
               </div>
               @for (p of positions(); track p.symbol) {
                 <div>
@@ -50,50 +50,50 @@
                 </div>
               }
             </dl>
-            <p class="lr-muted" style="margin-top: var(--space-3)">Tradable: {{ tradable() }}.</p>
+            <p class="lr-muted" style="margin-top: var(--space-3)">Négociables : {{ tradable() }}.</p>
           </section>
 
-          <section mtr-panel panelId="rules" heading="Rules">
+          <section mtr-panel panelId="rules" heading="Règles">
             <ul class="lr-bullets">
               @for (r of m.briefing.rules; track r) {
                 <li>{{ r }}</li>
               }
-              <li>Order types: {{ orderTypes() }}.</li>
-              <li>Commission {{ (m.rules.feeBps / 100).toFixed(2) }} % per fill, minimum {{ formatDT(m.rules.minFee) }}.</li>
+              <li>Types d'ordre : {{ orderTypes() }}.</li>
+              <li>Commission {{ (m.rules.feeBps / 100).toFixed(2) }} % par exécution, minimum {{ formatDT(m.rules.minFee) }}.</li>
               @if (m.rules.maxPositionWeightPct) {
-                <li>Buys above {{ m.rules.maxPositionWeightPct }} % of equity in one asset are rejected.</li>
+                <li>Les achats au-dessus de {{ m.rules.maxPositionWeightPct }} % de la valeur dans un seul actif sont rejetés.</li>
               }
               @if (maxLoss()) {
                 <li>
-                  <strong>The mission ends immediately if you lose {{ maxLoss() }} % of your starting value.</strong>
+                  <strong>La mission s'arrête immédiatement si vous perdez {{ maxLoss() }} % de votre valeur de départ.</strong>
                 </li>
               }
             </ul>
           </section>
         </div>
 
-        <section mtr-panel panelId="objectives" heading="Objectives" description="Required objectives must be met to pass. Optional ones improve your score.">
+        <section mtr-panel panelId="objectives" heading="Objectifs" description="Les objectifs obligatoires doivent être atteints pour réussir. Les facultatifs améliorent le score.">
           <ul class="lr-list">
             @for (o of m.objectives; track o.id) {
               <li class="lr-objective">
                 <span class="lr-objectiveIcon" aria-hidden="true"><svg mtrIcon [name]="o.required ? 'check' : 'info'" [size]="12" /></span>
                 <div>
                   <strong>{{ o.label }}</strong>
-                  <span>{{ o.required ? 'Required' : 'Optional' }}</span>
+                  <span>{{ o.required ? 'Obligatoire' : 'Facultatif' }}</span>
                 </div>
               </li>
             }
           </ul>
         </section>
 
-        <section mtr-panel panelId="outcomes" heading="What you will practise">
+        <section mtr-panel panelId="outcomes" heading="Ce que vous allez pratiquer">
           <ul class="lr-bullets">
             @for (o of m.learningOutcomes; track o) {
               <li>{{ o }}</li>
             }
           </ul>
           @if (m.briefing.tips.length) {
-            <h3 class="eyebrow" style="margin: var(--space-4) 0 var(--space-2)">Tips</h3>
+            <h3 class="eyebrow" style="margin: var(--space-4) 0 var(--space-2)">Conseils</h3>
             <ul class="lr-bullets">
               @for (t of m.briefing.tips; track t) {
                 <li>{{ t }}</li>
@@ -104,7 +104,7 @@
       </div>
 
       <div class="lr-col">
-        <section mtr-panel panelId="scoring" heading="How you are assessed" [description]="scoringDescription()">
+        <section mtr-panel panelId="scoring" heading="Comment vous êtes évalué" [description]="scoringDescription()">
           <div class="lr-stack">
             @for (key of weightKeys; track key) {
               <div class="lr-competency">
@@ -112,21 +112,21 @@
                   <strong>{{ weightLabel[key] }}</strong>
                   <span class="num">{{ m.scoring.weights[key] }} %</span>
                 </div>
-                <div mtr-meter [value]="m.scoring.weights[key]" [label]="weightLabel[key] + ' weight'"></div>
+                <div mtr-meter [value]="m.scoring.weights[key]" [label]="weightLabel[key] + ' · poids'"></div>
               </div>
             }
           </div>
-          <p class="lr-muted" style="margin-top: var(--space-3)">Competencies: {{ competencies() }}.</p>
+          <p class="lr-muted" style="margin-top: var(--space-3)">Compétences : {{ competencies() }}.</p>
         </section>
 
         <section
           mtr-panel
           panelId="mentor"
-          heading="Mentor style"
-          description="The mentor is rule-based (no AI provider is configured). Asking it for help marks the attempt as assisted, which counts for less in your profile."
+          heading="Style du mentor"
+          description="Le mentor repose sur des règles fixes (aucun fournisseur d'IA n'est configuré). Lui demander de l'aide marque la tentative comme assistée, ce qui compte moins dans votre profil."
         >
           <fieldset style="border: 0; padding: 0; margin: 0" [disabled]="!!activeId()">
-            <legend class="sr-only">Mentor style</legend>
+            <legend class="sr-only">Style du mentor</legend>
             <div class="lr-stack">
               @for (mm of mentorModes; track mm.value) {
                 <div class="lr-objective">
@@ -139,7 +139,7 @@
                     (change)="mode.set(mm.value)"
                   />
                   <label [for]="'mentor-mode-' + mm.value" style="cursor: pointer">
-                    <strong>{{ mm.label }}{{ mm.value === m.mentorMode ? ' (default for this mission)' : '' }}</strong>
+                    <strong>{{ mm.label }}{{ mm.value === m.mentorMode ? ' (par défaut pour cette mission)' : '' }}</strong>
                     <span>{{ mm.detail }}</span>
                   </label>
                 </div>
@@ -147,13 +147,13 @@
             </div>
           </fieldset>
           @if (activeId()) {
-            <p class="lr-muted">Your attempt in progress keeps the style you chose when you started.</p>
+            <p class="lr-muted">La tentative en cours conserve le style choisi au démarrage.</p>
           }
         </section>
 
         @if (m.relatedStorySlug) {
-          <section mtr-panel panelId="story" heading="Watch first" description="A one-minute FinStory on the same idea.">
-            <a routerLink="/stories" [queryParams]="{ story: m.relatedStorySlug }" class="btn btn-secondary"><svg mtrIcon name="play" [size]="14" /> Open the FinStory</a>
+          <section mtr-panel panelId="story" heading="À regarder d'abord" description="Une histoire financière d'une minute sur la même idée.">
+            <a routerLink="/stories" [queryParams]="{ story: m.relatedStorySlug }" class="btn btn-secondary"><svg mtrIcon name="play" [size]="14" /> Ouvrir l'histoire</a>
           </section>
         }
 
@@ -161,8 +161,8 @@
       </div>
     </div>
   } @else if (error()) {
-    <div mtr-empty-state tone="error" heading="Mission unavailable" description="Check the link or go back to the mission list.">
-      <a mtrEmptyAction routerLink="/learn" class="btn btn-secondary">Back to MarketQuest</a>
+    <div mtr-empty-state tone="error" heading="Mission indisponible" description="Vérifiez le lien ou retournez à la liste des missions.">
+      <a mtrEmptyAction routerLink="/learn" class="btn btn-secondary">Retour au parcours d'apprentissage</a>
     </div>
   } @else {
     <div mtr-panel-skeleton [rows]="8"></div>

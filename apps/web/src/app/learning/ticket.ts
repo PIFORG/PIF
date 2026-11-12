@@ -20,12 +20,12 @@ const PRICE_PATTERN = /^\d+(\.\d{1,3})?$/;
  */
 export function ticketFormErrors(draft: TicketDraft, rules: { requireConfidence?: boolean }): string[] {
   const errors: string[] = [];
-  if (!draft.symbol) errors.push('Choose an asset.');
-  if (!/^\d+$/.test(draft.quantity) || Number(draft.quantity) < 1) errors.push('Enter a whole number of shares (at least 1).');
-  if (draft.type !== 'MARKET' && (!PRICE_PATTERN.test(draft.price) || Number(draft.price) <= 0)) errors.push('Enter a price with at most 3 decimals.');
-  if (draft.type === 'STOP' && draft.side !== 'SELL') errors.push('Stop orders protect positions you hold, so they can only sell.');
-  if (!draft.rationale) errors.push('Say why you are placing this order.');
-  if (rules.requireConfidence && !draft.confidence) errors.push('Rate how confident you are. This mission asks on every order.');
+  if (!draft.symbol) errors.push('Choisissez un actif.');
+  if (!/^\d+$/.test(draft.quantity) || Number(draft.quantity) < 1) errors.push('Saisissez un nombre entier de titres (au moins 1).');
+  if (draft.type !== 'MARKET' && (!PRICE_PATTERN.test(draft.price) || Number(draft.price) <= 0)) errors.push('Saisissez un cours avec au plus 3 décimales.');
+  if (draft.type === 'STOP' && draft.side !== 'SELL') errors.push('Les ordres stop protègent des positions détenues : ils ne peuvent que vendre.');
+  if (!draft.rationale) errors.push('Indiquez pourquoi vous passez cet ordre.');
+  if (rules.requireConfidence && !draft.confidence) errors.push('Indiquez votre degré de confiance. Cette mission le demande à chaque ordre.');
   return errors;
 }
 

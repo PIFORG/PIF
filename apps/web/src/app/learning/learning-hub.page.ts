@@ -78,10 +78,10 @@ export class LearningHubPage {
   });
   protected readonly calibrationHint = computed(() => {
     const profile = this.profile();
-    if (!profile?.calibration.ratedOrders) return 'Rate your confidence on orders to see it.';
+    if (!profile?.calibration.ratedOrders) return 'Notez votre confiance sur les ordres pour la voir.';
     return profile.calibration.interpretable
-      ? `Brier score over ${profile.calibration.observations} market-adjusted outcomes · lower is better`
-      : `${profile.calibration.observations} of ${profile.calibration.minimumOrders} outcomes needed before this is meaningful`;
+      ? `Score de Brier sur ${profile.calibration.observations} résultats ajustés du marché · plus bas, mieux c'est`
+      : `${profile.calibration.observations} sur ${profile.calibration.minimumOrders} résultats nécessaires avant que ce chiffre ait un sens`;
   });
 
   constructor() {
@@ -96,7 +96,7 @@ export class LearningHubPage {
       if (this.destroyed) return;
       this.data.set({ profile, missions: catalog.missions, stories: feed.stories });
     } catch (err) {
-      if (!this.destroyed) this.error.set(describeApiError(err, 'Could not load your learning profile.'));
+      if (!this.destroyed) this.error.set(describeApiError(err, "Impossible de charger votre profil d'apprentissage."));
     }
   }
 }

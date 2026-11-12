@@ -82,12 +82,12 @@ export interface IndicatorSeriesResponse {
 }
 
 export const BACKTEST_STRATEGIES: { id: BacktestStrategyId; label: string; hint: string }[] = [
-  { id: 'BUY_AND_HOLD', label: 'Buy and hold', hint: 'Equal weight from the first fill onward.' },
-  { id: 'MA_CROSSOVER', label: 'Moving-average crossover', hint: 'Long when SMA(short) > SMA(long) on the first symbol.' },
+  { id: 'BUY_AND_HOLD', label: 'Acheter et conserver', hint: 'Poids égaux à partir de la première exécution.' },
+  { id: 'MA_CROSSOVER', label: 'Croisement de moyennes mobiles', hint: 'Position longue quand la MM courte dépasse la MM longue sur le premier symbole.' },
   {
     id: 'PERIODIC_REBALANCE',
-    label: 'Periodic rebalancing',
-    hint: 'Equal weight, restated every N bars (default 21).',
+    label: 'Rééquilibrage périodique',
+    hint: 'Poids égaux, recalculés toutes les N barres (21 par défaut).',
   },
 ];
 

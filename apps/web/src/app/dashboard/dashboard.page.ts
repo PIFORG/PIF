@@ -22,6 +22,7 @@ import {
 } from '../core/demo/sample-workspace';
 import { describeDevice } from '../core/format/device';
 import { formatDateTime, formatMoney, formatNumber, formatPercent } from '../core/format/finance';
+import { sectorLabel } from '../trading/trading-format';
 import { AccountStatusBadgeComponent } from '../shared/account-status-badge.component';
 import { AllocationBarComponent, LineChartComponent, SparklineComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { IconComponent, type IconName } from '../shared/icon/icon.component';
@@ -38,7 +39,7 @@ export function greetingForHour(date = new Date()): string {
 const MODULE_ROUTES: Record<string, { href: string; icon: IconName; blurb: string; label: string }> = {
   portfolio: { href: '/portfolios', icon: 'portfolio', label: 'Portefeuille virtuel', blurb: 'Portefeuilles virtuels, positions et performance.' },
   orders: { href: '/trading', icon: 'trading', label: 'Salle des ordres', blurb: 'Saisie d\'ordres simulés et historique d\'exécution.' },
-  learning: { href: '/learn', icon: 'academy', label: 'Parcours d\'apprentissage', blurb: 'Missions MarketQuest, profil de compétences et FinStories.' },
+  learning: { href: '/learn', icon: 'academy', label: 'Parcours d\'apprentissage', blurb: 'Missions du parcours, profil de compétences et histoires financières.' },
   ai: { href: '/ai', icon: 'ai', label: 'Analyses IA', blurb: 'Analyses des modèles avec confiance et limites.' },
   stress: { href: '/stress-testing', icon: 'bank', label: 'Tests de résistance bancaire', blurb: 'Scénarios de choc sur un bilan bancaire type.' },
   actuarial: { href: '/actuarial', icon: 'actuarial', label: 'Outils actuariels', blurb: 'Fréquence et sévérité des sinistres, perte agrégée et tarification.' },
@@ -177,7 +178,7 @@ export class SessionsPanelComponent {
   imports: [RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="learning" heading="MarketQuest" description="Intelligence d'apprentissage — missions, compétences et recommandations.">
+    <section mtr-panel panelId="learning" heading="Parcours d'apprentissage" description="Intelligence d'apprentissage — missions, compétences et recommandations.">
       <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
       <a mtrPanelActions routerLink="/learn" class="btn btn-ghost btn-sm">Ouvrir</a>
       @if (error()) {
@@ -208,7 +209,7 @@ export class SessionsPanelComponent {
               <a [routerLink]="'/learn/missions/' + r.slug" class="btn btn-secondary btn-sm">Briefing</a>
             </li>
           }
-          <li class="db-sessionMore">Niveau recommandé : {{ levelLabel[p.unlockedLevel] }} · <a routerLink="/stories">Voir une FinStory</a></li>
+          <li class="db-sessionMore">Niveau recommandé : {{ levelLabel[p.unlockedLevel] }} · <a routerLink="/stories">Voir une histoire financière</a></li>
         </ul>
       } @else {
         <div mtr-panel-skeleton [rows]="3"></div>
@@ -345,6 +346,7 @@ export class DashboardPage {
   }));
   protected readonly currency = SAMPLE_CURRENCY;
   protected readonly formatNumber = formatNumber;
+  protected readonly sectorLabel = sectorLabel;
   protected readonly equity = formatMoney(this.summary.equity, SAMPLE_CURRENCY);
   protected readonly varValue = formatPercent(sampleRisk.var95);
   protected readonly varHint = `Volatilité ${formatPercent(sampleRisk.annualVolatility, { digits: 1 })} · exemple`;
@@ -369,7 +371,7 @@ export class DashboardPage {
         detail:
           'Le niveau d\'expérience adapte uniquement le contenu pédagogique. Ce n\'est ni une évaluation d\'adéquation à l\'investissement, ni une certification de trading.',
         href: '/learn',
-        action: 'Ouvrir MarketQuest',
+        action: "Ouvrir le parcours d'apprentissage",
       });
     }
     for (const mod of ctx.modules.filter((m) => m.permitted && !m.available).slice(0, 2)) {
@@ -422,7 +424,7 @@ export class DashboardPage {
         this.authApi
           .fetchDashboardContext()
           .then((ctx) => !cancelled && this.context.set(ctx))
-          .catch((err) => !cancelled && this.error.set(describeApiError(err, 'Unable to load your workspace.'))),
+          .catch((err) => !cancelled && this.error.set(describeApiError(err, 'Impossible de charger votre espace de travail.'))),
       );
     });
 
@@ -431,6 +433,6 @@ export class DashboardPage {
     this.sessionsApi
       .listSessions()
       .then((list) => !destroyed && this.sessions.set(list))
-      .catch((err) => !destroyed && this.sessionsError.set(describeApiError(err, 'Unable to load your sessions.')));
+      .catch((err) => !destroyed && this.sessionsError.set(describeApiError(err, 'Impossible de charger vos sessions.')));
   }
 }

@@ -3,26 +3,26 @@ import { emptyTicket, termsKey, ticketErrors, toOrderTerms } from './ticket-draf
 describe('order ticket draft', () => {
   it('requires an instrument and a whole positive quantity', () => {
     expect(ticketErrors(emptyTicket())).toMatchObject({
-      symbol: 'Choose an instrument.',
-      quantity: 'Enter a whole number of units, at least 1.',
+      symbol: 'Choisissez un instrument.',
+      quantity: "Saisissez un nombre entier d'unités, au moins 1.",
     });
     expect(ticketErrors({ ...emptyTicket('CTB'), quantity: '1.5' }).quantity).toBeDefined();
     expect(ticketErrors({ ...emptyTicket('CTB'), quantity: '0' }).quantity).toBeDefined();
     expect(ticketErrors({ ...emptyTicket('CTB'), quantity: '25' })).toEqual({});
-    expect(ticketErrors({ ...emptyTicket('CTB'), quantity: '25' }, 10).quantity).toContain('lot size (10)');
+    expect(ticketErrors({ ...emptyTicket('CTB'), quantity: '25' }, 10).quantity).toContain('taille de lot (10)');
   });
 
   it('requires a positive price with at most 3 decimals for limit and stop orders', () => {
     const limit = { ...emptyTicket('CTB'), type: 'LIMIT' as const, quantity: '10' };
-    expect(ticketErrors(limit).limitPrice).toBe('Enter a limit price.');
-    expect(ticketErrors({ ...limit, limitPrice: '42.1234' }).limitPrice).toContain('at most 3 decimals');
+    expect(ticketErrors(limit).limitPrice).toBe('Saisissez un cours limite.');
+    expect(ticketErrors({ ...limit, limitPrice: '42.1234' }).limitPrice).toContain('3 décimales');
     expect(ticketErrors({ ...limit, limitPrice: '0' }).limitPrice).toBeDefined();
     expect(ticketErrors({ ...limit, limitPrice: '42.125' })).toEqual({});
   });
 
   it('allows stops only on sells', () => {
     const stop = { ...emptyTicket('CTB'), type: 'STOP' as const, quantity: '10', stopPrice: '40' };
-    expect(ticketErrors(stop).type).toContain('protective sells');
+    expect(ticketErrors(stop).type).toContain('ventes de protection');
     expect(ticketErrors({ ...stop, side: 'SELL' })).toEqual({});
   });
 

@@ -25,7 +25,7 @@ export interface StoryProgressEvent {
   host: {
     class: 'st-stage st-cinemaStage',
     role: 'region',
-    'aria-roledescription': 'story player',
+    'aria-roledescription': "lecteur d'histoire",
     '[attr.data-character]': 'summary().character',
     '[attr.aria-label]': 'regionLabel()',
     '(keydown)': 'onKeydown($event)',
@@ -43,7 +43,7 @@ export interface StoryProgressEvent {
       @if (reel(); as r) {
         <span class="st-reel" [attr.data-path]="r.path">{{ r.label }}</span>
       } @else {
-        <span class="st-reel">FinStories</span>
+        <span class="st-reel">Histoires financières</span>
       }
       <span class="st-reel">{{ characterName() }}</span>
     </div>
@@ -84,7 +84,7 @@ export interface StoryProgressEvent {
         </p>
         <div class="st-endCard">
           @if (summary().relatedMissionSlug; as mission) {
-            <a [routerLink]="['/learn/missions', mission]" class="btn btn-primary">S'entraîner dans MarketQuest</a>
+            <a [routerLink]="['/learn/missions', mission]" class="btn btn-primary">S'entraîner dans le parcours</a>
           }
           @if (hasNext()) {
             <button type="button" class="btn btn-secondary" (click)="next.emit()">Histoire suivante</button>
@@ -203,7 +203,7 @@ export class StoryPlayerComponent {
   });
   protected readonly characterName = computed(() => CHARACTER_NAME[this.summary().character]);
   protected readonly regionLabel = computed(
-    () => `${this.summary().title}. K to play or pause, arrow keys to move between scenes, M for narration, C for captions.`,
+    () => `${this.summary().title}. K pour lecture ou pause, flèches pour changer de scène, M pour la narration, C pour les sous-titres.`,
   );
 
   constructor() {

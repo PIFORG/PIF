@@ -21,13 +21,13 @@ import type { ReservingForm, ReservingFormErrors } from './reserving-form';
 
 const DASH = '\u2014';
 const RUN_LABEL = /^[\p{L}\p{N} .,'&()%+/–-]{1,80}$/u;
-const BASIS_LABEL: Record<ReservingBasis, string> = { PAID: 'Paid', INCURRED: 'Incurred' };
-const AVERAGE_LABEL: Record<FactorAverage, string> = { VOLUME_WEIGHTED: 'Volume-weighted', SIMPLE_AVERAGE: 'Simple average', LATEST_DIAGONALS: 'Latest years' };
+const BASIS_LABEL: Record<ReservingBasis, string> = { PAID: 'Payés', INCURRED: 'Survenus' };
+const AVERAGE_LABEL: Record<FactorAverage, string> = { VOLUME_WEIGHTED: 'Pondérée par volume', SIMPLE_AVERAGE: 'Moyenne simple', LATEST_DIAGONALS: 'Dernières années' };
 type TriangleView = 'CUMULATIVE' | 'INCREMENTAL' | 'LINK_RATIOS' | 'COMPLETED';
-const VIEW_LABEL: Record<TriangleView, string> = { CUMULATIVE: 'Cumulative', INCREMENTAL: 'Incremental', LINK_RATIOS: 'Link ratios', COMPLETED: 'Completed' };
+const VIEW_LABEL: Record<TriangleView, string> = { CUMULATIVE: 'Cumulés', INCREMENTAL: 'Incrémentaux', LINK_RATIOS: 'Coefficients de passage', COMPLETED: 'Complétés' };
 const BASIS_OPTIONS = [
-  { value: 'PAID', label: 'Paid' },
-  { value: 'INCURRED', label: 'Incurred' },
+  { value: 'PAID', label: 'Payés' },
+  { value: 'INCURRED', label: 'Survenus' },
 ] as const;
 
 export type MethodLabels = { id: ReservingMethod; label: string }[];
@@ -98,20 +98,20 @@ export class TriangleFieldComponent {
   host: { class: 'ac-form', novalidate: '', '(submit)': '$event.preventDefault()' },
   template: `
     <div class="field">
-      <label class="field-label" for="rs-example">Example triangle (fictional)</label>
+      <label class="field-label" for="rs-example">Triangle d'exemple (fictif)</label>
       <select id="rs-example" class="select" (change)="example.emit($any($event.target).value)">
-        <option value="" [selected]="exampleId() === ''">Your own data</option>
+        <option value="" [selected]="exampleId() === ''">Vos propres données</option>
         @for (e of catalogue().examples; track e.id) {
           <option [value]="e.id" [selected]="e.id === exampleId()">{{ e.name }}</option>
         }
       </select>
-      <p class="field-hint">{{ exampleText() ?? 'Edited by you. Pick an example to start again.' }}</p>
+      <p class="field-hint">{{ exampleText() ?? 'Modifié par vous. Choisissez un exemple pour recommencer.' }}</p>
     </div>
     <div
       mtr-number-field
       fieldId="rs-first-origin"
-      label="First accident year"
-      [hint]="catalogue().limits.minOrigins + ' to ' + catalogue().limits.maxOrigins + ' accident years, the latest is the valuation year.'"
+      label="Première année de survenance"
+      [hint]="'De ' + catalogue().limits.minOrigins + ' à ' + catalogue().limits.maxOrigins + ' années de survenance ; la dernière est l\u2019année de valorisation.'"
       [value]="form().firstOrigin"
       [error]="errors()['firstOrigin']"
       (changed)="set('firstOrigin', $event)"
@@ -119,8 +119,8 @@ export class TriangleFieldComponent {
     <div
       mtr-triangle-field
       fieldId="rs-paid"
-      label="Cumulative paid (DT)"
-      hint="One line per accident year, oldest first; amounts by development year separated by spaces, tabs or semicolons. Write a missing amount as -; it is left out, never read as zero."
+      label="Sinistres payés cumulés (DT)"
+      hint="Une ligne par année de survenance, la plus ancienne en premier ; montants par année de développement séparés par espaces, tabulations ou points-virgules. Montant manquant : - (exclu, jamais lu comme zéro)."
       [rows]="lines()"
       [value]="form().paid"
       [error]="errors()['paid']"
@@ -129,8 +129,8 @@ export class TriangleFieldComponent {
     <div
       mtr-triangle-field
       fieldId="rs-incurred"
-      label="Cumulative incurred (DT, optional)"
-      hint="Reported amounts: paid plus case reserves, same layout as paid."
+      label="Survenus cumulés (DT, facultatif)"
+      hint="Montants déclarés : payé + provisions dossier ; même disposition que les payés."
       [rows]="lines()"
       [value]="form().incurred"
       [error]="errors()['incurred']"
@@ -139,8 +139,8 @@ export class TriangleFieldComponent {
     <div
       mtr-triangle-field
       fieldId="rs-premiums"
-      label="Earned premium by accident year (DT, optional)"
-      hint="One amount per accident year, for the expected loss ratio and Bornhuetter–Ferguson methods."
+      label="Primes acquises par année de survenance (DT, facultatif)"
+      hint="Un montant par année de survenance, pour le ratio sinistres/primes attendu et les méthodes Bornhuetter–Ferguson."
       [rows]="2"
       [value]="form().premiums"
       [error]="errors()['premiums']"
@@ -170,13 +170,13 @@ export class ReservingDataFormComponent {
   host: { class: 'ac-form', novalidate: '', 'aria-describedby': 'rs-status', '(submit)': '$event.preventDefault()' },
   template: `
     <fieldset class="ac-fieldset">
-      <legend>Development factors</legend>
-      <div mtr-segmented label="Factor average" [value]="form().average" [options]="averageOptions" (changed)="set('average', $event)"></div>
+      <legend>Facteurs de développement</legend>
+      <div mtr-segmented label="Moyenne des facteurs" [value]="form().average" [options]="averageOptions" (changed)="set('average', $event)"></div>
       @if (form().average === 'LATEST_DIAGONALS') {
         <div
           mtr-number-field
           fieldId="rs-latest"
-          label="Latest calendar years used"
+          label="Dernières années calendaires utilisées"
           [value]="form().latestDiagonals"
           [error]="errors()['latestDiagonals']"
           (changed)="set('latestDiagonals', $event)"
@@ -186,8 +186,8 @@ export class ReservingDataFormComponent {
         <div
           mtr-number-field
           fieldId="rs-tail-paid"
-          label="Paid tail factor"
-          hint="1 = no development after the last year"
+          label="Facteur de queue des paiements"
+          hint="1 = pas de développement après la dernière année"
           [value]="form().tailPaid"
           [error]="errors()['tailPaid']"
           (changed)="set('tailPaid', $event)"
@@ -195,7 +195,7 @@ export class ReservingDataFormComponent {
         <div
           mtr-number-field
           fieldId="rs-tail-incurred"
-          label="Incurred tail factor"
+          label="Facteur de queue des survenus"
           [value]="form().tailIncurred"
           [error]="errors()['tailIncurred']"
           (changed)="set('tailIncurred', $event)"
@@ -203,13 +203,13 @@ export class ReservingDataFormComponent {
       </div>
     </fieldset>
     <fieldset class="ac-fieldset">
-      <legend>Prior estimate</legend>
+      <legend>Estimation a priori</legend>
       <div
         mtr-number-field
         fieldId="rs-loss-ratio"
-        label="Expected loss ratio"
+        label="Ratio sinistres/primes attendu"
         suffix="%"
-        hint="Ultimate claims ÷ earned premium, used by the expected loss ratio and Bornhuetter–Ferguson methods. Leave empty to skip them."
+        hint="Sinistres ultimes ÷ primes acquises ; utilisé par le ratio sinistres/primes attendu et Bornhuetter–Ferguson. Laissez vide pour les ignorer."
         [value]="form().lossRatioPct"
         [error]="errors()['lossRatioPct']"
         (changed)="set('lossRatioPct', $event)"
@@ -242,28 +242,28 @@ export class ReservingAssumptionsComponent {
     @let ibnr = totals?.ibnr ?? null;
     <div class="ac-toolbar" style="margin-bottom: var(--space-3)">
       <div class="field">
-        <label class="field-label" for="rs-method">Method for the headline figures</label>
+        <label class="field-label" for="rs-method">Méthode pour les chiffres clés</label>
         <select id="rs-method" class="select" (change)="methodChange.emit($any($event.target).value)">
           @for (m of results().methods; track m.method) {
-            <option [value]="m.method" [selected]="m.method === method()">{{ label(m.method) }}{{ m.available ? '' : ' (not available)' }}</option>
+            <option [value]="m.method" [selected]="m.method === method()">{{ label(m.method) }}{{ m.available ? '' : ' (indisponible)' }}</option>
           }
         </select>
       </div>
     </div>
     <div class="ac-kpis">
-      <div mtr-kpi label="Paid to date" icon="actuarial" [hint]="results().origins.length + ' accident years to ' + results().valuationYear">
+      <div mtr-kpi label="Payé à ce jour" icon="actuarial" [hint]="results().origins.length + ' années de survenance à ' + results().valuationYear">
         <span class="num">{{ tndShort(t.paid) }}</span>
       </div>
-      <div mtr-kpi label="Case reserves" [hint]="t.incurred === null ? 'Needs an incurred triangle' : 'Reported ' + tndShort(t.incurred) + ' − paid'">
+      <div mtr-kpi label="Provisions dossier" [hint]="t.incurred === null ? 'Nécessite un triangle des survenus' : 'Déclaré ' + tndShort(t.incurred) + ' − payé'">
         <span class="num">{{ t.caseReserve === null ? dash : tndShort(t.caseReserve) }}</span>
       </div>
-      <div mtr-kpi label="Ultimate" [hint]="reason() ?? label(method())">
+      <div mtr-kpi label="Ultime" [hint]="reason() ?? label(method())">
         <span class="num">{{ totals ? tndShort(totals.ultimate) : dash }}</span>
       </div>
-      <div mtr-kpi label="Unpaid" hint="Ultimate − paid = case reserves + IBNR">
+      <div mtr-kpi label="Non payé" hint="Ultime − payé = provisions dossier + IBNR">
         <span class="num">{{ totals ? tndShort(totals.unpaid) : dash }}</span>
       </div>
-      <div mtr-kpi label="IBNR" hint="Ultimate − reported; includes IBNER" [tone]="ibnr !== null && ibnr < 0 ? 'warning' : 'default'">
+      <div mtr-kpi label="IBNR" hint="Ultime − déclaré ; inclut l'IBNER" [tone]="ibnr !== null && ibnr < 0 ? 'warning' : 'default'">
         <span class="num">{{ ibnr === null ? dash : tndShort(ibnr) }}</span>
       </div>
     </div>
@@ -296,8 +296,8 @@ export class ReserveKpisComponent {
   template: `
     @let warnings = results().warnings;
     @let r = results().reconciliation;
-    <section mtr-panel panelId="checks" heading="Data checks" description="What the server found in the triangles and assumptions.">
-      <span mtrPanelBadge [class]="warnings.length > 0 ? 'ac-neg' : 'ac-pos'">{{ warnings.length > 0 ? warnings.length + ' to review' : 'No warnings' }}</span>
+    <section mtr-panel panelId="checks" heading="Contrôles des données" description="Ce que le serveur a trouvé dans les triangles et les hypothèses.">
+      <span mtrPanelBadge [class]="warnings.length > 0 ? 'ac-neg' : 'ac-pos'">{{ warnings.length > 0 ? warnings.length + ' à vérifier' : 'Aucun avertissement' }}</span>
       @if (warnings.length > 0) {
         <ul class="ac-warnings">
           @for (w of warnings; track w.code) {
@@ -305,11 +305,10 @@ export class ReserveKpisComponent {
           }
         </ul>
       } @else {
-        <p class="field-hint">No missing amounts, decreases, negative case reserves or undefined factors were found.</p>
+        <p class="field-hint">Aucun montant manquant, aucune baisse, aucune provision dossier négative ni facteur indéfini.</p>
       }
       <p class="ac-note">
-        {{ r.holds ? 'Reconciled' : 'Not reconciled' }}: for every method and accident year, unpaid = ultimate − paid = case reserve + IBNR, and each total equals the sum of its years (largest
-        relative difference {{ r.maxDifference.toExponential(1) }}).
+        {{ r.holds ? 'Rapproché' : 'Non rapproché' }} : pour chaque méthode et année de survenance, non payé = ultime − payé = provision dossier + IBNR, et chaque total égale la somme de ses années (plus grande différence relative {{ r.maxDifference.toExponential(1) }}).
       </p>
     </section>
   `,
@@ -332,24 +331,24 @@ interface TriangleCell {
   host: { style: 'display: contents' },
   template: `
     @let c = cl();
-    <section mtr-panel panelId="triangle" [heading]="basisLabel[c.basis] + ' triangle'" [description]="description()">
+    <section mtr-panel panelId="triangle" [heading]="'Triangle des ' + basisLabel[c.basis].toLowerCase()" [description]="description()">
       <div class="ac-toolbar" style="margin-bottom: var(--space-3)">
         @if (results().chainLadder.incurred) {
           <div mtr-segmented label="Triangle" [value]="c.basis" [options]="basisOptions" (changed)="basis.set($any($event))"></div>
         }
-        <div mtr-segmented label="Triangle view" [value]="view()" [options]="viewOptions" (changed)="view.set($any($event))"></div>
+        <div mtr-segmented label="Vue du triangle" [value]="view()" [options]="viewOptions" (changed)="view.set($any($event))"></div>
       </div>
       <div class="table-wrap ac-triangle">
         <table class="data-table">
           <caption class="sr-only">{{ caption() }}</caption>
           <thead>
             <tr>
-              <th scope="col">Accident year</th>
+              <th scope="col">Année de survenance</th>
               @for (h of headers(); track $index) {
                 <th scope="col" class="num">{{ h }}</th>
               }
               @if (view() === 'COMPLETED') {
-                <th scope="col" class="num">Ultimate</th>
+                <th scope="col" class="num">Ultime</th>
               }
             </tr>
           </thead>
@@ -373,7 +372,7 @@ interface TriangleCell {
           @if (view() === 'LINK_RATIOS') {
             <tfoot>
               <tr data-total="true">
-                <th scope="row">Selected</th>
+                <th scope="row">Retenu</th>
                 @for (f of c.factors; track f.from) {
                   <td class="num">{{ factor(f.selected) }}</td>
                 }
@@ -398,15 +397,15 @@ export class TrianglePanelComponent {
 
   protected readonly description = computed(() => {
     const view = this.view();
-    if (view === 'COMPLETED') return 'Observed amounts with the future projected by the selected factors (shaded), to the ultimate.';
+    if (view === 'COMPLETED') return 'Montants observés avec le futur projeté par les facteurs retenus (ombré), jusqu\'à l\'ultime.';
     return view === 'LINK_RATIOS'
-      ? 'Individual age-to-age factors C(j+1) ÷ C(j); blank where either amount is missing or the base is zero.'
-      : 'Amounts by accident year (rows) and development year (columns), in dinars.';
+      ? 'Coefficients individuels d\'âge à âge C(j+1) ÷ C(j) ; vide si l\'un des montants manque ou si la base est nulle.'
+      : 'Montants par année de survenance (lignes) et année de développement (colonnes), en dinars.';
   });
 
   protected readonly caption = computed(() => {
     const r = this.results();
-    return `${BASIS_LABEL[this.cl().basis]} triangle, ${VIEW_LABEL[this.view()].toLowerCase()}, accident years ${r.origins[0]} to ${r.valuationYear}`;
+    return `Triangle des ${BASIS_LABEL[this.cl().basis].toLowerCase()}, ${VIEW_LABEL[this.view()].toLowerCase()}, années de survenance ${r.origins[0]} à ${r.valuationYear}`;
   });
 
   private readonly columns = computed(() => {
@@ -433,7 +432,7 @@ export class TrianglePanelComponent {
         if (j >= observed && view !== 'COMPLETED') return { hidden: true, text: '', kind: null, title: null };
         const v = values[i][j];
         const kind = j >= observed ? 'projected' : v === null ? 'missing' : j === observed - 1 ? 'latest' : null;
-        return { hidden: false, text: show(v), kind, title: kind === 'missing' ? 'Missing amount' : kind === 'projected' ? 'Projected' : null };
+        return { hidden: false, text: show(v), kind, title: kind === 'missing' ? 'Montant manquant' : kind === 'projected' ? 'Projeté' : null };
       });
       return { origin, cells, ultimate: amount(cl.origins[i].ultimate) };
     });
@@ -441,7 +440,7 @@ export class TrianglePanelComponent {
 
   protected readonly note = computed(
     () =>
-      `Bold: latest diagonal (the valuation date). ${this.view() === 'COMPLETED' ? `Shaded: projected. Ultimate includes the tail factor ${factor(this.cl().tail)}. ` : ''}A dash marks a missing amount.`,
+      `Gras : dernière diagonale (date de valorisation). ${this.view() === 'COMPLETED' ? `Ombré : projeté. L'ultime inclut le facteur de queue ${factor(this.cl().tail)}. ` : ''}Un tiret indique un montant manquant.`,
   );
 }
 
@@ -453,9 +452,9 @@ export class TrianglePanelComponent {
   template: `
     @let c = cl();
     @let n = results().origins.length;
-    <section mtr-panel panelId="factors" heading="Development factors" [description]="description()">
+    <section mtr-panel panelId="factors" heading="Facteurs de développement" [description]="description()">
       @if (hasSelections()) {
-        <button mtrPanelActions type="button" class="btn btn-ghost btn-sm" (click)="clear.emit(c.basis)">Clear selections</button>
+        <button mtrPanelActions type="button" class="btn btn-ghost btn-sm" (click)="clear.emit(c.basis)">Effacer les sélections</button>
       }
       <div class="ac-toolbar" style="margin-bottom: var(--space-3)">
         @if (results().chainLadder.incurred) {
@@ -464,19 +463,19 @@ export class TrianglePanelComponent {
       </div>
       <div class="table-wrap ac-rows ac-compact">
         <table class="data-table">
-          <caption class="sr-only">{{ basisLabel[c.basis] }} development factors by development period, with cumulative factors to ultimate</caption>
+          <caption class="sr-only">Facteurs de développement {{ basisLabel[c.basis].toLowerCase() }} par période de développement, avec facteurs cumulés à l'ultime</caption>
           <thead>
             <tr>
-              <th scope="col">Years</th>
-              <th scope="col" class="num">Pairs</th>
-              <th scope="col" class="num">Weighted</th>
+              <th scope="col">Années</th>
+              <th scope="col" class="num">Paires</th>
+              <th scope="col" class="num">Pondéré</th>
               <th scope="col" class="num">Simple</th>
               @if (latest()) {
-                <th scope="col" class="num">Latest {{ results().averaging.latestDiagonals }}</th>
+                <th scope="col" class="num">Dernières {{ results().averaging.latestDiagonals }}</th>
               }
-              <th scope="col" class="num">Selected</th>
+              <th scope="col" class="num">Retenu</th>
               <th scope="col" class="num">CDF</th>
-              <th scope="col" class="num">Developed</th>
+              <th scope="col" class="num">Développé</th>
             </tr>
           </thead>
           <tbody>
@@ -484,26 +483,26 @@ export class TrianglePanelComponent {
               @let id = 'rs-factor-' + c.basis.toLowerCase() + '-' + j;
               @let error = errors()[key() + '-' + j];
               <tr>
-                <th scope="row">{{ f.from }} to {{ f.to }}</th>
+                <th scope="row">{{ f.from }} à {{ f.to }}</th>
                 <td class="num">{{ f.pairs }}</td>
                 <td class="num">{{ factor(f.volumeWeighted) }}</td>
                 <td class="num">
                   {{ factor(f.simpleAverage) }}
                   @if (f.min !== null && f.max !== null && f.pairs > 1) {
-                    <span class="ac-hint">{{ factor(f.min) }} to {{ factor(f.max) }}</span>
+                    <span class="ac-hint">{{ factor(f.min) }} à {{ factor(f.max) }}</span>
                   }
                 </td>
                 @if (latest()) {
                   <td class="num">{{ factor(f.latestDiagonals) }}</td>
                 }
                 <td class="num">
-                  <label class="sr-only" [attr.for]="id">Selected {{ basisLabel[c.basis].toLowerCase() }} factor, development years {{ f.from }} to {{ f.to }}</label>
+                  <label class="sr-only" [attr.for]="id">Facteur {{ basisLabel[c.basis].toLowerCase() }} retenu, années de développement {{ f.from }} à {{ f.to }}</label>
                   <input
                     [id]="id"
                     class="input num ac-factorInput"
                     inputmode="decimal"
                     autocomplete="off"
-                    [placeholder]="f.estimated === null ? 'Required' : factor(f.estimated)"
+                    [placeholder]="f.estimated === null ? 'Obligatoire' : factor(f.estimated)"
                     [value]="selections()[j] ?? ''"
                     [attr.aria-invalid]="error ? true : null"
                     [attr.aria-describedby]="error ? id + '-error' : null"
@@ -512,7 +511,7 @@ export class TrianglePanelComponent {
                   @if (error) {
                     <span [id]="id + '-error'" class="field-error" style="display: block">{{ error }}</span>
                   } @else if (f.source === 'SELECTED') {
-                    <span class="ac-hint">Using {{ factor(f.selected) }}</span>
+                    <span class="ac-hint">Retenu : {{ factor(f.selected) }}</span>
                   }
                 </td>
                 <td class="num">{{ factor(c.cdf[j]) }}</td>
@@ -520,7 +519,7 @@ export class TrianglePanelComponent {
               </tr>
             }
             <tr data-total="true">
-              <th scope="row">Tail after {{ n }}</th>
+              <th scope="row">Queue après {{ n }}</th>
               <td [attr.colspan]="latest() ? 4 : 3"></td>
               <td class="num">{{ factor(c.tail) }}</td>
               <td class="num">{{ factor(c.cdf[n - 1]) }}</td>
@@ -530,8 +529,7 @@ export class TrianglePanelComponent {
         </table>
       </div>
       <p class="ac-note">
-        Weighted: Σ C(j+1) ÷ Σ C(j); simple: mean of the link ratios, with their range below. CDF is the cumulative factor to ultimate from that development year: the product of the selected factors
-        that follow and the tail. Missing amounts are left out of every average.
+        Pondéré : Σ C(j+1) ÷ Σ C(j) ; simple : moyenne des coefficients de passage, avec leur plage ci-dessous. La CDF est le facteur cumulé à l'ultime à partir de cette année de développement : le produit des facteurs retenus suivants et de la queue. Les montants manquants sont exclus de chaque moyenne.
       </p>
     </section>
   `,
@@ -554,7 +552,7 @@ export class FactorsPanelComponent {
   protected readonly latest = computed(() => this.results().averaging.method === 'LATEST_DIAGONALS');
   protected readonly description = computed(
     () =>
-      `Estimated age-to-age factors and your selection. The ${AVERAGE_LABEL[this.results().averaging.method].toLowerCase()} estimate is used unless you enter a factor.`,
+      `Coefficients d'âge à âge estimés et votre sélection. L'estimation ${AVERAGE_LABEL[this.results().averaging.method].toLowerCase()} est utilisée sauf si vous saisissez un facteur.`,
   );
 }
 
@@ -565,19 +563,19 @@ export class FactorsPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let r = results().reserves;
-    <section mtr-panel panelId="reserves" heading="Reserves by accident year" description="Each amount counted once: unpaid = case reserves + IBNR. Amounts in dinars.">
+    <section mtr-panel panelId="reserves" heading="Provisions par année de survenance" description="Chaque montant n'est compté qu'une fois : non payé = provisions dossier + IBNR. Montants en dinars.">
       @if (estimate(); as e) {
         <div class="table-wrap ac-rows ac-compact">
           <table class="data-table">
-            <caption class="sr-only">Paid, case reserves, ultimate, unpaid and IBNR by accident year</caption>
+            <caption class="sr-only">Payé, provisions dossier, ultime, non payé et IBNR par année de survenance</caption>
             <thead>
               <tr>
-                <th scope="col">Accident year</th>
-                <th scope="col" class="num">Premium</th>
-                <th scope="col" class="num">Paid</th>
-                <th scope="col" class="num">Case reserve</th>
-                <th scope="col" class="num">Ultimate</th>
-                <th scope="col" class="num">Unpaid</th>
+                <th scope="col">Année de survenance</th>
+                <th scope="col" class="num">Prime</th>
+                <th scope="col" class="num">Payé</th>
+                <th scope="col" class="num">Provision dossier</th>
+                <th scope="col" class="num">Ultime</th>
+                <th scope="col" class="num">Non payé</th>
                 <th scope="col" class="num">IBNR</th>
               </tr>
             </thead>
@@ -607,7 +605,7 @@ export class FactorsPanelComponent {
           </table>
         </div>
       } @else {
-        <div mtr-empty-state icon="info" heading="Method not available" [description]="reason()"></div>
+        <div mtr-empty-state icon="info" heading="Méthode indisponible" [description]="reason()"></div>
       }
     </section>
   `,
@@ -636,17 +634,17 @@ export class ReservesPanelComponent {
     <section
       mtr-panel
       panelId="methods"
-      heading="Method comparison"
-      description="Totals over all accident years. The spread between methods is a first view of estimation uncertainty."
+      heading="Comparaison des méthodes"
+      description="Totaux sur toutes les années de survenance. L'écart entre méthodes donne une première vue de l'incertitude d'estimation."
     >
       <div class="table-wrap ac-rows">
         <table class="data-table">
-          <caption class="sr-only">Total ultimate, unpaid and IBNR by reserving method</caption>
+          <caption class="sr-only">Ultime, non payé et IBNR totaux par méthode de provisionnement</caption>
           <thead>
             <tr>
-              <th scope="col">Method</th>
-              <th scope="col" class="num">Ultimate</th>
-              <th scope="col" class="num">Unpaid</th>
+              <th scope="col">Méthode</th>
+              <th scope="col" class="num">Ultime</th>
+              <th scope="col" class="num">Non payé</th>
               <th scope="col" class="num">IBNR</th>
             </tr>
           </thead>
@@ -695,19 +693,19 @@ export class MethodsPanelComponent {
     <section
       mtr-panel
       panelId="paid-incurred"
-      heading="Paid against incurred"
-      description="Chain ladder ultimates on both bases. A persistent gap points to a change in payment speed or case reserving."
+      heading="Payé contre survenu"
+      description="Ultimes de la chaîne de développement sur les deux bases. Un écart persistant indique un changement de vitesse de règlement ou de provision dossier."
     >
       @if (results().paidVsIncurred; as p) {
         <div class="table-wrap ac-rows ac-compact">
           <table class="data-table">
-            <caption class="sr-only">Paid and incurred chain ladder ultimates by accident year</caption>
+            <caption class="sr-only">Ultimes chaîne de développement payés et survenus par année de survenance</caption>
             <thead>
               <tr>
-                <th scope="col">Year</th>
-                <th scope="col" class="num">Paid CL</th>
-                <th scope="col" class="num">Incurred CL</th>
-                <th scope="col" class="num">Gap</th>
+                <th scope="col">Année</th>
+                <th scope="col" class="num">CD payés</th>
+                <th scope="col" class="num">CD survenus</th>
+                <th scope="col" class="num">Écart</th>
               </tr>
             </thead>
             <tbody>
@@ -729,7 +727,7 @@ export class MethodsPanelComponent {
           </table>
         </div>
       } @else {
-        <div mtr-empty-state icon="info" heading="No incurred triangle" description="Add the incurred triangle to compare the two chain ladders."></div>
+        <div mtr-empty-state icon="info" heading="Pas de triangle des survenus" description="Ajoutez le triangle des sinistres survenus pour comparer les deux chaînes de développement."></div>
       }
     </section>
   `,
@@ -747,7 +745,7 @@ export class PaidIncurredPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let c = chart();
-    <section mtr-panel panelId="curves" heading="Development pattern" description="Expected share of the ultimate reached by each development year, from the selected factors.">
+    <section mtr-panel panelId="curves" heading="Schéma de développement" description="Part attendue de l'ultime atteinte à chaque année de développement, d'après les facteurs retenus.">
       <figure mtr-line-chart [series]="c.series" [formatY]="ratio0" [yMin]="0" [height]="180" [xLabels]="c.xLabels" [summary]="c.summary"></figure>
     </section>
   `,
@@ -758,13 +756,13 @@ export class CurvesPanelComponent {
   protected readonly chart = computed(() => {
     const results = this.results();
     const n = results.origins.length;
-    const series: ChartSeries[] = [{ label: 'Paid, share of ultimate', values: results.chainLadder.paid.percentDeveloped, tone: 'brand' }];
-    if (results.chainLadder.incurred) series.push({ label: 'Incurred, share of ultimate', values: results.chainLadder.incurred.percentDeveloped, tone: 'cyan', dashed: true });
+    const series: ChartSeries[] = [{ label: 'Payés, part de l\'ultime', values: results.chainLadder.paid.percentDeveloped, tone: 'brand' }];
+    if (results.chainLadder.incurred) series.push({ label: 'Survenus, part de l\'ultime', values: results.chainLadder.incurred.percentDeveloped, tone: 'cyan', dashed: true });
     const last = results.chainLadder.paid.percentDeveloped;
     return {
       series,
-      xLabels: ['Year 1', `Year ${n}`] as [string, string],
-      summary: `Paid development from ${ratio(last[0], 0)} of the ultimate in year 1 to ${ratio(last[n - 1], 0)} in year ${n}${results.chainLadder.incurred ? ', with the incurred pattern for comparison' : ''}.`,
+      xLabels: ['Année 1', `Année ${n}`] as [string, string],
+      summary: `Développement des payés de ${ratio(last[0], 0)} de l'ultime en année 1 à ${ratio(last[n - 1], 0)} en année ${n}${results.chainLadder.incurred ? ', avec le profil des survenus pour comparaison' : ''}.`,
     };
   });
 }
@@ -776,15 +774,15 @@ export class CurvesPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let incurred = results().chainLadder.incurred !== null;
-    <section mtr-panel panelId="sensitivity" heading="Sensitivity" [description]="description()">
+    <section mtr-panel panelId="sensitivity" heading="Sensibilité" [description]="description()">
       <div class="table-wrap ac-rows">
         <table class="data-table">
-          <caption class="sr-only">Total unpaid under alternative assumptions and change from the base</caption>
+          <caption class="sr-only">Non payé total sous hypothèses alternatives et variation par rapport au scénario de base</caption>
           <thead>
             <tr>
-              <th scope="col">Scenario</th>
-              <th scope="col" class="num">Unpaid</th>
-              <th scope="col" class="num">Change</th>
+              <th scope="col">Scénario</th>
+              <th scope="col" class="num">Non payé</th>
+              <th scope="col" class="num">Variation</th>
             </tr>
           </thead>
           <tbody>
@@ -803,23 +801,23 @@ export class CurvesPanelComponent {
           </tbody>
         </table>
       </div>
-      <h3 class="ac-subhead">One factor at a time</h3>
+      <h3 class="ac-subhead">Un facteur à la fois</h3>
       <div class="table-wrap ac-rows ac-compact">
         <table class="data-table">
-          <caption class="sr-only">Change in chain ladder total unpaid when one selected factor rises by one percent</caption>
+          <caption class="sr-only">Variation du non payé total de la chaîne de développement lorsqu'un facteur retenu augmente d'un pour cent</caption>
           <thead>
             <tr>
-              <th scope="col">Factor raised by 1%</th>
-              <th scope="col" class="num">Paid CL change</th>
+              <th scope="col">Facteur +1 %</th>
+              <th scope="col" class="num">Variation CD payés</th>
               @if (incurred) {
-                <th scope="col" class="num">Incurred CL change</th>
+                <th scope="col" class="num">Variation CD survenus</th>
               }
             </tr>
           </thead>
           <tbody>
             @for (f of paidFactors(); track f.from; let j = $index) {
               <tr>
-                <th scope="row">{{ f.from }} to {{ f.to }}</th>
+                <th scope="row">{{ f.from }} à {{ f.to }}</th>
                 <td class="num">{{ signed(f.change) }}</td>
                 @if (incurred) {
                   <td class="num">{{ signed(incurredFactors()[j]?.change) }}</td>
@@ -829,7 +827,7 @@ export class CurvesPanelComponent {
           </tbody>
         </table>
       </div>
-      <p class="ac-note">Early factors apply to the youngest accident years, where most of the reserve sits, so their selection usually matters most.</p>
+      <p class="ac-note">Les premiers facteurs s'appliquent aux années de survenance les plus récentes, où se situe l'essentiel de la provision ; leur sélection compte donc le plus souvent le plus.</p>
     </section>
   `,
 })
@@ -843,7 +841,7 @@ export class ReservingSensitivityPanelComponent {
   protected readonly paidFactors = computed(() => this.results().sensitivity.factors.filter((f) => f.basis === 'PAID'));
   protected readonly incurredFactors = computed(() => this.results().sensitivity.factors.filter((f) => f.basis === 'INCURRED'));
   protected readonly description = computed(
-    () => `Total unpaid for ${methodLabel(this.labels(), this.method()).toLowerCase()} when one assumption changes, everything else held.`,
+    () => `Non payé total pour ${methodLabel(this.labels(), this.method()).toLowerCase()} lorsqu'une hypothèse change, le reste inchangé.`,
   );
 }
 
@@ -857,8 +855,8 @@ export class ReservingSensitivityPanelComponent {
     <section
       mtr-panel
       panelId="cash-flows"
-      heading="Expected payments by calendar year"
-      description="Paid chain ladder unpaid amount spread over future years. Undiscounted, before any inflation adjustment: the liability input for asset–liability matching."
+      heading="Paiements attendus par année calendaire"
+      description="Montant non payé de la chaîne de développement payés réparti sur les années futures. Non actualisé, sans ajustement d'inflation : entrée passif pour l'adéquation actif–passif."
     >
       @if (c.periods.length > 0) {
         <figure
@@ -869,17 +867,17 @@ export class ReservingSensitivityPanelComponent {
           [height]="160"
           [formatX]="formatX"
           [formatY]="tndShort"
-          seriesLabel="Expected payments"
+          seriesLabel="Paiements attendus"
           [summary]="summary()"
         ></figure>
       }
       <div class="table-wrap ac-rows" style="margin-top: var(--space-3)">
         <table class="data-table">
-          <caption class="sr-only">Expected claim payments by future calendar year</caption>
+          <caption class="sr-only">Paiements de sinistres attendus par année calendaire future</caption>
           <thead>
             <tr>
-              <th scope="col">Calendar year</th>
-              <th scope="col" class="num">Expected payment</th>
+              <th scope="col">Année calendaire</th>
+              <th scope="col" class="num">Paiement attendu</th>
             </tr>
           </thead>
           <tbody>
@@ -892,14 +890,14 @@ export class ReservingSensitivityPanelComponent {
             @if (c.afterLastDevelopmentYear !== 0) {
               <tr>
                 <th scope="row">
-                  After development year {{ results().origins.length }}
-                  <span class="ac-hint">Tail factor; timing not modelled</span>
+                  Après l'année de développement {{ results().origins.length }}
+                  <span class="ac-hint">Facteur de queue ; calendrier non modélisé</span>
                 </th>
                 <td class="num">{{ tndWhole(c.afterLastDevelopmentYear) }}</td>
               </tr>
             }
             <tr data-total="true">
-              <th scope="row">Total (equals paid chain ladder unpaid)</th>
+              <th scope="row">Total (égal au non payé CD payés)</th>
               <td class="num">{{ tndWhole(c.total) }}</td>
             </tr>
           </tbody>
@@ -917,11 +915,11 @@ export class CashFlowPanelComponent {
     return c.periods[0]?.calendarYear ?? c.valuationYear + 1;
   });
   protected readonly payments = computed(() => this.results().cashFlows.periods.map((p) => p.expectedPayment));
-  protected readonly formatX = (v: number) => (v === this.first() ? `1 Jan ${v}` : `31 Dec ${v - 1}`);
+  protected readonly formatX = (v: number) => (v === this.first() ? `1 janv. ${v}` : `31 déc. ${v - 1}`);
   protected readonly summary = computed(() => {
     const c = this.results().cashFlows;
     const first = this.first();
-    return `Expected payments from ${first} to ${first + c.periods.length - 1}, totalling ${tndWhole(c.total)} with the tail.`;
+    return `Paiements attendus de ${first} à ${first + c.periods.length - 1}, total ${tndWhole(c.total)} avec la queue.`;
   });
 }
 
@@ -933,10 +931,10 @@ export class CashFlowPanelComponent {
   imports: [...WORKSPACE_PRIMITIVES, IconComponent],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="runs" heading="Your reserving runs" [description]="description()">
+    <section mtr-panel panelId="runs" heading="Vos calculs de provisionnement" [description]="description()">
       <form class="ac-saveForm" novalidate (submit)="submit($event)">
         <div class="field">
-          <label class="field-label" for="rs-run-label">Run label</label>
+          <label class="field-label" for="rs-run-label">Libellé du calcul</label>
           <input
             id="rs-run-label"
             class="input"
@@ -1020,11 +1018,11 @@ export class ReservingRunsPanelComponent {
   protected readonly saving = signal(false);
   protected readonly trimmed = computed(() => this.label().trim());
   protected readonly labelError = computed(() =>
-    this.trimmed() !== '' && !RUN_LABEL.test(this.trimmed()) ? "Use letters, digits, spaces and . , ' & ( ) % + / - (at most 80 characters)." : null,
+    this.trimmed() !== '' && !RUN_LABEL.test(this.trimmed()) ? "Utilisez lettres, chiffres, espaces et . , ' & ( ) % + / - (80 caractères au plus)." : null,
   );
   protected readonly dash = DASH;
   protected readonly tndShort = tndShort;
-  protected readonly createdAt = (iso: string) => new Date(iso).toLocaleString('en-GB');
+  protected readonly createdAt = (iso: string) => new Date(iso).toLocaleString('fr-FR');
   protected readonly paidUnpaid = (s: ReservingRunSummary) => s.headline.methods.find((m) => m.method === 'CHAIN_LADDER_PAID')?.unpaid ?? null;
   protected readonly description = computed(() => {
     const kept = this.history()?.kept;
@@ -1042,18 +1040,18 @@ export class ReservingRunsPanelComponent {
 }
 
 const RESERVING_METHOD = [
-  'Paid P        claim payments to date (cumulative)',
-  'Reported I    incurred = paid + case reserves set claim by claim',
-  'Ultimate U    estimated total cost of the accident year',
-  'Unpaid        U − P = case reserves + IBNR      (each amount counted once)',
-  'IBNR          U − I: claims not yet reported plus further development of known claims (IBNER)',
+  'Payé P       paiements de sinistres à ce jour (cumulés)',
+  'Déclaré I    survenu = payé + provisions dossier sinistre par sinistre',
+  'Ultime U     coût total estimé de l\'année de survenance',
+  'Non payé     U − P = provisions dossier + IBNR     (chaque montant compté une fois)',
+  'IBNR         U − I : sinistres pas encore déclarés + développement futur des sinistres connus (IBNER)',
   '',
-  'Link ratio    f(i, j) = C(i, j+1) / C(i, j); missing amounts are left out',
-  'Volume-wtd    f(j) = Σ C(i, j+1) / Σ C(i, j) over years with both amounts',
-  'To ultimate   CDF(j) = f(j) · f(j+1) · … · f(n−1) · tail',
-  'Chain ladder  U = latest amount × CDF at its age',
-  'Exp. loss     U = premium × expected loss ratio',
-  'B–F           U = latest + premium × ELR × (1 − 1 / CDF)',
+  'Coefficient  f(i, j) = C(i, j+1) / C(i, j) ; les montants manquants sont exclus',
+  'Pondéré      f(j) = Σ C(i, j+1) / Σ C(i, j) sur les années avec les deux montants',
+  'À l\'ultime   CDF(j) = f(j) · f(j+1) · … · f(n−1) · queue',
+  'Chaîne dévelop. U = dernier montant × CDF à son âge',
+  'Ratio S/P    U = prime × ratio sinistres/primes attendu',
+  'B–F          U = dernier + prime × RSP × (1 − 1 / CDF)',
 ].join('\n');
 
 @Component({
@@ -1062,13 +1060,13 @@ const RESERVING_METHOD = [
   imports: [...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="method" heading="Definitions and methods">
+    <section mtr-panel panelId="method" heading="Définitions et méthodes">
       <details class="ac-explain">
-        <summary>Show the definitions and formulas</summary>
+        <summary>Afficher les définitions et formules</summary>
         <pre class="ac-formula">{{ method }}</pre>
         <p class="ac-note">
-          Annual triangles only. Best estimates are undiscounted, without inflation adjustment or a risk margin, and carry no measure of variability (Mack or bootstrap are not implemented yet).
-          IBNER is included in IBNR because separating it needs claim-level data.
+          Triangles annuels uniquement. Les meilleures estimations ne sont pas actualisées, sans ajustement d'inflation ni marge de risque, et ne comportent pas de mesure de variabilité (Mack ou bootstrap ne sont pas encore implémentés).
+          L'IBNER est inclus dans l'IBNR car le séparer nécessite des données sinistre par sinistre.
         </p>
       </details>
     </section>

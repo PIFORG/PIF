@@ -47,15 +47,15 @@ public final class TradingRules {
   }
 
   public static final List<StressScenario> STRESS_SCENARIOS = List.of(
-      new StressScenario("equity-crash", "Broad equity crash", "Every equity falls 20 %; the bond fund falls 3 %.",
+      new StressScenario("equity-crash", "Krach actions large", "Toutes les actions baissent de 20 % ; le fonds obligataire de 3 %.",
           i -> equity(i) ? -0.2 : -0.03),
-      new StressScenario("banking-shock", "Banking sector shock",
-          "Banks fall 25 %, other equities 5 %; the bond fund gains 1 % as investors seek safety.",
+      new StressScenario("banking-shock", "Choc du secteur bancaire",
+          "Les banques −25 %, les autres actions −5 % ; le fonds obligataire +1 % (fuite vers la qualité).",
           i -> "Banking".equals(i.sector()) ? -0.25 : equity(i) ? -0.05 : 0.01),
-      new StressScenario("rate-rise", "Interest-rate rise",
-          "The bond fund falls 6 %, utilities 8 %, other equities 3 %.",
+      new StressScenario("rate-rise", "Hausse des taux",
+          "Fonds obligataire −6 %, utilities −8 %, autres actions −3 %.",
           i -> "Fixed income".equals(i.sector()) ? -0.06 : "Utilities".equals(i.sector()) ? -0.08 : -0.03),
-      new StressScenario("tech-selloff", "Technology sell-off",
-          "Technology falls 30 %, telecom 10 %, other equities 2 %; the bond fund is unchanged.",
+      new StressScenario("tech-selloff", "Vente massive technologique",
+          "Technologie −30 %, télécom −10 %, autres actions −2 % ; le fonds obligataire inchangé.",
           i -> "Technology".equals(i.sector()) ? -0.3 : "Telecom".equals(i.sector()) ? -0.1 : equity(i) ? -0.02 : 0));
 }

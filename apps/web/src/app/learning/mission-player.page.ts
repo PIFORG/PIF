@@ -23,6 +23,7 @@ import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.co
 import { IconComponent } from '../shared/icon/icon.component';
 import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
+import { sectorLabel } from '../trading/trading-format';
 import { ObjectiveListComponent, pct } from './learning-parts.components';
 import { MissionTicketComponent } from './mission-ticket.component';
 import { emptyDraft, toCommand, type TicketDraft } from './ticket';
@@ -47,35 +48,35 @@ interface Notice {
   host: { class: 'lr-metricGrid' },
   template: `
     <div>
-      <dt>Max drawdown</dt>
+      <dt>Drawdown max.</dt>
       <dd>{{ pct(state().metrics.maxDrawdownPct) }}</dd>
     </div>
     <div>
-      <dt>Invested</dt>
+      <dt>Investi</dt>
       <dd>{{ pct(state().metrics.exposurePct) }}</dd>
     </div>
     <div>
-      <dt>Largest position</dt>
+      <dt>Plus grosse position</dt>
       <dd>{{ pct(state().metrics.maxWeightPct) }}</dd>
     </div>
     <div>
-      <dt>Effective assets</dt>
+      <dt>Actifs effectifs</dt>
       <dd>{{ state().metrics.effectiveAssets === null ? '—' : state().metrics.effectiveAssets!.toFixed(1) }}</dd>
     </div>
     <div>
-      <dt [attr.title]="varTitle">1-day VaR 95 %</dt>
+      <dt [attr.title]="varTitle">VaR 1 jour 95 %</dt>
       <dd>{{ state().metrics.var95 === null ? '—' : formatDT(state().metrics.var95!, 0) }}</dd>
     </div>
     <div>
-      <dt>Volatility / step</dt>
+      <dt>Volatilité / pas</dt>
       <dd>{{ pct(state().metrics.volatilityPct, 2) }}</dd>
     </div>
     <div>
-      <dt>Fees paid</dt>
+      <dt>Frais payés</dt>
       <dd>{{ formatDT(state().metrics.feesPaid) }}</dd>
     </div>
     <div>
-      <dt>Spread cost</dt>
+      <dt>Coût de l'écart</dt>
       <dd>{{ formatDT(state().metrics.spreadCost) }}</dd>
     </div>
   `,
@@ -84,7 +85,7 @@ export class MissionMetricsComponent {
   readonly state = input.required<SessionState>();
   protected readonly pct = pct;
   protected readonly formatDT = formatDT;
-  protected readonly varTitle = 'One-day 95 % historical value at risk of current holdings';
+  protected readonly varTitle = 'Valeur à risque historique à 1 jour et 95 % des positions actuelles';
 }
 
 /** /learn/sessions/:id: apps/web/src/components/learning/MissionPlayer.tsx */
@@ -129,12 +130,15 @@ export class MissionPlayerPage {
   protected readonly formatDT = formatDT;
   protected readonly formatPrice = (v: number) => v.toFixed(2);
   protected readonly formatEquity = (v: number) => formatNumber(v, 0);
+  protected readonly sectorLabel = sectorLabel;
+  protected readonly lossLimitTitle = "Distance jusqu'à la limite de perte";
 
   protected readonly state = computed(() => this.session()?.state ?? null);
   protected readonly selected = computed(() => this.draft()?.symbol ?? this.state()?.quotes[0]?.symbol ?? '');
   protected readonly ended = computed(() => this.session()?.status !== 'ACTIVE');
   protected readonly disabled = computed(() => this.ended() || this.busy() !== null);
-  protected readonly stepWord = computed(() => (this.state()?.stepLabel === 'day' ? 'Day' : 'Week'));
+  protected readonly stepWord = computed(() => (this.state()?.stepLabel === 'day' ? 'Jour' : 'Semaine'));
+  protected readonly nextStepLabel = computed(() => (this.state()?.stepLabel === 'day' ? 'Jour suivant' : 'Semaine suivante'));
   protected readonly maxLoss = computed(() => this.session()?.mission.failure.find((f) => f.kind === 'MAX_LOSS')?.limitPct);
   protected readonly lossPct = computed(() => {
     const portfolio = this.state()?.portfolio;
@@ -154,15 +158,16 @@ export class MissionPlayerPage {
     const values = history.map((p) => p.mid);
     const position = state.portfolio.positions.find((p) => p.symbol === selected);
     const stop = state.orders.find((o) => o.symbol === selected && o.type === 'STOP' && o.status === 'OPEN');
-    const series: ChartSeries[] = [{ label: `${selected} mid price`, values, tone: 'brand', area: true }];
-    if (position) series.push({ label: 'Your average cost', values: values.map(() => position.averageCost), tone: 'muted', dashed: true });
-    if (stop?.stopPrice) series.push({ label: 'Your stop', values: values.map(() => stop.stopPrice as number), tone: 'cyan', dashed: true });
+    const series: ChartSeries[] = [{ label: `${selected} cours médian`, values, tone: 'brand', area: true }];
+    if (position) series.push({ label: 'Votre coût moyen', values: values.map(() => position.averageCost), tone: 'muted', dashed: true });
+    if (stop?.stopPrice) series.push({ label: 'Votre seuil', values: values.map(() => stop.stopPrice as number), tone: 'cyan', dashed: true });
     const stepWord = this.stepWord();
+    const before = -firstStep;
     return {
       series,
       xCount: state.steps - firstStep + 1,
-      summary: `${selected} mid price from ${-firstStep} ${state.stepLabel}s before the mission to ${stepWord.toLowerCase()} ${state.step}.`,
-      xLabels: [`${-firstStep} ${state.stepLabel}s before`, `${stepWord} ${state.steps}`] as [string, string],
+      summary: `${selected}, cours médian, de ${before} ${this.stepNoun(before)} avant la mission jusqu'au ${stepWord.toLowerCase()} ${state.step}.`,
+      xLabels: [`${before} ${this.stepNoun(before)} avant`, `${stepWord} ${state.steps}`] as [string, string],
     };
   });
 
@@ -171,11 +176,11 @@ export class MissionPlayerPage {
     if (!state) return null;
     const stepWord = this.stepWord();
     return {
-      series: [{ label: 'Equity', values: state.equityCurve.map((p) => p.equity), tone: 'cyan', area: true }] as ChartSeries[],
+      series: [{ label: 'Valeur du portefeuille', values: state.equityCurve.map((p) => p.equity), tone: 'cyan', area: true }] as ChartSeries[],
       xCount: state.steps + 1,
-      summary: `Portfolio value from the start to ${stepWord.toLowerCase()} ${state.step}: now ${formatDT(state.portfolio.equity)}.`,
+      summary: `Valeur du portefeuille du début jusqu'au ${stepWord.toLowerCase()} ${state.step} : ${formatDT(state.portfolio.equity)}.`,
       minSpan: (state.equityCurve[0]?.equity ?? state.portfolio.equity) * 0.04,
-      xLabels: ['Start', `${stepWord} ${state.steps}`] as [string, string],
+      xLabels: ['Début', `${stepWord} ${state.steps}`] as [string, string],
     };
   });
 
@@ -202,7 +207,7 @@ export class MissionPlayerPage {
       this.session.set(next);
       this.draft.update((d) => d ?? emptyDraft(next.state));
     } catch (err) {
-      if (!this.destroyed && id === this.sessionId()) this.loadError.set(describeApiError(err, 'Could not load this mission.'));
+      if (!this.destroyed && id === this.sessionId()) this.loadError.set(describeApiError(err, 'Impossible de charger cette mission.'));
     }
   }
 
@@ -216,9 +221,9 @@ export class MissionPlayerPage {
     } catch (err) {
       if (hasErrorCode(err, 'SEQUENCE_CONFLICT', 'SESSION_CLOSED')) {
         await this.load();
-        this.notice.set({ tone: 'amber', text: `${describeApiError(err, 'This mission changed.')} The latest state is shown.` });
+        this.notice.set({ tone: 'amber', text: `${describeApiError(err, 'Cette mission a changé.')} Le dernier état est affiché.` });
       } else {
-        this.notice.set({ tone: 'neg', text: describeApiError(err, 'That action failed.') });
+        this.notice.set({ tone: 'neg', text: describeApiError(err, 'Cette action a échoué.') });
       }
       return null;
     } finally {
@@ -306,11 +311,38 @@ export class MissionPlayerPage {
   protected orderPrice(o: MissionOrderView): string {
     if (o.averageFillPrice !== null) return o.averageFillPrice.toFixed(3);
     if (o.limitPrice !== null) return `≤ ${o.limitPrice.toFixed(3)}`;
-    if (o.stopPrice !== null) return `stop ${o.stopPrice.toFixed(3)}`;
+    if (o.stopPrice !== null) return `seuil ${o.stopPrice.toFixed(3)}`;
     return '—';
   }
 
+  protected orderTypeWord(type: string): string {
+    if (type === 'MARKET') return 'marché';
+    if (type === 'LIMIT') return 'limite';
+    return 'stop';
+  }
+
+  protected sentimentWord(sentiment: string): string {
+    if (sentiment === 'POSITIVE') return 'positif';
+    if (sentiment === 'NEGATIVE') return 'négatif';
+    if (sentiment === 'NEUTRAL') return 'neutre';
+    return sentiment.toLowerCase();
+  }
+
   protected orderStatus(o: MissionOrderView): string {
-    return o.status.replace('_', ' ').toLowerCase();
+    const labels: Record<string, string> = {
+      OPEN: 'ouvert',
+      FILLED: 'exécuté',
+      PARTIALLY_FILLED: 'partiellement exécuté',
+      CANCELLED: 'annulé',
+      EXPIRED: 'expiré',
+      REJECTED: 'rejeté',
+    };
+    return labels[o.status] ?? o.status.toLowerCase();
+  }
+
+  private stepNoun(count: number): string {
+    const word = this.stepWord().toLowerCase();
+    if (Math.abs(count) <= 1) return word;
+    return word === 'jour' ? 'jours' : 'semaines';
   }
 }

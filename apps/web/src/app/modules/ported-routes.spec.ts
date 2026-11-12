@@ -72,9 +72,9 @@ describe('routes ported from the landing page, FinStories and the module preview
 
   it('renders FinStories inside the workspace shell', async () => {
     const root = await open('/stories?story=x');
-    expect(root.querySelector('h1')?.textContent).toBe('FinStories');
-    expect(root.querySelector('.ws-emptyTitle')?.textContent).toBe('No stories yet');
-    expect(Array.from(root.querySelectorAll('.breadcrumb li')).map((li) => li.textContent)).toEqual(['Apprentissage', 'FinStories']);
-    expect(root.querySelector('a.link[aria-current="page"] .linkLabel')?.textContent).toBe('FinStories');
+    expect(root.querySelector('h1')?.textContent).toBe('Histoires financières');
+    expect(root.querySelector('.ws-emptyTitle')?.textContent).toBe('Aucune histoire pour le moment');
+    expect(Array.from(root.querySelectorAll('.breadcrumb li')).map((li) => li.textContent)).toEqual(['Apprentissage', 'Histoires financières']);
+    expect(root.querySelector('a.link[aria-current="page"] .linkLabel')?.textContent).toBe('Histoires financières');
   });
 });

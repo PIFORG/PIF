@@ -379,25 +379,25 @@ describe('MissionBriefingPage', () => {
   it('shows the briefing, rules, objectives and scoring from the server', async () => {
     const { root } = await render(MissionBriefingPage, { slug: 'protect-your-capital' });
     expect(api['mission']).toHaveBeenCalledWith('protect-your-capital');
-    expect(text(root.querySelector('nav[aria-label="Breadcrumb"]'))).toBe('MarketQuest / Mission briefing');
+    expect(text(root.querySelector('nav[aria-label="Breadcrumb"]'))).toBe("Parcours d'apprentissage / Briefing de mission");
     expect(text(root.querySelector('h1'))).toBe('Protect Your Capital');
     expect(text(root.querySelector('.eyebrow'))).toBe('Trader débutant');
     const start = words(panel(root, 'start'));
-    expect(start).toContain('Cash 9,000 DT');
-    expect(start).toContain('10 trading days');
+    expect(start).toContain('Espèces 9,000 DT');
+    expect(start).toContain('10 jours de bourse');
     expect(start).toContain('Alpha Bank 100 × AAA');
-    expect(start).toContain('Tradable: AAA (Banking), BBB (Telecom).');
+    expect(start).toContain('Négociables : AAA (Secteur bancaire), BBB (Télécoms).');
     const rules = text(panel(root, 'rules'));
-    expect(rules).toContain('Order types: market, limit, stop.');
-    expect(rules).toContain('Commission 0.25 % per fill, minimum 0.50 DT.');
-    expect(rules).toContain('Buys above 40 % of equity in one asset are rejected.');
-    expect(rules).toContain('The mission ends immediately if you lose 15 % of your starting value.');
-    expect(words(panel(root, 'objectives'))).toContain('Protect a position Optional');
-    expect(panel(root, 'scoring')?.querySelector('[role="meter"][aria-label="Risk management weight"]')?.getAttribute('aria-valuenow')).toBe('40');
-    expect(text(panel(root, 'scoring'))).toContain('Competencies: Risk Management, Trading Execution.');
+    expect(rules).toContain("Types d'ordre : marché, limite, stop.");
+    expect(rules).toContain('Commission 0.25 % par exécution, minimum 0.50 DT.');
+    expect(rules).toContain('Les achats au-dessus de 40 % de la valeur dans un seul actif sont rejetés.');
+    expect(rules).toContain("La mission s'arrête immédiatement si vous perdez 15 % de votre valeur de départ.");
+    expect(words(panel(root, 'objectives'))).toContain('Protect a position Facultatif');
+    expect(panel(root, 'scoring')?.querySelector('[role="meter"][aria-label="Gestion du risque · poids"]')?.getAttribute('aria-valuenow')).toBe('40');
+    expect(text(panel(root, 'scoring'))).toContain('Compétences : Gestion du risque, Exécution des ordres.');
     expect(root.querySelector<HTMLInputElement>('#mentor-mode-GUIDED')?.checked).toBe(true);
-    expect(text(root.querySelector('label[for="mentor-mode-GUIDED"]'))).toContain('Guided (default for this mission)');
-    expect(link(root, 'Open the FinStory')?.getAttribute('href')).toBe('/stories?story=sarah-and-the-market-crash');
+    expect(text(root.querySelector('label[for="mentor-mode-GUIDED"]'))).toContain('Guidé (par défaut pour cette mission)');
+    expect(link(root, "Ouvrir l'histoire")?.getAttribute('href')).toBe('/stories?story=sarah-and-the-market-crash');
   });
 
   it('starts the mission with the chosen mentor style and opens the player', async () => {
@@ -405,7 +405,7 @@ describe('MissionBriefingPage', () => {
     const { fixture, root, navigate } = await render(MissionBriefingPage, { slug: 'protect-your-capital' });
     root.querySelector<HTMLInputElement>('#mentor-mode-SOCRATIC')!.dispatchEvent(new Event('change'));
     await fixture.whenStable();
-    button(root, 'Start mission')!.click();
+    button(root, 'Commencer la mission')!.click();
     await settle(fixture);
     expect(api['start']).toHaveBeenCalledWith('protect-your-capital', 'SOCRATIC');
     expect(navigate).toHaveBeenCalledWith('/learn/sessions/new-1');
@@ -414,33 +414,33 @@ describe('MissionBriefingPage', () => {
   it('offers to resume an attempt in progress and locks the mentor style', async () => {
     api['missions'].mockResolvedValue({ unlockedLevel: 'ROOKIE', missions: [summary({ progress: { attempts: 1, passed: false, bestScore: null, activeSessionId: 's-9' } })] });
     const { root } = await render(MissionBriefingPage, { slug: 'protect-your-capital' });
-    expect(link(root, 'Resume mission')?.getAttribute('href')).toBe('/learn/sessions/s-9');
-    expect(button(root, 'Start mission')).toBeUndefined();
+    expect(link(root, 'Reprendre la mission')?.getAttribute('href')).toBe('/learn/sessions/s-9');
+    expect(button(root, 'Commencer la mission')).toBeUndefined();
     expect(root.querySelector<HTMLFieldSetElement>('fieldset')?.disabled).toBe(true);
-    expect(root.textContent).toContain('Your attempt in progress keeps the style you chose when you started.');
+    expect(root.textContent).toContain('La tentative en cours conserve le style choisi au démarrage.');
   });
 
   it('never offers to start a planned mission', async () => {
     api['mission'].mockResolvedValue(briefing({ availability: 'PLANNED' }));
     api['missions'].mockResolvedValue({ unlockedLevel: 'ROOKIE', missions: [summary({ availability: 'PLANNED', playable: false })] });
     const { root } = await render(MissionBriefingPage, { slug: 'protect-your-capital' });
-    expect(button(root, 'Not playable yet')?.disabled).toBe(true);
+    expect(button(root, 'Pas encore jouable')?.disabled).toBe(true);
   });
 
   it('reports load and start failures honestly', async () => {
     api['start'].mockRejectedValue(new ApiError(409, 'Mission locked.'));
     const ok = await render(MissionBriefingPage, { slug: 'protect-your-capital' });
-    button(ok.root, 'Start mission')!.click();
+    button(ok.root, 'Commencer la mission')!.click();
     await settle(ok.fixture);
     expect(text(ok.root.querySelector('.form-error-banner'))).toBe('Mission locked.');
-    expect(button(ok.root, 'Start mission')?.disabled).toBe(false);
+    expect(button(ok.root, 'Commencer la mission')?.disabled).toBe(false);
     TestBed.resetTestingModule();
 
     api['mission'].mockRejectedValue(new ApiError(404, 'Mission not found.'));
     const { root } = await render(MissionBriefingPage, { slug: 'nope' });
     expect(text(root.querySelector('.form-error-banner'))).toBe('Mission not found.');
-    expect(text(root.querySelector('.ws-empty[data-tone="error"]'))).toContain('Mission unavailable');
-    expect(link(root, 'Back to MarketQuest')?.getAttribute('href')).toBe('/learn');
+    expect(text(root.querySelector('.ws-empty[data-tone="error"]'))).toContain('Mission indisponible');
+    expect(link(root, "Retour au parcours d'apprentissage")?.getAttribute('href')).toBe('/learn');
   });
 });
 
@@ -450,24 +450,24 @@ describe('MissionPlayerPage', () => {
   it('shows the market, portfolio, orders, news and objectives up to the current step', async () => {
     const { root } = await render(MissionPlayerPage, { id: 's-1' });
     expect(api['session']).toHaveBeenCalledWith('s-1');
-    const toolbar = root.querySelector('[aria-label="Mission controls"]')!;
-    expect(text(toolbar)).toContain('Day 2 of 10');
+    const toolbar = root.querySelector('[aria-label="Commandes de la mission"]')!;
+    expect(text(toolbar)).toContain('Jour 2 sur 10');
     expect(text(toolbar)).toContain('10,000.00 DT');
-    expect(text(toolbar.querySelector('.badge'))).toBe('Loss limit 15 % · used 0.0 %');
-    expect(root.querySelector('#chart figure svg')?.getAttribute('aria-label')).toBe('AAA mid price from 2 days before the mission to day 2.');
+    expect(text(toolbar.querySelector('.badge'))).toBe('Limite de perte 15 % · utilisé 0.0 %');
+    expect(root.querySelector('#chart figure svg')?.getAttribute('aria-label')).toBe('AAA, cours médian, de 2 jours avant la mission jusqu\'au jour 2.');
     expect(text(panel(root, 'chart')?.querySelector('.ws-panelTitle'))).toBe('AAA · Alpha Bank');
-    expect(text(panel(root, 'chart')?.querySelector('.ch-legend'))).toContain('Your average cost');
+    expect(text(panel(root, 'chart')?.querySelector('.ch-legend'))).toContain('Votre coût moyen');
     expect(root.querySelector('.lr-quoteRow[data-selected="true"]')?.textContent).toContain('AAA');
-    expect(words(panel(root, 'quotes')?.querySelector('tbody tr'))).toContain('AAA Banking 9.990 10.010 20 bp 1,200');
-    expect(text(panel(root, 'positions')?.querySelector('.ws-panelDescription'))).toBe('Cash 9,000.00 DT · reserved for open buys 195.00 DT');
+    expect(words(panel(root, 'quotes')?.querySelector('tbody tr'))).toContain('AAA Secteur bancaire 9.990 10.010 20 bp 1,200');
+    expect(text(panel(root, 'positions')?.querySelector('.ws-panelDescription'))).toBe('Espèces 9,000.00 DT · réservé pour les achats ouverts 195.00 DT');
     const orders = panel(root, 'orders')!.querySelectorAll('tbody tr');
-    expect(words(orders[0])).toContain('Buy 10 BBB · limit 0/10 ≤ 19.500 open Diversify');
+    expect(words(orders[0])).toContain('Achat 10 BBB · limite 0/10 ≤ 19.500 ouvert Diversifier');
     expect(button(orders[0] as HTMLElement, 'Annuler')).toBeDefined();
     expect(button(orders[1] as HTMLElement, 'Annuler')).toBeUndefined();
     expect(root.querySelector('.lr-news[data-fresh="true"]')?.textContent).toContain('Alpha beats forecasts');
-    expect(words(panel(root, 'objectives'))).toContain('Keep drawdown under 8 % On track · Drawdown 1.2 %');
-    expect(words(panel(root, 'risk'))).toContain('1-day VaR 95 % 42 DT');
-    expect(text(panel(root, 'mentor')?.querySelector('.lr-source'))).toBe('Rule-based · no AI provider');
+    expect(words(panel(root, 'objectives'))).toContain('Keep drawdown under 8 % En bonne voie · Drawdown 1.2 %');
+    expect(words(panel(root, 'risk'))).toContain('VaR 1 jour 95 % 42 DT');
+    expect(text(panel(root, 'mentor')?.querySelector('.lr-source'))).toBe('Règles fixes · aucun fournisseur d\'IA');
     expect(root.textContent).toContain('Fictional deterministic scenario.');
   });
 
@@ -481,7 +481,7 @@ describe('MissionPlayerPage', () => {
     });
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
     const ticket = root.querySelector<HTMLFormElement>('form.lr-ticket')!;
-    expect(words(ticket.querySelector('#ticket-preview'))).toContain('Estimated price —');
+    expect(words(ticket.querySelector('#ticket-preview'))).toContain('Cours estimé —');
     setField(root, '#ticket-qty', ' 10 ', 'input');
     setField(root, '#ticket-rationale', 'LONG_TERM_VIEW', 'change');
     await fixture.whenStable();
@@ -490,9 +490,9 @@ describe('MissionPlayerPage', () => {
     await settle(fixture);
     expect(api['previewOrder']).toHaveBeenCalledWith('s-1', { type: 'PLACE_ORDER', symbol: 'AAA', side: 'BUY', orderType: 'MARKET', quantity: 10, rationale: 'LONG_TERM_VIEW' });
     const preview = words(ticket.querySelector('#ticket-preview'));
-    expect(preview).toContain('Estimated price 10.010 DT');
-    expect(preview).toContain('Estimated cost 100.60 DT');
-    expect(preview).toContain('Available cash 8,805.00 DT');
+    expect(preview).toContain('Cours estimé 10.010 DT');
+    expect(preview).toContain('Coût estimé 100.60 DT');
+    expect(preview).toContain('Espèces disponibles 8,805.00 DT');
     expect(ticket.textContent).toContain('Thin depth.');
 
     ticket.dispatchEvent(new Event('submit'));
@@ -514,7 +514,7 @@ describe('MissionPlayerPage', () => {
     ticket.dispatchEvent(new Event('submit'));
     await fixture.whenStable();
     const errors = Array.from(ticket.querySelectorAll('ul.field-error li')).map((li) => li.textContent);
-    expect(errors).toEqual(['Enter a whole number of shares (at least 1).', 'Say why you are placing this order.']);
+    expect(errors).toEqual(['Saisissez un nombre entier de titres (au moins 1).', 'Indiquez pourquoi vous passez cet ordre.']);
     expect(root.querySelector('#ticket-rationale')?.getAttribute('aria-invalid')).toBe('true');
 
     setField(root, '#ticket-qty', '5000', 'input');
@@ -534,38 +534,38 @@ describe('MissionPlayerPage', () => {
     setField(root, '#ticket-rationale', 'DIVERSIFY', 'change');
     await wait(300);
     await settle(fixture);
-    expect(root.textContent).toContain('The order check is unavailable right now.');
+    expect(root.textContent).toContain("La vérification de l'ordre est indisponible pour le moment.");
   });
 
   it('prefills a protective stop from a position', async () => {
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
-    button(panel(root, 'positions')!, 'Protect')!.click();
+    button(panel(root, 'positions')!, 'Protéger')!.click();
     await fixture.whenStable();
     expect(root.querySelector<HTMLSelectElement>('#ticket-type')!.value).toBe('STOP');
     expect(root.querySelector<HTMLInputElement>('#ticket-price')!.value).toBe('9.490');
     expect(root.querySelector<HTMLInputElement>('#ticket-qty')!.value).toBe('100');
     expect(root.querySelector<HTMLSelectElement>('#ticket-rationale')!.value).toBe('LIMIT_DOWNSIDE');
-    expect(button(root.querySelector('form.lr-ticket')!, 'Buy')?.disabled).toBe(true);
-    expect(text(root.querySelector('form.lr-ticket button[type="submit"]'))).toBe('Place sell order');
+    expect(button(root.querySelector('form.lr-ticket')!, 'Acheter')?.disabled).toBe(true);
+    expect(text(root.querySelector('form.lr-ticket button[type="submit"]'))).toBe("Passer l'ordre de vente");
   });
 
   it('advances the market and reloads after a sequence conflict', async () => {
     api['command'].mockResolvedValueOnce({ replayed: false, outcome: 'ACCEPTED', message: 'Day 3.', session: session({ lastSeq: 3 }, { step: 3 }) });
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
-    button(root, /^Next day/)!.click();
+    button(root, /^Jour suivant/)!.click();
     await settle(fixture);
     expect(api['command']).toHaveBeenCalledWith('s-1', expect.objectContaining({ expectedSeq: 2, command: { type: 'ADVANCE' } }));
-    expect(text(root.querySelector('[aria-label="Mission controls"]'))).toContain('Day 3 of 10');
+    expect(text(root.querySelector('[aria-label="Commandes de la mission"]'))).toContain('Jour 3 sur 10');
 
     api['command'].mockRejectedValueOnce(new ApiError(409, 'This mission changed in another tab.', 'SEQUENCE_CONFLICT'));
     api['session'].mockResolvedValue(session({ lastSeq: 5 }, { step: 4 }));
-    button(root, /^Next day/)!.click();
+    button(root, /^Jour suivant/)!.click();
     await settle(fixture);
     expect(api['command']).toHaveBeenLastCalledWith('s-1', expect.objectContaining({ expectedSeq: 3 }));
-    expect(text(root.querySelector('[aria-label="Mission controls"]'))).toContain('Day 4 of 10');
+    expect(text(root.querySelector('[aria-label="Commandes de la mission"]'))).toContain('Jour 4 sur 10');
     const toast = root.querySelector('.lr-toast')!;
     expect(toast.getAttribute('data-tone')).toBe('amber');
-    expect(text(toast)).toBe('This mission changed in another tab. The latest state is shown.');
+    expect(text(toast)).toBe('This mission changed in another tab. Le dernier état est affiché.');
   });
 
   it('asks the rule-based mentor with the chosen style', async () => {
@@ -584,15 +584,15 @@ describe('MissionPlayerPage', () => {
     });
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
     setField(root, '#mentor-mode', 'SOCRATIC', 'change');
-    button(root, 'Ask')!.click();
+    button(root, 'Demander')!.click();
     await settle(fixture);
     expect(api['mentor']).toHaveBeenCalledWith('s-1', 'SOCRATIC');
     const mentor = text(panel(root, 'mentor'));
     expect(mentor).toContain('Rule-based mentor · Concentration');
     expect(mentor).toContain('What happens if Alpha falls 20 %?');
-    expect(mentor).toContain('Based on');
-    expect(mentor).toContain('Mentor used 1 time(s) in this attempt.');
-    expect(text(root.querySelector('[aria-label="Mission controls"]'))).toContain('Assisted');
+    expect(mentor).toContain('Fondé sur');
+    expect(mentor).toContain('Mentor consulté 1 fois dans cette tentative.');
+    expect(text(root.querySelector('[aria-label="Commandes de la mission"]'))).toContain('Assisté');
   });
 
   it('runs a stress test and lists the newest result first', async () => {
@@ -602,32 +602,32 @@ describe('MissionPlayerPage', () => {
     ];
     api['command'].mockResolvedValue({ replayed: false, outcome: 'ACCEPTED', message: 'Stress test run.', session: session({ lastSeq: 3 }, { stressTests: tests }) });
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
-    button(panel(root, 'stress')!, 'Run')!.click();
+    button(panel(root, 'stress')!, 'Lancer')!.click();
     await settle(fixture);
     expect(api['command']).toHaveBeenCalledWith('s-1', expect.objectContaining({ command: { type: 'RUN_STRESS_TEST', scenarioId: 'crash' } }));
     const results = Array.from(panel(root, 'stress')!.querySelectorAll('li.lr-preview')).map(words);
-    expect(results[0]).toContain('Day 2 Estimated impact −200.00 DT (-2.0 %)');
-    expect(results[1]).toContain('Day 1');
+    expect(results[0]).toContain('Jour 2 Impact estimé −200.00 DT (-2.0 %)');
+    expect(results[1]).toContain('Jour 1');
   });
 
   it('abandons only after confirmation and then opens the Time Machine', async () => {
     api['abandon'].mockResolvedValue(session({ status: 'ABANDONED' }));
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
-    button(root, 'Abandon')!.click();
+    button(root, 'Abandonner')!.click();
     await fixture.whenStable();
-    expect(root.textContent).toContain('Abandon this attempt? It will not be assessed.');
-    button(root, 'Keep playing')!.click();
+    expect(root.textContent).toContain('Abandonner cette tentative ? Elle ne sera pas évaluée.');
+    button(root, 'Continuer à jouer')!.click();
     await fixture.whenStable();
-    expect(button(root, 'Yes, abandon')).toBeUndefined();
-    button(root, 'Abandon')!.click();
+    expect(button(root, 'Oui, abandonner')).toBeUndefined();
+    button(root, 'Abandonner')!.click();
     await fixture.whenStable();
-    button(root, 'Yes, abandon')!.click();
+    button(root, 'Oui, abandonner')!.click();
     await settle(fixture);
     expect(api['abandon']).toHaveBeenCalledWith('s-1');
-    expect(text(root.querySelector('.lr-banner'))).toBe('Mission abandoned.');
-    expect(link(root, 'Open the Time Machine')?.getAttribute('href')).toBe('/learn/sessions/s-1/review');
+    expect(text(root.querySelector('.lr-banner'))).toBe('Mission abandonnée.');
+    expect(link(root, 'Ouvrir la machine à remonter le temps')?.getAttribute('href')).toBe('/learn/sessions/s-1/review');
     expect(root.querySelector<HTMLButtonElement>('form.lr-ticket button[type="submit"]')?.disabled).toBe(true);
-    expect(text(panel(root, 'ticket')?.querySelector('.ws-panelDescription'))).toBe('This mission has ended.');
+    expect(text(panel(root, 'ticket')?.querySelector('.ws-panelDescription'))).toBe('Cette mission est terminée.');
   });
 
   it('shows the finish step when the market has closed and the result once completed', async () => {
@@ -639,24 +639,24 @@ describe('MissionPlayerPage', () => {
       session: session({ status: 'COMPLETED', lastSeq: 3 }, { marketClosed: true, step: 10, status: 'COMPLETED' }),
     });
     const { fixture, root } = await render(MissionPlayerPage, { id: 's-1' });
-    expect(root.textContent).toContain('The market has closed for this mission.');
-    expect(link(root, 'Order ticket')).toBeUndefined();
-    button(root, 'Finish and get assessed')!.click();
+    expect(root.textContent).toContain('Le marché est clos pour cette mission.');
+    expect(link(root, "Ticket d'ordre")).toBeUndefined();
+    button(root, 'Terminer et obtenir le bilan')!.click();
     await settle(fixture);
     expect(api['command']).toHaveBeenCalledWith('s-1', expect.objectContaining({ command: { type: 'FINISH' } }));
     const banner = root.querySelector('.lr-banner')!;
     expect(banner.getAttribute('data-tone')).toBe('pos');
-    expect(text(banner)).toBe('Mission complete. Your decisions have been assessed.');
-    expect(link(root, 'See your assessment')?.getAttribute('href')).toBe('/learn/sessions/s-1/review');
+    expect(text(banner)).toBe('Mission terminée. Vos décisions ont été évaluées.');
+    expect(link(root, 'Voir votre bilan')?.getAttribute('href')).toBe('/learn/sessions/s-1/review');
   });
 
   it('shows an error state when the session cannot be loaded', async () => {
     api['session'].mockRejectedValue(new ApiError(404, 'Session not found.'));
     const { root } = await render(MissionPlayerPage, { id: 'missing' });
     const empty = root.querySelector('.ws-empty[data-tone="error"]');
-    expect(text(empty)).toContain('Mission unavailable');
+    expect(text(empty)).toContain('Mission indisponible');
     expect(text(empty)).toContain('Session not found.');
-    expect(link(root, 'Back to MarketQuest')?.getAttribute('href')).toBe('/learn');
+    expect(link(root, "Retour au parcours d'apprentissage")?.getAttribute('href')).toBe('/learn');
   });
 });
 
@@ -670,25 +670,25 @@ describe('SessionReviewPage', () => {
   it('explains the assessment with evidence, objectives, competencies and calibration', async () => {
     const { root } = await render(SessionReviewPage, { id: 's-1' });
     expect(api['assessment']).toHaveBeenCalledWith('s-1');
-    expect(text(root.querySelector('nav[aria-label="Breadcrumb"]'))).toBe('MarketQuest / Protect Your Capital / Review');
+    expect(text(root.querySelector('nav[aria-label="Breadcrumb"]'))).toBe("Parcours d'apprentissage / Protect Your Capital / Bilan");
     const score = root.querySelector('.ws-kpi')!;
     expect(score.getAttribute('data-tone')).toBe('positive');
-    expect(text(score.querySelector('.ws-kpiValue'))).toBe('72Passed');
-    expect(text(score.querySelector('.ws-kpiHint'))).toBe('Pass mark 60');
-    expect(text(root.querySelectorAll('.ws-kpi')[3].querySelector('.ws-kpiValue'))).toBe('2 hint(s)');
-    const risk = root.querySelector('section[aria-label="Risk management"]')!;
-    expect(text(risk.querySelector('.num'))).toBe('80 / 100 · weight 50 % (configured 40 %)');
+    expect(text(score.querySelector('.ws-kpiValue'))).toBe('72Réussie');
+    expect(text(score.querySelector('.ws-kpiHint'))).toBe('Seuil de réussite 60');
+    expect(text(root.querySelectorAll('.ws-kpi')[3].querySelector('.ws-kpiValue'))).toBe('2 aide(s)');
+    const risk = root.querySelector('section[aria-label="Gestion du risque"]')!;
+    expect(text(risk.querySelector('.num'))).toBe('80 / 100 · poids 50 % (configuré 40 %)');
     expect(text(risk.querySelector('li'))).toBe('Drawdown (82): Max drawdown 3.1 %.');
-    expect(text(root.querySelector('section[aria-label="Reasoning"] .num'))).toBe('Not judged · weight 0 % (configured 20 %)');
-    expect(text(panel(root, 'objectives'))).toContain('Met · Drawdown 3.1 %');
-    expect(words(panel(root, 'competency-evidence'))).toContain('Trading Execution 65');
-    expect(words(panel(root, 'competency-evidence'))).toContain('Market Understanding Not observed');
-    expect(text(panel(root, 'improvements'))).toContain('Nothing major to improve.');
+    expect(text(root.querySelector('section[aria-label="Raisonnement"] .num'))).toBe('Non jugé · poids 0 % (configuré 20 %)');
+    expect(text(panel(root, 'objectives'))).toContain('Atteint · Drawdown 3.1 %');
+    expect(words(panel(root, 'competency-evidence'))).toContain('Exécution des ordres 65');
+    expect(words(panel(root, 'competency-evidence'))).toContain('Compréhension des marchés Non observé');
+    expect(text(panel(root, 'improvements'))).toContain('Rien de majeur à améliorer.');
     const calibration = words(panel(root, 'calibration'));
-    expect(calibration).toContain('Average confidence 70 %');
-    expect(calibration).toContain('Beat the market by the end 67 %');
-    expect(calibration).toContain('Brier score 0.210');
-    expect(calibration).toContain('3 outcome(s) compared. At least 10 are needed');
+    expect(calibration).toContain('Confiance moyenne 70 %');
+    expect(calibration).toContain('A battu le marché à la fin 67 %');
+    expect(calibration).toContain('Score de Brier 0.210');
+    expect(calibration).toContain('3 résultat(s) comparé(s). Il en faut au moins 10');
     expect(calibration).toContain('You rated two orders 90 % sure.');
   });
 
@@ -698,11 +698,11 @@ describe('SessionReviewPage', () => {
       session: session({ status: 'COMPLETED' }),
     });
     const { fixture, root } = await render(SessionReviewPage, { id: 's-1' });
-    button(root, 'Show debrief')!.click();
+    button(root, 'Afficher le débriefing')!.click();
     await settle(fixture);
     expect(api['mentor']).toHaveBeenCalledWith('s-1', 'DEBRIEF');
     expect(words(panel(root, 'debrief'))).toContain('Rule-based debrief · Risk You kept losses small.');
-    expect(button(root, 'Show debrief')).toBeUndefined();
+    expect(button(root, 'Afficher le débriefing')).toBeUndefined();
   });
 
   it('lists decisions without mentor requests and rewinds with "do nothing more" into a comparison', async () => {
@@ -710,17 +710,17 @@ describe('SessionReviewPage', () => {
     const { fixture, root } = await render(SessionReviewPage, { id: 's-1' });
     const items = Array.from(root.querySelectorAll('.lr-timeline li'));
     expect(items.map((li) => words(li))).toEqual([
-      'Day 0 · BUY 100 AAA market · Long-term view #1',
-      'Day 1 · SELL 500 AAA market · Take profit · rejected #3',
-      'Day 1 · Advance #4',
+      'Jour 0 · BUY 100 AAA market · Vision long terme #1',
+      'Jour 1 · SELL 500 AAA market · Prendre des bénéfices · rejeté #3',
+      'Jour 1 · Advance #4',
     ]);
     expect(items[1].getAttribute('data-outcome')).toBe('REJECTED');
-    expect(button(root, /Select a decision to rewind/)?.disabled).toBe(true);
+    expect(button(root, /Sélectionnez une décision pour remonter/)?.disabled).toBe(true);
 
     items[1].querySelector<HTMLInputElement>('input[type="radio"]')!.dispatchEvent(new Event('change'));
     await fixture.whenStable();
     expect(items[1].getAttribute('data-selected')).toBe('true');
-    button(root, /Rewind to decision #3/)!.click();
+    button(root, /Remonter à la décision n° 3/)!.click();
     await settle(fixture);
     expect(api['branch']).toHaveBeenCalledWith('s-1', 3, 'HOLD');
     expect(api['session']).toHaveBeenCalledTimes(2);
@@ -728,10 +728,10 @@ describe('SessionReviewPage', () => {
     expect(api['compare']).toHaveBeenCalledWith('s-1', 'r-3');
     const compare = panel(root, 'comparison')!;
     const cells = Array.from(compare.querySelectorAll('[role="row"]')).map((row) => Array.from(row.children).map(text));
-    expect(cells[0]).toEqual(['Measure', 'Original attempt', 'Replay from decision 3']);
-    expect(cells[2]).toEqual(['Score', '72 · passed', 'Not assessed']);
-    expect(cells[3]).toEqual(['Final value', '10,250.00 DT', '9,800.00 DT']);
-    expect(text(compare.querySelector('p.lr-muted'))).toBe('The paths split at decision 3. Replays use exactly the same market path.');
+    expect(cells[0]).toEqual(['Mesure', 'Tentative initiale', 'Rejeu depuis la décision 3']);
+    expect(cells[2]).toEqual(['Note', '72 · réussie', 'Non évaluée']);
+    expect(cells[3]).toEqual(['Valeur finale', '10,250.00 DT', '9,800.00 DT']);
+    expect(text(compare.querySelector('p.lr-muted'))).toBe('Les trajectoires divergent à la décision 3. Replays use exactly the same market path.');
   });
 
   it('opens the player when replaying manually', async () => {
@@ -740,7 +740,7 @@ describe('SessionReviewPage', () => {
     root.querySelector<HTMLInputElement>('.lr-timeline input[value="1"]')!.dispatchEvent(new Event('change'));
     setField(root, '#branch-strategy', 'MANUAL', 'change');
     await fixture.whenStable();
-    button(root, /Rewind to decision #1/)!.click();
+    button(root, /Remonter à la décision n° 1/)!.click();
     await settle(fixture);
     expect(api['branch']).toHaveBeenCalledWith('s-1', 1, 'MANUAL');
     expect(navigate).toHaveBeenCalledWith('/learn/sessions/r-9');
@@ -750,11 +750,11 @@ describe('SessionReviewPage', () => {
   it('lists existing replays with continue and compare actions', async () => {
     const { fixture, root } = await render(SessionReviewPage, { id: 's-1' });
     const replays = Array.from(root.querySelectorAll('#time-machine .lr-spread'));
-    expect(text(replays[0])).toContain('From decision #1 · active');
-    expect(link(replays[0], 'Continue')?.getAttribute('href')).toBe('/learn/sessions/r-1');
-    expect(text(replays[1])).toContain('From decision #3 · completed · score 65');
-    expect(link(replays[1], 'Continue')).toBeUndefined();
-    button(replays[1] as HTMLElement, 'Compare')!.click();
+    expect(text(replays[0])).toContain('Depuis la décision n° 1 · en cours');
+    expect(link(replays[0], 'Continuer')?.getAttribute('href')).toBe('/learn/sessions/r-1');
+    expect(text(replays[1])).toContain('Depuis la décision n° 3 · terminée · note 65');
+    expect(link(replays[1], 'Continuer')).toBeUndefined();
+    button(replays[1] as HTMLElement, 'Comparer')!.click();
     await settle(fixture);
     expect(api['compare']).toHaveBeenCalledWith('s-1', 'r-2');
     expect(panel(root, 'comparison')).not.toBeNull();
@@ -765,8 +765,8 @@ describe('SessionReviewPage', () => {
     api['timeline'].mockResolvedValue(timeline({ status: 'ACTIVE', canBranch: false, branches: [] }));
     const { root } = await render(SessionReviewPage, { id: 's-1' });
     expect(api['assessment']).not.toHaveBeenCalled();
-    expect(root.textContent).toContain('This mission is still in progress.');
-    expect(link(root, 'Resume mission')?.getAttribute('href')).toBe('/learn/sessions/s-1');
+    expect(root.textContent).toContain('Cette mission est encore en cours.');
+    expect(link(root, 'Reprendre la mission')?.getAttribute('href')).toBe('/learn/sessions/s-1');
     expect(root.querySelector<HTMLFieldSetElement>('#time-machine fieldset')?.disabled).toBe(true);
     expect(root.querySelector('#branch-strategy')).toBeNull();
   });
@@ -774,7 +774,7 @@ describe('SessionReviewPage', () => {
   it('treats an assessment that is not ready as absent and explains abandoned attempts', async () => {
     api['session'].mockResolvedValue(session({ status: 'ABANDONED' }));
     const abandoned = await render(SessionReviewPage, { id: 's-1' });
-    expect(abandoned.root.textContent).toContain('This attempt was abandoned, so it was not assessed.');
+    expect(abandoned.root.textContent).toContain("Cette tentative a été abandonnée, elle n'a donc pas été évaluée.");
     expect(link(abandoned.root, 'Réessayer')?.getAttribute('href')).toBe('/learn/missions/protect-your-capital');
     TestBed.resetTestingModule();
 
@@ -790,9 +790,9 @@ describe('SessionReviewPage', () => {
     api['session'].mockResolvedValue(session({ id: 'r-2', kind: 'REPLAY', status: 'COMPLETED', parentSessionId: 's-1', branchFromSeq: 3, countsTowardProfile: false }));
     api['assessment'].mockResolvedValue(assessment({ countsTowardProfile: false }));
     const { fixture, root } = await render(SessionReviewPage, { id: 'r-2' });
-    expect(text(root.querySelector('.eyebrow'))).toBe('Time Machine replay · practice only');
-    expect(text(panel(root, 'competency-evidence')?.querySelector('.ws-panelDescription'))).toBe('Practice replay: not added to your profile.');
-    button(root, 'Compare with original')!.click();
+    expect(text(root.querySelector('.eyebrow'))).toBe('Rejeu · entraînement uniquement');
+    expect(text(panel(root, 'competency-evidence')?.querySelector('.ws-panelDescription'))).toBe("Rejeu d'entraînement : non ajouté à votre profil.");
+    button(root, "Comparer avec l'originale")!.click();
     await settle(fixture);
     expect(api['compare']).toHaveBeenCalledWith('r-2', 's-1');
   });
@@ -800,14 +800,14 @@ describe('SessionReviewPage', () => {
   it('shows load and action failures honestly', async () => {
     api['compare'].mockRejectedValue(new ApiError(422, 'Only sessions of the same mission version can be compared.', 'NOT_COMPARABLE'));
     const ok = await render(SessionReviewPage, { id: 's-1' });
-    button(ok.root.querySelectorAll<HTMLElement>('#time-machine .lr-spread')[1], 'Compare')!.click();
+    button(ok.root.querySelectorAll<HTMLElement>('#time-machine .lr-spread')[1], 'Comparer')!.click();
     await settle(ok.fixture);
     expect(text(ok.root.querySelector('.form-error-banner'))).toBe('Only sessions of the same mission version can be compared.');
     TestBed.resetTestingModule();
 
     api['timeline'].mockRejectedValue(new ApiError(404, 'Session not found.'));
     const { root } = await render(SessionReviewPage, { id: 'missing' });
-    expect(text(root.querySelector('.ws-empty[data-tone="error"]'))).toContain('Review unavailable');
-    expect(link(root, 'Back to MarketQuest')?.getAttribute('href')).toBe('/learn');
+    expect(text(root.querySelector('.ws-empty[data-tone="error"]'))).toContain('Bilan indisponible');
+    expect(link(root, "Retour au parcours d'apprentissage")?.getAttribute('href')).toBe('/learn');
   });
 });

@@ -13,21 +13,21 @@ describe('order ticket form', () => {
 
   it('requires a reason, a whole quantity and a price with at most three decimals', () => {
     expect(ticketFormErrors(draft({ rationale: '', quantity: '1.5', type: 'LIMIT', price: '10.0001' }), {})).toEqual([
-      'Enter a whole number of shares (at least 1).',
-      'Enter a price with at most 3 decimals.',
-      'Say why you are placing this order.',
+      'Saisissez un nombre entier de titres (au moins 1).',
+      'Saisissez un cours avec au plus 3 décimales.',
+      'Indiquez pourquoi vous passez cet ordre.',
     ]);
     expect(ticketFormErrors(draft({ quantity: '0' }), {})).toHaveLength(1);
     expect(ticketFormErrors(draft({ type: 'LIMIT', price: '9.875' }), {})).toEqual([]);
   });
 
   it('requires a confidence rating only in missions that ask for one', () => {
-    expect(ticketFormErrors(draft({}), { requireConfidence: true })).toEqual(['Rate how confident you are. This mission asks on every order.']);
+    expect(ticketFormErrors(draft({}), { requireConfidence: true })).toEqual(['Indiquez votre degré de confiance. Cette mission le demande à chaque ordre.']);
     expect(ticketFormErrors(draft({ confidence: '60' }), { requireConfidence: true })).toEqual([]);
   });
 
   it('only allows stops on the sell side', () => {
-    expect(ticketFormErrors(draft({ type: 'STOP', side: 'BUY', price: '9.5' }), {}).join(' ')).toMatch(/can only sell/);
+    expect(ticketFormErrors(draft({ type: 'STOP', side: 'BUY', price: '9.5' }), {}).join(' ')).toMatch(/ne peuvent que vendre/);
     expect(ticketFormErrors(draft({ type: 'STOP', side: 'SELL', price: '9.5' }), {})).toEqual([]);
   });
 

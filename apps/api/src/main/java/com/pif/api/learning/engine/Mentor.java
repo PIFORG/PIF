@@ -1,6 +1,7 @@
 package com.pif.api.learning.engine;
 
 import com.pif.api.finance.Money;
+import com.pif.api.learning.LearningFr;
 import com.pif.api.learning.engine.Assessments.Assessment;
 import com.pif.api.learning.engine.Assessments.Calibration;
 import com.pif.api.learning.engine.Assessments.CalibrationSignal;
@@ -25,7 +26,7 @@ public final class Mentor {
 
   private Mentor() {}
 
-  public static final String RULE_BASED_MENTOR_LABEL = "Rule-based mentor (no AI provider configured)";
+  public static final String RULE_BASED_MENTOR_LABEL = "Mentor par règles (aucun fournisseur IA configuré)";
 
   public record MentorMessage(String mode, String source, String sourceLabel, String topic, String message,
       List<String> questions, List<String> evidence, String ruleId) {
@@ -72,22 +73,23 @@ public final class Mentor {
     }
 
     if (maxLoss != null && lossPct >= maxLoss * 0.7) {
-      return new Diagnosis("NEAR_LOSS_LIMIT", "Loss limit",
-          List.of("You are down " + pct(lossPct) + "; the mission fails at " + Js.str(maxLoss) + " %."),
-          "You have used most of your loss budget. With " + pct(current.exposure() * 100) + " of equity invested, a "
-              + "further 10 % fall in your holdings would cost about " + pct(current.exposure() * 10) + " of equity. "
-              + "Reducing exposure or adding stops limits how much more you can lose.",
-          List.of("How much further can your portfolio fall before the mission fails?",
-              "Which position contributes most to that risk?"));
+      return new Diagnosis("NEAR_LOSS_LIMIT", "Limite de perte",
+          List.of("Vous êtes en baisse de " + pct(lossPct) + " ; la mission échoue à " + Js.str(maxLoss) + " %."),
+          "Vous avez consommé une grande partie de votre budget de perte. Avec " + pct(current.exposure() * 100)
+              + " des fonds propres investis, une baisse supplémentaire de 10 % sur vos positions coûterait environ "
+              + pct(current.exposure() * 10) + " des fonds propres. Réduire l'exposition ou placer des stops limite "
+              + "ce que vous pouvez encore perdre.",
+          List.of("Jusqu'où votre portefeuille peut-il encore baisser avant l'échec de la mission ?",
+              "Quelle position contribue le plus à ce risque ?"));
     }
 
     for (ObjectiveResult atRisk : objectives) {
       if (!"AT_RISK".equals(atRisk.status())) continue;
       return new Diagnosis("OBJECTIVE_AT_RISK", atRisk.label(), List.of(atRisk.detail()),
-          "This objective is currently not satisfied: " + atRisk.detail()
-              + " Fix it before you advance, because the end-of-day snapshot is what counts.",
-          List.of("Which of your positions breaks this rule right now?",
-              "What is the smallest change that would satisfy it?"));
+          "Cet objectif n'est pas satisfait pour l'instant : " + atRisk.detail()
+              + " Corrigez-le avant d'avancer : c'est le snapshot de fin de journée qui compte.",
+          List.of("Quelle position enfreint cette règle maintenant ?",
+              "Quel est le plus petit changement pour la respecter ?"));
     }
 
     List<Order> ratedAll = state.orders.stream()
@@ -97,14 +99,14 @@ public final class Mentor {
     for (Order o : rated) sum = sum + o.confidence;
     double meanConfidence = rated.isEmpty() ? 0 : sum / rated.size();
     if (rated.size() >= 2 && meanConfidence >= 80) {
-      return new Diagnosis("HIGH_CONFIDENCE", "Confidence",
-          List.of("Your last " + rated.size() + " orders averaged " + Js.toFixed(meanConfidence, 0)
-              + " % stated confidence."),
-          "You are rating your recent orders as near-certain. Markets rarely justify that: high confidence should be "
-              + "rare and backed by evidence you could explain to someone who disagrees. Consider sizing positions as "
-              + "if you could be wrong.",
-          List.of("What do you know that the rest of the market does not?",
-              "If this view turned out wrong tomorrow, how much would it cost you?"));
+      return new Diagnosis("HIGH_CONFIDENCE", "Confiance",
+          List.of("Vos " + rated.size() + " derniers ordres affichent en moyenne "
+              + Js.toFixed(meanConfidence, 0) + " % de confiance déclarée."),
+          "Vous notez vos ordres récents comme quasi certains. Les marchés le justifient rarement : une confiance "
+              + "élevée doit rester rare et s'appuyer sur des éléments que vous pourriez expliquer à quelqu'un qui "
+              + "n'est pas d'accord. Dimensionnez comme si vous pouviez avoir tort.",
+          List.of("Que savez-vous que le reste du marché ignore ?",
+              "Si cette vue se révélait fausse demain, combien cela vous coûterait-il ?"));
     }
 
     MarketEventDefinition recent = null;
@@ -115,12 +117,14 @@ public final class Mentor {
       int from = recent.step();
       boolean answered = state.orders.stream().anyMatch(o -> o.createdStep >= from && !"REJECTED".equals(o.status));
       if (!answered) {
-        return new Diagnosis("UNANSWERED_EVENT", "Market event",
-            List.of("Headline: “" + recent.headline() + "”.", "You have not placed an order since it was published."),
-            "A headline just changed the picture. Holding can be a valid choice, but it should be a decision: check "
-                + "which of your holdings are exposed and whether your loss limit still holds.",
-            List.of("Does this news change the long-term value of what you hold, or only its short-term price?",
-                "If you did nothing, what would your plan be if prices fell another 5 %?"));
+        String headline = LearningFr.get("mission." + mission.slug() + ".event." + recent.id() + ".headline",
+            recent.headline());
+        return new Diagnosis("UNANSWERED_EVENT", "Actualité",
+            List.of("Titre : « " + headline + " ».", "Vous n'avez passé aucun ordre depuis sa publication."),
+            "Un titre vient de changer la donne. Conserver peut être un choix valide, mais ce doit être une décision : "
+                + "vérifiez quelles positions sont exposées et si votre limite de perte tient toujours.",
+            List.of("Cette nouvelle change-t-elle la valeur à long terme de ce que vous détenez, ou seulement le prix court terme ?",
+                "Si vous ne faisiez rien, que feriez-vous si les cours baissaient encore de 5 % ?"));
       }
     }
 
@@ -134,13 +138,13 @@ public final class Mentor {
     if (stressObjective != null && state.stressTests.isEmpty()) {
       Integer deadline = stressObjective.beforeStep();
       if (deadline == null || state.step >= deadline - 3) {
-        return new Diagnosis("STRESS_TEST_DUE", "Stress test",
-            List.of(deadline == null ? "No stress test run yet."
-                : "A stress test is required before step " + deadline + "; you are at step " + state.step + "."),
-            "Run a stress test to see what a severe but plausible shock would cost your current portfolio. Compare the "
-                + "estimated loss with your loss limit.",
-            List.of("If equities fell 20 % tomorrow, would you still be inside your loss limit?",
-                "Which scenario worries you most for this portfolio, and why?"));
+        return new Diagnosis("STRESS_TEST_DUE", "Test de résistance",
+            List.of(deadline == null ? "Aucun test de résistance lancé pour l'instant."
+                : "Un test est requis avant la séance " + deadline + " ; vous êtes à la séance " + state.step + "."),
+            "Lancez un test de résistance pour estimer ce qu'un choc sévère mais plausible coûterait à votre portefeuille "
+                + "actuel. Comparez la perte estimée à votre limite de perte.",
+            List.of("Si les actions baissaient de 20 % demain, resteriez-vous dans votre limite de perte ?",
+                "Quel scénario vous inquiète le plus pour ce portefeuille, et pourquoi ?"));
       }
     }
 
@@ -150,38 +154,39 @@ public final class Mentor {
       entries.sort((a, b) -> Js.compare(b.getValue(), a.getValue()));
       String largest = entries.isEmpty() ? "undefined" : entries.get(0).getKey();
       return new Diagnosis("CONCENTRATED", "Concentration",
-          List.of(largest + " is " + pct(current.maxWeight() * 100) + " of your equity."),
-          "One position dominates your portfolio. A bad surprise in " + largest + " alone would hit your whole account. "
-              + "Spreading capital across less related assets reduces that single-name risk.",
-          List.of("What would happen to your account if " + largest + " fell 20 %?",
-              "Which asset in this market behaves least like your largest holding?"));
+          List.of(largest + " représente " + pct(current.maxWeight() * 100) + " de vos fonds propres."),
+          "Une position domine le portefeuille. Une mauvaise surprise sur " + largest + " seule toucherait tout le "
+              + "compte. Répartir le capital sur des actifs moins corrélés réduit ce risque de ligne unique.",
+          List.of("Que se passerait-il si " + largest + " baissait de 20 % ?",
+              "Quel actif de ce marché se comporte le moins comme votre plus grosse ligne ?"));
     }
 
     if (mission.rules().allowedOrderTypes().contains("STOP") && !current.heldSymbols().isEmpty()
         && current.protectedSymbols().isEmpty()) {
       return new Diagnosis("UNPROTECTED", "Protection",
-          List.of("You hold " + String.join(", ", current.heldSymbols()) + " with no stop orders."),
-          "None of your holdings has a stop. A stop sell triggers when the bid falls to your level; remember it executes "
-              + "at the next bid, which can be lower after a gap.",
-          List.of("At what price would you admit your idea for this position was wrong?",
-              "How much would you lose if that happened?"));
+          List.of("Vous détenez " + String.join(", ", current.heldSymbols()) + " sans ordre stop."),
+          "Aucune position n'a de stop. Un stop vente se déclenche quand le bid atteint votre niveau ; il s'exécute "
+              + "au bid suivant, qui peut être plus bas après un gap.",
+          List.of("À quel prix admettriez-vous que votre idée sur cette position était fausse ?",
+              "Combien perdriez-vous dans ce cas ?"));
     }
 
     if (current.exposure() < 0.3 && mission.objectives().stream().anyMatch(o -> "MIN_INVESTED".equals(o.kind()))) {
-      return new Diagnosis("IDLE_CASH", "Exposure",
-          List.of("Only " + pct(current.exposure() * 100) + " of your equity is invested."),
-          "Most of your capital is in cash. That avoids losses, but this mission asks you to stay invested — the skill "
-              + "is managing risk while invested, not avoiding the market.",
-          List.of("What would make you comfortable investing more?",
-              "How could you invest while still limiting your downside?"));
+      return new Diagnosis("IDLE_CASH", "Exposition",
+          List.of("Seulement " + pct(current.exposure() * 100) + " de vos fonds propres sont investis."),
+          "La majeure partie de votre capital est en liquidités. Cela évite les pertes, mais cette mission demande "
+              + "de rester investi — l'enjeu est de gérer le risque en étant investi, pas d'éviter le marché.",
+          List.of("Qu'est-ce qui vous rendrait à l'aise pour investir davantage ?",
+              "Comment investir tout en limitant votre downside ?"));
     }
 
-    return new Diagnosis("PLAN_CHECK", "Your plan",
-        List.of("Equity " + Js.toFixed(Money.fromAmount(equity), 3) + " DT, " + pct(current.exposure() * 100)
-            + " invested, " + current.heldSymbols().size() + " asset(s) held."),
-        "Your portfolio meets the visible rules right now. Before advancing, restate your plan: what you expect, and "
-            + "what you will do if you are wrong.",
-        List.of("What is your plan for the next few steps?", "What signal would make you change it?"));
+    return new Diagnosis("PLAN_CHECK", "Votre plan",
+        List.of("Fonds propres " + Js.toFixed(Money.fromAmount(equity), 3) + " DT, "
+            + pct(current.exposure() * 100) + " investis, " + current.heldSymbols().size() + " actif(s) détenu(s)."),
+        "Votre portefeuille respecte les règles visibles pour l'instant. Avant d'avancer, reformulez votre plan : "
+            + "ce que vous attendez, et ce que vous ferez si vous avez tort.",
+        List.of("Quel est votre plan pour les prochaines séances ?",
+            "Quel signal vous ferait le modifier ?"));
   }
 
   private record Critique(String fact, String message, String question) {}
@@ -197,14 +202,16 @@ public final class Mentor {
     if (last == null) return null;
     Consistency check = Assessments.rationaleConsistent(last);
     String label = last.rationale.replace('_', ' ').toLowerCase(Locale.ROOT);
-    String fact = "Last order: " + last.side + " " + Js.str(last.quantity) + " " + last.symbol + " (" + last.type
-        + "), reason “" + label + "”.";
+    String fact = "Dernier ordre : " + last.side + " " + Js.str(last.quantity) + " " + last.symbol + " (" + last.type
+        + "), raison « " + label + " ».";
     return check.consistent()
-        ? new Critique(fact, "Your last order is consistent with the reason you gave ("
-            + check.why().toLowerCase(Locale.ROOT) + "). Now argue the other side: what is the strongest case that it "
-            + "was a mistake?", "What evidence would prove this decision wrong, and are you watching for it?")
-        : new Critique(fact, "Your stated reason does not match the order: " + check.why()
-            + " Either the reason or the order needs to change.", "Which was your real motivation for this order?");
+        ? new Critique(fact, "Votre dernier ordre est cohérent avec la raison indiquée ("
+            + check.why().toLowerCase(Locale.ROOT) + "). Maintenant arguez l'inverse : quel est le meilleur argument "
+            + "pour dire que c'était une erreur ?",
+            "Quelles preuves montreraient que cette décision était fausse, et les surveillez-vous ?")
+        : new Critique(fact, "La raison indiquée ne correspond pas à l'ordre : " + check.why()
+            + " Modifiez la raison ou l'ordre.",
+            "Quelle était votre vraie motivation pour cet ordre ?");
   }
 
   public static MentorMessage mentorDuringSession(Context ctx, SimState state, String mode) {
@@ -215,14 +222,14 @@ public final class Mentor {
     }
     if ("SOCRATIC".equals(mode)) {
       return new MentorMessage(mode, "RULE_BASED", RULE_BASED_MENTOR_LABEL, d.topic(),
-          "Think it through before acting — these questions point at what matters most right now.", d.socratic(),
+          "Réfléchissez avant d'agir — ces questions ciblent ce qui compte le plus maintenant.", d.socratic(),
           d.facts(), d.ruleId());
     }
     Critique c = critique(state);
     if (c == null) {
       return new MentorMessage(mode, "RULE_BASED", RULE_BASED_MENTOR_LABEL, d.topic(),
-          "You have not placed an order yet. " + d.guided(),
-          List.of("What would have to be true for doing nothing to be the best choice?"), d.facts(), d.ruleId());
+          "Vous n'avez pas encore passé d'ordre. " + d.guided(),
+          List.of("Que faudrait-il pour que ne rien faire soit le meilleur choix ?"), d.facts(), d.ruleId());
     }
     List<String> questions = new ArrayList<>();
     questions.add(c.question());
@@ -236,26 +243,26 @@ public final class Mentor {
 
   private static List<String> calibrationEvidence(Calibration c) {
     if (c.orders() == 0 || c.meanConfidence() == null) return List.of();
-    String stated = "Stated confidence " + Js.toFixed(c.meanConfidence(), 0) + " % on " + c.orders()
-        + " rated order(s)";
+    String stated = "Confiance déclarée " + Js.toFixed(c.meanConfidence(), 0) + " % sur " + c.orders()
+        + " ordre(s) noté(s)";
     String outcome = "MARKET_ADJUSTED".equals(c.method()) && c.interpretable() && c.hitRate() != null
-        ? stated + "; " + Js.toFixed(c.hitRate(), 0) + " % of " + c.observations()
-            + " beat the mission's equal-weight market by the end (retrospective, not scored)"
-        : stated + "; too few outcomes to read as over- or under-confidence (not scored)";
+        ? stated + " ; " + Js.toFixed(c.hitRate(), 0) + " % sur " + c.observations()
+            + " battent le marché à poids égaux de la mission à la fin (rétrospectif, non noté)"
+        : stated + " ; trop peu de résultats pour juger sur- ou sous-confiance (non noté)";
     List<String> out = new ArrayList<>();
     out.add(outcome);
-    for (CalibrationSignal s : c.signals()) out.add("Confidence review: " + s.detail());
+    for (CalibrationSignal s : c.signals()) out.add("Revue de confiance : " + s.detail());
     return out;
   }
 
   public static MentorMessage mentorDebrief(Context ctx, SimState state, Assessment assessment) {
     String outcome = assessment.failedByRule()
-        ? "The mission ended early: " + assessment.failureReason()
+        ? "La mission s'est arrêtée plus tôt : " + assessment.failureReason()
         : assessment.passed()
-            ? "You passed with " + Js.str(assessment.total()) + "/100."
-            : "You scored " + Js.str(assessment.total()) + "/100; " + (assessment.requiredObjectivesMet()
-                ? "the pass mark is " + Js.str(assessment.passThreshold()) + "."
-                : "some required objectives were not met.");
+            ? "Mission réussie avec " + Js.str(assessment.total()) + "/100."
+            : "Score " + Js.str(assessment.total()) + "/100 ; " + (assessment.requiredObjectivesMet()
+                ? "la note de passage est " + Js.str(assessment.passThreshold()) + "."
+                : "certains objectifs obligatoires ne sont pas atteints.");
     List<ComponentScore> scored = new ArrayList<>(assessment.components().stream().filter(c -> c.score() != null).toList());
     scored.sort((a, b) -> Js.compare(a.score(), b.score()));
     ComponentScore weakest = scored.isEmpty() ? null : scored.get(0);
@@ -268,23 +275,23 @@ public final class Mentor {
     }
     List<String> questions = List.of(
         weakest != null
-            ? "Your weakest area was " + weakest.key() + " (" + Js.str(weakest.score())
-                + "/100). What would you do differently there?"
-            : "What would you do differently next time?",
-        "Which decision are you most proud of, and was it good process or good luck?",
-        "Open the Time Machine and rewind to step " + rewindStep
-            + ": how would an alternative decision have changed your risk, not just your return?");
+            ? "Votre point le plus faible était " + weakest.key() + " (" + Js.str(weakest.score())
+                + "/100). Que feriez-vous différemment ?"
+            : "Que feriez-vous différemment la prochaine fois ?",
+        "De quelle décision êtes-vous le plus fier, et s'agissait-il d'un bon processus ou de la chance ?",
+        "Ouvrez la Time Machine et revenez à la séance " + rewindStep
+            + " : comment une décision alternative aurait-elle changé votre risque, pas seulement votre rendement ?");
     List<String> parts = new ArrayList<>();
     parts.add(outcome);
-    assessment.strengths().stream().limit(1).forEach(s -> parts.add("Strength — " + s));
-    assessment.improvements().stream().limit(2).forEach(s -> parts.add("To improve — " + s));
+    assessment.strengths().stream().limit(1).forEach(s -> parts.add("Point fort — " + s));
+    assessment.improvements().stream().limit(2).forEach(s -> parts.add("À améliorer — " + s));
     List<String> evidence = new ArrayList<>();
-    evidence.add("Return " + Js.toFixed(assessment.metrics().totalReturnPct(), 2) + " %");
-    evidence.add("Max drawdown " + Js.toFixed(assessment.metrics().maxDrawdownPct(), 2) + " %");
-    evidence.add("Fills " + assessment.metrics().fills());
-    evidence.add("Hints used " + assessment.hintsUsed());
+    evidence.add("Rendement " + Js.toFixed(assessment.metrics().totalReturnPct(), 2) + " %");
+    evidence.add("Drawdown max. " + Js.toFixed(assessment.metrics().maxDrawdownPct(), 2) + " %");
+    evidence.add("Exécutions " + assessment.metrics().fills());
+    evidence.add("Indices utilisés " + assessment.hintsUsed());
     evidence.addAll(calibrationEvidence(assessment.calibration()));
-    return new MentorMessage("DEBRIEF", "RULE_BASED", RULE_BASED_MENTOR_LABEL, "Mission debrief", String.join(" ", parts),
+    return new MentorMessage("DEBRIEF", "RULE_BASED", RULE_BASED_MENTOR_LABEL, "Bilan de mission", String.join(" ", parts),
         Simulator.isMarketClosed(ctx, state) || !"ACTIVE".equals(state.status) ? questions : questions.subList(0, 2),
         List.copyOf(evidence), "DEBRIEF");
   }

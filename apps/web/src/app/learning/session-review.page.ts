@@ -26,27 +26,37 @@ import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { MeterComponent, ObjectiveListComponent, pct } from './learning-parts.components';
 
 const COMPONENT_LABEL: Record<AssessmentComponentKey, string> = {
-  risk: 'Risk management',
-  decision: 'Decision quality',
-  reasoning: 'Reasoning',
-  execution: 'Execution',
+  risk: 'Gestion du risque',
+  decision: 'Qualité des décisions',
+  reasoning: 'Raisonnement',
+  execution: 'Exécution',
 };
+
+function sessionStatus(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: 'en cours',
+    COMPLETED: 'terminée',
+    FAILED: 'échouée',
+    ABANDONED: 'abandonnée',
+  };
+  return labels[status] ?? status.toLowerCase();
+}
 
 const formatEquityAxis = (v: number) => (v >= 10000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0));
 
 function sessionName(s: ComparedSession): string {
-  return s.kind === 'MISSION' ? 'Original attempt' : `Replay from decision ${s.branchFromSeq}`;
+  return s.kind === 'MISSION' ? 'Tentative initiale' : `Rejeu depuis la décision ${s.branchFromSeq}`;
 }
 
 const COMPARISON_ROWS: { label: string; value: (s: ComparedSession) => string }[] = [
-  { label: 'Status', value: (s) => s.status.toLowerCase() },
-  { label: 'Score', value: (s) => (s.assessment ? `${s.assessment.total} · ${s.assessment.passed ? 'passed' : 'not passed'}` : 'Not assessed') },
-  { label: 'Final value', value: (s) => formatDT(s.metrics.equity) },
-  { label: 'Return', value: (s) => pct(s.metrics.totalReturnPct, 2) },
-  { label: 'Max drawdown', value: (s) => pct(s.metrics.maxDrawdownPct) },
-  { label: 'Largest position', value: (s) => pct(s.metrics.maxWeightPct) },
-  { label: 'Trading decisions', value: (s) => String(s.decisions) },
-  { label: 'Fees and spread', value: (s) => formatDT(s.metrics.feesPaid + s.metrics.spreadCost) },
+  { label: 'Statut', value: (s) => sessionStatus(s.status) },
+  { label: 'Note', value: (s) => (s.assessment ? `${s.assessment.total} · ${s.assessment.passed ? 'réussie' : 'non réussie'}` : 'Non évaluée') },
+  { label: 'Valeur finale', value: (s) => formatDT(s.metrics.equity) },
+  { label: 'Rendement', value: (s) => pct(s.metrics.totalReturnPct, 2) },
+  { label: 'Perte maximale', value: (s) => pct(s.metrics.maxDrawdownPct) },
+  { label: 'Plus grosse position', value: (s) => pct(s.metrics.maxWeightPct) },
+  { label: 'Décisions de négociation', value: (s) => String(s.decisions) },
+  { label: 'Frais et écart', value: (s) => formatDT(s.metrics.feesPaid + s.metrics.spreadCost) },
 ];
 
 /** Side-by-side view of two attempts on the same market path (ComparisonView in SessionReview.tsx). */
@@ -57,9 +67,9 @@ const COMPARISON_ROWS: { label: string; value: (s: ComparedSession) => string }[
   host: { class: 'lr-stack' },
   template: `
     <figure mtr-line-chart [series]="view().series" [xCount]="steps() + 1" [height]="200" [summary]="view().summary" [formatY]="formatY" [xLabels]="xLabels"></figure>
-    <div class="lr-compareGrid" role="table" aria-label="Side-by-side comparison">
+    <div class="lr-compareGrid" role="table" aria-label="Comparaison côte à côte">
       <div role="row" style="display: contents">
-        <div class="lr-compareHead" role="columnheader">Measure</div>
+        <div class="lr-compareHead" role="columnheader">Mesure</div>
         <div class="lr-compareHead" role="columnheader">{{ view().nameA }}</div>
         <div class="lr-compareHead" role="columnheader">{{ view().nameB }}</div>
       </div>
@@ -78,7 +88,7 @@ export class ComparisonViewComponent {
   readonly comparison = input.required<Comparison>();
   readonly steps = input.required<number>();
   protected readonly formatY = formatEquityAxis;
-  protected readonly xLabels: [string, string] = ['Start', 'End'];
+  protected readonly xLabels: [string, string] = ['Début', 'Fin'];
   protected readonly view = computed(() => {
     const comparison = this.comparison();
     const [a, b] = comparison.sessions;
@@ -92,9 +102,9 @@ export class ComparisonViewComponent {
       nameA,
       nameB,
       series,
-      summary: `Portfolio value of ${nameA} and ${nameB} on the same market path.`,
+      summary: `Valeur du portefeuille de ${nameA} et ${nameB} sur le même chemin de marché.`,
       rows: COMPARISON_ROWS.map((r) => ({ label: r.label, a: r.value(a), b: r.value(b) })),
-      note: `${comparison.divergenceSeq ? `The paths split at decision ${comparison.divergenceSeq}. ` : 'Both sessions made the same decisions. '}${comparison.note}`,
+      note: `${comparison.divergenceSeq ? `Les trajectoires divergent à la décision ${comparison.divergenceSeq}. ` : 'Les deux sessions ont pris les mêmes décisions. '}${comparison.note}`,
     };
   });
 }
@@ -146,7 +156,19 @@ export class SessionReviewPage {
 
   protected readonly marketAdjusted = computed(() => this.assessment()?.calibration.method === 'MARKET_ADJUSTED');
   protected readonly isReplay = computed(() => this.session()?.kind === 'REPLAY');
-  protected readonly stepWord = computed(() => (this.session()?.state.stepLabel === 'day' ? 'Day' : 'Week'));
+  protected readonly reviewEyebrow = computed(() => (this.isReplay() ? 'Rejeu · entraînement uniquement' : 'Bilan de mission'));
+  protected readonly reviewDescription = computed(() =>
+    this.isReplay()
+      ? 'Ce rejeu a suivi le même chemin de marché que votre tentative initiale. Il est noté pour comparaison, mais ne modifie jamais votre profil de compétences.'
+      : 'Comment vos décisions ont été évaluées, et ce qui se serait passé si vous aviez choisi autrement.',
+  );
+  protected readonly calibrationDescription = computed(() =>
+    this.marketAdjusted()
+      ? "Hors note. Chaque ordre noté est comparé au marché équipondéré de cette mission, de l'exécution jusqu'à la fin."
+      : "Se réfère aux prix finaux : c'est un outil de réflexion, pas un élément de la note.",
+  );
+  protected readonly stepWord = computed(() => (this.session()?.state.stepLabel === 'day' ? 'Jour' : 'Semaine'));
+  protected readonly statusWord = sessionStatus;
   protected readonly decisions = computed(() => (this.timeline()?.decisions ?? []).filter((d) => d.type !== 'REQUEST_HINT'));
   protected readonly competencyScores = computed(() =>
     (Object.entries(this.assessment()?.competencyScores ?? {}) as [Competency, number | null][]).map(([competency, score]) => ({
@@ -157,17 +179,17 @@ export class SessionReviewPage {
   );
   protected readonly calibrationNote = computed(() => {
     const calibration = this.assessment()?.calibration;
-    return `${calibration?.observations ?? 0} outcome(s) compared. At least ${calibration?.minimumOrders ?? 10} are needed before this says anything about over- or under-confidence, and a poor outcome on its own is not evidence of overconfidence.`;
+    return `${calibration?.observations ?? 0} résultat(s) comparé(s). Il en faut au moins ${calibration?.minimumOrders ?? 10} avant d'en tirer un constat de sur- ou sous-confiance, et un mauvais résultat isolé n'est pas une preuve de surconfiance.`;
   });
   protected readonly timelineChart = computed(() => {
     const timeline = this.timeline();
     const session = this.session();
     if (!timeline || !session) return null;
     return {
-      series: [{ label: 'Portfolio value', values: timeline.equityCurve.map((p) => p.equity), tone: 'brand', area: true }] as ChartSeries[],
+      series: [{ label: 'Valeur du portefeuille', values: timeline.equityCurve.map((p) => p.equity), tone: 'brand', area: true }] as ChartSeries[],
       xCount: session.state.steps + 1,
-      summary: `Portfolio value through the mission, ending at ${formatDT(timeline.equityCurve[timeline.equityCurve.length - 1]?.equity ?? 0)}.`,
-      xLabels: ['Start', `${this.stepWord()} ${session.state.steps}`] as [string, string],
+      summary: `Valeur du portefeuille au fil de la mission, jusqu'à ${formatDT(timeline.equityCurve[timeline.equityCurve.length - 1]?.equity ?? 0)}.`,
+      xLabels: ['Début', `${this.stepWord()} ${session.state.steps}`] as [string, string],
     };
   });
 
@@ -203,7 +225,7 @@ export class SessionReviewPage {
         }
       }
     } catch (err) {
-      if (!this.destroyed && id === this.sessionId()) this.error.set(describeApiError(err, 'Could not load this review.'));
+      if (!this.destroyed && id === this.sessionId()) this.error.set(describeApiError(err, "Impossible de charger ce bilan."));
     }
   }
 
@@ -213,7 +235,7 @@ export class SessionReviewPage {
     try {
       return await fn();
     } catch (err) {
-      this.actionError.set(describeApiError(err, 'That action failed.'));
+      this.actionError.set(describeApiError(err, 'Cette action a échoué.'));
       return null;
     } finally {
       this.busy.set(null);
@@ -245,11 +267,11 @@ export class SessionReviewPage {
 
   protected componentScore(c: Assessment['components'][number]): string {
     const applied = Math.round(c.appliedWeight);
-    return `${c.score === null ? 'Not judged' : `${Math.round(c.score)} / 100`} · weight ${applied} %${applied !== c.configuredWeight ? ` (configured ${c.configuredWeight} %)` : ''}`;
+    return `${c.score === null ? 'Non jugé' : `${Math.round(c.score)} / 100`} · poids ${applied} %${applied !== c.configuredWeight ? ` (configuré ${c.configuredWeight} %)` : ''}`;
   }
 
   protected decisionText(d: TimelineDecision): string {
-    return `· ${d.summary}${d.rationale ? ` · ${RATIONALE_LABEL[d.rationale]}` : ''}${d.outcome === 'REJECTED' ? ' · rejected' : ''}`;
+    return `· ${d.summary}${d.rationale ? ` · ${RATIONALE_LABEL[d.rationale]}` : ''}${d.outcome === 'REJECTED' ? ' · rejeté' : ''}`;
   }
 
   protected setStrategy(value: string): void {

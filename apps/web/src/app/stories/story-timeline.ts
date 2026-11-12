@@ -41,15 +41,15 @@ export function reelOf(kind: StoryScene['kind']): ReelInfo {
   switch (kind) {
     case 'SETUP':
     case 'DECISION':
-      return { reel: 1, label: 'Reel 1 · The decision', path: null };
+      return { reel: 1, label: 'Épisode 1 · La décision', path: null };
     case 'PATH_A':
-      return { reel: 2, label: 'Reel 2 · If you chose A', path: 'A' };
+      return { reel: 2, label: 'Épisode 2 · Si vous choisissiez A', path: 'A' };
     case 'REWIND':
-      return { reel: 3, label: "Reel 3 · Let's rewind", path: null };
+      return { reel: 3, label: 'Épisode 3 · Remontons le temps', path: null };
     case 'PATH_B':
-      return { reel: 3, label: 'Reel 3 · If you chose B', path: 'B' };
+      return { reel: 3, label: 'Épisode 3 · Si vous choisissiez B', path: 'B' };
     case 'LESSON':
-      return { reel: null, label: 'The lesson', path: null };
+      return { reel: null, label: 'La leçon', path: null };
   }
 }
 

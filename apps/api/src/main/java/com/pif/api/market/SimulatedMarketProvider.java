@@ -30,8 +30,8 @@ public final class SimulatedMarketProvider {
   private static final int BRIDGE_CACHE_LIMIT = 512;
 
   public static final Provenance SIMULATED_PROVENANCE = new Provenance("pif-simulated-v1", "FICTIONAL", "TND",
-      "Deterministic simulated prices for fictional instruments. Not real market data. The simulated market trades "
-          + "continuously, 24 hours a day, in 5-minute quote periods.");
+      "Prix simulés déterministes pour des instruments fictifs — pas des données de marché réelles. "
+          + "Le marché simulé cote en continu, 24 h sur 24, par périodes de cotation de 5 minutes.");
 
   private final Map<String, FictionalInstrument> universe;
   private final String seedPrefix;

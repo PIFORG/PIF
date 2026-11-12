@@ -13,7 +13,7 @@ import { EmptyStateComponent } from '../shared/workspace/workspace.components';
 import { emptyTicket, termsKey, ticketErrors, toOrderTerms, type TicketDraft } from './ticket-draft';
 import { describeTradingError, dt, price, shortTime, units } from './trading-format';
 
-const TYPE_LABEL: Record<TradeOrderType, string> = { MARKET: 'Market', LIMIT: 'Limit', STOP: 'Stop-loss' };
+const TYPE_LABEL: Record<TradeOrderType, string> = { MARKET: 'Marché', LIMIT: 'Limite', STOP: 'Stop' };
 
 function newClientOrderId(): string {
   const source: Crypto = globalThis.crypto;
@@ -73,7 +73,7 @@ export class OrderTicketComponent {
     const review = this.review();
     return review ? this.now() >= new Date(review.quote.validUntil).getTime() : false;
   });
-  protected readonly sideWord = computed(() => (this.draft().side === 'BUY' ? 'buy' : 'sell'));
+  protected readonly sideWord = computed(() => (this.draft().side === 'BUY' ? 'achat' : 'vente'));
   protected readonly quote = computed(() => this.instrument()?.quote ?? null);
   protected readonly priceError = computed(() => this.errors().limitPrice ?? this.errors().stopPrice);
   protected readonly confirmable = computed(() => {
@@ -82,7 +82,7 @@ export class OrderTicketComponent {
   });
   protected readonly reviewTitle = computed(() => {
     const draft = this.draft();
-    return `Review: ${this.sideWord()} ${units(Number(draft.quantity))} ${draft.symbol} · ${TYPE_LABEL[draft.type]}`;
+    return `Aperçu : ${this.sideWord()} ${units(Number(draft.quantity))} ${draft.symbol} · ${TYPE_LABEL[draft.type]}`;
   });
 
   constructor() {
@@ -119,7 +119,7 @@ export class OrderTicketComponent {
       this.preview.set({ key, result });
     } catch (err) {
       this.preview.set(null);
-      this.error.set(describeTradingError(err, 'The order could not be previewed.'));
+      this.error.set(describeTradingError(err, "L'ordre n'a pas pu être prévisualisé."));
     } finally {
       this.busy.set(null);
     }
@@ -132,7 +132,7 @@ export class OrderTicketComponent {
     if (!portfolio || !review || !this.currentKey() || !intent || review.rejection) return;
     if (this.expired()) {
       await this.requestPreview(
-        'The quote you previewed has expired. Here is the order at the new price; confirm again if it still suits you.',
+        "La cotation prévisualisée a expiré. Voici l'ordre au nouveau prix ; confirmez à nouveau s'il vous convient.",
       );
       return;
     }
@@ -158,16 +158,16 @@ export class OrderTicketComponent {
         this.busy.set(null);
         await this.requestPreview(
           hasErrorCode(err, 'QUOTE_CHANGED')
-            ? 'The price moved to a new quote before you confirmed. The preview below uses the new price.'
-            : 'Your portfolio changed (an order filled or cash moved). The preview below is up to date.',
+            ? "Le prix a changé avant votre confirmation. L'aperçu ci-dessous utilise le nouveau prix."
+            : "Votre portefeuille a changé (un ordre exécuté ou un mouvement de trésorerie). L'aperçu ci-dessous est à jour.",
         );
         return;
       }
       if (hasErrorCode(err, 'DUPLICATE_SUBMISSION')) this.stale.emit();
       this.error.set(
         err instanceof TypeError
-          ? 'The server could not be reached, so we cannot tell whether the order was placed. Confirm again: the same order reference is reused, so it can never be placed twice.'
-          : describeTradingError(err, 'The order could not be submitted.'),
+          ? "Le serveur est injoignable : impossible de savoir si l'ordre a été passé. Confirmez à nouveau : la même référence est réutilisée, il ne peut donc pas être passé deux fois."
+          : describeTradingError(err, "L'ordre n'a pas pu être soumis."),
       );
     } finally {
       this.busy.set(null);

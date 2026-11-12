@@ -154,7 +154,7 @@
                 <tbody>
                   @for (line of a.allocation.bySector; track line.name) {
                     <tr>
-                      <th scope="row">{{ line.name }}</th>
+                      <th scope="row">{{ sectorLabel(line.name) }}</th>
                       <td class="num">{{ dt(line.value) }}</td>
                       <td class="num">
                         <span class="tr-weight">

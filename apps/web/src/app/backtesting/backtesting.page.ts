@@ -66,13 +66,13 @@ export class BacktestingPage {
   protected readonly equityChart = computed(() => {
     const points = this.result()?.equityCurve ?? [];
     if (points.length < 2) return { enough: false as const };
-    const series: ChartSeries[] = [{ label: 'Equity', values: points.map((p) => p.equity), tone: 'brand', area: true }];
+    const series: ChartSeries[] = [{ label: 'Valeur', values: points.map((p) => p.equity), tone: 'brand', area: true }];
     const first = points[0];
     const last = points[points.length - 1];
     return {
       enough: true as const,
       series,
-      summary: `Equity from ${dt(first.equity)} to ${dt(last.equity)}.`,
+      summary: `Valeur de ${dt(first.equity)} à ${dt(last.equity)}.`,
       xLabels: [dateTime(first.at), dateTime(last.at)] as [string, string],
       minSpan: Math.max(1, last.equity * 0.01),
     };
@@ -82,14 +82,14 @@ export class BacktestingPage {
     const points = this.result()?.drawdown ?? [];
     if (points.length < 2) return { enough: false as const };
     const series: ChartSeries[] = [
-      { label: 'Drawdown', values: points.map((p) => -p.drawdown), tone: 'cyan', area: true },
+      { label: 'Repli', values: points.map((p) => -p.drawdown), tone: 'cyan', area: true },
     ];
     const first = points[0];
     const last = points[points.length - 1];
     return {
       enough: true as const,
       series,
-      summary: `Drawdown as a negative fraction of peak equity.`,
+      summary: `Repli en fraction négative de la valeur au pic.`,
       xLabels: [dateTime(first.at), dateTime(last.at)] as [string, string],
       minSpan: 0.01,
     };

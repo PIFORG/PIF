@@ -34,13 +34,13 @@ describe('Landing page', () => {
     expect(Array.from(root.querySelectorAll('.mk-pillar h3')).map((h) => h.textContent)).toEqual([
       'Salle de trading simulée',
       'Portefeuilles et analyse des risques',
-      'Stratégies et backtesting',
+      'Stratégies et tests historiques',
       'Analyses IA que vous pouvez questionner',
       'Tests de résistance bancaire',
       'Laboratoire actuariel',
     ]);
     expect(Array.from(root.querySelectorAll('.mk-stepIndex')).map((s) => s.textContent)).toEqual(['01', '02', '03']);
-    expect(root.querySelector('.mk-checks')?.textContent).toContain('FinStories : histoires de décision en une minute');
+    expect(root.querySelector('.mk-checks')?.textContent).toContain('Histoires financières : histoires de décision en une minute');
     expect(Array.from(root.querySelectorAll('.mk-topActions a')).map((a) => a.getAttribute('href'))).toEqual(['/login', '/register']);
     const preview = root.querySelector('figure.mk-window')!;
     expect(preview.querySelector('.mk-headValue')?.textContent).toBe(formatMoney(sampleSummary().equity, SAMPLE_CURRENCY));

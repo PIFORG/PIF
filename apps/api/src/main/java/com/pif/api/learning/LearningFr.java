@@ -52,4 +52,39 @@ public final class LearningFr {
   public static String provenance(String fallback) {
     return get("provenance", fallback);
   }
+
+  public static String stressName(String id, String fallback) {
+    return get("stress." + id + ".name", fallback);
+  }
+
+  public static String stressDescription(String id, String fallback) {
+    return get("stress." + id + ".description", fallback);
+  }
+
+  public static String sectorLabel(String sector) {
+    return com.pif.api.market.MarketDisplay.sectorLabel(sector);
+  }
+
+  public static String strategyLabel(String strategy) {
+    if (strategy == null) return null;
+    return switch (strategy) {
+      case "HOLD" -> get("strategy.hold", "Conserver sans trader");
+      case "MANUAL" -> get("strategy.manual", "Reprendre la main");
+      default -> strategy;
+    };
+  }
+
+  public static String timemachineCompareNote() {
+    return get("timemachine.compare.note",
+        "Les rejouages utilisent exactement le même chemin de marché. Ce sont des exercices contrefactuels avec "
+            + "rétrospection : ils ne modifient jamais votre profil de compétences.");
+  }
+
+  public static String profileCalibrationNote(int minimumOrders) {
+    return format("profile.calibration.note",
+        "Rétrospectif et hors score. Chaque ordre noté est comparé au marché à poids égaux de la mission "
+            + "depuis l'exécution jusqu'à la fin. En dessous de " + minimumOrders
+            + " ordres, le signal est surtout du bruit ; un résultat défavorable seul n'est pas une preuve de surconfiance.",
+        minimumOrders);
+  }
 }

@@ -19,28 +19,30 @@ public final class RiskStudio {
 
   public static Map<String, Object> methodology(String currency, int observations, int heldSymbols) {
     Map<String, Object> m = new LinkedHashMap<>();
-    m.put("horizon", "1 trading day");
+    m.put("horizon", "1 jour de bourse");
     m.put("confidenceLevel", 0.95);
-    m.put("dataPeriod", "Up to " + Risk.MIN_VAR_OBSERVATIONS + "-250 aligned daily closes per held instrument "
-        + "(provider: fictional simulated market).");
-    m.put("observationFrequency", "1 day");
+    m.put("dataPeriod", "Jusqu'à " + Risk.MIN_VAR_OBSERVATIONS + " à 250 clôtures journalières alignées par ligne détenue "
+        + "(fournisseur : marché simulé fictif).");
+    m.put("observationFrequency", "1 jour");
     m.put("currency", currency);
-    m.put("calculationMethod", "Historical simulation on current holdings: each day replays concurrent instrument "
-        + "simple returns; VaR is the loss at index floor((1-0.95)*n) of sorted P&L; ES is the mean of losses at or below "
-        + "that VaR. Realised volatility and drawdown use the portfolio equity path with deposits/withdrawals removed.");
+    m.put("calculationMethod", "Simulation historique sur les positions actuelles : chaque jour rejoue les rendements "
+        + "simples concurrents des instruments ; la VaR est la perte à l'indice floor((1-0,95)×n) des P&L triés ; "
+        + "l'ES est la moyenne des pertes au plus égal à cette VaR. La volatilité et le drawdown réalisés utilisent "
+        + "la trajectoire de fonds propres du portefeuille, dépôts/retraits retirés.");
     m.put("assumptions", List.of(
-        "Holdings marked at mid; liquidation uses bid minus commission.",
-        "Cash carries no price risk in this simulation.",
-        "Returns are simple close-to-close; no corporate actions.",
-        "Stress scenarios are instantaneous linear shocks, not forecasts."));
+        "Positions valorisées au mid ; liquidation au bid moins commission.",
+        "Les liquidités ne portent pas de risque de prix dans cette simulation.",
+        "Rendements simples clôture à clôture ; pas d'opérations sur titres.",
+        "Les scénarios de stress sont des chocs linéaires instantanés, pas des prévisions."));
     m.put("limitations", List.of(
-        "Historical VaR is not a guarantee of maximum possible loss.",
-        "Fictional prices only - not calibrated to a real market.",
-        "No covariance matrix is inverted for parametric VaR; contributions are historical component ES shares.",
+        "La VaR historique ne garantit pas la perte maximale possible.",
+        "Prix fictifs uniquement — non calibrés sur un marché réel.",
+        "Aucune inversion de matrice de covariance pour une VaR paramétrique ; les contributions sont des parts "
+            + "historiques d'ES par composante.",
         observations < Risk.MIN_VAR_OBSERVATIONS && heldSymbols > 0
-            ? "Only " + observations + " aligned daily windows are available (need "
+            ? "Seulement " + observations + " fenêtres journalières alignées disponibles (il en faut "
                 + Risk.MIN_VAR_OBSERVATIONS + ")."
-            : "Aligned observation count: " + observations + "."));
+            : "Nombre d'observations alignées : " + observations + "."));
     m.put("metricSource", Map.of(
         "valueAtRisk95", "OBSERVED_RETURNS",
         "expectedShortfall95", "OBSERVED_RETURNS",
@@ -62,7 +64,7 @@ public final class RiskStudio {
     List<String> symbols = new ArrayList<>(values.keySet());
     if (symbols.isEmpty()) {
       out.put("available", true);
-      out.put("basis", "No holdings - no price-risk contribution.");
+      out.put("basis", "Aucune position — pas de contribution au risque de prix.");
       out.put("byInstrument", List.of());
       return out;
     }
@@ -73,7 +75,7 @@ public final class RiskStudio {
     }
     if (window < Risk.MIN_VAR_OBSERVATIONS) {
       out.put("available", false);
-      out.put("unavailableReason", "Only " + window + " aligned daily returns (need "
+      out.put("unavailableReason", "Seulement " + window + " rendements journaliers alignés (il en faut "
           + Risk.MIN_VAR_OBSERVATIONS + ").");
       out.put("byInstrument", List.of());
       return out;
@@ -102,7 +104,7 @@ public final class RiskStudio {
     }
     if (hs == null) {
       out.put("available", false);
-      out.put("unavailableReason", "Insufficient observations for VaR.");
+      out.put("unavailableReason", "Observations insuffisantes pour calculer la VaR.");
       out.put("byInstrument", List.of());
       return out;
     }
@@ -114,7 +116,7 @@ public final class RiskStudio {
     for (int k = 0; k < window; k++) if (pnl[k] <= varLevel) tail.add(k);
     if (tail.isEmpty()) {
       out.put("available", false);
-      out.put("unavailableReason", "Empty VaR tail.");
+      out.put("unavailableReason", "Queue VaR vide.");
       out.put("byInstrument", List.of());
       return out;
     }
@@ -141,7 +143,8 @@ public final class RiskStudio {
         ((Number) b.get("tailLossContribution")).doubleValue(),
         ((Number) a.get("tailLossContribution")).doubleValue()));
     out.put("available", true);
-    out.put("basis", "Mean loss of each holding on historical VaR-tail days (component ES). Not a guarantee of future loss.");
+    out.put("basis", "Perte moyenne de chaque ligne les jours de la queue VaR historique (ES par composante). "
+        + "Ce n'est pas une garantie de perte future.");
     out.put("tailDays", tail.size());
     out.put("byInstrument", rows);
     return out;
@@ -152,7 +155,7 @@ public final class RiskStudio {
     Map<String, Object> out = new LinkedHashMap<>();
     if (symbols.size() < 2) {
       out.put("meanPairwiseCorrelation", null);
-      out.put("unavailableReason", symbols.isEmpty() ? "No holdings." : "Need at least two holdings.");
+      out.put("unavailableReason", symbols.isEmpty() ? "Aucune position." : "Il faut au moins deux positions.");
       out.put("pairs", 0);
       return out;
     }
@@ -163,7 +166,7 @@ public final class RiskStudio {
     }
     if (window < Risk.MIN_VOLATILITY_RETURNS) {
       out.put("meanPairwiseCorrelation", null);
-      out.put("unavailableReason", "Need at least " + Risk.MIN_VOLATILITY_RETURNS + " aligned returns per holding.");
+      out.put("unavailableReason", "Au moins " + Risk.MIN_VOLATILITY_RETURNS + " rendements alignés par position requis.");
       out.put("pairs", 0);
       return out;
     }
@@ -180,14 +183,15 @@ public final class RiskStudio {
     }
     if (pairs == 0) {
       out.put("meanPairwiseCorrelation", null);
-      out.put("unavailableReason", "Correlation could not be computed (zero variance).");
+      out.put("unavailableReason", "Impossible de calculer la corrélation (variance nulle).");
       out.put("pairs", 0);
       return out;
     }
     out.put("meanPairwiseCorrelation", sum / pairs);
     out.put("unavailableReason", null);
     out.put("pairs", pairs);
-    out.put("requirement", "Pearson correlation of concurrent daily simple returns, averaged over unique pairs.");
+    out.put("requirement", "Corrélation de Pearson des rendements simples journaliers concurrents, "
+        + "moyennée sur les paires distinctes.");
     return out;
   }
 

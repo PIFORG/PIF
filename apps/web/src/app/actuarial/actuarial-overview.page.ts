@@ -8,11 +8,11 @@ import { count, decimal, probability, ratio, tnd, tndShort } from './actuarial-f
 import { ACTUARIAL_WORKSPACES, ActuarialTabsComponent, ColumnChartComponent, EstimateNoteComponent, describeActuarialError, type ChartMarker } from './actuarial-parts.components';
 
 const WORKSPACE_TEXT: Record<string, string> = {
-  pricing: 'Claim frequency and severity, aggregate loss, premiums, ratios and sensitivities.',
-  'monte-carlo': 'Seeded simulation of total claims with VaR, TVaR and confidence intervals.',
-  reserving: 'Paid, case reserves, IBNR and ultimate claims on a development triangle.',
-  capital: 'Assets, liabilities and the probability that capital is insufficient.',
-  alm: 'Asset–liability cash flows, duration gaps, rate shocks and liquidity.',
+  pricing: 'Fréquence et sévérité des sinistres, perte agrégée, primes, ratios et sensibilités.',
+  'monte-carlo': 'Simulation avec graine des sinistres totaux, VaR, TVaR et intervalles de confiance.',
+  reserving: 'Paiements, provisions dossier, IBNR et sinistres ultimes sur un triangle de développement.',
+  capital: 'Actifs, passifs et probabilité d’insuffisance de capital.',
+  alm: 'Flux de trésorerie actif-passif, écarts de duration, chocs de taux et liquidité.',
 };
 
 /** /actuarial: apps/web/src/components/actuarial/ActuarialOverview.tsx */
@@ -47,15 +47,15 @@ export class ActuarialOverviewPage {
     const r = this.data()?.reference.pricing;
     if (!r) return [];
     return [
-      { label: 'Expected claims', value: r.aggregate.mean, tone: 'cyan' },
-      { label: 'Claims budget', value: r.premium.totals.claimsBudget, tone: 'amber' },
+      { label: 'Sinistres attendus', value: r.aggregate.mean, tone: 'cyan' },
+      { label: 'Budget sinistres', value: r.premium.totals.claimsBudget, tone: 'amber' },
     ];
   });
 
   protected readonly chartSummary = computed(() => {
     const r = this.data()?.reference.pricing;
     if (!r) return '';
-    return `Reference portfolio total claims: expected ${tnd(r.aggregate.mean)}; probability of exceeding the claims budget ${probability(r.probabilities.underwritingLoss)}.`;
+    return `Sinistres totaux du portefeuille de référence : attendu ${tnd(r.aggregate.mean)} ; probabilité de dépasser le budget sinistres ${probability(r.probabilities.underwritingLoss)}.`;
   });
 
   protected readonly quantile995 = computed(() => tnd(this.data()?.reference.pricing.aggregate.risk.find((x) => x.level === 0.995)?.valueAtRisk ?? null));
@@ -70,7 +70,7 @@ export class ActuarialOverviewPage {
       const res = await this.api.overview();
       if (!this.destroyed) this.data.set(res);
     } catch (err) {
-      if (!this.destroyed) this.error.set(describeActuarialError(err, 'The actuarial overview could not be loaded.'));
+      if (!this.destroyed) this.error.set(describeActuarialError(err, 'La synthèse actuarielle n’a pas pu se charger.'));
     }
   }
 }

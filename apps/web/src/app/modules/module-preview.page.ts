@@ -76,8 +76,8 @@ export class ModuleWireframeComponent {
     <fieldset disabled class="mp-ticketFields">
       <legend class="sr-only">Simulated order ticket (disabled)</legend>
       <div class="mp-sides" role="group" aria-label="Side">
-        <button type="button" class="mp-side" data-side="buy">Buy</button>
-        <button type="button" class="mp-side" data-side="sell">Sell</button>
+        <button type="button" class="mp-side" data-side="buy">Acheter</button>
+        <button type="button" class="mp-side" data-side="sell">Vendre</button>
       </div>
       <label class="field">
         <span class="field-label">Instrument</span>

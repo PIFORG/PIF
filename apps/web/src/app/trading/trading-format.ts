@@ -32,10 +32,28 @@ export function dateTime(iso: string): string {
   return new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
 }
 
-/** Explains a failed request in plain English; maps the "migration pending" case explicitly. */
+const SECTOR_LABEL: Record<string, string> = {
+  Banking: 'Secteur bancaire',
+  Utilities: 'Services aux collectivités',
+  'Fixed income': 'Obligations',
+  Technology: 'Technologies',
+  Telecom: 'Télécoms',
+  'Consumer staples': 'Biens de consommation de base',
+  Materials: 'Matériaux',
+  Energy: 'Énergie',
+  Currencies: 'Devises',
+  Equity: 'Actions',
+};
+
+/** Libellé d'affichage. Les identifiants (secteurs, classes) restent inchangés. */
+export function sectorLabel(sector: string): string {
+  return SECTOR_LABEL[sector] ?? sector;
+}
+
+/** Explains a failed request in plain language; maps the "migration pending" case explicitly. */
 export function describeTradingError(error: unknown, fallback: string): string {
   if (hasErrorCode(error, 'DATABASE_SCHEMA_OUTDATED')) {
-    return 'Virtual trading is not enabled on this server yet: its database migration has not been applied.';
+    return "Le trading virtuel n'est pas encore activé sur ce serveur : la migration de la base de données n'a pas été appliquée.";
   }
   return describeApiError(error, fallback);
 }

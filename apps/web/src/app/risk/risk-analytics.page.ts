@@ -14,6 +14,7 @@ import {
   type TradeSide,
 } from '../core/api/trading-api';
 import { formatNumber } from '../core/format/finance';
+import { sectorLabel } from '../trading/trading-format';
 import { FR } from '../core/i18n/fr';
 import { AllocationBarComponent, LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
@@ -100,19 +101,19 @@ export class RiskAnalyticsPage {
     if (points.length <= 2) {
       return {
         enough: false as const,
-        description: `The chart starts after the portfolio's first end of day (00:00 UTC). So far: ${dt(points[0]?.equity ?? 0)} at creation, ${dt(points[points.length - 1]?.equity ?? 0)} now. Peak-to-trough drawdown in the KPIs uses a flow-adjusted index from the server.`,
+        description: `Le graphique commence après la première fin de journée du portefeuille (00:00 UTC). Pour l'instant : ${dt(points[0]?.equity ?? 0)} à la création, ${dt(points[points.length - 1]?.equity ?? 0)} maintenant. Le drawdown des indicateurs utilise un indice ajusté des flux, calculé par le serveur.`,
       };
     }
     const first = points[0];
     const last = points[points.length - 1];
     const series: ChartSeries[] = [
-      { label: 'Equity', values: points.map((p) => p.equity), tone: 'brand', area: true },
-      { label: 'Net contributions', values: points.map((p) => p.netContributions), tone: 'muted', dashed: true },
+      { label: 'Valeur', values: points.map((p) => p.equity), tone: 'brand', area: true },
+      { label: 'Apports nets', values: points.map((p) => p.netContributions), tone: 'muted', dashed: true },
     ];
     return {
       enough: true as const,
       series,
-      summary: `Equity moved from ${dt(first.equity)} to ${dt(last.equity)}; net contributions are ${dt(last.netContributions)}. Maximum drawdown above is on a time-weighted index, not this raw equity line.`,
+      summary: `La valeur est passée de ${dt(first.equity)} à ${dt(last.equity)} ; les apports nets sont de ${dt(last.netContributions)}. Le drawdown maximal ci-dessus porte sur un indice pondéré dans le temps, pas sur cette courbe brute.`,
       xLabels: [dateTime(first.at), dateTime(last.at)] as [string, string],
       minSpan: Math.max(1, last.equity * 0.01),
     };
@@ -132,8 +133,8 @@ export class RiskAnalyticsPage {
     const last = points[points.length - 1];
     return {
       enough: true as const,
-      series: [{ label: 'Drawdown (raw equity)', values: dd, tone: 'muted', area: true }] as ChartSeries[],
-      summary: `Illustrative drawdown on raw equity (flows not removed). Server KPI max drawdown uses the time-weighted index.`,
+      series: [{ label: 'Repli (valeur brute)', values: dd, tone: 'muted', area: true }] as ChartSeries[],
+      summary: `Repli illustratif sur la valeur brute (flux non retirés). L'indicateur serveur utilise l'indice pondéré dans le temps.`,
       xLabels: [dateTime(first.at), dateTime(last.at)] as [string, string],
       minSpan: 0.01,
     };
@@ -144,7 +145,7 @@ export class RiskAnalyticsPage {
     if (!a) return [];
     return [
       ...a.allocation.byInstrument.filter((line) => line.weight !== null).map((line) => ({ label: line.name, weight: line.weight as number })),
-      ...(a.allocation.cash.weight !== null ? [{ label: 'Cash', weight: a.allocation.cash.weight }] : []),
+      ...(a.allocation.cash.weight !== null ? [{ label: 'Espèces', weight: a.allocation.cash.weight }] : []),
     ];
   });
 
@@ -153,7 +154,7 @@ export class RiskAnalyticsPage {
     if (!a) return [];
     return a.allocation.byAssetClass
       .filter((line) => line.weight !== null)
-      .map((line) => ({ label: line.name, weight: line.weight as number }));
+      .map((line) => ({ label: sectorLabel(line.name), weight: line.weight as number }));
   });
 
   constructor() {

@@ -85,7 +85,7 @@
           <select id="markets-sector" class="select" (change)="setSector($event)">
             <option value="ALL" [selected]="sector() === 'ALL'">Tous les secteurs</option>
             @for (name of sectors(); track name) {
-              <option [value]="name" [selected]="sector() === name">{{ name }}</option>
+              <option [value]="name" [selected]="sector() === name">{{ sectorLabel(name) }}</option>
             }
           </select>
         </div>

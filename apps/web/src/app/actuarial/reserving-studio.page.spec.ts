@@ -87,35 +87,35 @@ describe('ReservingStudio', () => {
 
   it('sends the example to the server and shows only the figures it returns', async () => {
     const { fixture, root } = await render();
-    expect(getControl<HTMLTextAreaElement>(root, 'Cumulative paid (DT)')).toBeTruthy();
+    expect(getControl<HTMLTextAreaElement>(root, 'Sinistres payés cumulés (DT)')).toBeTruthy();
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(1));
     expect(api.analyzeReserving.mock.calls[0][0]).toEqual(request);
 
-    await waitFor(fixture, () => expect(kpi(root, 'Paid to date')).toBeTruthy());
-    expect(getText(kpi(root, 'Paid to date'), '481 DT')).toBeTruthy();
-    expect(getText(kpi(root, 'Unpaid'), '107 DT')).toBeTruthy();
-    expect(getText(root, 'Results match the inputs.')).toBeTruthy();
-    expect(getText(root, /Deterministic best estimates\./)).toBeTruthy();
-    expect(getText(root, /^Reconciled:/)).toBeTruthy();
+    await waitFor(fixture, () => expect(kpi(root, 'Payé à ce jour')).toBeTruthy());
+    expect(getText(kpi(root, 'Payé à ce jour'), '481 DT')).toBeTruthy();
+    expect(getText(kpi(root, 'Non payé'), '107 DT')).toBeTruthy();
+    expect(getText(root, 'Les résultats correspondent aux entrées.')).toBeTruthy();
+    expect(getText(root, /Meilleures estimations déterministes\./)).toBeTruthy();
+    expect(getText(root, /^Rapproché/)).toBeTruthy();
 
-    const methods = tableByCaption(root, /Total ultimate, unpaid and IBNR by reserving method/);
+    const methods = tableByCaption(root, /Ultime, non payé et IBNR totaux par méthode de provisionnement/);
     expect(getText(methods, '588 DT')).toBeTruthy();
 
-    change(getControl<HTMLSelectElement>(root, 'Method for the headline figures'), 'EXPECTED_LOSS_RATIO');
+    change(getControl<HTMLSelectElement>(root, 'Méthode pour les chiffres clés'), 'EXPECTED_LOSS_RATIO');
     await settle(fixture);
-    expect(getText(kpi(root, 'Ultimate'), '528 DT')).toBeTruthy();
-    expect(getText(kpi(root, 'Unpaid'), '47 DT')).toBeTruthy();
+    expect(getText(kpi(root, 'Ultime'), '528 DT')).toBeTruthy();
+    expect(getText(kpi(root, 'Non payé'), '47 DT')).toBeTruthy();
   });
 
   it('parses pasted triangles, keeps missing amounts as null and reports server rejections', async () => {
     const { fixture, root } = await render();
-    const paid = getControl<HTMLTextAreaElement>(root, 'Cumulative paid (DT)');
+    const paid = getControl<HTMLTextAreaElement>(root, 'Sinistres payés cumulés (DT)');
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(1));
 
     change(paid, '100 150 abc\n120 186\n130');
     await settle(fixture);
-    expect(getText(root, 'Line 1, amount 3: “abc” is not a number. Write a missing amount as -.')).toBeTruthy();
-    expect(getText(root, 'Fix the highlighted fields to update the reserves.')).toBeTruthy();
+    expect(getText(root, "Ligne 1, montant 3 : « abc » n'est pas un nombre. Écrivez un montant manquant avec -.")).toBeTruthy();
+    expect(getText(root, 'Corrigez les champs signalés pour mettre à jour les provisions.')).toBeTruthy();
 
     api.analyzeReserving.mockRejectedValue(
       new ApiError(422, 'Invalid triangle: the latest paid amount of accident year 2024 (development year 2) is missing.', 'INVALID_TRIANGLE'),
@@ -124,18 +124,18 @@ describe('ReservingStudio', () => {
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(2));
     expect(api.analyzeReserving.mock.calls[1][0].data.paid).toEqual([[100, 150, 165], [120, null], [130]]);
     await waitFor(fixture, () => expect(getText(root, /the latest paid amount of accident year 2024/)).toBeTruthy());
-    expect(getText(root, /The results below were computed for earlier inputs/)).toBeTruthy();
+    expect(getText(root, /Les résultats ci-dessous ont été calculés pour des entrées antérieures/)).toBeTruthy();
   });
 
   it('sends a selected development factor and validates its range locally', async () => {
     const { fixture, root } = await render();
-    await waitFor(fixture, () => getControl(root, 'Selected paid factor, development years 1 to 2'));
+    await waitFor(fixture, () => getControl(root, 'Facteur payés retenu, années de développement 1 à 2'));
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(1));
-    const input = getControl(root, 'Selected paid factor, development years 1 to 2');
+    const input = getControl(root, 'Facteur payés retenu, années de développement 1 à 2');
 
     change(input, '500');
     await settle(fixture);
-    expect(getText(root, 'Enter a factor from 0.1 to 100, or leave it empty to use the estimate.')).toBeTruthy();
+    expect(getText(root, "Saisissez un facteur compris entre 0.1 et 100, ou laissez vide pour utiliser l'estimation.")).toBeTruthy();
 
     change(input, '1.6');
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(2));
@@ -150,9 +150,9 @@ describe('ReservingStudio', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     const { fixture, root } = await render();
     await waitFor(fixture, () => expect(api.analyzeReserving).toHaveBeenCalledTimes(1));
-    await waitFor(fixture, () => expect(getText(root, 'Results match the inputs.')).toBeTruthy());
+    await waitFor(fixture, () => expect(getText(root, 'Les résultats correspondent aux entrées.')).toBeTruthy());
 
-    change(getControl(root, 'Run label'), 'Hand check');
+    change(getControl(root, 'Libellé du calcul'), 'Hand check');
     api.reservingRuns.mockResolvedValue({ kept: 25, runs: [summary(stored)] });
     await settle(fixture);
     getButton(root, /Enregistrer le calcul/).click();
@@ -161,9 +161,9 @@ describe('ReservingStudio', () => {
 
     await waitFor(fixture, () => getButton(root, 'Charger Hand check'));
     getButton(root, 'Charger Hand check').click();
-    await waitFor(fixture, () => expect(getText(root, /Loaded “Hand check”/)).toBeTruthy());
-    expect(getControl(root, 'Paid tail factor').value).toBe('1.05');
-    expect(getText(root, 'Showing the stored results of “Hand check”.')).toBeTruthy();
+    await waitFor(fixture, () => expect(getText(root, /« Hand check » chargé/)).toBeTruthy());
+    expect(getControl(root, 'Facteur de queue des paiements').value).toBe('1.05');
+    expect(getText(root, 'Résultats enregistrés de « Hand check ».')).toBeTruthy();
     expect(api.analyzeReserving).toHaveBeenCalledTimes(1);
 
     api.reservingRuns.mockResolvedValue({ kept: 25, runs: [] });

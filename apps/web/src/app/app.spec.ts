@@ -84,7 +84,7 @@ describe('application routes', () => {
   it('shows "Checking session…" while the session is being restored', async () => {
     status.set('loading');
     const harness = await RouterTestingHarness.create('/settings/profile');
-    expect(harness.routeNativeElement?.textContent).toContain('Checking session…');
+    expect(harness.routeNativeElement?.textContent).toContain('Vérification de la session…');
   });
 
   it('renders the profile page inside the workspace shell for a signed-in user', async () => {
@@ -174,7 +174,7 @@ describe('application routes', () => {
     it('shows "Checking session…" while the session is being restored', async () => {
       status.set('loading');
       const harness = await RouterTestingHarness.create('/admin');
-      expect(harness.routeNativeElement?.textContent).toContain('Checking session…');
+      expect(harness.routeNativeElement?.textContent).toContain('Vérification de la session…');
       expect(harness.routeNativeElement?.textContent).not.toContain('Administration de la plateforme');
     });
 

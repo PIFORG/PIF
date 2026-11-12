@@ -226,13 +226,13 @@ describe('RiskAnalyticsPage', () => {
   it('loads server risk metrics and surfaces unavailable reasons instead of silent zeros', async () => {
     const { root } = await render();
     expect(root.querySelector('h1')?.textContent).toBe('Analyse des risques');
-    expect(root.querySelector('.tr-provenance')?.textContent).toContain('Fictional simulated prices');
+    expect(root.querySelector('.tr-provenance')?.textContent).toContain('Prix simulés fictifs');
     expect(kpi(root, 'Drawdown maximal')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe(pct(0));
-    expect(root.textContent).toContain('Not available: fewer than 20 daily observations.');
-    expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Allocation by instrument and cash');
+    expect(root.textContent).toContain('Indisponible : fewer than 20 daily observations.');
+    expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Allocation par instrument et espèces');
     expect(root.textContent).toContain('Equity crash');
     expect(root.textContent).toContain('Historical VaR is not a guarantee of maximum possible loss.');
-    expect(root.textContent).toContain('Contributions unavailable');
+    expect(root.textContent).toContain('Contributions indisponibles');
     expect(root.querySelector('a.btn[href="/trading"]')?.textContent?.trim()).toMatch(/salle de trading|Ouvrir la salle de trading/i);
     expect(portfolioApi['analytics']).toHaveBeenCalledWith('p1');
     expect(portfolioApi['history']).toHaveBeenCalledWith('p1');
@@ -250,7 +250,7 @@ describe('RiskAnalyticsPage', () => {
       quantity: 10,
     });
     expect(root.textContent).toContain('Simulated immediate fill for risk comparison only.');
-    expect(root.textContent).toContain('Largest weight');
+    expect(root.textContent).toContain('Poids le plus élevé');
   });
 
   it('shows an error when analytics cannot be loaded', async () => {

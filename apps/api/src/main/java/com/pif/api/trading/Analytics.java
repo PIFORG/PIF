@@ -7,6 +7,7 @@ import com.pif.api.finance.Performance;
 import com.pif.api.finance.Performance.ValuationPoint;
 import com.pif.api.finance.PreTrade.FeeSchedule;
 import com.pif.api.finance.Risk;
+import com.pif.api.market.MarketDisplay;
 import com.pif.api.finance.Valuation;
 import com.pif.api.trading.TradingRules.ShockTarget;
 import com.pif.api.trading.TradingRules.StressScenario;
@@ -219,12 +220,12 @@ public final class Analytics {
       invalidSample = true;
     }
     Double pnlSd = Risk.sampleStdDev(pnl);
-    String varRequirement = "At least " + Risk.MIN_VAR_OBSERVATIONS + " daily returns for every held instrument "
-        + "(up to 250 are used); 1-day horizon, 95 % confidence, current holdings, historical simulation.";
+    String varRequirement = "Au moins " + Risk.MIN_VAR_OBSERVATIONS + " rendements journaliers par ligne détenue "
+        + "(jusqu'à 250 utilisés) ; horizon 1 jour, confiance 95 %, positions actuelles, simulation historique.";
     boolean noHoldings = symbols.isEmpty();
 
-    String realizedRequirement = "At least " + Risk.MIN_VOLATILITY_RETURNS
-        + " complete days of portfolio history since creation.";
+    String realizedRequirement = "Au moins " + Risk.MIN_VOLATILITY_RETURNS
+        + " jours complets d'historique de portefeuille depuis la création.";
     List<Double> index = new ArrayList<>();
     index.add(1.0);
     for (double r : daily) index.add(index.get(index.size() - 1) * (1 + r));
@@ -239,8 +240,8 @@ public final class Analytics {
     Map<String, Object> out = new LinkedHashMap<>();
 
     Map<String, Object> valuation = new LinkedHashMap<>();
-    valuation.put("convention", "Holdings are marked at the mid price. Liquidation value sells every holding at the "
-        + "bid and deducts the commission.");
+    valuation.put("convention", "Les positions sont valorisées au prix médian. La valeur de liquidation vend chaque "
+        + "ligne au bid et déduit la commission.");
     valuation.put("equity", m.applyAsDouble(equity));
     valuation.put("cash", m.applyAsDouble(input.cash()));
     valuation.put("reservedCash", m.applyAsDouble(input.reserved()));
@@ -255,8 +256,8 @@ public final class Analytics {
     out.put("valuation", valuation);
 
     Map<String, Object> reconciliation = new LinkedHashMap<>();
-    reconciliation.put("description", "Equity − net contributions must equal realised + unrealised P&L. Commissions "
-        + "are inside both: buy commissions in cost basis, sell commissions in proceeds.");
+    reconciliation.put("description", "Fonds propres − apports nets = P&L réalisé + P&L latent. Les commissions "
+        + "sont incluses des deux côtés : achats dans le prix de revient, ventes dans le produit.");
     reconciliation.put("equity", m.applyAsDouble(equity));
     reconciliation.put("netContributions", m.applyAsDouble(input.netContributions()));
     reconciliation.put("profit", m.applyAsDouble(equity - input.netContributions()));
@@ -285,42 +286,47 @@ public final class Analytics {
       byInstrument.add(row);
     }
     allocation.put("byInstrument", byInstrument);
-    allocation.put("bySector", byGroup.apply(HoldingInput::sector));
+    List<Map<String, Object>> bySector = byGroup.apply(HoldingInput::sector);
+    for (Map<String, Object> row : bySector) {
+      row.put("sectorLabel", MarketDisplay.sectorLabel((String) row.get("name")));
+    }
+    allocation.put("bySector", bySector);
     allocation.put("byAssetClass", byGroup.apply(HoldingInput::assetClass));
     out.put("allocation", allocation);
 
     Map<String, Object> concentration = new LinkedHashMap<>();
     concentration.put("largestWeight", noHoldings
-        ? available(0, "Largest holding as a share of equity.")
-        : available(Valuation.maxWeight(values, equity), "Largest holding as a share of equity."));
-    concentration.put("exposure", available(Valuation.exposure(values, equity), "Invested value as a share of equity."));
+        ? available(0, "Poids de la plus grande ligne en part des fonds propres.")
+        : available(Valuation.maxWeight(values, equity), "Poids de la plus grande ligne en part des fonds propres."));
+    concentration.put("exposure", available(Valuation.exposure(values, equity),
+        "Valeur investie en part des fonds propres."));
     concentration.put("hhi", conc.hhi() == null
-        ? unavailable("Nothing is invested.", "Herfindahl index of invested weights; needs at least one holding.")
-        : available(conc.hhi(), "Herfindahl index of invested weights."));
+        ? unavailable("Rien n'est investi.", "Indice Herfindahl des poids investis ; au moins une position requise.")
+        : available(conc.hhi(), "Indice Herfindahl des poids investis."));
     concentration.put("effectiveHoldings", conc.effectiveAssets() == null
-        ? unavailable("Nothing is invested.", "1 / HHI; needs at least one holding.")
+        ? unavailable("Rien n'est investi.", "1 / HHI ; au moins une position requise.")
         : available(conc.effectiveAssets(), "1 / HHI."));
     out.put("concentration", concentration);
 
     Map<String, Object> performance = new LinkedHashMap<>();
     performance.put("profit", available(m.applyAsDouble(equity - input.netContributions()),
-        "Equity minus net contributions, in DT. Profit is an amount, not a rate of return."));
+        "Fonds propres moins apports nets, en DT. Le profit est un montant, pas un taux de rendement."));
     performance.put("timeWeightedReturn", twr == null
-        ? unavailable("There is no complete period to measure yet.",
-            "Valuations at creation and at every deposit or withdrawal.")
-        : available(twr, "Chains returns between deposits and withdrawals, so flows do not count as performance. "
-            + "Since creation, not annualised."));
+        ? unavailable("Aucune période complète à mesurer pour l'instant.",
+            "Valorisations à la création et à chaque versement ou retrait.")
+        : available(twr, "Enchaîne les rendements entre flux ; les apports ne comptent pas comme performance. "
+            + "Depuis la création, non annualisé."));
     performance.put("moneyWeightedReturn", mwr == null
-        ? unavailable("The portfolio is too new to weight its cash flows.",
-            "Time since creation and the dates and amounts of every deposit and withdrawal.")
-        : available(mwr, "Modified Dietz: gain divided by time-weighted capital, so the timing of your deposits "
-            + "matters. Since creation, not annualised."));
+        ? unavailable("Le portefeuille est trop récent pour pondérer ses flux.",
+            "Temps écoulé depuis la création et dates/montants de chaque versement ou retrait.")
+        : available(mwr, "Dietz modifié : gain divisé par le capital pondéré dans le temps — le calendrier "
+            + "de vos apports compte. Depuis la création, non annualisé."));
     performance.put("completeDays", daily.length);
     out.put("performance", performance);
 
-    String noRisk = "No holdings: cash carries no price risk in this simulation.";
-    String tooFew = "Only " + windowLength + " daily returns are available.";
-    String invalid = "The price history of a holding contains invalid values, so this metric is not computed.";
+    String noRisk = "Aucune position : les liquidités ne portent pas de risque de prix dans cette simulation.";
+    String tooFew = "Seulement " + windowLength + " rendements journaliers disponibles.";
+    String invalid = "L'historique de prix d'une ligne contient des valeurs invalides ; cet indicateur n'est pas calculé.";
     Map<String, Object> risk = new LinkedHashMap<>();
     risk.put("valueAtRisk95", noHoldings ? available(0, noRisk)
         : invalidSample ? unavailable(invalid, varRequirement)
@@ -330,23 +336,23 @@ public final class Analytics {
         : invalidSample ? unavailable(invalid, varRequirement)
         : hs == null ? unavailable(tooFew, varRequirement)
         : available(m.applyAsDouble(JsSemantics.round(hs.expectedShortfall())),
-            "Mean loss beyond the VaR. " + varRequirement));
-    risk.put("holdingsVolatilityDaily", noHoldings ? available(0, "No holdings.")
+            "Perte moyenne au-delà de la VaR. " + varRequirement));
+    risk.put("holdingsVolatilityDaily", noHoldings ? available(0, "Aucune position.")
         : pnlSd == null || equity <= 0 ? unavailable(com.pif.api.web.Messages.get("risk.not_enough_returns"), varRequirement)
         : available(pnlSd / equity,
-            "Standard deviation of the simulated daily P&L of current holdings, as a share of equity."));
+            "Écart-type du P&L journalier simulé des positions actuelles, en part des fonds propres."));
     risk.put("observations", windowLength);
-    String historyDays = "The portfolio has " + daily.length + " complete days of history.";
+    String historyDays = "Le portefeuille a " + daily.length + " jours complets d'historique.";
     boolean noVol = dailyVol == null || daily.length < Risk.MIN_VOLATILITY_RETURNS;
     risk.put("realizedVolatilityDaily", noVol ? unavailable(historyDays, realizedRequirement)
-        : available(dailyVol, "Sample standard deviation of daily returns, flows removed. " + realizedRequirement));
+        : available(dailyVol, "Écart-type des rendements journaliers (flux retirés). " + realizedRequirement));
     risk.put("realizedVolatilityAnnualized", noVol ? unavailable(historyDays, realizedRequirement)
         : available(dailyVol * Math.sqrt(365),
-            "Daily volatility × √365 (the simulated market trades every day). " + realizedRequirement));
+            "Volatilité journalière × √365 (le marché simulé cote tous les jours). " + realizedRequirement));
     risk.put("maxDrawdown", index.size() < 2
-        ? unavailable("The portfolio has no price history yet.", "At least one revaluation after creation.")
+        ? unavailable("Le portefeuille n'a pas encore d'historique de prix.", "Au moins une revalorisation après la création.")
         : available(Risk.maxDrawdown(index.stream().mapToDouble(Double::doubleValue).toArray()),
-            "Largest peak-to-trough fall of the time-weighted value index (deposits and withdrawals removed)."));
+            "Plus forte baisse pic-creux de l'indice de valeur pondéré dans le temps (apports et retraits retirés)."));
     out.put("risk", risk);
 
     Map<String, HoldingInput> holdingBy = new HashMap<>();

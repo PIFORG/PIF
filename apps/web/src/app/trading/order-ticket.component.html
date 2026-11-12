@@ -1,5 +1,5 @@
 @if (portfolio(); as current) {
-  <form class="tr-ticket" (submit)="onSubmit($event)" novalidate aria-label="Order ticket">
+  <form class="tr-ticket" (submit)="onSubmit($event)" novalidate aria-label="Ticket d'ordre">
     <div class="field">
       <label class="field-label" for="ticket-symbol">Instrument</label>
       <select
@@ -9,7 +9,7 @@
         [attr.aria-invalid]="showErrors() && !!errors().symbol"
       >
         @if (!draft().symbol) {
-          <option value="">Choose an instrument</option>
+          <option value="">Choisir un instrument</option>
         }
         @for (i of instruments(); track i.symbol) {
           <option [value]="i.symbol" [selected]="i.symbol === draft().symbol">{{ i.symbol }} · {{ i.name }}</option>
@@ -20,13 +20,13 @@
       }
     </div>
 
-    <div class="tr-segmented" role="group" aria-label="Side">
+    <div class="tr-segmented" role="group" aria-label="Sens">
       @for (side of sides; track side) {
-        <button type="button" [attr.data-side]="side" [attr.aria-pressed]="draft().side === side" (click)="update({ side })">{{ side === 'BUY' ? 'Buy' : 'Sell' }}</button>
+        <button type="button" [attr.data-side]="side" [attr.aria-pressed]="draft().side === side" (click)="update({ side })">{{ side === 'BUY' ? 'Acheter' : 'Vendre' }}</button>
       }
     </div>
 
-    <div class="tr-segmented" data-count="3" role="group" aria-label="Order type">
+    <div class="tr-segmented" data-count="3" role="group" aria-label="Type d'ordre">
       @for (type of types; track type) {
         <button type="button" [attr.aria-pressed]="draft().type === type" (click)="update({ type })">{{ typeLabel[type] }}</button>
       }
@@ -37,7 +37,7 @@
 
     <div class="tr-fieldRow">
       <div class="field">
-        <label class="field-label" for="ticket-quantity">Units</label>
+        <label class="field-label" for="ticket-quantity">Quantité</label>
         <input
           id="ticket-quantity"
           class="input num"
@@ -52,15 +52,15 @@
           @if (showErrors() && errors().quantity) {
             {{ errors().quantity }}
           } @else if (draft().side === 'SELL') {
-            You hold {{ units(held()) }}.
+            Vous détenez {{ units(held()) }}.
           } @else {
-            Cash available {{ dt(current.availableCash) }}
+            Trésorerie disponible {{ dt(current.availableCash) }}
           }
         </p>
       </div>
       @if (draft().type !== 'MARKET') {
         <div class="field">
-          <label class="field-label" for="ticket-price">{{ draft().type === 'LIMIT' ? 'Limit price (DT)' : 'Stop price (DT)' }}</label>
+          <label class="field-label" for="ticket-price">{{ draft().type === 'LIMIT' ? 'Cours limite (DT)' : 'Cours stop (DT)' }}</label>
           <input
             id="ticket-price"
             class="input num"
@@ -75,9 +75,9 @@
             @if (showErrors() && priceError()) {
               {{ priceError() }}
             } @else if (quote(); as q) {
-              Bid {{ price(q.bid) }} · Ask {{ price(q.ask) }}
+              Achat {{ price(q.bid) }} · Vente {{ price(q.ask) }}
             } @else {
-              No quote available.
+              Aucune cotation disponible.
             }
           </p>
         </div>
@@ -85,10 +85,10 @@
     </div>
 
     @if (draft().type === 'STOP' && draft().side === 'SELL') {
-      <p class="tr-muted">A stop-loss waits until the bid falls to your stop price, then sells at the bid. It protects a position you hold.</p>
+      <p class="tr-muted">Un stop attend que le cours acheteur descende jusqu'à votre cours stop, puis vend à ce cours. Il protège une position que vous détenez.</p>
     }
     @if (draft().type === 'MARKET') {
-      <p class="tr-muted">A market order fills now at the best price, up to the size available; any rest is cancelled, never left working.</p>
+      <p class="tr-muted">Un ordre au marché s'exécute maintenant au meilleur prix, dans la limite de la quantité disponible ; le solde est annulé et ne reste pas en carnet.</p>
     }
 
     @if (notice()) {
@@ -96,41 +96,41 @@
     }
 
     @if (review(); as r) {
-      <section class="tr-review" [attr.data-tone]="r.rejection ? 'neg' : null" aria-live="polite" aria-label="Order preview">
-        <h3>{{ r.rejection ? 'This order would be rejected' : reviewTitle() }}</h3>
+      <section class="tr-review" [attr.data-tone]="r.rejection ? 'neg' : null" aria-live="polite" aria-label="Aperçu de l'ordre">
+        <h3>{{ r.rejection ? 'Cet ordre serait rejeté' : reviewTitle() }}</h3>
         @if (r.rejection) {
-          <p>{{ r.rejection.message }} Change the order and preview it again.</p>
+          <p>{{ r.rejection.message }} Modifiez l'ordre et relancez l'aperçu.</p>
         }
         <dl class="tr-reviewRows">
           <div>
-            <dt>{{ draft().side === 'BUY' ? (draft().type === 'LIMIT' ? 'Limit price (the most you pay)' : 'Ask price now') : 'Bid price now' }}</dt>
+            <dt>{{ draft().side === 'BUY' ? (draft().type === 'LIMIT' ? 'Cours limite (le maximum que vous payez)' : 'Cours vendeur actuel') : 'Cours acheteur actuel' }}</dt>
             <dd>{{ price(r.referencePrice) }} DT</dd>
           </div>
           @if (r.executesNow) {
             <div>
-              <dt>Units that fill now</dt>
+              <dt>Quantité exécutée maintenant</dt>
               <dd>{{ units(r.fillableNow) }}</dd>
             </div>
           } @else {
             <div>
-              <dt>Fills now</dt>
-              <dd>No, it waits</dd>
+              <dt>Exécution immédiate</dt>
+              <dd>Non, il attend</dd>
             </div>
           }
           <div>
-            <dt>Estimated amount</dt>
+            <dt>Montant estimé</dt>
             <dd>{{ dt(r.estimate.notional) }}</dd>
           </div>
           <div>
-            <dt>Estimated fee</dt>
+            <dt>Frais estimés</dt>
             <dd>{{ dt(r.estimate.fee) }}</dd>
           </div>
           <div data-total="true">
-            <dt>{{ draft().side === 'BUY' ? 'Estimated total cost' : 'Estimated proceeds' }}</dt>
+            <dt>{{ draft().side === 'BUY' ? 'Coût total estimé' : 'Produit estimé' }}</dt>
             <dd>{{ dt(r.estimate.total) }}</dd>
           </div>
           <div>
-            <dt>{{ draft().side === 'BUY' ? 'Cash available' : 'Units held' }}</dt>
+            <dt>{{ draft().side === 'BUY' ? 'Trésorerie disponible' : 'Quantité détenue' }}</dt>
             <dd>{{ draft().side === 'BUY' ? dt(r.availableCash) : units(r.held) }}</dd>
           </div>
         </dl>
@@ -142,8 +142,8 @@
           </ul>
         }
         <p class="tr-muted">
-          Quote {{ price(r.quote.bid) }} / {{ price(r.quote.ask) }} at {{ shortTime(r.quote.asOf) }}.
-          {{ expired() ? 'This quote has expired; confirming will refresh the preview first.' : 'Valid until ' + shortTime(r.quote.validUntil) + '.' }}
+          Cotation {{ price(r.quote.bid) }} / {{ price(r.quote.ask) }} à {{ shortTime(r.quote.asOf) }}.
+          {{ expired() ? "Cette cotation a expiré ; la confirmation actualisera d'abord l'aperçu." : 'Valable jusqu\'à ' + shortTime(r.quote.validUntil) + '.' }}
         </p>
       </section>
     }
@@ -154,19 +154,19 @@
 
     <div class="tr-actions">
       @if (confirmable()) {
-        <button type="submit" [class]="'btn ' + (draft().side === 'BUY' ? 'btn-primary' : 'btn-danger')" [disabled]="busy() !== null">{{ busy() === 'submit' ? 'Placing order…' : busy() === 'preview' ? 'Refreshing…' : expired() ? 'Refresh preview' : 'Confirm ' + sideWord() }}</button>
-        <button type="button" class="btn btn-ghost" [disabled]="busy() !== null" (click)="preview.set(null)">Edit</button>
+        <button type="submit" [class]="'btn ' + (draft().side === 'BUY' ? 'btn-primary' : 'btn-danger')" [disabled]="busy() !== null">{{ busy() === 'submit' ? "Passage de l'ordre…" : busy() === 'preview' ? 'Actualisation…' : expired() ? "Actualiser l'aperçu" : (draft().side === 'BUY' ? "Confirmer l'achat" : 'Confirmer la vente') }}</button>
+        <button type="button" class="btn btn-ghost" [disabled]="busy() !== null" (click)="preview.set(null)">Modifier</button>
       } @else {
-        <button type="submit" class="btn btn-primary" [disabled]="busy() !== null">{{ busy() === 'preview' ? 'Checking…' : 'Preview order' }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="busy() !== null">{{ busy() === 'preview' ? 'Vérification…' : "Aperçu de l'ordre" }}</button>
       }
     </div>
-    <p class="tr-muted">Prices are fictional and simulated; trades move virtual money only.</p>
+    <p class="tr-muted">Les prix sont fictifs et simulés ; les transactions ne portent que sur de l'argent virtuel.</p>
   </form>
 } @else {
   <div
     mtr-empty-state
     icon="portfolio"
-    heading="Create a portfolio to trade"
-    description="Orders are placed against a virtual portfolio with its own cash and positions."
+    heading="Créez un portefeuille pour négocier"
+    description="Les ordres sont passés sur un portefeuille virtuel, avec sa propre trésorerie et ses positions."
   ></div>
 }

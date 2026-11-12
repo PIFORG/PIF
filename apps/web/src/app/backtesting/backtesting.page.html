@@ -25,44 +25,44 @@
       @if (showMaParams()) {
         <div class="tr-formRow">
           <label>
-            Short SMA
+            MM courte
             <input class="input" type="number" min="2" [ngModel]="shortPeriod()" (ngModelChange)="shortPeriod.set(+$event)" name="short" />
           </label>
           <label>
-            Long SMA
+            MM longue
             <input class="input" type="number" min="3" [ngModel]="longPeriod()" (ngModelChange)="longPeriod.set(+$event)" name="long" />
           </label>
         </div>
       }
       @if (showRebalanceParams()) {
         <label>
-          Rebalance every N bars
+          Rééquilibrer toutes les N barres
           <input class="input" type="number" min="1" [ngModel]="rebalanceEvery()" (ngModelChange)="rebalanceEvery.set(+$event)" name="reb" />
         </label>
       }
 
       <div class="tr-formRow">
         <label>
-          Start (UTC)
+          Début (UTC)
           <input class="input" [ngModel]="start()" (ngModelChange)="start.set($event)" name="start" />
         </label>
         <label>
-          End (UTC)
+          Fin (UTC)
           <input class="input" [ngModel]="end()" (ngModelChange)="end.set($event)" name="end" />
         </label>
       </div>
 
       <div class="tr-formRow">
         <label>
-          Initial cash (DT)
+          Espèces initiales (DT)
           <input class="input" type="number" min="1000" [ngModel]="initialCash()" (ngModelChange)="initialCash.set(+$event)" name="cash" />
         </label>
         <label>
-          Fee (bps)
+          Frais (pb)
           <input class="input" type="number" min="0" [ngModel]="feeBps()" (ngModelChange)="feeBps.set(+$event)" name="fee" />
         </label>
         <label>
-          Slippage (bps)
+          Glissement (pb)
           <input class="input" type="number" min="0" [ngModel]="slippageBps()" (ngModelChange)="slippageBps.set(+$event)" name="slip" />
         </label>
       </div>
@@ -83,7 +83,7 @@
         }
       </fieldset>
 
-      <button type="submit" class="btn btn-primary" [disabled]="running()">{{ running() ? 'Exécution…' : 'Lancer le backtest' }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="running()">{{ running() ? 'Exécution…' : 'Lancer le test historique' }}</button>
     </form>
     @if (runError()) {
       <p class="form-error-banner" role="alert">{{ runError() }}</p>
@@ -101,53 +101,53 @@
     </div>
 
     <div class="tr-twoUp">
-      <section mtr-panel heading="Equity curve" [description]="r.executionConvention">
+      <section mtr-panel heading="Courbe de valeur" [description]="r.executionConvention">
         @if (equityChart(); as c) {
           @if (c.enough) {
             <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="twoDecimals" [xLabels]="c.xLabels" [minSpan]="c.minSpan"></figure>
           } @else {
-            <div mtr-empty-state heading="No equity path" description="The run did not return enough points."></div>
+            <div mtr-empty-state heading="Pas de courbe de valeur" description="L'exécution n'a pas renvoyé assez de points."></div>
           }
         }
       </section>
-      <section mtr-panel heading="Drawdown" description="Peak-to-trough on the strategy equity curve.">
+      <section mtr-panel heading="Repli" description="Du pic au creux sur la courbe de valeur de la stratégie.">
         @if (drawdownChart(); as c) {
           @if (c.enough) {
             <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="plainPct" [xLabels]="c.xLabels" [minSpan]="c.minSpan"></figure>
           } @else {
-            <div mtr-empty-state heading="No drawdown path" description="Not enough points."></div>
+            <div mtr-empty-state heading="Pas de courbe de repli" description="Pas assez de points."></div>
           }
         }
       </section>
     </div>
 
-    <section mtr-panel heading="Performance metrics" [description]="r.metrics.annualization">
+    <section mtr-panel heading="Indicateurs de performance" [description]="r.metrics.annualization">
       <dl class="tr-metricGrid">
-        <div><dt>Annualized return</dt><dd>{{ r.metrics.annualizedReturn === null ? '—' : pct(r.metrics.annualizedReturn, true) }}</dd></div>
-        <div><dt>Volatility (ann.)</dt><dd>{{ r.metrics.volatilityAnnualized === null ? '—' : pct(r.metrics.volatilityAnnualized) }}</dd></div>
-        <div><dt>Fees</dt><dd>{{ dt(r.metrics.totalFees) }}</dd></div>
-        <div><dt>Slippage cost</dt><dd>{{ dt(r.metrics.totalSlippageCost) }}</dd></div>
-        <div><dt>Win rate</dt><dd>{{ r.metrics.winRate === null ? '—' : pct(r.metrics.winRate) }}</dd></div>
-        <div><dt>Benchmark (buy &amp; hold)</dt><dd>{{ r.metrics.benchmarkTotalReturn === null ? '—' : pct(r.metrics.benchmarkTotalReturn, true) }}</dd></div>
-        <div><dt>Excess vs benchmark</dt><dd>{{ r.metrics.excessReturnVsBenchmark === null ? '—' : pct(r.metrics.excessReturnVsBenchmark, true) }}</dd></div>
-        <div><dt>Bars</dt><dd>{{ r.barCount }} · {{ r.metrics.calendarDays }} calendar days</dd></div>
+        <div><dt>Rendement annualisé</dt><dd>{{ r.metrics.annualizedReturn === null ? '—' : pct(r.metrics.annualizedReturn, true) }}</dd></div>
+        <div><dt>Volatilité (ann.)</dt><dd>{{ r.metrics.volatilityAnnualized === null ? '—' : pct(r.metrics.volatilityAnnualized) }}</dd></div>
+        <div><dt>Frais</dt><dd>{{ dt(r.metrics.totalFees) }}</dd></div>
+        <div><dt>Coût de glissement</dt><dd>{{ dt(r.metrics.totalSlippageCost) }}</dd></div>
+        <div><dt>Taux de gain</dt><dd>{{ r.metrics.winRate === null ? '—' : pct(r.metrics.winRate) }}</dd></div>
+        <div><dt>Référence (acheter et conserver)</dt><dd>{{ r.metrics.benchmarkTotalReturn === null ? '—' : pct(r.metrics.benchmarkTotalReturn, true) }}</dd></div>
+        <div><dt>Écart vs référence</dt><dd>{{ r.metrics.excessReturnVsBenchmark === null ? '—' : pct(r.metrics.excessReturnVsBenchmark, true) }}</dd></div>
+        <div><dt>Barres</dt><dd>{{ r.barCount }} · {{ r.metrics.calendarDays }} jours calendaires</dd></div>
       </dl>
     </section>
 
-    <section mtr-panel heading="Trades" description="Chronological simulated fills at next-open mid with fees and slippage.">
+    <section mtr-panel heading="Transactions" description="Exécutions simulées dans l'ordre chronologique, au cours médian de l'ouverture suivante, frais et glissement inclus.">
       @if (r.trades.length === 0) {
-        <div mtr-empty-state heading="No trades" description="This strategy stayed in cash or held without rebalancing fills."></div>
+        <div mtr-empty-state heading="Aucune transaction" description="Cette stratégie est restée en espèces ou a conservé ses titres sans rééquilibrage."></div>
       } @else {
         <div class="table-wrap tr-rows">
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">When</th>
-                <th scope="col">Symbol</th>
-                <th scope="col">Side</th>
-                <th scope="col" class="num">Qty</th>
-                <th scope="col" class="num">Price</th>
-                <th scope="col" class="num">Fee</th>
+                <th scope="col">Date</th>
+                <th scope="col">Symbole</th>
+                <th scope="col">Sens</th>
+                <th scope="col" class="num">Qté</th>
+                <th scope="col" class="num">Cours</th>
+                <th scope="col" class="num">Frais</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +155,7 @@
                 <tr>
                   <td>{{ dateTime(t.at) }}</td>
                   <td>{{ t.symbol }}</td>
-                  <td>{{ t.side }}</td>
+                  <td>{{ t.side === 'BUY' ? 'Achat' : t.side === 'SELL' ? 'Vente' : t.side }}</td>
                   <td class="num">{{ t.quantity }}</td>
                   <td class="num">{{ dt(t.price) }}</td>
                   <td class="num">{{ dt(t.fee) }}</td>
@@ -167,7 +167,7 @@
       }
     </section>
 
-    <section mtr-panel heading="Assumptions and limitations">
+    <section mtr-panel heading="Hypothèses et limites">
       <ul>
         @for (a of r.assumptions; track a) {
           <li>{{ a }}</li>

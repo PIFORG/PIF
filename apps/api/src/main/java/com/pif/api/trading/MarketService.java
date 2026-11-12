@@ -64,23 +64,25 @@ public class MarketService {
     m.put("dataStart", Db.iso(provider.dataStart()));
     m.put("quotePeriodSeconds", SimulatedMarketProvider.BUCKET_MS / 1000);
     m.put("currentPeriod", period);
-    m.put("tradingHours", "The simulated market trades continuously, 24 hours a day, 7 days a week.");
+    m.put("tradingHours", "Le marché simulé cote en continu, 24 h sur 24, 7 jours sur 7.");
     m.put("dataKinds", List.of("FICTIONAL"));
     m.put("quality", Map.of(
-        "missingObservationPolicy", "Pre-epoch quotes are null; incomplete risk windows report metrics as unavailable, never as a silent zero.",
+        "missingObservationPolicy",
+        "Avant l'époque de simulation, les cotations sont nulles ; les fenêtres de risque incomplètes signalent les "
+            + "indicateurs comme indisponibles, jamais comme un zéro silencieux.",
         "corporateActions", Messages.get("market.corporate_actions"),
-        "adjustments", "None - closes are unadjusted simulated mids."));
+        "adjustments", "Aucun — les clôtures sont des mids simulés non ajustés."));
     m.put("assetClassConventions", List.of(
         Map.of("assetClass", "EQUITY", "status", "LIVE", "note",
-            "Mid mark-to-market, bid/ask spread, equity fee schedule."),
+            "Valorisation au mid, spread bid/ask, barème de frais actions."),
         Map.of("assetClass", "FUND", "status", "LIVE", "note",
-            "Bond-fund proxy (GOV): lower vol/beta; not dirty/clean price or accrued interest."),
+            "Proxy de fonds obligataire (GOV) : volatilité et bêta plus faibles ; pas de prix sale/net ni d'intérêts courus."),
         Map.of("assetClass", "BOND", "status", "PENDING_DB_APPROVAL", "note",
-            "Enum/seed extension prepared; main PIF database unchanged until approved."),
+            "Extension enum/seed préparée ; la base PIF principale reste inchangée jusqu'à validation."),
         Map.of("assetClass", "COMMODITY", "status", "PENDING_DB_APPROVAL", "note",
-            "Synthetic future-style continuous return planned."),
+            "Rendement continu de type future synthétique prévu."),
         Map.of("assetClass", "FX", "status", "PENDING_DB_APPROVAL", "note",
-            "Quote pairs in TND terms planned; no overnight interest.")));
+            "Paires cotées en TND prévues ; pas d'intérêt overnight.")));
     return m;
   }
 

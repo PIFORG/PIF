@@ -59,18 +59,18 @@ interface Rule {
 }
 
 const RULES = {
-  policies: { label: 'Policies', min: 1, max: 1_000_000, decimals: 0, integer: true },
-  years: { label: 'Cover period', min: 0.25, max: 5, decimals: 2 },
-  probabilityPct: { label: 'Claim probability', min: 0.01, max: 50, decimals: 4 },
-  intensity: { label: 'Claim frequency', min: 0.0001, max: 2, decimals: 6 },
-  meanCost: { label: 'Average claim cost', min: 1, max: 10_000_000, decimals: 3 },
-  cv: { label: 'Coefficient of variation', min: 0.05, max: 5, decimals: 4 },
-  inflationPct: { label: 'Claim inflation', min: -5, max: 30, decimals: 2 },
-  inflationYears: { label: 'Trend period', min: 0, max: 10, decimals: 2 },
-  fixedExpenses: { label: 'Fixed expenses', min: 0, max: 100_000_000, decimals: 3 },
-  perPolicyExpenses: { label: 'Expenses per policy', min: 0, max: 100_000, decimals: 3 },
-  variablePct: { label: 'Variable expenses', min: 0, max: 50, decimals: 2 },
-  marginPct: { label: 'Profit margin', min: 0, max: 30, decimals: 2 },
+  policies: { label: 'Polices', min: 1, max: 1_000_000, decimals: 0, integer: true },
+  years: { label: 'Période de couverture', min: 0.25, max: 5, decimals: 2 },
+  probabilityPct: { label: 'Probabilité de sinistre', min: 0.01, max: 50, decimals: 4 },
+  intensity: { label: 'Fréquence des sinistres', min: 0.0001, max: 2, decimals: 6 },
+  meanCost: { label: 'Coût moyen du sinistre', min: 1, max: 10_000_000, decimals: 3 },
+  cv: { label: 'Coefficient de variation', min: 0.05, max: 5, decimals: 4 },
+  inflationPct: { label: 'Inflation des sinistres', min: -5, max: 30, decimals: 2 },
+  inflationYears: { label: 'Période de tendance', min: 0, max: 10, decimals: 2 },
+  fixedExpenses: { label: 'Frais fixes', min: 0, max: 100_000_000, decimals: 3 },
+  perPolicyExpenses: { label: 'Frais par police', min: 0, max: 100_000, decimals: 3 },
+  variablePct: { label: 'Frais variables', min: 0, max: 50, decimals: 2 },
+  marginPct: { label: 'Marge bénéficiaire', min: 0, max: 30, decimals: 2 },
   loadingEv: { label: 'Chargement θ', min: 0, max: 100, decimals: 2 },
   loadingSd: { label: 'Chargement k', min: 0, max: 5, decimals: 4 },
 } satisfies Record<string, Rule>;
@@ -79,13 +79,13 @@ const NUMBER = /^-?\d+(\.\d+)?$/;
 
 function parse(raw: string, rule: Rule): { value: number } | { error: string } {
   const text = raw.trim();
-  if (text === '') return { error: `${rule.label} is required.` };
-  if (!NUMBER.test(text)) return { error: `${rule.label} must be a number.` };
+  if (text === '') return { error: `${rule.label} est obligatoire.` };
+  if (!NUMBER.test(text)) return { error: `${rule.label} doit être un nombre.` };
   const decimals = text.includes('.') ? text.split('.')[1].length : 0;
-  if (rule.integer && decimals > 0) return { error: `${rule.label} must be a whole number.` };
-  if (decimals > rule.decimals) return { error: `${rule.label} allows at most ${rule.decimals} decimals.` };
+  if (rule.integer && decimals > 0) return { error: `${rule.label} doit être un nombre entier.` };
+  if (decimals > rule.decimals) return { error: `${rule.label} accepte au plus ${rule.decimals} décimales.` };
   const value = Number(text);
-  if (value < rule.min || value > rule.max) return { error: `${rule.label} must be between ${rule.min.toLocaleString('en-US')} and ${rule.max.toLocaleString('en-US')}.` };
+  if (value < rule.min || value > rule.max) return { error: `${rule.label} doit être compris entre ${rule.min.toLocaleString('en-US')} et ${rule.max.toLocaleString('en-US')}.` };
   return { value };
 }
 
@@ -153,10 +153,10 @@ export interface SimulationSettings {
 
 export const MAX_SEED = 2_147_483_647;
 const SIMULATION_RULES: Record<'simulations' | 'seed' | 'initialCapital' | 'premiumCharged', Rule> = {
-  simulations: { label: 'Simulations', min: 1_000, max: 200_000, decimals: 0, integer: true },
-  seed: { label: 'Seed', min: 1, max: MAX_SEED, decimals: 0, integer: true },
-  initialCapital: { label: 'Initial capital', min: 0, max: 10_000_000_000, decimals: 3 },
-  premiumCharged: { label: 'Premium charged', min: 1, max: 100_000_000_000, decimals: 3 },
+  simulations: { label: 'Périodes simulées', min: 1_000, max: 200_000, decimals: 0, integer: true },
+  seed: { label: 'Graine', min: 1, max: MAX_SEED, decimals: 0, integer: true },
+  initialCapital: { label: 'Capital initial', min: 0, max: 10_000_000_000, decimals: 3 },
+  premiumCharged: { label: 'Prime encaissée', min: 1, max: 100_000_000_000, decimals: 3 },
 };
 const RUN_LABEL = /^[\p{L}\p{N} .,'&()%+/-]{1,80}$/u;
 
@@ -175,7 +175,7 @@ export function validateSimulationSettings(form: SimulationSettingsForm): { sett
   const initialCapital = read('initialCapital');
   const premiumCharged = form.premiumCharged.trim() === '' ? undefined : read('premiumCharged');
   const label = form.label.trim();
-  if (label !== '' && !RUN_LABEL.test(label)) errors.label = "Use 1–80 letters, digits, spaces or . , ' & ( ) % + / -";
+  if (label !== '' && !RUN_LABEL.test(label)) errors.label = "Utilisez 1 à 80 lettres, chiffres, espaces ou . , ' & ( ) % + / -";
   if (Object.keys(errors).length > 0) return { settings: null, errors };
   return {
     errors,
