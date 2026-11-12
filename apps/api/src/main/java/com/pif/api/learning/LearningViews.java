@@ -92,6 +92,7 @@ public final class LearningViews {
       row.put("symbol", a.symbol());
       row.put("name", a.name());
       row.put("sector", a.sector());
+      row.put("sectorLabel", LearningFr.sectorLabel(a.sector()));
       assets.add(row);
     }
     out.put("assets", assets);
@@ -226,6 +227,7 @@ public final class LearningViews {
       row.put("symbol", a.symbol());
       row.put("name", a.name());
       row.put("sector", a.sector());
+      row.put("sectorLabel", LearningFr.sectorLabel(a.sector()));
       row.put("bid", dt(q.bid()));
       row.put("ask", dt(q.ask()));
       row.put("mid", dt(q.mid()));
@@ -303,8 +305,8 @@ public final class LearningViews {
       for (StressScenarioDefinition s : mission.scenario().stressScenarios()) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", s.id());
-        row.put("name", s.name());
-        row.put("description", s.description());
+        row.put("name", LearningFr.stressName(s.id(), s.name()));
+        row.put("description", LearningFr.stressDescription(s.id(), s.description()));
         scenarios.add(row);
       }
     }

@@ -9,19 +9,19 @@
   </mtr-page-heading>
 
   @if (error()) {
-    <div mtr-empty-state tone="error" heading="FinStories unavailable" [description]="error()">
+    <div mtr-empty-state tone="error" heading="Histoires financières indisponibles" [description]="error()">
       <button mtrEmptyAction type="button" class="btn btn-secondary" (click)="load()">Réessayer</button>
     </div>
   } @else if (stories(); as list) {
     @if (list.length === 0) {
-      <div mtr-empty-state heading="No stories yet" description="New stories will appear here."></div>
+      <div mtr-empty-state heading="Aucune histoire pour le moment" description="Les nouvelles histoires apparaîtront ici."></div>
     } @else {
       @let weak = weakest();
       <div class="st-cinemaFrame" aria-hidden="true">
         <span class="st-cinemaVignette"></span>
         <span class="st-cinemaGrain"></span>
       </div>
-      <div class="st-feed" #feed aria-label="FinStories feed">
+      <div class="st-feed" #feed aria-label="Fil des histoires financières">
         <div class="st-feedRail" aria-hidden="true">
           @for (story of list; track story.slug; let index = $index) {
             <button
@@ -40,7 +40,7 @@
             #item
             [attr.data-index]="index"
             [attr.data-active]="index === activeIndex() ? 'true' : null"
-            [attr.aria-label]="index + 1 + ' of ' + list.length + ': ' + story.title"
+            [attr.aria-label]="index + 1 + ' sur ' + list.length + ' : ' + story.title"
           >
             <div
               mtr-story-player
@@ -62,29 +62,29 @@
                 <span class="badge badge-muted">{{ characterName[story.character] }}</span>
                 <span class="badge badge-muted">{{ levelLabel[story.level] }}</span>
                 @if (story.recommended) {
-                  <span class="badge badge-info">For your weakest skill</span>
+                  <span class="badge badge-info">Pour votre compétence la plus faible</span>
                 }
                 @if (story.progress.completed) {
-                  <span class="badge badge-active">Watched</span>
+                  <span class="badge badge-active">Vu</span>
                 }
                 @if (story.progress.watchedEarlierVersion) {
-                  <span class="badge badge-muted">Watched an earlier version</span>
+                  <span class="badge badge-muted">Version antérieure vue</span>
                 }
                 @if (story.progress.updatedSinceLastWatch) {
-                  <span class="badge badge-info">Updated since you watched</span>
+                  <span class="badge badge-info">Mis à jour depuis votre visionnage</span>
                 }
               </div>
               <h2>{{ story.title }}</h2>
               <p>{{ story.summary }}</p>
-              <p>Skill: {{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}{{ resumesAt > 0 ? ' · resumes at ' + clock(resumesAt) : '' }}</p>
+              <p>Compétence : {{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}{{ resumesAt > 0 ? ' · reprise à ' + clock(resumesAt) : '' }}</p>
               @if (story.relatedMissionSlug) {
-                <a [routerLink]="['/learn/missions', story.relatedMissionSlug]" class="btn btn-secondary btn-sm" style="justify-self: start">Practise it in MarketQuest</a>
+                <a [routerLink]="['/learn/missions', story.relatedMissionSlug]" class="btn btn-secondary btn-sm" style="justify-self: start">S'entraîner dans le parcours</a>
               }
               <div style="display: flex; gap: var(--space-2)">
-                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index - 1)" [disabled]="index === 0">Previous story</button>
-                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index + 1)" [disabled]="index === list.length - 1">Next story</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index - 1)" [disabled]="index === 0">Histoire précédente</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index + 1)" [disabled]="index === list.length - 1">Histoire suivante</button>
               </div>
-              <p class="st-transcript">Motion graphics rendered in your browser from the story script; no video file is involved. Narration, when switched on, uses your browser's text-to-speech. These are fictional, illustrative scenarios.{{ weak && index === 0 ? ' Ordered for you: stories on ' + competencyLabel[weak] + ' come first.' : '' }}</p>
+              <p class="st-transcript">Animations dessinées dans votre navigateur à partir du script ; aucun fichier vidéo. La narration, lorsqu'elle est activée, utilise la synthèse vocale du navigateur. Ce sont des scénarios fictifs et illustratifs.{{ weak && index === 0 ? ' Ordre personnalisé : les histoires sur ' + competencyLabel[weak] + ' viennent en premier.' : '' }}</p>
             </aside>
           </section>
         }

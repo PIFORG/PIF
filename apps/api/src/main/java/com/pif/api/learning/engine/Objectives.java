@@ -1,6 +1,7 @@
 package com.pif.api.learning.engine;
 
 import com.pif.api.finance.Risk;
+import com.pif.api.learning.LearningFr;
 import com.pif.api.learning.engine.Definitions.MarketEventDefinition;
 import com.pif.api.learning.engine.Definitions.ObjectiveDefinition;
 import com.pif.api.learning.engine.SimState.Order;
@@ -53,20 +54,20 @@ public final class Objectives {
           }
         }
         int needed = objective.minCount() == null ? 1 : objective.minCount();
-        return open(fin, count >= needed, count + " qualifying order(s) executed.",
-            count + " of " + needed + " qualifying order(s) executed so far.");
+        return open(fin, count >= needed, count + " ordre(s) éligible(s) exécuté(s).",
+            count + " sur " + needed + " ordre(s) éligible(s) exécuté(s) pour l'instant.");
       }
       case "PROTECTIVE_STOP": {
         boolean protectedOnce = state.history.stream().anyMatch(h -> !h.protectedSymbols().isEmpty())
             || state.orders.stream().anyMatch(o -> "STOP".equals(o.type) && o.filledQuantity > 0);
-        return open(fin, protectedOnce, "A stop order protected a position.",
-            "No position has been protected by a stop order yet.");
+        return open(fin, protectedOnce, "Un ordre stop a protégé une position.",
+            "Aucune position n'a encore été protégée par un ordre stop.");
       }
       case "MAX_DRAWDOWN": {
         double dd = Risk.maxDrawdown(Metrics.equitySeries(state)) * 100;
         String limit = Js.str(objective.limitPct());
-        return holding(fin, dd <= objective.limitPct(), "Maximum drawdown " + Js.toFixed(dd, 2) + " % (limit " + limit + " %).",
-            "Drawdown reached " + Js.toFixed(dd, 2) + " %, above the " + limit + " % limit.");
+        return holding(fin, dd <= objective.limitPct(), "Drawdown maximal " + Js.toFixed(dd, 2) + " % (limite " + limit + " %).",
+            "Drawdown à " + Js.toFixed(dd, 2) + " %, au-dessus de la limite de " + limit + " %.");
       }
       case "MAX_LOSS": {
         double worst = Double.POSITIVE_INFINITY;
@@ -74,36 +75,36 @@ public final class Objectives {
         double lossPct = Math.max(0, ((state.initialEquity - worst) / state.initialEquity) * 100);
         String limit = Js.str(objective.limitPct());
         return holding(fin, lossPct < objective.limitPct(),
-            "Largest loss from the start " + Js.toFixed(lossPct, 2) + " % (limit " + limit + " %).",
-            "Loss reached " + Js.toFixed(lossPct, 2) + " %, breaching the " + limit + " % limit.");
+            "Plus forte perte depuis le départ " + Js.toFixed(lossPct, 2) + " % (limite " + limit + " %).",
+            "Perte à " + Js.toFixed(lossPct, 2) + " %, dépassant la limite de " + limit + " %.");
       }
       case "MAX_POSITION_WEIGHT": {
         String limit = Js.str(objective.limitPct());
         int fromStep = objective.fromStep();
         for (StepRecord h : state.history) {
           if (h.step() >= fromStep && (fin || h.step() < state.step) && h.maxWeight() * 100 > objective.limitPct()) {
-            return new Evaluation("FAILED", "At step " + h.step() + " one position was "
-                + Js.toFixed(h.maxWeight() * 100, 1) + " % of equity (limit " + limit + " %).");
+            return new Evaluation("FAILED", "À la séance " + h.step() + " une position représentait "
+                + Js.toFixed(h.maxWeight() * 100, 1) + " % des fonds propres (limite " + limit + " %).");
           }
         }
         if (!fin && current.maxWeight() * 100 > objective.limitPct() && state.step >= fromStep) {
-          return new Evaluation("AT_RISK", "One position is " + Js.toFixed(current.maxWeight() * 100, 1)
-              + " % of equity; bring it under " + limit + " % before advancing.");
+          return new Evaluation("AT_RISK", "Une position fait " + Js.toFixed(current.maxWeight() * 100, 1)
+              + " % des fonds propres ; repassez sous " + limit + " % avant d'avancer.");
         }
         if (!fin && state.step < fromStep) {
-          return new Evaluation("PENDING", "The " + limit + " % limit applies from step " + fromStep + ".");
+          return new Evaluation("PENDING", "La limite de " + limit + " % s'applique à partir de la séance " + fromStep + ".");
         }
-        return new Evaluation(fin ? "MET" : "ON_TRACK", "Every position stayed at or below " + limit + " % of equity.");
+        return new Evaluation(fin ? "MET" : "ON_TRACK", "Chaque position est restée à " + limit + " % des fonds propres ou moins.");
       }
       case "MIN_ASSETS_HELD": {
         int held = current.heldSymbols().size();
         int count = objective.count();
         if (fin) {
-          return held >= count ? new Evaluation("MET", "You ended holding " + held + " assets.")
-              : new Evaluation("NOT_MET", "You ended holding " + held + " of " + count + " assets.");
+          return held >= count ? new Evaluation("MET", "Vous terminez avec " + held + " actif(s).")
+              : new Evaluation("NOT_MET", "Vous terminez avec " + held + " actif(s) sur " + count + " requis.");
         }
-        return held >= count ? new Evaluation("ON_TRACK", "Holding " + held + " assets.")
-            : new Evaluation("PENDING", "Holding " + held + " of " + count + " assets.");
+        return held >= count ? new Evaluation("ON_TRACK", held + " actif(s) détenu(s).")
+            : new Evaluation("PENDING", held + " actif(s) sur " + count + " requis.");
       }
       case "MIN_INVESTED": {
         List<StepRecord> judged = new ArrayList<>();
@@ -115,7 +116,7 @@ public final class Objectives {
         for (StepRecord h : sample) sum = sum + h.exposure();
         double exposure = (sum / sample.size()) * 100;
         boolean ok = exposure >= objective.pct();
-        String detail = "Average exposure " + Js.toFixed(exposure, 1) + " % from step 1 (target "
+        String detail = "Exposition moyenne " + Js.toFixed(exposure, 1) + " % depuis la séance 1 (objectif "
             + Js.str(objective.pct()) + " %).";
         if (fin) return new Evaluation(ok ? "MET" : "NOT_MET", detail);
         return new Evaluation(ok ? "ON_TRACK" : "AT_RISK", detail);
@@ -123,12 +124,13 @@ public final class Objectives {
       case "RUN_STRESS_TEST": {
         Integer deadline = objective.beforeStep();
         boolean done = state.stressTests.stream().anyMatch(t -> deadline == null || t.step() < deadline);
-        if (done) return new Evaluation("MET", "You stress-tested the portfolio in time.");
+        if (done) return new Evaluation("MET", "Vous avez lancé un test de résistance à temps.");
         if (deadline != null && state.step >= deadline) {
-          return new Evaluation(fin ? "NOT_MET" : "FAILED", "No stress test was run before step " + deadline + ".");
+          return new Evaluation(fin ? "NOT_MET" : "FAILED", "Aucun test de résistance avant la séance " + deadline + ".");
         }
         return new Evaluation(fin ? "NOT_MET" : "PENDING",
-            deadline == null ? "No stress test run yet." : "Run a stress test before step " + deadline + ".");
+            deadline == null ? "Aucun test de résistance pour l'instant."
+                : "Lancez un test de résistance avant la séance " + deadline + ".");
       }
       case "REACT_TO_EVENT": {
         MarketEventDefinition event = null;
@@ -138,24 +140,26 @@ public final class Objectives {
             break;
           }
         }
-        if (event == null) return new Evaluation("NOT_MET", "The referenced event is not part of this scenario.");
+        if (event == null) return new Evaluation("NOT_MET", "L'événement référencé ne fait pas partie de ce scénario.");
         int start = event.step();
         int end = event.step() + objective.withinSteps();
         boolean reacted = state.orders.stream()
             .anyMatch(o -> !"REJECTED".equals(o.status) && o.createdStep >= start && o.createdStep <= end);
-        if (reacted) return new Evaluation("MET", "You acted on “" + event.headline() + "”.");
-        if (state.step < event.step()) return new Evaluation(fin ? "NOT_MET" : "PENDING", "Watch the news feed.");
+        String headline = LearningFr.get("mission." + ctx.mission().slug() + ".event." + event.id() + ".headline",
+            event.headline());
+        if (reacted) return new Evaluation("MET", "Vous avez réagi à « " + headline + " ».");
+        if (state.step < event.step()) return new Evaluation(fin ? "NOT_MET" : "PENDING", "Surveillez le fil d'actualité.");
         if (state.step > end || fin) {
           return new Evaluation(fin ? "NOT_MET" : "FAILED",
-              "No decision within " + objective.withinSteps() + " step(s) of the event.");
+              "Aucune décision dans les " + objective.withinSteps() + " séance(s) suivant l'événement.");
         }
-        return new Evaluation("PENDING", "Decide how to respond before step " + (end + 1) + ".");
+        return new Evaluation("PENDING", "Décidez comment réagir avant la séance " + (end + 1) + ".");
       }
       case "MAX_TRADES": {
         long trades = state.orders.stream().filter(o -> o.filledQuantity > 0).count();
         int count = objective.count();
-        return holding(fin, trades <= count, trades + " executed order(s) (limit " + count + ").",
-            trades + " executed orders exceed the limit of " + count + ".");
+        return holding(fin, trades <= count, trades + " ordre(s) exécuté(s) (limite " + count + ").",
+            trades + " ordres exécutés dépassent la limite de " + count + ".");
       }
       default:
         throw new IllegalArgumentException("Unknown objective kind " + objective.kind());
@@ -174,8 +178,8 @@ public final class Objectives {
     List<ObjectiveResult> out = new ArrayList<>();
     for (ObjectiveDefinition objective : ctx.mission().objectives()) {
       Evaluation e = evaluate(ctx, state, objective);
-      out.add(new ObjectiveResult(objective.id(), objective.kind(), objective.label(), objective.required(), e.status(),
-          e.detail()));
+      String label = LearningFr.get("mission." + ctx.mission().slug() + ".objective." + objective.id(), objective.label());
+      out.add(new ObjectiveResult(objective.id(), objective.kind(), label, objective.required(), e.status(), e.detail()));
     }
     return out;
   }

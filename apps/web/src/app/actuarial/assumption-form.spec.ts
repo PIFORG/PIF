@@ -19,7 +19,7 @@ describe('simulation settings', () => {
   it('rejects sizes, seeds and labels the server would refuse', () => {
     const errors = validateSimulationSettings({ simulations: '200001', seed: '0', initialCapital: '-1', premiumCharged: '0', label: '<b>' }).errors;
     expect(Object.keys(errors).sort()).toEqual(['initialCapital', 'label', 'premiumCharged', 'seed', 'simulations']);
-    expect(validateSimulationSettings({ ...base, seed: '1.5' }).errors.seed).toBe('Seed must be a whole number.');
+    expect(validateSimulationSettings({ ...base, seed: '1.5' }).errors.seed).toBe('Graine doit être un nombre entier.');
   });
 
   it('draws seeds inside 1 … 2,147,483,647', () => {
@@ -74,11 +74,11 @@ describe('assumption form', () => {
     };
     const { assumptions, errors } = validateForm(form);
     expect(assumptions).toBeNull();
-    expect(errors.policies).toBe('Policies must be a whole number.');
-    expect(errors.probabilityPct).toBe('Claim probability must be between 0.01 and 50.');
-    expect(errors.meanCost).toBe('Average claim cost is required.');
-    expect(errors.variablePct).toBe('Variable expenses allows at most 2 decimals.');
-    expect(errors.fixedExpenses).toBe('Fixed expenses must be a number.');
+    expect(errors.policies).toBe('Polices doit être un nombre entier.');
+    expect(errors.probabilityPct).toBe('Probabilité de sinistre doit être compris entre 0.01 et 50.');
+    expect(errors.meanCost).toBe('Coût moyen du sinistre est obligatoire.');
+    expect(errors.variablePct).toBe('Frais variables accepte au plus 2 décimales.');
+    expect(errors.fixedExpenses).toBe('Frais fixes doit être un nombre.');
   });
 
   it('ignores the hidden family field even when it is invalid', () => {

@@ -23,27 +23,27 @@ export const LEVEL_LABEL: Record<LearningLevel, string> = {
 };
 
 export const COMPETENCY_LABEL: Record<Competency, string> = {
-  MARKET_UNDERSTANDING: 'Market Understanding',
-  TRADING_EXECUTION: 'Trading Execution',
-  RISK_MANAGEMENT: 'Risk Management',
-  DIVERSIFICATION: 'Portfolio Diversification',
-  STRATEGIC_REASONING: 'Strategic Reasoning',
+  MARKET_UNDERSTANDING: 'Compréhension des marchés',
+  TRADING_EXECUTION: 'Exécution des ordres',
+  RISK_MANAGEMENT: 'Gestion du risque',
+  DIVERSIFICATION: 'Diversification du portefeuille',
+  STRATEGIC_REASONING: 'Raisonnement stratégique',
 };
 
 export const RATIONALE_LABEL: Record<Rationale, string> = {
-  LIMIT_DOWNSIDE: 'Limit downside',
-  DIVERSIFY: 'Diversify',
-  REACT_TO_NEWS: 'React to news',
-  TAKE_PROFIT: 'Take profit',
-  REBALANCE: 'Rebalance',
-  LONG_TERM_VIEW: 'Long-term view',
-  FOLLOW_MOMENTUM: 'Follow momentum',
+  LIMIT_DOWNSIDE: 'Limiter la baisse',
+  DIVERSIFY: 'Diversifier',
+  REACT_TO_NEWS: "Réagir à l'actualité",
+  TAKE_PROFIT: 'Prendre des bénéfices',
+  REBALANCE: 'Rééquilibrer',
+  LONG_TERM_VIEW: 'Vision long terme',
+  FOLLOW_MOMENTUM: 'Suivre la tendance',
 };
 
 export const AVAILABILITY_LABEL: Record<MissionAvailability, string> = {
-  IMPLEMENTED: 'Implemented',
-  CONFIGURED: 'Playable · in review',
-  PLANNED: 'Planned',
+  IMPLEMENTED: 'Disponible',
+  CONFIGURED: 'Jouable · en revue',
+  PLANNED: 'Prévue',
 };
 
 export interface MissionSummary {

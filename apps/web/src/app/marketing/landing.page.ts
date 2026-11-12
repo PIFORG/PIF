@@ -20,7 +20,7 @@ const PILLARS: { icon: IconName; title: string; body: string }[] = [
   },
   {
     icon: 'strategy',
-    title: 'Stratégies et backtesting',
+    title: 'Stratégies et tests historiques',
     body: 'Décrivez une stratégie par règles, rejouez-la sur des scénarios historiques et comparez-la à un indice de référence.',
   },
   {
@@ -60,13 +60,13 @@ const LIVE_NOW = [
   'MFA via application d\'authentification et codes de récupération',
   'Gestion des appareils et des sessions',
   'Administration par rôles et journal d\'audit',
-  'Missions d\'apprentissage MarketQuest dans un marché simulé, avec évaluation et relecture',
-  'FinStories : histoires de décision en une minute',
+  'Parcours d\'apprentissage dans un marché simulé, avec évaluation et relecture',
+  'Histoires financières : histoires de décision en une minute',
 ];
 
 const IN_DEVELOPMENT = [
   'Données de marché en direct et salle de trading principale',
-  'Moteurs de portefeuille, de risque et de backtesting',
+  'Moteurs de portefeuille, de risque et de tests historiques',
   'Analyses IA et explicabilité',
   'Tests de résistance et laboratoire actuariel',
 ];

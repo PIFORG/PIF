@@ -4,7 +4,7 @@ import { MarketApi, type AssetClass, type InstrumentView, type MarketSnapshot, t
 import { IconComponent } from '../shared/icon/icon.component';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
-import { dateTime, describeTradingError, dt, price, shortTime, units } from './trading-format';
+import { dateTime, describeTradingError, dt, price, sectorLabel, shortTime, units } from './trading-format';
 import { ProvenanceNoteComponent, SignedAmountComponent } from './trading-parts.components';
 
 const REFRESH_MS = 30_000;
@@ -60,7 +60,7 @@ function mover(instrument: InstrumentView | undefined): { change: number; hint: 
                     <span class="badge badge-danger">Suspendu</span>
                   }
                 </span>
-                <div class="field-hint">{{ i.name }} · {{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ i.sector }}</div>
+                <div class="field-hint">{{ i.name }} · {{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ sectorLabel(i.sector) }}</div>
               </th>
               <td class="num">{{ price(i.quote?.bid) }}</td>
               <td class="num">{{ price(i.quote?.ask) }}</td>
@@ -92,6 +92,7 @@ export class InstrumentTableComponent {
   readonly caption = input.required<string>();
   readonly toggleWatch = output<string>();
   protected readonly price = price;
+  protected readonly sectorLabel = sectorLabel;
   protected readonly units = units;
   protected readonly dash = '\u2014';
 }
@@ -126,6 +127,7 @@ export class MarketsPage {
 
   protected readonly dash = '\u2014';
   protected readonly dateTime = dateTime;
+  protected readonly sectorLabel = sectorLabel;
 
   protected readonly sectors = computed(() =>
     [...new Set((this.market()?.instruments ?? []).map((i) => i.sector))].sort((a, b) => a.localeCompare(b, 'fr')),

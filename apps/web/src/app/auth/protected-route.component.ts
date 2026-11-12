@@ -18,7 +18,7 @@ import { buildLoginHref } from '../core/auth/return-to';
   template: `
     @if (auth.status() === 'loading') {
       <div class="page-shell" role="status" aria-live="polite">
-        <p>Checking session…</p>
+        <p>Vérification de la session…</p>
       </div>
     } @else if (allowed()) {
       <ng-container [ngTemplateOutlet]="content()" />

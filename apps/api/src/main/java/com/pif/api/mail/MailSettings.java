@@ -68,7 +68,7 @@ public class MailSettings {
     from = env.getProperty("EMAIL_FROM", "noreply@localhost");
     if (from.isBlank()) throw new IllegalStateException("Environment validation failed: EMAIL_FROM should not be empty");
     supportUrl = emptyToNull(env.getProperty("EMAIL_SUPPORT_URL"));
-    appName = env.getProperty("APP_NAME", "Market Trading Room Simulator");
+    appName = env.getProperty("APP_NAME", "Market Trading Room");
     frontendUrl = env.getProperty("APP_FRONTEND_URL", "http://localhost:4200");
     linkBaseUrl = migrationLinkBase(emptyToNull(env.getProperty("MIGRATION_FRONTEND_URL")),
         env.getProperty("CORS_ORIGINS", "http://localhost:4200"));

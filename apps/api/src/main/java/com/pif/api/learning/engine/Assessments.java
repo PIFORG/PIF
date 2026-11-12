@@ -139,16 +139,16 @@ public final class Assessments {
       if (near) onRumour++;
     }
     if (onRumour > 0) {
-      signals.add(new CalibrationSignal("CONFIDENT_ON_UNCONFIRMED_NEWS", onRumour, onRumour + " order(s) rated 80 % or "
-          + "more within 2 days of an unconfirmed report about the same asset."));
+      signals.add(new CalibrationSignal("CONFIDENT_ON_UNCONFIRMED_NEWS", onRumour, onRumour + " ordre(s) noté(s) à 80 % ou "
+          + "plus dans les 2 jours suivant une rumeur non confirmée sur le même actif."));
     }
 
     Set<Double> levels = new HashSet<>();
     for (Order o : rated) levels.add(o.confidence == 0 ? 0.0 : o.confidence);
     if (rated.size() >= 3 && levels.size() == 1) {
-      signals.add(new CalibrationSignal("UNVARYING_CONFIDENCE", rated.size(), "All " + rated.size()
-          + " rated orders carried the same " + Js.str(rated.get(0).confidence) + " % confidence, so it did not "
-          + "separate stronger decisions from weaker ones."));
+      signals.add(new CalibrationSignal("UNVARYING_CONFIDENCE", rated.size(), "Les " + rated.size()
+          + " ordres notés portaient la même confiance de " + Js.str(rated.get(0).confidence) + " %, ce qui ne "
+          + "distinguait pas les décisions solides des plus faibles."));
     }
 
     double sum = 0;
@@ -156,9 +156,9 @@ public final class Assessments {
     double mean = rated.isEmpty() ? 0 : sum / rated.size();
     double reasonable = ctx.mission().scoring().maxReasonableTrades();
     if (!rated.isEmpty() && mean >= HIGH_CONFIDENCE && fills > reasonable) {
-      signals.add(new CalibrationSignal("CONFIDENT_OVERTRADING", rated.size(), "Average confidence "
-          + Js.toFixed(mean, 0) + " % with " + fills + " fills, more than the " + Js.str(reasonable)
-          + " that start to look like overtrading."));
+      signals.add(new CalibrationSignal("CONFIDENT_OVERTRADING", rated.size(), "Confiance moyenne de "
+          + Js.toFixed(mean, 0) + " % avec " + fills + " exécutions, au-delà de " + Js.str(reasonable)
+          + ", ce qui commence à ressembler à du sur-trading."));
     }
     return signals;
   }
@@ -238,37 +238,37 @@ public final class Assessments {
     boolean buy = "BUY".equals(order.side);
     switch (String.valueOf(order.rationale)) {
       case "LIMIT_DOWNSIDE":
-        return sell ? new Consistency(true, "Selling or a stop reduces exposure to further falls.")
-            : new Consistency(false, "A buy adds exposure; it does not limit downside.");
+        return sell ? new Consistency(true, "Vendre ou un stop réduit l'exposition aux baisses ultérieures.")
+            : new Consistency(false, "Un achat augmente l'exposition ; il ne limite pas la baisse.");
       case "DIVERSIFY":
         if (buy) {
           boolean ok = c.symbolWeight() < 0.2 && !order.symbol.equals(c.largestSymbol());
-          return new Consistency(ok, ok ? "Bought an under-weighted asset."
-              : "Added to an asset that was already a large share of the portfolio.");
+          return new Consistency(ok, ok ? "Achat d'un actif sous-pondéré."
+              : "Renforcement d'un actif déjà très présent dans le portefeuille.");
         }
-        return order.symbol.equals(c.largestSymbol()) ? new Consistency(true, "Trimmed the largest position.")
-            : new Consistency(false, "Selling a smaller position increases concentration in the largest one.");
+        return order.symbol.equals(c.largestSymbol()) ? new Consistency(true, "Réduction de la plus grande position.")
+            : new Consistency(false, "Vendre une position plus petite concentre davantage la plus grande.");
       case "REACT_TO_NEWS":
         return c.recentEventId() != null && !c.recentEventId().isEmpty()
-            ? new Consistency(true, "Placed shortly after a published headline.")
-            : new Consistency(false, "No headline had been published in the previous two steps.");
+            ? new Consistency(true, "Ordre placé peu après une actualité publiée.")
+            : new Consistency(false, "Aucune actualité n'avait été publiée lors des deux étapes précédentes.");
       case "TAKE_PROFIT": {
         boolean ok = sell && (c.positionGain() == null ? 0 : c.positionGain()) > 0;
-        return new Consistency(ok, ok ? "Sold a position that showed a gain." : "There was no unrealised gain to take.");
+        return new Consistency(ok, ok ? "Vente d'une position en gain." : "Aucun gain latent à réaliser.");
       }
       case "REBALANCE": {
         boolean ok = sell ? order.symbol.equals(c.largestSymbol())
             : c.heldCount() == 0 || c.symbolWeight() < c.largestWeight();
-        return new Consistency(ok, ok ? "Moved weights toward balance." : "The order made the portfolio less balanced.");
+        return new Consistency(ok, ok ? "Rééquilibrage des pondérations." : "L'ordre a déséquilibré le portefeuille.");
       }
       case "LONG_TERM_VIEW": {
         boolean ok = buy || "STOP".equals(order.type);
-        return new Consistency(ok, ok ? "Building or protecting a long-term holding."
-            : "Selling outright contradicts a long-term view.");
+        return new Consistency(ok, ok ? "Construction ou protection d'un placement à long terme."
+            : "Vendre en bloc contredit une vision à long terme.");
       }
       case "FOLLOW_MOMENTUM": {
         boolean ok = (buy && c.trend() > 0) || (sell && c.trend() < 0);
-        return new Consistency(ok, ok ? "Traded in the direction of the recent trend." : "Traded against the recent trend.");
+        return new Consistency(ok, ok ? "Ordre dans le sens de la tendance récente." : "Ordre à contre-tendance récente.");
       }
       default:
         throw new IllegalArgumentException("Unknown rationale " + order.rationale);
@@ -282,15 +282,15 @@ public final class Assessments {
     double dd = metrics.maxDrawdownPct();
     double drawdownScore = dd <= limit * 0.5 ? 100 : dd >= limit * 1.5 ? 0 : (100 * (limit * 1.5 - dd)) / limit;
     List<Evidence> evidence = new ArrayList<>();
-    evidence.add(new Evidence("Drawdown control", "FAILED".equals(state.status) ? 0 : drawdownScore,
-        "Maximum drawdown " + Js.toFixed(dd, 2) + " % against a " + Js.str(limit) + " % reference."));
+    evidence.add(new Evidence("Contrôle du drawdown", "FAILED".equals(state.status) ? 0 : drawdownScore,
+        "Drawdown maximal de " + Js.toFixed(dd, 2) + " % sur une référence de " + Js.str(limit) + " %."));
 
     List<StepRecord> judged = state.history.stream().filter(h -> h.step() >= 1).toList();
     if (scoring.concentrationLimitPct() != null && !judged.isEmpty()) {
       double cap = scoring.concentrationLimitPct();
       int within = (int) judged.stream().filter(h -> h.maxWeight() * 100 <= cap).count();
-      evidence.add(new Evidence("Concentration discipline", ((double) within / judged.size()) * 100,
-          within + " of " + judged.size() + " days with every position at or below " + Js.str(cap) + " %."));
+      evidence.add(new Evidence("Discipline de concentration", ((double) within / judged.size()) * 100,
+          within + " jours sur " + judged.size() + " avec chaque position à " + Js.str(cap) + " % ou moins."));
     }
 
     if (mission.rules().allowedOrderTypes().contains("STOP")) {
@@ -299,8 +299,8 @@ public final class Assessments {
         double sum = 0;
         for (StepRecord h : exposed) sum = sum + (double) h.protectedSymbols().size() / h.heldSymbols().size();
         double coverage = sum / exposed.size();
-        evidence.add(new Evidence("Downside protection", clamp((coverage / 0.5) * 100),
-            "On average " + Js.toFixed(coverage * 100, 0) + " % of holdings were covered by a stop."));
+        evidence.add(new Evidence("Protection à la baisse", clamp((coverage / 0.5) * 100),
+            "En moyenne " + Js.toFixed(coverage * 100, 0) + " % des positions étaient couvertes par un stop."));
       }
     }
     return evidence;
@@ -320,8 +320,8 @@ public final class Assessments {
       }
     }
     List<Evidence> evidence = new ArrayList<>();
-    evidence.add(new Evidence("Objectives achieved", totalWeight != 0 ? (metWeight / totalWeight) * 100 : null,
-        met + " of " + objectives.size() + " objectives met (required objectives count double)."));
+    evidence.add(new Evidence("Objectifs atteints", totalWeight != 0 ? (metWeight / totalWeight) * 100 : null,
+        met + " objectifs sur " + objectives.size() + " atteints (les objectifs obligatoires comptent double)."));
 
     List<MarketEventDefinition> relevant = new ArrayList<>();
     for (MarketEventDefinition e : ctx.mission().scenario().events()) {
@@ -345,14 +345,14 @@ public final class Assessments {
             || state.stressTests.stream().anyMatch(t -> t.step() >= from && t.step() <= to);
         if (acted) reviewed++;
       }
-      evidence.add(new Evidence("Response to adverse events", ((double) reviewed / relevant.size()) * 100,
-          "You reviewed or acted on " + reviewed + " of " + relevant.size() + " adverse event(s) within two steps."));
+      evidence.add(new Evidence("Réaction aux événements défavorables", ((double) reviewed / relevant.size()) * 100,
+          "Vous avez examiné ou réagi à " + reviewed + " événement(s) défavorable(s) sur " + relevant.size() + " dans les deux étapes suivantes."));
     }
 
     double reasonable = ctx.mission().scoring().maxReasonableTrades();
     double excess = Math.max(0, metrics.fills() - reasonable);
-    evidence.add(new Evidence("Trading discipline", clamp(100 - excess * 15), metrics.fills()
-        + " fill(s); more than " + Js.str(reasonable) + " starts to look like overtrading."));
+    evidence.add(new Evidence("Discipline de trading", clamp(100 - excess * 15), metrics.fills()
+        + " exécution(s) ; au-delà de " + Js.str(reasonable) + ", cela ressemble à du sur-trading."));
     return evidence;
   }
 
@@ -361,13 +361,13 @@ public final class Assessments {
     List<Evidence> evidence = new ArrayList<>();
     if (!decided.isEmpty()) {
       int consistent = (int) decided.stream().filter(o -> rationaleConsistent(o).consistent()).count();
-      evidence.add(new Evidence("Rationale consistency", ((double) consistent / decided.size()) * 100,
-          consistent + " of " + decided.size() + " order(s) matched the reason you gave at the time."));
+      evidence.add(new Evidence("Cohérence des motifs", ((double) consistent / decided.size()) * 100,
+          consistent + " ordre(s) sur " + decided.size() + " correspondaient au motif indiqué au moment du placement."));
     }
     if (ctx.mission().rules().allowStressTest()) {
       int ran = state.stressTests.size();
-      evidence.add(new Evidence("Evidence before action", ran > 0 ? 100.0 : 0.0,
-          ran > 0 ? "You ran " + ran + " stress test(s)." : "You did not run a stress test."));
+      evidence.add(new Evidence("Analyse avant action", ran > 0 ? 100.0 : 0.0,
+          ran > 0 ? "Vous avez lancé " + ran + " test(s) de résistance." : "Vous n'avez lancé aucun test de résistance."));
     }
     return evidence;
   }
@@ -375,9 +375,9 @@ public final class Assessments {
   private static List<Evidence> executionComponent(SimState state, PortfolioMetrics metrics) {
     List<Evidence> evidence = new ArrayList<>();
     if (state.orders.isEmpty()) return evidence;
-    evidence.add(new Evidence("Order validity",
+    evidence.add(new Evidence("Validité des ordres",
         (1 - (double) metrics.ordersRejected() / metrics.ordersPlaced()) * 100,
-        metrics.ordersRejected() + " of " + metrics.ordersPlaced() + " order(s) rejected by the market rules."));
+        metrics.ordersRejected() + " ordre(s) sur " + metrics.ordersPlaced() + " rejeté(s) par les règles du marché."));
 
     List<Order> executed = state.orders.stream().filter(o -> !"REJECTED".equals(o.status)).toList();
     if (!executed.isEmpty()) {
@@ -390,9 +390,8 @@ public final class Assessments {
         boolean stressed = o.context.spreadBps() > o.context.baseSpreadBps() * 2;
         if (!stressed && o.quantity <= o.context.depth()) appropriate++;
       }
-      evidence.add(new Evidence("Order type choice", ((double) appropriate / executed.size()) * 100,
-          appropriate + " of " + executed.size() + " order(s) suited the liquidity at the time (market orders in wide "
-              + "spreads or larger than displayed depth count against you)."));
+      evidence.add(new Evidence("Choix du type d'ordre", ((double) appropriate / executed.size()) * 100,
+          appropriate + " ordre(s) sur " + executed.size() + " adapté(s) à la liquidité du moment (ordres au marché quand l'écart est large ou le volume affiché trop faible pénalisent)."));
     }
 
     double traded = 0;
@@ -401,8 +400,8 @@ public final class Assessments {
     }
     if (traded > 0) {
       double costBps = ((metrics.feesPaid() + metrics.spreadCost()) / traded) * 10_000;
-      evidence.add(new Evidence("Cost efficiency", clamp(((150 - costBps) / 110) * 100),
-          "Commissions and spread cost " + Js.toFixed(costBps, 0) + " bps of traded value."));
+      evidence.add(new Evidence("Efficacité des coûts", clamp(((150 - costBps) / 110) * 100),
+          "Commissions et coût de spread de " + Js.toFixed(costBps, 0) + " points de base de la valeur échangée."));
     }
     return evidence;
   }
@@ -450,8 +449,8 @@ public final class Assessments {
     byKey.put("reasoning", reasoningComponent(ctx, state));
     byKey.put("execution", executionComponent(state, metrics));
     if (state.orders.isEmpty()) {
-      Evidence none = new Evidence("No decisions", 0.0,
-          "No orders were placed, so there is no reasoning or execution to credit.");
+      Evidence none = new Evidence("Aucune décision", 0.0,
+          "Aucun ordre n'a été placé : rien à créditer en raisonnement ni en exécution.");
       byKey.get("reasoning").add(none);
       byKey.get("execution").add(none);
     }
@@ -480,14 +479,14 @@ public final class Assessments {
         .allMatch(o -> Objectives.isSatisfied(o.status()));
     boolean passed = !failedByRule && requiredObjectivesMet && total >= mission.scoring().passThreshold();
 
-    Double objectivesScore = find(byKey, "decision", "Objectives achieved");
+    Double objectivesScore = find(byKey, "decision", "Objectifs atteints");
     Map<String, Double> rawCompetencies = new LinkedHashMap<>();
     rawCompetencies.put("RISK_MANAGEMENT", components.get(0).score());
     rawCompetencies.put("TRADING_EXECUTION", components.get(3).score());
     rawCompetencies.put("MARKET_UNDERSTANDING", blend(
-        new Double[] {find(byKey, "decision", "Response to adverse events"), find(byKey, "reasoning", "Rationale consistency")},
+        new Double[] {find(byKey, "decision", "Réaction aux événements défavorables"), find(byKey, "reasoning", "Cohérence des motifs")},
         new double[] {1, 1}));
-    Double concentration = find(byKey, "risk", "Concentration discipline");
+    Double concentration = find(byKey, "risk", "Discipline de concentration");
     rawCompetencies.put("DIVERSIFICATION", concentration != null ? concentration
         : metrics.effectiveAssets() != null
             ? (Double) clamp((metrics.effectiveAssets() / Math.min(4, mission.scenario().assets().size())) * 100)

@@ -269,7 +269,7 @@ async function render<T>(page: Type<T>) {
 describe('Markets page', () => {
   it('shows server quotes, movers and the watchlist with the fictional-data notice', async () => {
     const { root } = await render(MarketsPage);
-    expect(root.querySelector('.tr-provenance')?.textContent).toContain('Fictional simulated prices');
+    expect(root.querySelector('.tr-provenance')?.textContent).toContain('Prix simulés fictifs');
     expect(kpi(root, 'Instruments')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('3');
     expect(kpi(root, 'Période de cotation')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('5 min');
     expect(kpi(root, 'Meilleure perf. depuis la clôture')?.querySelector('.ws-kpiHint')?.textContent).toBe('CTB · CTB Holdings');
@@ -339,7 +339,7 @@ describe('Trading desk page', () => {
     expect(kpi(root, 'Ordres ouverts')?.querySelector('a')?.getAttribute('href')).toBe('/portfolios');
     expect(root.querySelector('.tr-instrumentRow[data-selected="true"]')?.textContent).toContain('CTB');
     expect(marketApi['history']).toHaveBeenCalledWith('CTB', '1D');
-    expect(root.querySelector('figure.ch-figure svg')?.getAttribute('aria-label')).toContain('CTB mid price over 1D');
+    expect(root.querySelector('figure.ch-figure svg')?.getAttribute('aria-label')).toContain('CTB, cours médian sur 1D');
     expect(root.querySelector('.tr-chartHead')?.textContent?.replace(/\s+/g, ' ')).toContain('depuis la clôture précédente');
     expect(portfolioApi['orders']).toHaveBeenCalledWith('p1', 'open', 50);
     expect(root.querySelector('mtr-order-ticket form')).not.toBeNull();
@@ -350,7 +350,7 @@ describe('Trading desk page', () => {
     const { root } = await render(TradingDeskPage);
     expect(root.textContent).toContain('Commencer avec un portefeuille virtuel');
     expect(root.querySelector('mtr-portfolio-picker')).toBeNull();
-    expect(root.textContent).toContain('Create a portfolio to trade');
+    expect(root.textContent).toContain('Créez un portefeuille pour négocier');
   });
 
   it('cancels a working order and reports it', async () => {
@@ -376,10 +376,10 @@ describe('Portfolios page', () => {
       pct(-0.000025, true),
     );
     expect(kpi(root, "Rendement pondéré par l'argent")?.textContent).toContain(
-      'Not available: the portfolio is younger than one day.',
+      'Indisponible : the portfolio is younger than one day.',
     );
     const risk = root.querySelector('.tr-metricGrid')!;
-    expect(risk.textContent).toContain('Not available: fewer than 20 daily observations.');
+    expect(risk.textContent).toContain('Indisponible : fewer than 20 daily observations.');
     expect(root.textContent).toContain("L'historique se constitue au fil des jours");
     expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Allocation par instrument et trésorerie');
     expect(root.textContent).toContain('Equity crash');

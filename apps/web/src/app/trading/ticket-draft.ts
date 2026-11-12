@@ -20,8 +20,8 @@ const PRICE = /^\d+(\.\d{1,3})?$/;
 
 function priceError(value: string, label: string): string | null {
   const text = value.trim();
-  if (!text) return `Enter a ${label}.`;
-  if (!PRICE.test(text) || Number(text) <= 0) return `The ${label} must be a positive amount in DT with at most 3 decimals.`;
+  if (!text) return `Saisissez un ${label}.`;
+  if (!PRICE.test(text) || Number(text) <= 0) return `Le ${label} doit être un montant positif en DT, avec au plus 3 décimales.`;
   return null;
 }
 
@@ -31,18 +31,18 @@ function priceError(value: string, label: string): string | null {
  */
 export function ticketErrors(draft: TicketDraft, lotSize = 1): TicketErrors {
   const errors: TicketErrors = {};
-  if (!draft.symbol) errors.symbol = 'Choose an instrument.';
+  if (!draft.symbol) errors.symbol = 'Choisissez un instrument.';
   const quantity = draft.quantity.trim();
-  if (!/^\d+$/.test(quantity) || Number(quantity) < 1) errors.quantity = 'Enter a whole number of units, at least 1.';
-  else if (Number(quantity) > 1_000_000) errors.quantity = 'The quantity can be at most 1,000,000.';
-  else if (Number(quantity) % lotSize !== 0) errors.quantity = `The quantity must be a multiple of the lot size (${lotSize}).`;
+  if (!/^\d+$/.test(quantity) || Number(quantity) < 1) errors.quantity = "Saisissez un nombre entier d'unités, au moins 1.";
+  else if (Number(quantity) > 1_000_000) errors.quantity = 'La quantité ne peut pas dépasser 1 000 000.';
+  else if (Number(quantity) % lotSize !== 0) errors.quantity = `La quantité doit être un multiple de la taille de lot (${lotSize}).`;
   if (draft.type === 'LIMIT') {
-    const error = priceError(draft.limitPrice, 'limit price');
+    const error = priceError(draft.limitPrice, 'cours limite');
     if (error) errors.limitPrice = error;
   }
   if (draft.type === 'STOP') {
-    if (draft.side === 'BUY') errors.type = 'Stop orders are protective sells. Choose Sell, or use a limit order to buy.';
-    const error = priceError(draft.stopPrice, 'stop price');
+    if (draft.side === 'BUY') errors.type = 'Les ordres stop sont des ventes de protection. Choisissez Vendre, ou un ordre à cours limité pour acheter.';
+    const error = priceError(draft.stopPrice, 'cours stop');
     if (error) errors.stopPrice = error;
   }
   return errors;

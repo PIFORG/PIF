@@ -141,11 +141,11 @@ final class Pricing {
   record Driver(String id, String label) {}
 
   static final List<Driver> SENSITIVITY_DRIVERS = List.of(
-      new Driver("frequency", "Claim frequency +10%"),
-      new Driver("severity", "Average claim cost +10%"),
-      new Driver("expenses", "Fixed and per-policy expenses +10%"),
-      new Driver("variable", "Variable expense rate +1 point"),
-      new Driver("loading", "Risk loading parameter +10%"));
+      new Driver("frequency", "Fréquence des sinistres +10 %"),
+      new Driver("severity", "Coût moyen du sinistre +10 %"),
+      new Driver("expenses", "Frais fixes et par police +10 %"),
+      new Driver("variable", "Taux de frais variables +1 point"),
+      new Driver("loading", "Paramètre de chargement +10 %"));
 
   static Assumptions shock(Assumptions input, String driver) {
     Frequency.Assumptions f = input.frequency();

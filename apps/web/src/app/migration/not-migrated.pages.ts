@@ -7,7 +7,7 @@ import { findNavItem } from '../core/navigation/workspace-nav';
 import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 
 const NOTICE =
-  'This path is not part of the active PIF application. Use the workspace navigation for live modules, or open a designed preview from the sidebar where marked Preview.';
+  "Ce chemin ne fait pas partie de l'application active. Utilisez la navigation de l'espace de travail pour les modules opérationnels, ou ouvrez un aperçu conçu depuis la barre latérale lorsqu'il est marqué Aperçu.";
 
 function currentPath(router: Router) {
   return toSignal(
@@ -27,7 +27,7 @@ function currentPath(router: Router) {
   host: { style: 'display: contents' },
   template: `
     <div class="page-shell">
-      <mtr-page-heading [eyebrow]="location()?.group?.label ?? 'Workspace'" [title]="location()?.item?.label ?? 'Not available'" />
+      <mtr-page-heading [eyebrow]="location()?.group?.label ?? 'Espace de travail'" [title]="location()?.item?.label ?? 'Non disponible'" />
       <section class="card-panel" role="status">
         <p style="margin: 0">{{ notice }}</p>
       </section>
@@ -47,9 +47,9 @@ export class WorkspaceNotMigratedPage {
   imports: [RouterLink, AuthLayoutComponent],
   host: { style: 'display: contents' },
   template: `
-    <mtr-auth-layout title="Not available yet" [lead]="notice" [showFooter]="true">
+    <mtr-auth-layout title="Pas encore disponible" [lead]="notice" [showFooter]="true">
       <ng-container ngProjectAs="[authFooter]">
-        <span><a routerLink="/login">Back to sign in</a></span>
+        <span><a routerLink="/login">Retour à la connexion</a></span>
       </ng-container>
     </mtr-auth-layout>
   `,

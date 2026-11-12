@@ -145,7 +145,7 @@ export class ReservingStudioPage {
         this.form.set(formFromInputs(first.data, first.assumptions));
       }
     } catch (err) {
-      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'The reserving examples could not be loaded.', 'reserving'));
+      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'Les exemples de provisionnement n\'ont pas pu être chargés.', 'reserving'));
     }
   }
 
@@ -156,7 +156,7 @@ export class ReservingStudioPage {
     } catch (err) {
       if (this.destroyed) return;
       this.history.set({ kept: 0, runs: [] });
-      this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Your reserving runs could not be loaded.', 'reserving') });
+      this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Vos calculs de provisionnement n\'ont pas pu être chargés.', 'reserving') });
     }
   }
 
@@ -215,9 +215,9 @@ export class ReservingStudioPage {
       this.exampleId.set('');
       this.shown.set({ results: detail.results, key: check ? JSON.stringify(check) : `run:${detail.id}`, run: summary });
       this.error.set(null);
-      this.historyMessage.set({ tone: 'ok', text: `Loaded “${summary.label}”. These are its stored results; change any input to recompute.` });
+      this.historyMessage.set({ tone: 'ok', text: `« ${summary.label} » chargé. Ce sont ses résultats enregistrés ; modifiez une entrée pour recalculer.` });
     } catch (err) {
-      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'The run could not be loaded.', 'reserving') });
+      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Le calcul n\'a pas pu être chargé.', 'reserving') });
     }
   }
 
@@ -230,7 +230,7 @@ export class ReservingStudioPage {
       this.historyMessage.set({ tone: 'ok', text: `« ${summary.label} » supprimé.` });
       await this.refreshHistory();
     } catch (err) {
-      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'The run could not be deleted.', 'reserving') });
+      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Le calcul n\'a pas pu être supprimé.', 'reserving') });
     }
   }
 
@@ -245,7 +245,7 @@ export class ReservingStudioPage {
       await this.refreshHistory();
       return true;
     } catch (err) {
-      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'The run could not be saved.', 'reserving') });
+      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Le calcul n\'a pas pu être enregistré.', 'reserving') });
       return false;
     }
   };

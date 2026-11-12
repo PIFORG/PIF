@@ -92,7 +92,7 @@
                     }
                   </span>
                   <span class="tr-instrumentName">{{ i.name }}</span>
-                  <span class="tr-instrumentMeta">{{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ i.sector }}</span>
+                  <span class="tr-instrumentMeta">{{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ sectorLabel(i.sector) }}</span>
                   <span class="tr-instrumentPrice">
                     <span class="num">{{ price(i.quote?.mid) }}</span>
                     @if (i.changePct !== null) {
@@ -122,7 +122,7 @@
       <section
         mtr-panel
         [heading]="instrument() ? instrument()!.symbol + ' · ' + instrument()!.name : 'Instrument'"
-        [description]="instrument() ? (instrument()!.assetClass === 'FUND' ? 'Fonds' : 'Action') + ' · ' + instrument()!.sector + (instrument()!.status === 'HALTED' ? ' · négociation suspendue' : '') : undefined"
+        [description]="instrument() ? (instrument()!.assetClass === 'FUND' ? 'Fonds' : 'Action') + ' · ' + sectorLabel(instrument()!.sector) + (instrument()!.status === 'HALTED' ? ' · négociation suspendue' : '') : undefined"
       >
         @if (instrument(); as inst) {
           <div class="tr-chartHead">

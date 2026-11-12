@@ -15,15 +15,17 @@ import {
 import { IconComponent } from '../shared/icon/icon.component';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
+import { sectorLabel } from '../trading/trading-format';
 import { AvailabilityBadgeComponent, MeterComponent } from './learning-parts.components';
 
 const MENTOR_MODES: { value: SessionMentorMode; label: string; detail: string }[] = [
-  { value: 'GUIDED', label: 'Guided', detail: 'Direct advice on the most important issue.' },
-  { value: 'SOCRATIC', label: 'Socratic', detail: 'Questions that lead you to the answer yourself.' },
-  { value: 'CRITICAL', label: 'Critical', detail: 'Challenges your plan and points out what could go wrong.' },
+  { value: 'GUIDED', label: 'Guidé', detail: 'Un conseil direct sur le point le plus important.' },
+  { value: 'SOCRATIC', label: 'Socratique', detail: 'Des questions qui vous mènent vous-même à la réponse.' },
+  { value: 'CRITICAL', label: 'Critique', detail: 'Remet votre plan en question et signale ce qui peut mal tourner.' },
 ];
 
-const WEIGHT_LABEL = { risk: 'Risk management', decision: 'Decision quality', reasoning: 'Reasoning', execution: 'Execution' } as const;
+const WEIGHT_LABEL = { risk: 'Gestion du risque', decision: 'Qualité des décisions', reasoning: 'Raisonnement', execution: 'Exécution' } as const;
+const ORDER_TYPE_WORD = { MARKET: 'marché', LIMIT: 'limite', STOP: 'stop' } as const;
 const WEIGHT_KEYS = Object.keys(WEIGHT_LABEL) as (keyof typeof WEIGHT_LABEL)[];
 
 /** /learn/missions/:slug: apps/web/src/components/learning/MissionBriefingView.tsx */
@@ -59,8 +61,17 @@ export class MissionBriefingPage {
   protected readonly playable = computed(() => this.summary()?.playable ?? this.mission()?.availability !== 'PLANNED');
   protected readonly maxLoss = computed(() => this.mission()?.failure.find((f) => f.kind === 'MAX_LOSS')?.limitPct);
   protected readonly selectedMode = computed(() => this.mode() ?? this.mission()?.mentorMode);
-  protected readonly orderTypes = computed(() => (this.mission()?.rules.allowedOrderTypes ?? []).map((t) => t.toLowerCase()).join(', '));
-  protected readonly tradable = computed(() => (this.mission()?.assets ?? []).map((a) => `${a.symbol} (${a.sector})`).join(', '));
+  protected readonly orderTypes = computed(() =>
+    (this.mission()?.rules.allowedOrderTypes ?? []).map((t) => ORDER_TYPE_WORD[t] ?? t.toLowerCase()).join(', '),
+  );
+  protected readonly durationLabel = computed(() => {
+    const mission = this.mission();
+    if (!mission) return '';
+    const plural = mission.steps > 1;
+    const unit = mission.stepLabel === 'day' ? (plural ? 'jours de bourse' : 'jour de bourse') : plural ? 'semaines' : 'semaine';
+    return `${mission.steps} ${unit}`;
+  });
+  protected readonly tradable = computed(() => (this.mission()?.assets ?? []).map((a) => `${a.symbol} (${sectorLabel(a.sector)})`).join(', '));
   protected readonly competencies = computed(() => (this.mission()?.competencies ?? []).map((c) => COMPETENCY_LABEL[c.competency]).join(', '));
   protected readonly positions = computed(() => {
     const mission = this.mission();
@@ -72,7 +83,7 @@ export class MissionBriefingPage {
   });
   protected readonly scoringDescription = computed(
     () =>
-      `Pass mark ${this.mission()?.scoring.passThreshold} / 100. Profit alone never passes a mission: a lucky, reckless result scores low on risk and reasoning.`,
+      `Seuil de réussite ${this.mission()?.scoring.passThreshold} / 100. Le profit seul ne fait jamais réussir une mission : un résultat chanceux et imprudent est mal noté sur le risque et le raisonnement.`,
   );
 
   constructor() {
@@ -91,7 +102,7 @@ export class MissionBriefingPage {
       this.mission.set(briefing);
       this.summary.set(catalog.missions.find((m) => m.slug === slug) ?? null);
     } catch (err) {
-      if (!this.destroyed && slug === this.slug()) this.error.set(describeApiError(err, 'Could not load this mission.'));
+      if (!this.destroyed && slug === this.slug()) this.error.set(describeApiError(err, 'Impossible de charger cette mission.'));
     }
   }
 
@@ -105,7 +116,7 @@ export class MissionBriefingPage {
       if (!this.destroyed) void this.router.navigateByUrl(`/learn/sessions/${session.id}`);
     } catch (err) {
       if (this.destroyed) return;
-      this.error.set(describeApiError(err, 'Could not start the mission.'));
+      this.error.set(describeApiError(err, 'Impossible de démarrer la mission.'));
       this.starting.set(false);
     }
   }

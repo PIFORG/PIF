@@ -67,7 +67,7 @@ function result(assumptions: PricingAssumptions): PricingResult {
       underwritingMargin: 9 / 89,
     },
     probabilities: { underwritingLoss: 0.1, claimsExceedPremium: 0.001 },
-    sensitivities: [{ driver: 'frequency', label: 'Claim frequency +10%', repricedGrossPremium: 95_900, repricedPerPolicy: 95.9, premiumChange: 0.0775, resultAtBasePremium: 3_000 }],
+    sensitivities: [{ driver: 'frequency', label: 'Fréquence des sinistres +10 %', repricedGrossPremium: 95_900, repricedPerPolicy: 95.9, premiumChange: 0.0775, resultAtBasePremium: 3_000 }],
     warnings: [],
   };
 }
@@ -88,7 +88,7 @@ async function render() {
   const fixture = TestBed.createComponent(PricingStudioPage);
   const root = fixture.nativeElement as HTMLElement;
   await settle(fixture);
-  await waitFor(fixture, () => getControl(root, 'Policies'));
+  await waitFor(fixture, () => getControl(root, 'Polices'));
   return { fixture, root };
 }
 
@@ -109,8 +109,8 @@ describe('PricingStudio', () => {
     await waitFor(fixture, () => expect(api.price).toHaveBeenCalledTimes(1));
     expect(api.price.mock.calls[0][0]).toEqual(reference);
     await waitFor(fixture, () => expect(getText(root, '89,000 DT')).toBeTruthy());
-    expect(getText(root, 'Gross (commercial) premium')).toBeTruthy();
-    expect(getText(root, /Model estimates from fictional assumptions/)).toBeTruthy();
+    expect(getText(root, 'Prime brute (commerciale)')).toBeTruthy();
+    expect(getText(root, /Estimations du modèle à partir d'hypothèses fictives/)).toBeTruthy();
     const link = (name: string) => Array.from(root.querySelectorAll('a')).find((a) => a.textContent?.trim() === name);
     expect(link('Laboratoire Monte Carlo')?.getAttribute('href')).toBe('/actuarial/monte-carlo');
     expect(link('Studio de provisionnement')?.getAttribute('href')).toBe('/actuarial/reserving');
@@ -121,13 +121,13 @@ describe('PricingStudio', () => {
     const { fixture, root } = await render();
     await waitFor(fixture, () => expect(api.price).toHaveBeenCalledTimes(1));
 
-    const policies = getControl(root, 'Policies');
+    const policies = getControl(root, 'Polices');
     change(policies, '12.5');
     await sleep(400);
     await settle(fixture);
-    expect(getText(root, 'Policies must be a whole number.')).toBeTruthy();
+    expect(getText(root, 'Polices doit être un nombre entier.')).toBeTruthy();
     expect(policies.getAttribute('aria-invalid')).toBe('true');
-    expect(queryText(root, 'Fix the highlighted fields to recalculate.')).not.toBeNull();
+    expect(queryText(root, 'Corrigez les champs signalés pour recalculer.')).not.toBeNull();
     expect(api.price).toHaveBeenCalledTimes(1);
   });
 
@@ -137,12 +137,12 @@ describe('PricingStudio', () => {
 
     getButton(root, 'Poisson').click();
     await settle(fixture);
-    const intensity = getControl(root, 'Claims per policy-year');
+    const intensity = getControl(root, 'Sinistres par police-année');
     change(intensity, '0.1');
     change(intensity, '0.12');
     await sleep(400);
     await waitFor(fixture, () => expect(api.price).toHaveBeenCalledTimes(2));
     expect(api.price.mock.calls[1][0].frequency).toEqual({ family: 'POISSON', policies: 1000, years: 1, intensity: 0.12 });
-    expect(getControl<HTMLSelectElement>(root, 'Example portfolio (fictional)').value).toBe('');
+    expect(getControl<HTMLSelectElement>(root, "Portefeuille d'exemple (fictif)").value).toBe('');
   });
 });

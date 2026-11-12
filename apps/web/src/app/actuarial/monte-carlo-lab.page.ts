@@ -94,7 +94,7 @@ export class MonteCarloLabPage {
       this.presetId.set(res.presets[0]?.id ?? '');
       if (res.presets[0]) this.form.set(formFromAssumptions(res.presets[0].assumptions));
     } catch (err) {
-      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'The example portfolios could not be loaded.'));
+      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'Les portefeuilles d\'exemple n\'ont pas pu être chargés.'));
     }
   }
 
@@ -105,7 +105,7 @@ export class MonteCarloLabPage {
     } catch (err) {
       if (this.destroyed) return;
       this.history.set({ kept: 0, runs: [] });
-      this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Your simulation runs could not be loaded.', 'simulations') });
+      this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'Vos simulations n\'ont pas pu être chargées.', 'simulations') });
     }
   }
 
@@ -186,7 +186,7 @@ export class MonteCarloLabPage {
       this.historyMessage.set({ tone: 'ok', text: `${runName(summary)} supprimé.` });
       await this.refreshHistory();
     } catch (err) {
-      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'The run could not be deleted.', 'simulations') });
+      if (!this.destroyed) this.historyMessage.set({ tone: 'error', text: describeActuarialError(err, 'La simulation n\'a pas pu être supprimée.', 'simulations') });
     }
   }
 }

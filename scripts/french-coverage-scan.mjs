@@ -7,12 +7,11 @@ import path from 'node:path';
 const root = path.resolve('apps/web/src');
 const apiRes = path.resolve('apps/api/src/main/resources');
 const allow = new Set([
-  'MarketQuest',
-  'FinStories',
+  'Market Trading Room',
   'VaR',
   'TVaR',
-  'PIF',
-  'MarketLab',
+  'IBNR',
+  'IBNER',
   'API',
   'MFA',
   'OK',
@@ -27,12 +26,16 @@ const allow = new Set([
   'EMA',
   'RSI',
   'MACD',
-  // Identical FR/EN product terms kept intentionally
+  'Poisson',
+  'Gamma',
+  'Monte',
+  'Carlo',
+  'ALM',
+  // Identical FR/EN
   'Sessions',
-  'Backtesting',
 ]);
 const englishy =
-  /\b(Welcome|Sign in|Sign up|Password|Dashboard|Loading|Error|Success|Cancel|Submit|Save|Delete|Settings|Profile|Sessions|Overview|Markets|Trading Desk|Portfolios|Risk Analytics|Something went wrong|Try again|No data|Create account|Forgot password)\b/;
+  /\b(Welcome|Sign in|Sign up|Password|Dashboard|Loading|Error|Success|Cancel|Submit|Save|Delete|Settings|Profile|Overview|Markets|Trading Desk|Portfolios|Risk Analytics|Something went wrong|Try again|No data|Create account|Forgot password|Fictional|Deterministic|Watchlist|Buy|Sell|Hold|Manual|Replay|Continue|Skill|REEL|Breaking news|Utilities|Banking|Fixed income|Simulated mean|Claims &|Create a portfolio|Unable to|MarketQuest|FinStories|Backtesting)\b/;
 const hits = [];
 
 function walk(dir) {

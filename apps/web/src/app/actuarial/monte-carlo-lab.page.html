@@ -8,7 +8,7 @@
   <nav mtr-actuarial-tabs></nav>
 
   @if (loadError()) {
-    <div mtr-empty-state tone="error" icon="alert" heading="The Monte Carlo lab could not load" [description]="loadError()"></div>
+    <div mtr-empty-state tone="error" icon="alert" heading="Le laboratoire Monte Carlo n'a pas pu se charger" [description]="loadError()"></div>
   } @else {
     <p mtr-simulated-note></p>
     @if (run(); as r) {
@@ -24,24 +24,24 @@
                 <div
                   mtr-number-field
                   fieldId="mc-simulations"
-                  label="Simulated periods"
-                  hint="1,000 to 200,000"
+                  label="Périodes simulées"
+                  hint="1 000 à 200 000"
                   [value]="settings().simulations"
                   [error]="settingErrors().simulations"
                   (changed)="setSetting('simulations', $event)"
                 ></div>
                 <div class="ac-seedField">
-                  <div mtr-number-field fieldId="mc-seed" label="Seed" [value]="settings().seed" [error]="settingErrors().seed" (changed)="setSetting('seed', $event)"></div>
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="newSeed()"><svg mtrIcon name="refresh" [size]="14" /> New seed</button>
+                  <div mtr-number-field fieldId="mc-seed" label="Graine" [value]="settings().seed" [error]="settingErrors().seed" (changed)="setSetting('seed', $event)"></div>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="newSeed()"><svg mtrIcon name="refresh" [size]="14" /> Nouvelle graine</button>
                 </div>
               </div>
               <div class="ac-fieldRow">
                 <div
                   mtr-number-field
                   fieldId="mc-capital"
-                  label="Initial capital"
+                  label="Capital initial"
                   suffix="DT"
-                  hint="Held at the start of the period"
+                  hint="Détenu au début de la période"
                   [value]="settings().initialCapital"
                   [error]="settingErrors().initialCapital"
                   (changed)="setSetting('initialCapital', $event)"
@@ -49,17 +49,17 @@
                 <div
                   mtr-number-field
                   fieldId="mc-premium"
-                  label="Premium charged"
+                  label="Prime encaissée"
                   suffix="DT"
-                  hint="Leave empty to use the model gross premium"
-                  placeholder="Model premium"
+                  hint="Laissez vide pour utiliser la prime brute du modèle"
+                  placeholder="Prime du modèle"
                   [value]="settings().premiumCharged"
                   [error]="settingErrors().premiumCharged"
                   (changed)="setSetting('premiumCharged', $event)"
                 ></div>
               </div>
               <div class="field">
-                <label class="field-label" for="mc-label">Run label (optional)</label>
+                <label class="field-label" for="mc-label">Libellé de l'exécution (facultatif)</label>
                 <input
                   id="mc-label"
                   class="input"
@@ -75,24 +75,24 @@
                 }
               </div>
               <button type="submit" class="btn btn-primary" [disabled]="running() || invalid()">
-                <svg mtrIcon name="play" [size]="14" /> {{ running() ? 'Simulating…' : 'Run simulation' }}
+                <svg mtrIcon name="play" [size]="14" /> {{ running() ? 'Simulation…' : 'Lancer la simulation' }}
               </button>
               <p id="mc-status" class="ac-status" role="status" aria-live="polite">
                 @if (running()) {
-                  <svg mtrIcon name="refresh" [size]="14" /> Simulating {{ runningPeriods() }} periods on the server…
+                  <svg mtrIcon name="refresh" [size]="14" /> Simulation de {{ runningPeriods() }} périodes sur le serveur…
                 } @else if (invalid()) {
-                  <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to run the simulation.
+                  <svg mtrIcon name="alert" [size]="14" /> Corrigez les champs signalés pour lancer la simulation.
                 } @else if (outdated()) {
-                  <svg mtrIcon name="info" [size]="14" /> Inputs changed since the run shown. Run again to update.
+                  <svg mtrIcon name="info" [size]="14" /> Les entrées ont changé depuis l'exécution affichée. Relancez pour mettre à jour.
                 } @else if (run(); as r) {
-                  <svg mtrIcon name="check" [size]="14" /> Showing the run with seed {{ r.seed }}.
+                  <svg mtrIcon name="check" [size]="14" /> Exécution affichée, graine {{ r.seed }}.
                 } @else {
-                  <svg mtrIcon name="info" [size]="14" /> No run yet.
+                  <svg mtrIcon name="info" [size]="14" /> Aucune exécution.
                 }
               </p>
             </form>
           </section>
-          <section mtr-panel panelId="assumptions" heading="Portfolio assumptions" description="The same models as the pricing studio.">
+          <section mtr-panel panelId="assumptions" heading="Hypothèses du portefeuille" description="Les mêmes modèles que le studio de tarification.">
             @if (form() && presets()) {
               <form
                 mtr-assumptions-form
@@ -117,15 +117,15 @@
         @if (run(); as r) {
           <mtr-run-results [run]="r" [outdated]="outdated()" />
         } @else {
-          <section mtr-panel heading="Results">
+          <section mtr-panel heading="Résultats">
             @if (running()) {
               <div mtr-panel-skeleton [rows]="6"></div>
             } @else {
               <div
                 mtr-empty-state
                 icon="info"
-                heading="No simulation yet"
-                description="Choose the assumptions and press Run simulation. Nothing is shown until the server has finished the run."
+                heading="Aucune simulation"
+                description="Choisissez les hypothèses et lancez la simulation. Rien ne s'affiche tant que le serveur n'a pas terminé."
               ></div>
             }
           </section>

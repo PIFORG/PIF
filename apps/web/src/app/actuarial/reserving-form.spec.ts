@@ -31,8 +31,8 @@ describe('parseTriangle', () => {
   });
 
   it('rejects text that is not a number and an empty paste', () => {
-    expect(parseTriangle('1 2x')).toEqual({ error: 'Line 1, amount 2: “2x” is not a number. Write a missing amount as -.' });
-    expect(parseTriangle('  \n ')).toEqual({ error: 'Paste one line of cumulative amounts per accident year.' });
+    expect(parseTriangle('1 2x')).toEqual({ error: "Ligne 1, montant 2 : « 2x » n'est pas un nombre. Écrivez un montant manquant avec -." });
+    expect(parseTriangle('  \n ')).toEqual({ error: 'Collez une ligne de montants cumulés par année de survenance.' });
   });
 });
 
@@ -49,8 +49,8 @@ describe('reserving form', () => {
     const form = { ...formFromInputs(data, assumptions), tailPaid: '9', average: 'LATEST_DIAGONALS' as const, latestDiagonals: '3' };
     const { request, errors } = validateReservingForm(form, limits);
     expect(request).toBeNull();
-    expect(errors['tailPaid']).toBe('The paid tail factor must be a number from 0.5 to 3.');
-    expect(errors['latestDiagonals']).toBe('The number of latest calendar years must be a whole number from 1 to 2.');
+    expect(errors['tailPaid']).toBe('Le facteur de queue des paiements doit être un nombre compris entre 0.5 et 3.');
+    expect(errors['latestDiagonals']).toBe('Le nombre de dernières années calendaires doit être un nombre entier compris entre 1 et 2.');
 
     const grown = resizeSelections({ ...form, paid: '1 2 3 4\n1 2 3\n1 2\n1' });
     expect(grown.selectedPaid).toEqual(['', '', '']);

@@ -125,7 +125,7 @@ describe('BacktestingPage', () => {
 
   it('loads instruments and runs a backtest with FICTIONAL provenance', async () => {
     const { fixture, root } = await render();
-    expect(root.querySelector('h1')?.textContent).toBe('Backtesting');
+    expect(root.querySelector('h1')?.textContent).toBe('Tests historiques');
     expect(marketApi.instruments).toHaveBeenCalled();
     await (fixture.componentInstance as any).run();
     await settle(fixture);

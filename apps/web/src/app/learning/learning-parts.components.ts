@@ -30,10 +30,10 @@ export class AvailabilityBadgeComponent {
 }
 
 const EVIDENCE_LABEL: Record<CompetencyMastery['evidenceLevel'], string> = {
-  NONE: 'No evidence yet',
-  EMERGING: 'Emerging evidence',
-  DEVELOPING: 'Developing evidence',
-  ESTABLISHED: 'Established evidence',
+  NONE: 'Pas encore de preuve',
+  EMERGING: 'Preuve émergente',
+  DEVELOPING: 'Preuve en développement',
+  ESTABLISHED: 'Preuve établie',
 };
 
 export function scoreTone(score: number | null): 'neg' | 'amber' | undefined {
@@ -69,7 +69,7 @@ export class MeterComponent {
   protected readonly tone = computed(() => scoreTone(this.value()));
   protected readonly valueText = computed(() => {
     const value = this.value();
-    return value === null ? 'Not assessed yet' : `${Math.round(value)} out of 100`;
+    return value === null ? 'Pas encore évalué' : `${Math.round(value)} sur 100`;
   });
 }
 
@@ -85,10 +85,10 @@ export class MeterComponent {
           <strong>{{ c.label }}</strong>
           <span class="num">{{ c.score }}</span>
         </div>
-        <div mtr-meter [value]="c.value" [label]="c.label + ' mastery'"></div>
+        <div mtr-meter [value]="c.value" [label]="c.label + ' — maîtrise'"></div>
         <div class="lr-spread">
           <span class="lr-muted">{{ c.evidence }}</span>
-          <span class="lr-muted">Unassisted {{ c.unassisted }} · With mentor {{ c.assisted }}</span>
+          <span class="lr-muted">Sans mentor {{ c.unassisted }} · Avec le mentor {{ c.assisted }}</span>
         </div>
       </div>
     }
@@ -119,12 +119,12 @@ const OBJECTIVE_ICON: Record<ObjectiveStatus, IconName> = {
 };
 
 const OBJECTIVE_TEXT: Record<ObjectiveStatus, string> = {
-  PENDING: 'Pending',
-  ON_TRACK: 'On track',
-  AT_RISK: 'At risk',
-  MET: 'Met',
-  NOT_MET: 'Not met',
-  FAILED: 'Failed',
+  PENDING: 'En attente',
+  ON_TRACK: 'En bonne voie',
+  AT_RISK: 'À risque',
+  MET: 'Atteint',
+  NOT_MET: 'Non atteint',
+  FAILED: 'Échoué',
 };
 
 @Component({
@@ -137,7 +137,7 @@ const OBJECTIVE_TEXT: Record<ObjectiveStatus, string> = {
       <li class="lr-objective" [attr.data-status]="o.status">
         <span class="lr-objectiveIcon" aria-hidden="true"><svg mtrIcon [name]="icon[o.status]" [size]="12" /></span>
         <div>
-          <strong>{{ o.label }}{{ o.required ? '' : ' (optional)' }}</strong>
+          <strong>{{ o.label }}{{ o.required ? '' : ' (facultatif)' }}</strong>
           <span>{{ text[o.status] }} · {{ o.detail }}</span>
         </div>
       </li>

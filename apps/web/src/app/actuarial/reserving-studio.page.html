@@ -8,7 +8,7 @@
   <nav mtr-actuarial-tabs></nav>
 
   @if (loadError()) {
-    <div mtr-empty-state tone="error" icon="alert" heading="The reserving studio could not load" [description]="loadError()"></div>
+    <div mtr-empty-state tone="error" icon="alert" heading="Le studio de provisionnement n'a pas pu se charger" [description]="loadError()"></div>
   } @else {
     @let f = form();
     @let c = catalogue();
@@ -16,8 +16,8 @@
     <p class="ac-provenance">
       <svg mtrIcon name="info" [size]="16" />
       <span>
-        <strong>Deterministic best estimates.</strong> Computed on the server from the triangles and assumptions entered; undiscounted, without a risk margin, and not a regulatory technical
-        provision. The examples are fictional.
+        <strong>Meilleures estimations déterministes.</strong> Calculées sur le serveur à partir des triangles et des hypothèses saisis ; non actualisées, sans marge de risque, et ce n'est pas une
+        provision technique réglementaire. Les exemples sont fictifs.
       </span>
     </p>
     @if (r) {
@@ -27,7 +27,7 @@
     <div class="ac-studio ac-researchDesk">
       <div class="ac-formColumn ac-specColumn">
         <div class="ac-stack" style="margin-bottom: 0">
-          <section mtr-panel panelId="reserving-data" heading="Claims data" description="Cumulative amounts in dinars, valued at the end of the latest accident year.">
+          <section mtr-panel panelId="reserving-data" heading="Données de sinistres" description="Montants cumulés en dinars, valorisés à la fin de la dernière année d'accident.">
             @if (f && c) {
               <form
                 mtr-reserving-data-form
@@ -43,21 +43,21 @@
               <div mtr-panel-skeleton [rows]="8"></div>
             }
           </section>
-          <section mtr-panel panelId="reserving-assumptions" heading="Assumptions">
+          <section mtr-panel panelId="reserving-assumptions" heading="Hypothèses">
             @if (f && c) {
               <form mtr-reserving-assumptions [form]="f" [errors]="errors()" (changed)="change($event)">
                 <p id="rs-status" class="ac-status" role="status" aria-live="polite">
                   @if (busy()) {
-                    <svg mtrIcon name="refresh" [size]="14" /> Calculating on the server…
+                    <svg mtrIcon name="refresh" [size]="14" /> Calcul sur le serveur…
                   } @else if (invalid()) {
-                    <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to update the reserves.
+                    <svg mtrIcon name="alert" [size]="14" /> Corrigez les champs signalés pour mettre à jour les provisions.
                   } @else if (error()) {
-                    <svg mtrIcon name="alert" [size]="14" /> The server could not use these inputs.
+                    <svg mtrIcon name="alert" [size]="14" /> Le serveur n'a pas pu utiliser ces entrées.
                   } @else if (shown() && !outdated()) {
                     <svg mtrIcon name="check" [size]="14" />
-                    {{ shown()?.run ? 'Showing the stored results of “' + shown()?.run?.label + '”.' : 'Results match the inputs.' }}
+                    {{ shown()?.run ? 'Résultats enregistrés de « ' + shown()?.run?.label + ' ».' : 'Les résultats correspondent aux entrées.' }}
                   } @else {
-                    <svg mtrIcon name="info" [size]="14" /> Waiting for valid inputs.
+                    <svg mtrIcon name="info" [size]="14" /> En attente d'entrées valides.
                   }
                 </p>
               </form>
@@ -74,12 +74,12 @@
         }
         @if (results() && outdated()) {
           <div class="form-error-banner" role="status">
-            The results below were computed for earlier inputs. They update once the current inputs are valid and calculated.
+            Les résultats ci-dessous ont été calculés pour des entrées antérieures. Ils se mettent à jour dès que les entrées actuelles sont valides et calculées.
           </div>
         }
         @if (shown()?.run?.stale) {
           <div class="form-error-banner" role="status">
-            This run was computed with an older model version ({{ shown()?.run?.modelVersion }}). Change any input to recompute it with the current model.
+            Ce calcul a été fait avec une version antérieure du modèle ({{ shown()?.run?.modelVersion }}). Modifiez une entrée pour le recalculer avec le modèle actuel.
           </div>
         }
         @if (r && f) {
@@ -95,11 +95,11 @@
           <mtr-reserving-sensitivity-panel [results]="r" [method]="method()" [labels]="methods()" />
           <mtr-cash-flow-panel [results]="r" />
         } @else {
-          <section mtr-panel heading="Results">
+          <section mtr-panel heading="Résultats">
             @if (busy() || !c) {
               <div mtr-panel-skeleton [rows]="6"></div>
             } @else {
-              <div mtr-empty-state icon="info" heading="No reserves yet" description="Enter a triangle or pick an example. Results appear once the server has calculated them."></div>
+              <div mtr-empty-state icon="info" heading="Pas encore de provisions" description="Saisissez un triangle ou choisissez un exemple. Les résultats apparaissent une fois le calcul serveur terminé."></div>
             }
           </section>
         }

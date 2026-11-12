@@ -104,46 +104,46 @@ describe('LearningHubPage', () => {
     const rookie = region(root, 'Trader débutant');
     const first = links(rookie).find((a) => a.textContent?.includes('my-first-trade'));
     expect(first?.getAttribute('href')).toBe('/learn/missions/my-first-trade');
-    expect(rookie.textContent).toContain('Passed · best 81');
+    expect(rookie.textContent).toContain('Réussie · meilleur 81');
 
     const commander = region(root, 'Commandant risque');
     expect(links(commander).find((a) => a.textContent?.includes('interest-rate-shock'))).toBeUndefined();
     const planned = commander.querySelector('.lr-mission[aria-disabled="true"]')!;
     expect(planned.getAttribute('data-availability')).toBe('PLANNED');
-    expect(planned.querySelector('.badge')?.textContent).toBe('Planned');
-    expect(planned.textContent).toContain('not playable yet');
-    expect(commander.textContent).toContain('Recommended later');
+    expect(planned.querySelector('.badge')?.textContent).toBe('Prévue');
+    expect(planned.textContent).toContain("n'est pas encore jouable");
+    expect(commander.textContent).toContain('Recommandé plus tard');
 
-    expect(region(root, 'Stratège marché').querySelector('.badge')?.textContent).toBe('Playable · in review');
+    expect(region(root, 'Stratège marché').querySelector('.badge')?.textContent).toBe('Jouable · en revue');
   });
 
   it('shows the competency profile with assisted and unassisted evidence separately', async () => {
     const { root } = await render();
     expect(root.textContent).toContain('62 / 100');
-    expect(root.textContent).toContain('Unassisted 70 · With mentor 45');
-    expect(root.textContent).toContain('No evidence yet');
-    expect(root.textContent).toContain('Developing evidence · 2 missions');
-    const meter = root.querySelector('[role="meter"][aria-label="Portfolio Diversification mastery"]');
-    expect(meter?.getAttribute('aria-valuetext')).toBe('Not assessed yet');
-    expect(root.querySelector('[role="meter"][aria-label="Risk Management mastery"]')?.getAttribute('aria-valuenow')).toBe('62');
+    expect(root.textContent).toContain('Sans mentor 70 · Avec le mentor 45');
+    expect(root.textContent).toContain('Pas encore de preuve');
+    expect(root.textContent).toContain('Preuve en développement · 2 missions');
+    const meter = root.querySelector('[role="meter"][aria-label="Diversification du portefeuille — maîtrise"]');
+    expect(meter?.getAttribute('aria-valuetext')).toBe('Pas encore évalué');
+    expect(root.querySelector('[role="meter"][aria-label="Gestion du risque — maîtrise"]')?.getAttribute('aria-valuenow')).toBe('62');
   });
 
   it('links active sessions, recommendations and the recommended FinStory', async () => {
     const { root } = await render();
-    expect(links(root).find((a) => a.textContent?.trim() === 'Resume')?.getAttribute('href')).toBe('/learn/sessions/s-1');
+    expect(links(root).find((a) => a.textContent?.trim() === 'Reprendre')?.getAttribute('href')).toBe('/learn/sessions/s-1');
     expect(root.textContent).toContain('your weakest competency');
     const storyLink = links(root).find((a) => a.textContent?.includes('Sarah and the Market Crash'));
     expect(storyLink?.getAttribute('href')).toBe('/stories?story=sarah-and-the-market-crash');
-    expect(storyLink?.textContent).toContain('For your weakest skill');
-    expect(storyLink?.textContent).toContain('59 s · Risk Management');
+    expect(storyLink?.textContent).toContain('Pour votre compétence la plus faible');
+    expect(storyLink?.textContent).toContain('59 s · Gestion du risque');
   });
 
   it('shows the KPIs from the profile and links the playable showcase mission', async () => {
     const { root } = await render();
-    expect(kpi(root, 'Recommended level')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('Trader débutant');
-    expect(kpi(root, 'Missions passed')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('1 / 6');
-    expect(kpi(root, 'Assessed attempts')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('3');
-    expect(kpi(root, 'Confidence calibration')?.querySelector('.ws-kpiHint')?.textContent).toBe('Rate your confidence on orders to see it.');
+    expect(kpi(root, 'Niveau recommandé')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('Trader débutant');
+    expect(kpi(root, 'Missions réussies')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('1 / 6');
+    expect(kpi(root, 'Tentatives évaluées')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('3');
+    expect(kpi(root, 'Calibration de la confiance')?.querySelector('.ws-kpiHint')?.textContent).toBe('Notez votre confiance sur les ordres pour la voir.');
     const actions = root.querySelector('.headingActions')!;
     expect(links(actions).map((a) => a.getAttribute('href'))).toEqual(['/stories', '/learn/missions/survive-the-market-crash']);
   });
@@ -152,9 +152,9 @@ describe('LearningHubPage', () => {
     learningApi['profile'].mockRejectedValueOnce(new ApiError(503, 'Learning is down.'));
     const { fixture, root } = await render();
     const error = root.querySelector('.ws-empty[data-tone="error"]');
-    expect(error?.textContent).toContain('Learning data unavailable');
+    expect(error?.textContent).toContain("Données d'apprentissage indisponibles");
     expect(error?.textContent).toContain('Learning is down.');
-    expect(kpi(root, 'Recommended level')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('—');
+    expect(kpi(root, 'Niveau recommandé')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('—');
     Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Réessayer')!.click();
     await settle(fixture);
     expect(root.querySelector('.ws-empty[data-tone="error"]')).toBeNull();

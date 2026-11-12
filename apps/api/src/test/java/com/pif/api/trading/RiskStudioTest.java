@@ -13,13 +13,13 @@ class RiskStudioTest {
   @Test
   void methodologyStatesHorizonConfidenceAndNeverTreatsVaRAsGuarantee() {
     Map<String, Object> m = RiskStudio.methodology("TND", 12, 2);
-    assertThat(m.get("horizon")).isEqualTo("1 trading day");
+    assertThat(m.get("horizon")).isEqualTo("1 jour de bourse");
     assertThat(m.get("confidenceLevel")).isEqualTo(0.95);
     assertThat(m.get("currency")).isEqualTo("TND");
     assertThat(m.get("minVarObservations")).isEqualTo(Risk.MIN_VAR_OBSERVATIONS);
     @SuppressWarnings("unchecked")
     List<String> limitations = (List<String>) m.get("limitations");
-    assertThat(limitations.get(0)).contains("not a guarantee");
+    assertThat(limitations.get(0)).contains("ne garantit pas");
     assertThat(limitations.stream().anyMatch(s -> s.contains("12"))).isTrue();
   }
 
@@ -38,7 +38,7 @@ class RiskStudioTest {
     Map<String, Object> one = RiskStudio.diversification(Map.of("CTB", new double[] {0.01, 0.02, 0.0, -0.01, 0.03}),
         List.of("CTB"));
     assertThat(one.get("meanPairwiseCorrelation")).isNull();
-    assertThat(one.get("unavailableReason")).isEqualTo("Need at least two holdings.");
+    assertThat(one.get("unavailableReason")).isEqualTo("Il faut au moins deux positions.");
   }
 
   @Test

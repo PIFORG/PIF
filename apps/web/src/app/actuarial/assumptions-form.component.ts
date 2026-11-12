@@ -16,29 +16,29 @@ export interface AssumptionChange {
   host: { class: 'ac-form', novalidate: '', 'aria-describedby': 'act-status', '(submit)': '$event.preventDefault()' },
   template: `
     <div class="field">
-      <label class="field-label" for="act-preset">Example portfolio (fictional)</label>
+      <label class="field-label" for="act-preset">Portefeuille d'exemple (fictif)</label>
       <select id="act-preset" class="select" (change)="preset.emit($any($event.target).value)">
-        <option value="" [selected]="presetId() === ''">Custom assumptions</option>
+        <option value="" [selected]="presetId() === ''">Hypothèses personnalisées</option>
         @for (p of presets(); track p.id) {
           <option [value]="p.id" [selected]="p.id === presetId()">{{ p.name }}</option>
         }
       </select>
-      <p class="field-hint">{{ selectedPreset()?.description ?? 'Edited by you. Pick an example to start again.' }}</p>
+      <p class="field-hint">{{ selectedPreset()?.description ?? 'Modifié par vous. Choisissez un exemple pour recommencer.' }}</p>
     </div>
 
     <fieldset class="ac-fieldset">
-      <legend>Portfolio and claim frequency</legend>
-      <div mtr-segmented label="Frequency model" [value]="form().frequencyFamily" [options]="frequencyOptions" (changed)="set('frequencyFamily', $event)"></div>
+      <legend>Portefeuille et fréquence des sinistres</legend>
+      <div mtr-segmented label="Modèle de fréquence" [value]="form().frequencyFamily" [options]="frequencyOptions" (changed)="set('frequencyFamily', $event)"></div>
       <div class="ac-fieldRow">
-        <div mtr-number-field fieldId="act-policies" label="Policies" [value]="form().policies" [error]="errors().policies" (changed)="set('policies', $event)"></div>
-        <div mtr-number-field fieldId="act-years" label="Cover period" suffix="years" [value]="form().years" [error]="errors().years" (changed)="set('years', $event)"></div>
+        <div mtr-number-field fieldId="act-policies" label="Polices" [value]="form().policies" [error]="errors().policies" (changed)="set('policies', $event)"></div>
+        <div mtr-number-field fieldId="act-years" label="Période de couverture" suffix="ans" [value]="form().years" [error]="errors().years" (changed)="set('years', $event)"></div>
       </div>
       @if (form().frequencyFamily === 'BINOMIAL') {
         <div
           mtr-number-field
           fieldId="act-probabilityPct"
-          label="Annual claim probability"
-          hint="At most one claim per policy."
+          label="Probabilité annuelle de sinistre"
+          hint="Au plus un sinistre par police."
           suffix="%"
           [value]="form().probabilityPct"
           [error]="errors().probabilityPct"
@@ -48,8 +48,8 @@ export interface AssumptionChange {
         <div
           mtr-number-field
           fieldId="act-intensity"
-          label="Claims per policy-year"
-          hint="Several claims per policy are possible."
+          label="Sinistres par police-année"
+          hint="Plusieurs sinistres par police sont possibles."
           [value]="form().intensity"
           [error]="errors().intensity"
           (changed)="set('intensity', $event)"
@@ -58,20 +58,20 @@ export interface AssumptionChange {
     </fieldset>
 
     <fieldset class="ac-fieldset">
-      <legend>Claim cost</legend>
-      <div mtr-segmented label="Severity model" [value]="form().severityFamily" [options]="severityOptions" (changed)="set('severityFamily', $event)"></div>
+      <legend>Coût du sinistre</legend>
+      <div mtr-segmented label="Modèle de sévérité" [value]="form().severityFamily" [options]="severityOptions" (changed)="set('severityFamily', $event)"></div>
       <div class="ac-fieldRow">
-        <div mtr-number-field fieldId="act-meanCost" label="Average claim cost" suffix="DT" [value]="form().meanCost" [error]="errors().meanCost" (changed)="set('meanCost', $event)"></div>
+        <div mtr-number-field fieldId="act-meanCost" label="Coût moyen du sinistre" suffix="DT" [value]="form().meanCost" [error]="errors().meanCost" (changed)="set('meanCost', $event)"></div>
         @if (form().severityFamily !== 'DETERMINISTIC') {
-          <div mtr-number-field fieldId="act-cv" label="Coefficient of variation" hint="sd ÷ mean" [value]="form().cv" [error]="errors().cv" (changed)="set('cv', $event)"></div>
+          <div mtr-number-field fieldId="act-cv" label="Coefficient de variation" hint="écart-type ÷ moyenne" [value]="form().cv" [error]="errors().cv" (changed)="set('cv', $event)"></div>
         }
       </div>
       <div class="ac-fieldRow">
         <div
           mtr-number-field
           fieldId="act-inflationPct"
-          label="Claim inflation"
-          hint="Per year"
+          label="Inflation des sinistres"
+          hint="Par an"
           suffix="%"
           [value]="form().inflationPct"
           [error]="errors().inflationPct"
@@ -80,8 +80,8 @@ export interface AssumptionChange {
         <div
           mtr-number-field
           fieldId="act-inflationYears"
-          label="Trend period"
-          suffix="years"
+          label="Période de tendance"
+          suffix="ans"
           [value]="form().inflationYears"
           [error]="errors().inflationYears"
           (changed)="set('inflationYears', $event)"
@@ -90,13 +90,13 @@ export interface AssumptionChange {
     </fieldset>
 
     <fieldset class="ac-fieldset">
-      <legend>Expenses and margin</legend>
+      <legend>Frais et marge</legend>
       <div class="ac-fieldRow">
         <div
           mtr-number-field
           fieldId="act-fixedExpenses"
-          label="Fixed expenses"
-          hint="Whole portfolio"
+          label="Frais fixes"
+          hint="Portefeuille entier"
           suffix="DT"
           [value]="form().fixedExpenses"
           [error]="errors().fixedExpenses"
@@ -105,7 +105,7 @@ export interface AssumptionChange {
         <div
           mtr-number-field
           fieldId="act-perPolicyExpenses"
-          label="Per policy"
+          label="Par police"
           suffix="DT"
           [value]="form().perPolicyExpenses"
           [error]="errors().perPolicyExpenses"
@@ -116,8 +116,8 @@ export interface AssumptionChange {
         <div
           mtr-number-field
           fieldId="act-variablePct"
-          label="Variable expenses"
-          hint="Share of gross premium"
+          label="Frais variables"
+          hint="Part de la prime brute"
           suffix="%"
           [value]="form().variablePct"
           [error]="errors().variablePct"
@@ -126,8 +126,8 @@ export interface AssumptionChange {
         <div
           mtr-number-field
           fieldId="act-marginPct"
-          label="Profit margin"
-          hint="Share of gross premium"
+          label="Marge bénéficiaire"
+          hint="Part de la prime brute"
           suffix="%"
           [value]="form().marginPct"
           [error]="errors().marginPct"
@@ -137,13 +137,13 @@ export interface AssumptionChange {
     </fieldset>
 
     <fieldset class="ac-fieldset">
-      <legend>Risk loading</legend>
+      <legend>Chargement de risque</legend>
       <div class="field">
-        <label class="field-label" for="act-loading-method">Principle</label>
+        <label class="field-label" for="act-loading-method">Principe</label>
         <select id="act-loading-method" class="select" (change)="set('loadingMethod', $any($event.target).value)">
-          <option value="EXPECTED_VALUE" [selected]="form().loadingMethod === 'EXPECTED_VALUE'">Expected value: θ × E[S]</option>
-          <option value="STANDARD_DEVIATION" [selected]="form().loadingMethod === 'STANDARD_DEVIATION'">Standard deviation: k × sd(S)</option>
-          <option value="NONE" [selected]="form().loadingMethod === 'NONE'">No loading</option>
+          <option value="EXPECTED_VALUE" [selected]="form().loadingMethod === 'EXPECTED_VALUE'">Espérance : θ × E[S]</option>
+          <option value="STANDARD_DEVIATION" [selected]="form().loadingMethod === 'STANDARD_DEVIATION'">Écart-type : k × σ(S)</option>
+          <option value="NONE" [selected]="form().loadingMethod === 'NONE'">Aucun chargement</option>
         </select>
       </div>
       @if (form().loadingMethod === 'EXPECTED_VALUE') {
@@ -151,7 +151,7 @@ export interface AssumptionChange {
           mtr-number-field
           fieldId="act-loadingParameter"
           label="Chargement θ"
-          hint="Percent of expected claims"
+          hint="Pourcentage des sinistres attendus"
           suffix="%"
           [value]="form().loadingParameter"
           [error]="errors().loadingParameter"
@@ -163,7 +163,7 @@ export interface AssumptionChange {
           mtr-number-field
           fieldId="act-loadingParameter"
           label="Chargement k"
-          hint="Multiple of the standard deviation of total claims"
+          hint="Multiple de l'écart-type des sinistres totaux"
           [value]="form().loadingParameter"
           [error]="errors().loadingParameter"
           (changed)="set('loadingParameter', $event)"
@@ -183,13 +183,13 @@ export class AssumptionsFormComponent {
   readonly changed = output<AssumptionChange>();
 
   protected readonly frequencyOptions = [
-    { value: 'BINOMIAL', label: 'Binomial' },
+    { value: 'BINOMIAL', label: 'Binomiale' },
     { value: 'POISSON', label: 'Poisson' },
   ] as const;
   protected readonly severityOptions = [
-    { value: 'DETERMINISTIC', label: 'Fixed' },
+    { value: 'DETERMINISTIC', label: 'Fixe' },
     { value: 'GAMMA', label: 'Gamma' },
-    { value: 'LOGNORMAL', label: 'Lognormal' },
+    { value: 'LOGNORMAL', label: 'Log-normale' },
   ] as const;
   protected readonly selectedPreset = computed(() => this.presets().find((p) => p.id === this.presetId()));
 

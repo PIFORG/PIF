@@ -118,7 +118,7 @@ export class ScenariosPanelComponent {
     } catch (err) {
       if (this.destroyed) return;
       this.scenarios.set([]);
-      this.message.set({ tone: 'error', text: describeActuarialError(err, 'Your saved scenarios could not be loaded.') });
+      this.message.set({ tone: 'error', text: describeActuarialError(err, 'Vos scénarios enregistrés n\'ont pas pu être chargés.') });
     }
   }
 
@@ -146,7 +146,7 @@ export class ScenariosPanelComponent {
       if (this.destroyed) return;
       this.message.set({
         tone: 'error',
-        text: hasErrorCode(err, 'SCENARIO_NAME_TAKEN') ? 'You already have a scenario with this name.' : describeActuarialError(err, 'The scenario could not be saved.'),
+        text: hasErrorCode(err, 'SCENARIO_NAME_TAKEN') ? 'Vous avez déjà un scénario avec ce nom.' : describeActuarialError(err, 'Le scénario n\'a pas pu être enregistré.'),
       });
     } finally {
       this.pending.set(false);
@@ -160,7 +160,7 @@ export class ScenariosPanelComponent {
       this.loaded.emit(formFromAssumptions(detail.inputs));
       this.message.set({ tone: 'ok', text: `« ${s.name} » chargé. Les résultats sont recalculés avec le modèle actuel.` });
     } catch (err) {
-      if (!this.destroyed) this.message.set({ tone: 'error', text: describeActuarialError(err, 'The scenario could not be loaded.') });
+      if (!this.destroyed) this.message.set({ tone: 'error', text: describeActuarialError(err, 'Le scénario n\'a pas pu être chargé.') });
     }
   }
 
@@ -172,7 +172,7 @@ export class ScenariosPanelComponent {
       this.message.set({ tone: 'ok', text: `« ${s.name} » supprimé.` });
       await this.refresh();
     } catch (err) {
-      if (!this.destroyed) this.message.set({ tone: 'error', text: describeActuarialError(err, 'The scenario could not be deleted.') });
+      if (!this.destroyed) this.message.set({ tone: 'error', text: describeActuarialError(err, 'Le scénario n\'a pas pu être supprimé.') });
     }
   }
 }
@@ -244,7 +244,7 @@ export class PricingStudioPage {
       this.presetId.set(res.presets[0]?.id ?? '');
       if (res.presets[0]) this.form.set(formFromAssumptions(res.presets[0].assumptions));
     } catch (err) {
-      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'The example portfolios could not be loaded.'));
+      if (!this.destroyed) this.loadError.set(describeActuarialError(err, 'Les portefeuilles d\'exemple n\'ont pas pu être chargés.'));
     }
   }
 

@@ -203,7 +203,7 @@ public final class Simulator {
   private static double execute(Context ctx, SimState state, Order order, Quote quote, int seq) {
     double held = heldQuantity(state, order.symbol);
     if ("SELL".equals(order.side) && held == 0) {
-      cancelOrder(state, order, seq, "The position was already closed, so this sell order was cancelled.");
+      cancelOrder(state, order, seq, "La position était déjà fermée ; cet ordre de vente a été annulé.");
       return 0;
     }
     String key = order.symbol + ":" + order.side;
@@ -216,7 +216,7 @@ public final class Simulator {
     double value = Money.notional(price, quantity);
     double fee = Money.commission(value, ctx.feeBps(), ctx.minFee());
     if ("BUY".equals(order.side) && value + fee > state.cash) {
-      cancelOrder(state, order, seq, "Not enough cash to complete this fill.");
+      cancelOrder(state, order, seq, "Liquidités insuffisantes pour exécuter cette transaction.");
       return 0;
     }
     Ledger ledger = new Ledger(state.cash, state.positions, state.realizedPnl, state.feesPaid, state.spreadCostPaid);
@@ -242,7 +242,7 @@ public final class Simulator {
       for (Order other : state.orders) {
         if (other != order && "OPEN".equals(other.status) && "SELL".equals(other.side)
             && other.symbol.equals(order.symbol)) {
-          cancelOrder(state, other, seq, "The position was closed, so the remaining sell orders for it were cancelled.");
+          cancelOrder(state, other, seq, "La position a été fermée ; les ordres de vente restants sur cet actif ont été annulés.");
         }
       }
     }
@@ -305,25 +305,25 @@ public final class Simulator {
     MissionDefinition mission = ctx.mission();
     MarketPath market = ctx.market();
     if (isMarketClosed(ctx, state)) {
-      throw new SimulationError("MARKET_CLOSED", "The mission horizon has ended. Finish the mission to see your assessment.");
+      throw new SimulationError("MARKET_CLOSED", "L'horizon de la mission est atteint. Terminez la mission pour voir votre évaluation.");
     }
     if (!market.symbols().contains(command.symbol())) {
-      throw new SimulationError("UNKNOWN_SYMBOL", command.symbol() + " is not traded in this mission.");
+      throw new SimulationError("UNKNOWN_SYMBOL", command.symbol() + " n'est pas coté dans cette mission.");
     }
     Double quantity = command.quantity();
     if (quantity == null || !Js.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
-      throw new SimulationError("INVALID_QUANTITY", "Quantity must be a whole number between 1 and 1000000.");
+      throw new SimulationError("INVALID_QUANTITY", "La quantité doit être un entier entre 1 et 1\u00a0000\u00a0000.");
     }
     if (!mission.rules().allowedOrderTypes().contains(command.orderType())) {
-      throw new SimulationError("ORDER_TYPE_NOT_ALLOWED", command.orderType() + " orders are not available in this mission.");
+      throw new SimulationError("ORDER_TYPE_NOT_ALLOWED", command.orderType() + " : ce type d'ordre n'est pas disponible dans cette mission.");
     }
     Double confidence = command.confidence();
     if (command.hasConfidence() && (confidence == null || !Js.isInteger(confidence) || confidence < 0 || confidence > 100)) {
-      throw new SimulationError("INVALID_CONFIDENCE", "Confidence must be a whole number from 0 to 100.");
+      throw new SimulationError("INVALID_CONFIDENCE", "La confiance doit être un entier de 0 à 100.");
     }
     if (mission.rules().requireConfidence() && !command.hasConfidence()) {
       throw new SimulationError("CONFIDENCE_REQUIRED",
-          "This mission asks how sure you are: rate your confidence on every order.");
+          "Cette mission demande votre niveau de certitude : indiquez votre confiance sur chaque ordre.");
     }
 
     Quote quote = market.quoteAt(state.step, command.symbol());
@@ -331,24 +331,24 @@ public final class Simulator {
     Double stopPrice = null;
     if ("LIMIT".equals(command.orderType())) {
       if (command.limitPrice() == null || !(command.limitPrice() > 0)) {
-        throw new SimulationError("INVALID_PRICE", "A limit order needs a positive limit price.");
+        throw new SimulationError("INVALID_PRICE", "Un ordre à cours limité nécessite un prix limite positif.");
       }
       limitPrice = Money.toAmount(command.limitPrice());
       if (!OrderRules.limitWithinBand(limitPrice, quote.mid(), 50)) {
-        throw new SimulationError("INVALID_PRICE", "The limit price must be within 50 % of the current price.");
+        throw new SimulationError("INVALID_PRICE", "Le prix limite doit se situer à ± 50 % du cours actuel.");
       }
     }
     if ("STOP".equals(command.orderType())) {
       if (!"SELL".equals(command.side())) {
-        throw new SimulationError("INVALID_ORDER", "Stop orders protect long positions, so only SELL stops are available.");
+        throw new SimulationError("INVALID_ORDER", "Les ordres stop protègent les positions longues : seuls les stops de vente sont disponibles.");
       }
       if (command.stopPrice() == null || !(command.stopPrice() > 0)) {
-        throw new SimulationError("INVALID_PRICE", "A stop order needs a positive stop price.");
+        throw new SimulationError("INVALID_PRICE", "Un ordre stop nécessite un prix stop positif.");
       }
       stopPrice = Money.toAmount(command.stopPrice());
       if (!OrderRules.stopBelowBid(stopPrice, quote)) {
-        throw new SimulationError("INVALID_PRICE", "The stop price must be below the current bid (" + dt(quote.bid())
-            + " DT); otherwise it would trigger immediately.");
+        throw new SimulationError("INVALID_PRICE", "Le prix stop doit être inférieur à l'offre actuelle (" + dt(quote.bid())
+            + " DT) ; sinon il se déclencherait immédiatement.");
       }
     }
 
@@ -387,12 +387,12 @@ public final class Simulator {
         mission.rules().maxPositionWeightPct()));
     if (rejection == null) return new OrderCheck(order, quote, null, null);
     String reason = switch (rejection) {
-      case PreTrade.InsufficientPosition r -> "You hold " + Js.str(r.held()) + " " + order.symbol
-          + "; short selling is not available in this mission.";
-      case PreTrade.InsufficientCash r -> "This order needs " + dt(r.needed()) + " DT including fees; "
-          + dt(r.available()) + " DT is available.";
-      case PreTrade.PositionLimit r -> "This order would put " + Js.toFixed(r.weightPct(), 1) + " % of your equity in "
-          + order.symbol + "; the mission limit is " + Js.str(r.limitPct()) + " %.";
+      case PreTrade.InsufficientPosition r -> "Vous détenez " + Js.str(r.held()) + " " + order.symbol
+          + " ; la vente à découvert n'est pas disponible dans cette mission.";
+      case PreTrade.InsufficientCash r -> "Cet ordre nécessite " + dt(r.needed()) + " DT frais compris ; "
+          + dt(r.available()) + " DT disponibles.";
+      case PreTrade.PositionLimit r -> "Cet ordre porterait " + Js.toFixed(r.weightPct(), 1) + " % de votre capital sur "
+          + order.symbol + " ; la limite de la mission est " + Js.str(r.limitPct()) + " %.";
     };
     return new OrderCheck(order, quote, rejection.code(), reason);
   }
@@ -414,7 +414,7 @@ public final class Simulator {
   public static OrderPreview previewOrder(Context ctx, SimState state, Command command) {
     int seq = state.lastCommandSeq;
     if (!"ACTIVE".equals(state.status)) {
-      return new OrderPreview(seq, false, "SESSION_CLOSED", "This mission session has already ended.", null, List.of());
+      return new OrderPreview(seq, false, "SESSION_CLOSED", "Cette session de mission est déjà terminée.", null, List.of());
     }
     OrderCheck check;
     try {
@@ -439,7 +439,7 @@ public final class Simulator {
       double weightPct = (Money.notional(quote.mid(), held + pendingBuys(state, order.symbol) + order.quantity)
           / equityOf(ctx, state)) * 100;
       if (weightPct > CONCENTRATION_WARNING_PCT) {
-        warnings.add(order.symbol + " would be about " + Js.toFixed(weightPct, 1) + " % of your equity.");
+        warnings.add(order.symbol + " représenterait environ " + Js.toFixed(weightPct, 1) + " % de votre capital.");
       }
     } else if (!"STOP".equals(order.type)) {
       double committed = 0;
@@ -449,26 +449,26 @@ public final class Simulator {
         }
       }
       if (committed > 0 && committed + order.quantity > held) {
-        warnings.add("Open sell orders already cover " + Js.str(committed) + " of your " + Js.str(held) + " "
-            + order.symbol + "; whichever fills first leaves less for the others.");
+        warnings.add("Des ordres de vente ouverts couvrent déjà " + Js.str(committed) + " de vos " + Js.str(held) + " "
+            + order.symbol + " ; le premier exécuté laisse moins pour les autres.");
       }
     }
     if ("MARKET".equals(order.type)) {
       Double used = state.liquidityUsed.get(order.symbol + ":" + order.side);
       double available = Math.max(0, ExecutionRules.remainingDepth(quote, used == null ? 0 : used));
       if (order.quantity > available) {
-        warnings.add("Only " + com.pif.api.web.JsNumbers.toLocaleEnUs(available) + " units are offered at the best "
-            + ("BUY".equals(order.side) ? "ask" : "bid")
-            + " now; a market order fills that much and cancels the rest.");
+        warnings.add("Seulement " + com.pif.api.web.JsNumbers.toLocaleEnUs(available) + " unités sont proposées au meilleur "
+            + ("BUY".equals(order.side) ? "offre" : "demande")
+            + " actuellement ; un ordre au marché exécute ce volume et annule le reste.");
       }
     }
     if ("LIMIT".equals(order.type) && order.limitPrice != null) {
       warnings.add(ExecutionRules.limitIsMarketable(side(order.side), order.limitPrice, quote)
-          ? "This limit is marketable and should fill now, at the best price available up to your limit."
-          : "This limit rests until the market reaches your price or the mission ends.");
+          ? "Ce cours limité est atteignable et devrait s'exécuter maintenant, au meilleur prix disponible jusqu'à votre limite."
+          : "Ce cours limité attend que le marché atteigne votre prix ou que la mission se termine.");
     }
     if ("STOP".equals(order.type)) {
-      warnings.add("A stop sells at the bid once it is reached. After a gap, that can be below your stop price.");
+      warnings.add("Un stop vend à la demande une fois atteint. Après un gap, le cours peut être inférieur à votre stop.");
     }
     return new OrderPreview(seq, true, null, null, estimate, List.copyOf(warnings));
   }
@@ -499,14 +499,14 @@ public final class Simulator {
     if ("MARKET".equals(order.type)) {
       double filled = execute(ctx, state, order, quote, seq);
       if ("FILLED".equals(order.status)) {
-        return new Outcome("ACCEPTED", "Filled " + Js.str(order.quantity) + " " + order.symbol + " at "
+        return new Outcome("ACCEPTED", "Exécution : " + Js.str(order.quantity) + " " + order.symbol + " à "
             + dt(order.fills.get(0).price()) + " DT.");
       }
       if ("OPEN".equals(order.status)) {
-        String book = "BUY".equals(order.side) ? "ask" : "bid";
-        cancelOrder(state, order, seq, "Only " + Js.str(filled) + " of " + Js.str(order.quantity)
-            + " units were available at the best " + book
-            + "; market orders are immediate-or-cancel, so the rest was cancelled.");
+        String book = "BUY".equals(order.side) ? "offre" : "demande";
+        cancelOrder(state, order, seq, "Seulement " + Js.str(filled) + " sur " + Js.str(order.quantity)
+            + " unités étaient disponibles au meilleur " + book
+            + " ; les ordres au marché sont immédiats ou annulés, le reste a été annulé.");
       }
       return new Outcome("ACCEPTED", order.statusReason == null ? "" : order.statusReason);
     }
@@ -515,24 +515,24 @@ public final class Simulator {
       if (ExecutionRules.limitIsMarketable(side(order.side), limitPrice, quote)) {
         execute(ctx, state, order, quote, seq);
         if ("FILLED".equals(order.status)) {
-          return new Outcome("ACCEPTED", "Limit order filled immediately at " + dt(order.fills.get(0).price()) + " DT.");
+          return new Outcome("ACCEPTED", "Ordre à cours limité exécuté immédiatement à " + dt(order.fills.get(0).price()) + " DT.");
         }
         if ("OPEN".equals(order.status)) {
-          return new Outcome("ACCEPTED", "Partially filled " + Js.str(order.filledQuantity)
-              + " units; the rest rests in the book at " + dt(limitPrice) + " DT.");
+          return new Outcome("ACCEPTED", "Partiellement exécuté : " + Js.str(order.filledQuantity)
+              + " unités ; le reste attend dans le carnet à " + dt(limitPrice) + " DT.");
         }
         return new Outcome("ACCEPTED", order.statusReason == null ? "" : order.statusReason);
       }
-      return new Outcome("ACCEPTED", "Limit order resting at " + dt(limitPrice)
-          + " DT until the market reaches it or the mission ends.");
+      return new Outcome("ACCEPTED", "Ordre à cours limité en attente à " + dt(limitPrice)
+          + " DT jusqu'à ce que le marché l'atteigne ou que la mission se termine.");
     }
-    return new Outcome("ACCEPTED", "Stop order armed at " + dt(stopPrice == null ? 0 : stopPrice)
-        + " DT. It sells at the bid once the bid falls to or below the stop.");
+    return new Outcome("ACCEPTED", "Ordre stop armé à " + dt(stopPrice == null ? 0 : stopPrice)
+        + " DT. Il vend à la demande lorsque celle-ci tombe au niveau du stop ou en dessous.");
   }
 
   private static String advance(Context ctx, SimState state, int seq) {
     if (isMarketClosed(ctx, state)) {
-      throw new SimulationError("MARKET_CLOSED", "This is the final step. Finish the mission to see your assessment.");
+      throw new SimulationError("MARKET_CLOSED", "C'est la dernière étape. Terminez la mission pour voir votre évaluation.");
     }
     state.step += 1;
     state.liquidityUsed = new LinkedHashMap<>();
@@ -564,12 +564,12 @@ public final class Simulator {
     if (isMarketClosed(ctx, state)) {
       for (Order order : state.orders) {
         if ("OPEN".equals(order.status)) {
-          cancelOrder(state, order, seq, "The mission horizon ended before this order completed.", "EXPIRED");
+          cancelOrder(state, order, seq, "L'horizon de la mission s'est terminé avant la complétion de cet ordre.", "EXPIRED");
         }
       }
-      return "Final " + label + " reached. Review your portfolio, then finish the mission.";
+      return "Dernière " + label + " atteinte. Passez votre portefeuille en revue, puis terminez la mission.";
     }
-    return "Moved to " + label + " " + state.step + " of " + ctx.mission().scenario().steps() + ".";
+    return "Passage à " + label + " " + state.step + " sur " + ctx.mission().scenario().steps() + ".";
   }
 
   private static Double shockFor(StressScenarioDefinition scenario, String symbol) {
@@ -581,7 +581,7 @@ public final class Simulator {
 
   private static String runStressTest(Context ctx, SimState state, String scenarioId, int seq) {
     if (!ctx.mission().rules().allowStressTest()) {
-      throw new SimulationError("STRESS_TEST_UNAVAILABLE", "Stress tests are not part of this mission.");
+      throw new SimulationError("STRESS_TEST_UNAVAILABLE", "Les tests de résistance ne font pas partie de cette mission.");
     }
     StressScenarioDefinition scenario = null;
     for (StressScenarioDefinition s : ctx.mission().scenario().stressScenarios()) {
@@ -590,7 +590,7 @@ public final class Simulator {
         break;
       }
     }
-    if (scenario == null) throw new SimulationError("UNKNOWN_SCENARIO", "Unknown stress scenario.");
+    if (scenario == null) throw new SimulationError("UNKNOWN_SCENARIO", "Scénario de stress inconnu.");
     StressScenarioDefinition chosen = scenario;
     Risk.StressResult stress = Risk.stressImpact(marketValues(ctx, state), symbol -> {
       Double own = shockFor(chosen, symbol);
@@ -606,8 +606,8 @@ public final class Simulator {
     state.stressTests.add(result);
     emit(state, "STRESS_TEST_RUN", seq, data("scenarioId", scenarioId, "impact", stress.impact(), "impactPct",
         result.impactPct()));
-    return scenario.name() + ": estimated impact " + dt(stress.impact()) + " DT (" + Js.toFixed(result.impactPct(), 2)
-        + " % of equity).";
+    return scenario.name() + " : impact estimé " + dt(stress.impact()) + " DT (" + Js.toFixed(result.impactPct(), 2)
+        + " % du capital).";
   }
 
   private static void checkFailure(Context ctx, SimState state, int seq) {
@@ -616,11 +616,11 @@ public final class Simulator {
       double floor = state.initialEquity * (1 - rule.limitPct() / 100);
       if (equity <= floor) {
         state.status = "FAILED";
-        state.failureReason = "Equity fell to " + dt(equity) + " DT, breaching the " + Js.str(rule.limitPct())
-            + " % maximum-loss rule (" + dt(Js.round(floor)) + " DT).";
+        state.failureReason = "Le capital est tombé à " + dt(equity) + " DT, franchissant la règle de perte maximale de " + Js.str(rule.limitPct())
+            + " % (plancher " + dt(Js.round(floor)) + " DT).";
         for (Order order : state.orders) {
           if ("OPEN".equals(order.status)) {
-            cancelOrder(state, order, seq, "The mission ended because the loss limit was breached.");
+            cancelOrder(state, order, seq, "La mission s'est terminée car la limite de perte a été franchie.");
           }
         }
         emit(state, "MISSION_FAILED", seq, data("reason", state.failureReason, "equity", equity));
@@ -635,10 +635,10 @@ public final class Simulator {
    */
   public static CommandResult applyCommand(Context ctx, SimState previous, Command command, int seq) {
     if (seq != previous.lastCommandSeq + 1) {
-      throw new SimulationError("SEQUENCE_CONFLICT", "The session changed since you last loaded it.");
+      throw new SimulationError("SEQUENCE_CONFLICT", "La session a changé depuis votre dernier chargement.");
     }
     if (!"ACTIVE".equals(previous.status)) {
-      throw new SimulationError("SESSION_CLOSED", "This mission session has already ended.");
+      throw new SimulationError("SESSION_CLOSED", "Cette session de mission est déjà terminée.");
     }
     if (command == null) {
       throw new IllegalArgumentException("Cannot read properties of undefined (reading 'type')");
@@ -664,28 +664,28 @@ public final class Simulator {
           }
         }
         if (order == null || !"OPEN".equals(order.status)) {
-          throw new SimulationError("ORDER_NOT_OPEN", "Only open orders can be cancelled.");
+          throw new SimulationError("ORDER_NOT_OPEN", "Seuls les ordres ouverts peuvent être annulés.");
         }
-        cancelOrder(state, order, seq, "Cancelled by you.");
-        message = "Order " + order.id + " cancelled.";
+        cancelOrder(state, order, seq, "Annulé par vous.");
+        message = "Ordre " + order.id + " annulé.";
       }
       case "ADVANCE" -> message = advance(ctx, state, seq);
       case "FINISH" -> {
         if (!isMarketClosed(ctx, state)) {
           throw new SimulationError("MISSION_NOT_OVER",
-              "Advance to the final " + ctx.mission().scenario().stepLabel() + " before finishing.");
+              "Avancez jusqu'à la dernière " + ctx.mission().scenario().stepLabel() + " avant de terminer.");
         }
         state.status = "COMPLETED";
         emit(state, "MISSION_COMPLETED", seq, data("equity", equityOf(ctx, state)));
-        message = "Mission completed.";
+        message = "Mission terminée.";
       }
       case "RUN_STRESS_TEST" -> message = runStressTest(ctx, state, command.scenarioId(), seq);
       case "REQUEST_HINT" -> {
         state.hintsUsed += 1;
         emit(state, "HINT_REQUESTED", seq, data("hintsUsed", state.hintsUsed));
-        message = "Hint requested.";
+        message = "Indice demandé.";
       }
-      default -> throw new SimulationError("UNKNOWN_COMMAND", "Unknown command " + command.type() + ".");
+      default -> throw new SimulationError("UNKNOWN_COMMAND", "Commande inconnue " + command.type() + ".");
     }
 
     state.lastCommandSeq = seq;

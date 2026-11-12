@@ -7,8 +7,8 @@ import { ColumnChartComponent, type ChartMarker } from './actuarial-parts.compon
 
 /* apps/web/src/components/actuarial/results.tsx: every figure is read from the server's pricing result. */
 
-const FREQUENCY_LABEL = { BINOMIAL: 'Binomial', POISSON: 'Poisson' } as const;
-const SEVERITY_LABEL = { DETERMINISTIC: 'Deterministic', GAMMA: 'Gamma', LOGNORMAL: 'Lognormal' } as const;
+const FREQUENCY_LABEL = { BINOMIAL: 'Binomiale', POISSON: 'Poisson' } as const;
+const SEVERITY_LABEL = { DETERMINISTIC: 'Déterministe', GAMMA: 'Gamma', LOGNORMAL: 'Log-normale' } as const;
 const DASH = '\u2014';
 const ratio1 = (v: number) => ratio(v, 1);
 
@@ -19,22 +19,22 @@ const ratio1 = (v: number) => ratio(v, 1);
   host: { class: 'ac-kpis' },
   template: `
     @let r = result();
-    <div mtr-kpi label="Gross premium per policy" icon="actuarial" [hint]="count(r.frequency.policies) + ' policies'">
+    <div mtr-kpi label="Prime brute par police" icon="actuarial" [hint]="count(r.frequency.policies) + ' polices'">
       <span class="num">{{ tnd(r.premium.perPolicy.grossPremium) }}</span>
     </div>
-    <div mtr-kpi label="Total gross premium" hint="Commercial premium for the period">
+    <div mtr-kpi label="Prime brute totale" hint="Prime commerciale sur la période">
       <span class="num">{{ tndShort(r.premium.totals.grossPremium) }}</span>
     </div>
-    <div mtr-kpi label="Expected claims E[S]" [hint]="decimal(r.frequency.mean, 2) + ' claims expected'">
+    <div mtr-kpi label="Sinistres attendus E[S]" [hint]="decimal(r.frequency.mean, 2) + ' sinistres attendus'">
       <span class="num">{{ tndShort(r.premium.totals.purePremium) }}</span>
     </div>
-    <div mtr-kpi label="Combined ratio" hint="Expected claims and expenses ÷ premium" [tone]="r.premium.ratios.combined >= 1 ? 'negative' : 'default'">
+    <div mtr-kpi label="Ratio combiné" hint="Sinistres attendus et frais ÷ prime" [tone]="r.premium.ratios.combined >= 1 ? 'negative' : 'default'">
       <span class="num">{{ ratio(r.premium.ratios.combined, 1) }}</span>
     </div>
     <div
       mtr-kpi
-      label="P(underwriting loss)"
-      [hint]="loss() === null ? 'Distribution unavailable' : 'Claims exceed the claims budget'"
+      label="P(perte de souscription)"
+      [hint]="loss() === null ? 'Distribution indisponible' : 'Les sinistres dépassent le budget sinistres'"
       [tone]="(loss() ?? 0) > 0.25 ? 'warning' : 'default'"
     >
       <span class="num">{{ probability(loss()) }}</span>
@@ -54,9 +54,9 @@ export class PremiumKpisComponent {
 
 function loadingHint(result: PricingResult): string {
   const { method, parameter } = result.assumptions.riskLoading;
-  if (method === 'EXPECTED_VALUE') return `θ = ${ratio(parameter, 1)} of E[S]`;
-  if (method === 'STANDARD_DEVIATION') return `k = ${decimal(parameter)} × sd(S)`;
-  return 'No loading';
+  if (method === 'EXPECTED_VALUE') return `θ = ${ratio(parameter, 1)} d'E[S]`;
+  if (method === 'STANDARD_DEVIATION') return `k = ${decimal(parameter)} × écart-type(S)`;
+  return 'Aucun chargement';
 }
 
 @Component({
@@ -66,16 +66,16 @@ function loadingHint(result: PricingResult): string {
   host: { style: 'display: contents' },
   template: `
     @let premium = result().premium;
-    <section mtr-panel panelId="premium" heading="Premium build-up" description="From expected claims to the commercial premium charged to policyholders.">
+    <section mtr-panel panelId="premium" heading="Construction de la prime" description="Des sinistres attendus à la prime commerciale facturée aux assurés.">
       <div class="table-wrap ac-rows">
         <table class="data-table">
-          <caption class="sr-only">Premium components for the portfolio and per policy</caption>
+          <caption class="sr-only">Composantes de la prime pour le portefeuille et par police</caption>
           <thead>
             <tr>
-              <th scope="col">Component</th>
-              <th scope="col" class="num">Portfolio</th>
-              <th scope="col" class="num">Per policy</th>
-              <th scope="col" class="num">Share of gross</th>
+              <th scope="col">Composante</th>
+              <th scope="col" class="num">Portefeuille</th>
+              <th scope="col" class="num">Par police</th>
+              <th scope="col" class="num">Part de la brute</th>
             </tr>
           </thead>
           <tbody>
@@ -94,23 +94,23 @@ function loadingHint(result: PricingResult): string {
         </table>
       </div>
       <div style="margin-top: var(--space-4)">
-        <div mtr-allocation-bar label="What the gross premium pays for" [items]="allocation()"></div>
+        <div mtr-allocation-bar label="Répartition de la prime brute" [items]="allocation()"></div>
       </div>
       <dl class="ac-stats" style="margin-top: var(--space-4); margin-bottom: 0">
         <div>
-          <dt>Loss ratio</dt>
+          <dt>Ratio de sinistralité</dt>
           <dd>{{ ratio(premium.ratios.loss, 1) }}</dd>
         </div>
         <div>
-          <dt>Expense ratio</dt>
+          <dt>Ratio de frais</dt>
           <dd>{{ ratio(premium.ratios.expense, 1) }}</dd>
         </div>
         <div>
-          <dt>Expected underwriting result</dt>
+          <dt>Résultat de souscription attendu</dt>
           <dd [class.ac-neg]="premium.totals.expectedUnderwritingResult < 0">{{ tnd(premium.totals.expectedUnderwritingResult) }}</dd>
         </div>
         <div>
-          <dt>Pure premium per policy-year</dt>
+          <dt>Prime pure par police-année</dt>
           <dd>{{ tnd(premium.purePremiumPerExposure) }}</dd>
         </div>
       </dl>
@@ -131,30 +131,30 @@ export class PremiumBuildUpComponent {
     const result = this.result();
     const { totals, perPolicy } = result.premium;
     return [
-      { label: 'Pure premium', hint: 'E[S] = E[N] × E[X]', total: totals.purePremium, perPolicy: perPolicy.purePremium, isTotal: false },
-      { label: 'Risk loading', hint: loadingHint(result), total: totals.riskLoading, perPolicy: perPolicy.riskLoading, isTotal: false },
-      { label: 'Fixed and per-policy expenses', hint: 'Administration, claims handling', total: totals.fixedExpenses, perPolicy: perPolicy.fixedExpenses, isTotal: false },
-      { label: 'Technical premium', hint: 'Pure premium + loading + fixed expenses', total: totals.technicalPremium, perPolicy: perPolicy.technicalPremium, isTotal: true },
+      { label: 'Prime pure', hint: 'E[S] = E[N] × E[X]', total: totals.purePremium, perPolicy: perPolicy.purePremium, isTotal: false },
+      { label: 'Chargement de risque', hint: loadingHint(result), total: totals.riskLoading, perPolicy: perPolicy.riskLoading, isTotal: false },
+      { label: 'Frais fixes et par police', hint: 'Administration, gestion des sinistres', total: totals.fixedExpenses, perPolicy: perPolicy.fixedExpenses, isTotal: false },
+      { label: 'Prime technique', hint: 'Prime pure + chargement + frais fixes', total: totals.technicalPremium, perPolicy: perPolicy.technicalPremium, isTotal: true },
       {
-        label: 'Variable expenses',
-        hint: `${ratio(result.assumptions.expenses.variableRate, 1)} of gross premium`,
+        label: 'Frais variables',
+        hint: `${ratio(result.assumptions.expenses.variableRate, 1)} de la prime brute`,
         total: totals.variableExpenses,
         perPolicy: perPolicy.variableExpenses,
         isTotal: false,
       },
-      { label: 'Profit margin', hint: `${ratio(result.assumptions.profitMarginRate, 1)} of gross premium`, total: totals.profitMargin, perPolicy: perPolicy.profitMargin, isTotal: false },
-      { label: 'Gross (commercial) premium', hint: 'Technical premium ÷ (1 − variable rate − margin)', total: totals.grossPremium, perPolicy: perPolicy.grossPremium, isTotal: true },
+      { label: 'Marge de profit', hint: `${ratio(result.assumptions.profitMarginRate, 1)} de la prime brute`, total: totals.profitMargin, perPolicy: perPolicy.profitMargin, isTotal: false },
+      { label: 'Prime brute (commerciale)', hint: 'Prime technique ÷ (1 − taux variable − marge)', total: totals.grossPremium, perPolicy: perPolicy.grossPremium, isTotal: true },
     ];
   });
 
   protected readonly allocation = computed(() => {
     const totals = this.result().premium.totals;
     return [
-      { label: 'Expected claims', weight: this.share(totals.purePremium) },
-      { label: 'Risk loading', weight: this.share(totals.riskLoading) },
-      { label: 'Fixed expenses', weight: this.share(totals.fixedExpenses) },
-      { label: 'Variable expenses', weight: this.share(totals.variableExpenses) },
-      { label: 'Profit margin', weight: this.share(totals.profitMargin) },
+      { label: 'Sinistres attendus', weight: this.share(totals.purePremium) },
+      { label: 'Chargement de risque', weight: this.share(totals.riskLoading) },
+      { label: 'Frais fixes', weight: this.share(totals.fixedExpenses) },
+      { label: 'Frais variables', weight: this.share(totals.variableExpenses) },
+      { label: 'Marge de profit', weight: this.share(totals.profitMargin) },
     ];
   });
 }
@@ -169,8 +169,8 @@ export class PremiumBuildUpComponent {
     <section
       mtr-panel
       panelId="aggregate"
-      heading="Aggregate claims distribution"
-      description="Total claims S = X₁ + … + X_N for the period, compared with the premium left for claims after expenses."
+      heading="Distribution des sinistres agrégés"
+      description="Sinistres totaux S = X₁ + … + X_N sur la période, comparés à la part de prime restante pour les sinistres après frais."
     >
       <dl class="ac-stats">
         <div>
@@ -178,19 +178,19 @@ export class PremiumBuildUpComponent {
           <dd>{{ tnd(r.aggregate.mean) }}</dd>
         </div>
         <div>
-          <dt>Standard deviation</dt>
+          <dt>Écart-type</dt>
           <dd>{{ tnd(r.aggregate.sd) }}</dd>
         </div>
         <div>
-          <dt>Coefficient of variation</dt>
+          <dt>Coefficient de variation</dt>
           <dd>{{ r.aggregate.cv === null ? dash : decimal(r.aggregate.cv, 4) }}</dd>
         </div>
         <div>
-          <dt>P(S &gt; claims budget)</dt>
+          <dt>P(S &gt; budget sinistres)</dt>
           <dd>{{ probability(r.probabilities.underwritingLoss) }}</dd>
         </div>
         <div>
-          <dt>P(S &gt; gross premium)</dt>
+          <dt>P(S &gt; prime brute)</dt>
           <dd>{{ probability(r.probabilities.claimsExceedPremium) }}</dd>
         </div>
       </dl>
@@ -203,21 +203,21 @@ export class PremiumBuildUpComponent {
           [markers]="markers()"
           [formatX]="tndShort"
           [formatY]="ratio1"
-          seriesLabel="Probability of total claims in range"
+          seriesLabel="Probabilité des sinistres totaux dans l'intervalle"
           [summary]="summary()"
         ></figure>
       } @else {
-        <div mtr-empty-state icon="info" heading="Full distribution not available" [description]="unavailableReason()"></div>
+        <div mtr-empty-state icon="info" heading="Distribution complète indisponible" [description]="unavailableReason()"></div>
       }
       <div class="table-wrap ac-rows" style="margin-top: var(--space-4)">
         <table class="data-table">
-          <caption class="sr-only">Quantiles (value-at-risk) and tail value-at-risk of total claims</caption>
+          <caption class="sr-only">Quantiles (value-at-risk) et tail value-at-risk des sinistres totaux</caption>
           <thead>
             <tr>
-              <th scope="col">Confidence level</th>
+              <th scope="col">Niveau de confiance</th>
               <th scope="col" class="num">Quantile (VaR)</th>
-              <th scope="col" class="num">Tail mean (TVaR)</th>
-              <th scope="col" class="num">Normal approximation</th>
+              <th scope="col" class="num">Moyenne de queue (TVaR)</th>
+              <th scope="col" class="num">Approximation normale</th>
             </tr>
           </thead>
           <tbody>
@@ -232,7 +232,7 @@ export class PremiumBuildUpComponent {
           </tbody>
         </table>
       </div>
-      <p class="ac-note">{{ distributionNote() }} The normal approximation is shown for comparison only: it understates skewed claim totals.</p>
+      <p class="ac-note">{{ distributionNote() }} L'approximation normale est affichée pour comparaison seulement : elle sous-estime les totaux de sinistres asymétriques.</p>
     </section>
   `,
 })
@@ -250,29 +250,29 @@ export class LossDistributionPanelComponent {
     const { aggregate, premium } = this.result();
     const var995 = aggregate.risk.find((r) => r.level === 0.995);
     const markers: ChartMarker[] = [
-      { label: 'Expected claims', value: aggregate.mean, tone: 'cyan' },
-      { label: 'Claims budget', value: premium.totals.claimsBudget, tone: 'amber' },
+      { label: 'Sinistres attendus', value: aggregate.mean, tone: 'cyan' },
+      { label: 'Budget sinistres', value: premium.totals.claimsBudget, tone: 'amber' },
     ];
-    if (var995?.valueAtRisk) markers.push({ label: '99.5% quantile', value: var995.valueAtRisk, tone: 'neg' });
+    if (var995?.valueAtRisk) markers.push({ label: 'Quantile 99,5 %', value: var995.valueAtRisk, tone: 'neg' });
     return markers;
   });
 
   protected readonly summary = computed(() => {
     const { aggregate, premium, probabilities } = this.result();
-    return `Distribution of total claims. Expected ${tnd(aggregate.mean)}, standard deviation ${tnd(aggregate.sd)}. Probability that claims exceed the claims budget of ${tnd(premium.totals.claimsBudget)}: ${probability(probabilities.underwritingLoss)}.`;
+    return `Distribution des sinistres totaux. Attendu ${tnd(aggregate.mean)}, écart-type ${tnd(aggregate.sd)}. Probabilité que les sinistres dépassent le budget sinistres de ${tnd(premium.totals.claimsBudget)} : ${probability(probabilities.underwritingLoss)}.`;
   });
 
   protected readonly unavailableReason = computed(() => {
     const dist = this.result().aggregate.distribution;
-    return dist.available ? 'No distribution returned.' : dist.reason;
+    return dist.available ? 'Aucune distribution renvoyée.' : dist.reason;
   });
 
   protected readonly distributionNote = computed(() => {
     const dist = this.result().aggregate.distribution;
-    if (!dist.available) return 'Moments are exact; quantiles need the distribution.';
+    if (!dist.available) return 'Les moments sont exacts ; les quantiles nécessitent la distribution.';
     return dist.method === 'EXACT'
-      ? 'Exact distribution: every claim costs the same, so S = cost × N.'
-      : `Panjer recursion on a ${tnd(dist.span)} grid (mean-preserving discretisation); ${probability(dist.capturedMass)} of the probability is on the grid.`;
+      ? 'Distribution exacte : chaque sinistre coûte le même montant, donc S = coût × N.'
+      : `Récursion de Panjer sur une grille de ${tnd(dist.span)} (discrétisation préservant la moyenne) ; ${probability(dist.capturedMass)} de la probabilité est sur la grille.`;
   });
 }
 
@@ -283,7 +283,7 @@ export class LossDistributionPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let f = result().frequency;
-    <section mtr-panel panelId="frequency" heading="Claim frequency" [description]="description()">
+    <section mtr-panel panelId="frequency" heading="Fréquence des sinistres" [description]="description()">
       <dl class="ac-stats">
         <div>
           <dt>E[N]</dt>
@@ -297,11 +297,11 @@ export class LossDistributionPanelComponent {
           <dt>Var ÷ mean</dt>
           <dd>
             {{ f.dispersionIndex === null ? dash : decimal(f.dispersionIndex, 4) }}
-            <span class="ac-hint">{{ isBinomial() ? 'Below 1 for the binomial' : 'Exactly 1 for Poisson' }}</span>
+            <span class="ac-hint">{{ isBinomial() ? 'Inférieur à 1 pour la binomiale' : 'Exactement 1 pour Poisson' }}</span>
           </dd>
         </div>
         <div>
-          <dt>{{ isBinomial() ? 'Claim probability per policy' : 'P(a policy has a claim)' }}</dt>
+          <dt>{{ isBinomial() ? 'Probabilité de sinistre par police' : 'P(une police a un sinistre)' }}</dt>
           <dd>{{ probability(f.probabilityPolicyClaims) }}</dd>
         </div>
         <div>
@@ -317,8 +317,8 @@ export class LossDistributionPanelComponent {
         [markers]="markers()"
         [formatX]="formatCount"
         [formatY]="ratio1"
-        [seriesLabel]="f.distribution.binWidth > 1 ? 'P(N in a range of ' + f.distribution.binWidth + ' claims)' : 'P(N = k)'"
-        [summary]="'Number of claims: mean ' + decimal(f.mean, 2) + ', standard deviation ' + decimal(f.sd, 2) + '.'"
+        [seriesLabel]="f.distribution.binWidth > 1 ? 'P(N dans un intervalle de ' + f.distribution.binWidth + ' sinistres)' : 'P(N = k)'"
+        [summary]="'Nombre de sinistres : moyenne ' + decimal(f.mean, 2) + ', écart-type ' + decimal(f.sd, 2) + '.'"
         [height]="160"
       ></figure>
     </section>
@@ -334,7 +334,7 @@ export class FrequencyPanelComponent {
   protected readonly isBinomial = computed(() => this.result().frequency.family === 'BINOMIAL');
   protected readonly description = computed(() => {
     const f = this.result().frequency;
-    return `${FREQUENCY_LABEL[f.family]} model over ${decimal(f.exposure, 2)} policy-years.`;
+    return `Modèle ${FREQUENCY_LABEL[f.family]} sur ${decimal(f.exposure, 2)} années-polices.`;
   });
   protected readonly markers = computed<ChartMarker[]>(() => [{ label: 'E[N]', value: this.result().frequency.mean, tone: 'cyan' }]);
 }
@@ -346,30 +346,30 @@ export class FrequencyPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let s = result().severity;
-    <section mtr-panel panelId="severity" heading="Claim cost (severity)" [description]="description()">
+    <section mtr-panel panelId="severity" heading="Coût du sinistre (sévérité)" [description]="description()">
       <dl class="ac-stats">
         <div>
-          <dt>Mean E[X]</dt>
+          <dt>Moyenne E[X]</dt>
           <dd>{{ tnd(s.mean) }}</dd>
         </div>
         <div>
-          <dt>Standard deviation</dt>
+          <dt>Écart-type</dt>
           <dd>{{ tnd(s.sd) }}</dd>
         </div>
         <div>
-          <dt>Median</dt>
+          <dt>Médiane</dt>
           <dd>{{ tnd(q(0.5)) }}</dd>
         </div>
         <div>
-          <dt>99.5% quantile</dt>
+          <dt>Quantile 99,5 %</dt>
           <dd>
             {{ tnd(q(0.995)) }}
-            <span class="ac-hint">{{ decimal(s.tailRatio, 2) }} × the mean</span>
+            <span class="ac-hint">{{ decimal(s.tailRatio, 2) }} × la moyenne</span>
           </dd>
         </div>
         @if (s.family === 'GAMMA') {
           <div>
-            <dt>Shape α, scale θ</dt>
+            <dt>Forme α, échelle θ</dt>
             <dd>{{ decimal(param('shape'), 4) }}, {{ decimal(param('scale'), 2) }}</dd>
           </div>
         }
@@ -378,7 +378,7 @@ export class FrequencyPanelComponent {
             <dt>μ, σ of ln X</dt>
             <dd>
               {{ decimal(param('mu'), 4) }}, {{ decimal(param('sigma'), 4) }}
-              <span class="ac-hint">Not the mean and sd of the cost</span>
+              <span class="ac-hint">Pas la moyenne ni l'écart-type du coût</span>
             </dd>
           </div>
         }
@@ -389,8 +389,8 @@ export class FrequencyPanelComponent {
         <div
           mtr-empty-state
           icon="info"
-          heading="Every claim costs the same"
-          [description]="'Deterministic severity: each claim costs exactly ' + tnd(s.mean) + ', so only the number of claims is uncertain.'"
+          heading="Chaque sinistre coûte le même montant"
+          [description]="'Sévérité déterministe : chaque sinistre coûte exactement ' + tnd(s.mean) + ' ; seul le nombre de sinistres est incertain.'"
         ></div>
       }
     </section>
@@ -412,17 +412,17 @@ export class SeverityPanelComponent {
 
   protected readonly description = computed(() => {
     const result = this.result();
-    return `${SEVERITY_LABEL[result.severity.family]} model${result.trendFactor !== 1 ? `, inflated by ×${decimal(result.trendFactor, 4)}` : ''}.`;
+    return `Modèle ${SEVERITY_LABEL[result.severity.family]}${result.trendFactor !== 1 ? `, revalorisé de ×${decimal(result.trendFactor, 4)}` : ''}.`;
   });
 
   protected readonly curve = computed(() => {
     const s = this.result().severity;
     if (!s.curve) return null;
-    const series: ChartSeries[] = [{ label: 'Density (probability per 1,000 DT of cost)', values: s.curve.map((p) => p.density * 1000), tone: 'cyan', area: true }];
+    const series: ChartSeries[] = [{ label: 'Densité (probabilité par 1 000 DT de coût)', values: s.curve.map((p) => p.density * 1000), tone: 'cyan', area: true }];
     return {
       series,
       xLabels: [tndShort(0), tndShort(s.curve[s.curve.length - 1].x)] as [string, string],
-      summary: `Claim cost density from 0 to the 99.5% quantile ${tnd(this.q(0.995))}. Mean ${tnd(s.mean)}, median ${tnd(this.q(0.5))}.`,
+      summary: `Densité du coût de sinistre de 0 au quantile 99,5 % ${tnd(this.q(0.995))}. Moyenne ${tnd(s.mean)}, médiane ${tnd(this.q(0.5))}.`,
     };
   });
 }
@@ -434,21 +434,21 @@ export class SeverityPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let r = result();
-    <section mtr-panel panelId="sensitivity" heading="Sensitivity" description="One assumption changed at a time. Compare repricing the book with keeping today’s premium.">
+    <section mtr-panel panelId="sensitivity" heading="Sensibilité" description="Une hypothèse à la fois. Comparez une retarification du portefeuille au maintien de la prime actuelle.">
       <div class="table-wrap ac-rows">
         <table class="data-table">
-          <caption class="sr-only">Premium and expected result under one-at-a-time assumption changes</caption>
+          <caption class="sr-only">Prime et résultat attendu selon des changements d'hypothèses un par un</caption>
           <thead>
             <tr>
-              <th scope="col">Change</th>
-              <th scope="col" class="num">Repriced premium per policy</th>
-              <th scope="col" class="num">Premium change</th>
-              <th scope="col" class="num">Expected result at today’s premium</th>
+              <th scope="col">Changement</th>
+              <th scope="col" class="num">Prime retarifée par police</th>
+              <th scope="col" class="num">Variation de prime</th>
+              <th scope="col" class="num">Résultat attendu à la prime actuelle</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row">Base case</th>
+              <th scope="row">Cas de base</th>
               <td class="num">{{ tnd(r.premium.perPolicy.grossPremium) }}</td>
               <td class="num">{{ dash }}</td>
               <td class="num">{{ tnd(r.premium.totals.expectedUnderwritingResult) }}</td>
@@ -475,15 +475,15 @@ export class PricingSensitivityPanelComponent {
 }
 
 const PRICING_FORMULAS = [
-  'Frequency   Binomial: N ~ Bin(n, p_t), p_t = 1 − (1 − p)^t     Poisson: N ~ Poisson(λ), λ = n·t·μ',
-  'Severity    Gamma: shape 1/c², scale m·c²     Lognormal: σ² = ln(1 + c²), μ = ln m − σ²/2',
-  'Inflation   E[X] = m × (1 + i)^years',
-  'Aggregate   E[S] = E[N]·E[X]     Var(S) = E[N]·Var(X) + Var(N)·E[X]²',
-  'Chargement  RL = θ·E[S] (valeur attendue)  ou  k·sd(S) (écart-type)',
-  'Technical   P_T = E[S] + RL + fixed + n·per-policy',
-  'Gross       P_G = P_T ÷ (1 − v − m)   (v, m are shares of the gross premium)',
-  'Result      E[result] = P_G − E[S] − fixed − v·P_G = RL + m·P_G',
-  'Ratios      loss = E[S]/P_G   expense = (fixed + v·P_G)/P_G   combined = loss + expense',
+  'Fréquence   Binomiale : N ~ Bin(n, p_t), p_t = 1 − (1 − p)^t     Poisson : N ~ Poisson(λ), λ = n·t·μ',
+  'Sévérité    Gamma : forme 1/c², échelle m·c²     Log-normale : σ² = ln(1 + c²), μ = ln m − σ²/2',
+  'Inflation   E[X] = m × (1 + i)^années',
+  'Agrégat     E[S] = E[N]·E[X]     Var(S) = E[N]·Var(X) + Var(N)·E[X]²',
+  'Chargement  RL = θ·E[S] (espérance)  ou  k·sd(S) (écart-type)',
+  'Technique   P_T = E[S] + RL + frais fixes + n·par police',
+  'Brute       P_G = P_T ÷ (1 − v − m)   (v, m = parts de la prime brute)',
+  'Résultat    E[résultat] = P_G − E[S] − frais fixes − v·P_G = RL + m·P_G',
+  'Ratios      sinistres = E[S]/P_G   frais = (fixes + v·P_G)/P_G   combiné = sinistres + frais',
 ].join('\n');
 
 @Component({
@@ -492,12 +492,12 @@ const PRICING_FORMULAS = [
   imports: [...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="method" heading="How the premium is calculated">
+    <section mtr-panel panelId="method" heading="Comment la prime est calculée">
       <details class="ac-explain">
-        <summary>Show the formulas</summary>
+        <summary>Afficher les formules</summary>
         <pre class="ac-formula">{{ formulas }}</pre>
         <p class="ac-note">
-          Out of scope here: investment income, reinsurance, cost of capital and regulatory provisions. Claim costs never use a normal distribution because they cannot be negative.
+          Hors périmètre ici : revenus de placement, réassurance, coût du capital et provisions réglementaires. Les coûts de sinistre n'utilisent jamais une loi normale car ils ne peuvent pas être négatifs.
         </p>
       </details>
     </section>

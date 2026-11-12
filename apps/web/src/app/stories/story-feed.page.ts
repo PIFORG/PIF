@@ -112,7 +112,7 @@ export class StoryFeedPage {
       this.stories.set(feed.stories);
       this.weakest.set(feed.weakestCompetency);
     } catch (err) {
-      if (!this.destroyed) this.error.set(describeApiError(err, 'Could not load FinStories.'));
+      if (!this.destroyed) this.error.set(describeApiError(err, 'Impossible de charger les histoires financières.'));
     }
   }
 

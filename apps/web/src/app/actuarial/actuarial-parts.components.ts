@@ -64,8 +64,8 @@ export class ActuarialTabsComponent {
   template: `
     <svg mtrIcon name="info" [size]="16" />
     <span>
-      <strong>Model estimates from fictional assumptions.</strong>&ngsp;<ng-content
-        >No observed claims data is used. Results come from the server-side actuarial models and are for learning, not for regulatory reporting or technical provisions.</ng-content
+      <strong>Estimations du modèle à partir d'hypothèses fictives.</strong>&ngsp;<ng-content
+        >Aucune donnée de sinistres observée n'est utilisée. Les résultats viennent des modèles actuariels côté serveur et servent à l'apprentissage, pas au reporting réglementaire ni aux provisions techniques.</ng-content
       >
     </span>
   `,

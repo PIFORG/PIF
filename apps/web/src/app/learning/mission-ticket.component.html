@@ -1,4 +1,4 @@
-<div class="lr-segmented" role="group" aria-label="Order side">
+<div class="lr-segmented" role="group" aria-label="Sens de l'ordre">
   @for (side of sides; track side) {
     <button
       type="button"
@@ -7,13 +7,13 @@
       [disabled]="disabled() || (draft().type === 'STOP' && side === 'BUY')"
       (click)="update({ side })"
     >
-      {{ side === 'BUY' ? 'Buy' : 'Sell' }}
+      {{ side === 'BUY' ? 'Acheter' : 'Vendre' }}
     </button>
   }
 </div>
 <div class="lr-fieldRow">
   <div class="field">
-    <label for="ticket-symbol">Asset</label>
+    <label for="ticket-symbol">Actif</label>
     <select id="ticket-symbol" class="select" [disabled]="disabled()" (change)="update({ symbol: $any($event.target).value })">
       @for (q of session().state.quotes; track q.symbol) {
         <option [value]="q.symbol" [selected]="q.symbol === draft().symbol">{{ q.symbol }} · {{ q.name }}</option>
@@ -21,17 +21,17 @@
     </select>
   </div>
   <div class="field">
-    <label for="ticket-type">Order type</label>
+    <label for="ticket-type">Type d'ordre</label>
     <select id="ticket-type" class="select" [disabled]="disabled()" (change)="changeType($any($event.target).value)">
       @for (t of rules().allowedOrderTypes; track t) {
-        <option [value]="t" [selected]="t === draft().type">{{ t === 'MARKET' ? 'Market' : t === 'LIMIT' ? 'Limit' : 'Stop (protective sell)' }}</option>
+        <option [value]="t" [selected]="t === draft().type">{{ t === 'MARKET' ? 'Marché' : t === 'LIMIT' ? 'Limite' : 'Stop (vente de protection)' }}</option>
       }
     </select>
   </div>
 </div>
 <div class="lr-fieldRow">
   <div class="field">
-    <label for="ticket-qty">Quantity</label>
+    <label for="ticket-qty">Quantité</label>
     <input
       id="ticket-qty"
       class="input num"
@@ -43,7 +43,7 @@
   </div>
   @if (draft().type !== 'MARKET') {
     <div class="field">
-      <label for="ticket-price">{{ draft().type === 'LIMIT' ? 'Limit price (DT)' : 'Stop price (DT)' }}</label>
+      <label for="ticket-price">{{ draft().type === 'LIMIT' ? 'Cours limite (DT)' : 'Cours stop (DT)' }}</label>
       <input
         id="ticket-price"
         class="input num"
@@ -57,7 +57,7 @@
 </div>
 <div class="lr-fieldRow">
   <div class="field">
-    <label for="ticket-rationale">Why?</label>
+    <label for="ticket-rationale">Pourquoi ?</label>
     <select
       id="ticket-rationale"
       class="select"
@@ -65,14 +65,14 @@
       [attr.aria-invalid]="touched() && !draft().rationale ? 'true' : null"
       (change)="update({ rationale: $any($event.target).value })"
     >
-      <option value="" [selected]="draft().rationale === ''">Choose a reason…</option>
+      <option value="" [selected]="draft().rationale === ''">Choisir un motif…</option>
       @for (r of rationales; track r) {
         <option [value]="r" [selected]="draft().rationale === r">{{ rationaleLabel[r] }}</option>
       }
     </select>
   </div>
   <div class="field">
-    <label for="ticket-confidence">{{ rules().requireConfidence ? 'Confidence (required)' : 'Confidence (optional)' }}</label>
+    <label for="ticket-confidence">{{ rules().requireConfidence ? 'Confiance (obligatoire)' : 'Confiance (facultative)' }}</label>
     <select
       id="ticket-confidence"
       class="select"
@@ -80,9 +80,9 @@
       [attr.aria-invalid]="touched() && rules().requireConfidence && !draft().confidence ? 'true' : null"
       (change)="update({ confidence: $any($event.target).value })"
     >
-      <option value="" [selected]="draft().confidence === ''">{{ rules().requireConfidence ? 'How sure are you?' : 'Not rated' }}</option>
+      <option value="" [selected]="draft().confidence === ''">{{ rules().requireConfidence ? 'Quel est votre degré de certitude ?' : 'Non évalué' }}</option>
       @for (c of confidenceOptions; track c) {
-        <option [value]="c" [selected]="draft().confidence === c">{{ c }} % sure it works out</option>
+        <option [value]="c" [selected]="draft().confidence === c">{{ c }} % de chances que cela se passe bien</option>
       }
     </select>
   </div>
@@ -90,7 +90,7 @@
 
 <div class="lr-preview" id="ticket-preview" aria-live="polite" [attr.aria-busy]="checking() || null">
   <div>
-    <span>Estimated price</span>
+    <span>Cours estimé</span>
     <span class="num">{{ estimate() ? formatDT(estimate()!.price, 3) : '—' }}</span>
   </div>
   <div>
@@ -98,18 +98,18 @@
     <span class="num">{{ estimate() ? formatDT(estimate()!.fee) : '—' }}</span>
   </div>
   <div>
-    <strong>{{ draft().side === 'BUY' ? 'Estimated cost' : 'Estimated proceeds' }}</strong>
+    <strong>{{ draft().side === 'BUY' ? 'Coût estimé' : 'Produit estimé' }}</strong>
     <strong class="num">{{ estimate() ? formatDT(estimate()!.total) : '—' }}</strong>
   </div>
   <div>
-    <span>Available cash</span>
+    <span>Espèces disponibles</span>
     <span class="num">{{ formatDT(session().state.portfolio.availableCash) }}</span>
   </div>
   @if (refusal()) {
     <p class="field-error" style="margin: 0">{{ refusal() }}</p>
   }
   @if (unavailable()) {
-    <p class="lr-muted" style="margin: 0">The order check is unavailable right now. The server still validates the order when you place it.</p>
+    <p class="lr-muted" style="margin: 0">La vérification de l'ordre est indisponible pour le moment. Le serveur valide tout de même l'ordre au moment du passage.</p>
   }
 </div>
 @if (touched() && formErrors().length) {
@@ -127,5 +127,5 @@
   </ul>
 }
 <button type="submit" [class]="'btn ' + (draft().side === 'BUY' ? 'btn-primary' : 'btn-danger')" [disabled]="disabled()">
-  {{ draft().side === 'BUY' ? 'Place buy order' : 'Place sell order' }}
+  {{ draft().side === 'BUY' ? "Passer l'ordre d'achat" : "Passer l'ordre de vente" }}
 </button>

@@ -121,7 +121,7 @@ async function render() {
   const fixture = TestBed.createComponent(MonteCarloLabPage);
   const root = fixture.nativeElement as HTMLElement;
   await settle(fixture);
-  await waitFor(fixture, () => getControl(root, 'Policies'));
+  await waitFor(fixture, () => getControl(root, 'Polices'));
   return { fixture, root };
 }
 
@@ -140,21 +140,21 @@ describe('MonteCarloLab', () => {
     let finish: (run: SimulationRunDetail) => void = () => undefined;
     api.simulate.mockReturnValue(new Promise<SimulationRunDetail>((resolve) => (finish = resolve)));
     const { fixture, root } = await render();
-    expect(getText(root, 'No simulation yet')).toBeTruthy();
+    expect(getText(root, 'Aucune simulation')).toBeTruthy();
 
-    getButton(root, /Run simulation/).click();
+    getButton(root, /Lancer la simulation/).click();
     await waitFor(fixture, () => expect(api.simulate).toHaveBeenCalledTimes(1));
     expect(api.simulate.mock.calls[0][0]).toEqual({ assumptions: reference, simulations: 50_000, seed: 12345, initialCapital: 10_000 });
     await settle(fixture);
-    expect(getText(root, /Simulating 50,000 periods on the server/)).toBeTruthy();
-    expect(queryText(root, 'Simulated mean E[S]')).toBeNull();
+    expect(getText(root, /Simulation de 50,000 périodes sur le serveur/)).toBeTruthy();
+    expect(queryText(root, 'Moyenne simulée E[S]')).toBeNull();
 
     finish(runFixture());
-    await waitFor(fixture, () => expect(getText(root, 'Simulated mean E[S]')).toBeTruthy());
-    expect(getText(root, /Simulated values from fictional assumptions/)).toBeTruthy();
-    expect(getText(root, 'Simulated against exact')).toBeTruthy();
+    await waitFor(fixture, () => expect(getText(root, 'Moyenne simulée E[S]')).toBeTruthy());
+    expect(getText(root, /Valeurs simulées à partir d'hypothèses fictives/)).toBeTruthy();
+    expect(getText(root, 'Simulé contre exact')).toBeTruthy();
     expect(getText(root, 'P(S > budget + capital)')).toBeTruthy();
-    expect(getText(root, 'Showing the run with seed 12345.')).toBeTruthy();
+    expect(getText(root, 'Exécution affichée, graine 12345.')).toBeTruthy();
     await waitFor(fixture, () => expect(api.simulations).toHaveBeenCalledTimes(2));
   });
 
@@ -162,17 +162,17 @@ describe('MonteCarloLab', () => {
     api.simulate.mockResolvedValue(runFixture());
     const { fixture, root } = await render();
 
-    change(getControl(root, 'Simulated periods'), '999');
+    change(getControl(root, 'Périodes simulées'), '999');
     await settle(fixture);
-    expect(getText(root, 'Simulations must be between 1,000 and 200,000.')).toBeTruthy();
-    expect(getButton(root, /Run simulation/).disabled).toBe(true);
-    expect(getText(root, 'Fix the highlighted fields to run the simulation.')).toBeTruthy();
+    expect(getText(root, 'Périodes simulées doit être compris entre 1,000 et 200,000.')).toBeTruthy();
+    expect(getButton(root, /Lancer la simulation/).disabled).toBe(true);
+    expect(getText(root, 'Corrigez les champs signalés pour lancer la simulation.')).toBeTruthy();
 
-    change(getControl(root, 'Simulated periods'), '20000');
-    change(getControl(root, 'Premium charged (DT)'), '80000');
-    change(getControl(root, 'Run label (optional)'), 'Cheaper premium');
+    change(getControl(root, 'Périodes simulées'), '20000');
+    change(getControl(root, 'Prime encaissée (DT)'), '80000');
+    change(getControl(root, 'Libellé de l\'exécution (facultatif)'), 'Cheaper premium');
     await settle(fixture);
-    getButton(root, /Run simulation/).click();
+    getButton(root, /Lancer la simulation/).click();
     await waitFor(fixture, () => expect(api.simulate).toHaveBeenCalledTimes(1));
     expect(api.simulate.mock.calls[0][0]).toMatchObject({ simulations: 20_000, premiumCharged: 80_000, label: 'Cheaper premium' });
   });
@@ -180,14 +180,14 @@ describe('MonteCarloLab', () => {
   it('draws a new seed within the accepted range and flags results whose inputs have changed', async () => {
     api.simulate.mockResolvedValue(runFixture());
     const { fixture, root } = await render();
-    getButton(root, /Run simulation/).click();
-    await waitFor(fixture, () => expect(getText(root, 'Simulated mean E[S]')).toBeTruthy());
+    getButton(root, /Lancer la simulation/).click();
+    await waitFor(fixture, () => expect(getText(root, 'Moyenne simulée E[S]')).toBeTruthy());
 
-    getButton(root, /New seed/).click();
+    getButton(root, /Nouvelle graine/).click();
     await settle(fixture);
-    const seed = Number(getControl(root, 'Seed').value);
+    const seed = Number(getControl(root, 'Graine').value);
     expect(Number.isInteger(seed) && seed >= 1 && seed <= 2_147_483_647).toBe(true);
-    expect(getText(root, /The inputs have changed since; press Run simulation to recompute/)).toBeTruthy();
+    expect(getText(root, /Les entrées ont changé depuis ; relancez la simulation pour recalculer/)).toBeTruthy();
   });
 
   it('loads a stored run with its inputs and reports server errors in plain English', async () => {
@@ -204,15 +204,15 @@ describe('MonteCarloLab', () => {
     await waitFor(fixture, () => getButton(root, 'Charger Stored run'));
     getButton(root, 'Charger Stored run').click();
     await waitFor(fixture, () =>
-      expect(getText(root, /Chargement de “Stored run”\. Résultats enregistrés/)).toBeTruthy(),
+      expect(getText(root, /Chargement de « Stored run »\. Résultats enregistrés/)).toBeTruthy(),
     );
-    expect(getControl(root, 'Policies').value).toBe('2000');
-    expect(getControl(root, 'Seed').value).toBe('777');
-    expect(getControl(root, 'Premium charged (DT)').value).toBe('95000');
-    expect(getControl(root, 'Initial capital (DT)').value).toBe('5000');
+    expect(getControl(root, 'Polices').value).toBe('2000');
+    expect(getControl(root, 'Graine').value).toBe('777');
+    expect(getControl(root, 'Prime encaissée (DT)').value).toBe('95000');
+    expect(getControl(root, 'Capital initial (DT)').value).toBe('5000');
     expect(queryText(root, /The inputs have changed since/)).toBeNull();
 
-    getButton(root, /Run simulation/).click();
+    getButton(root, /Lancer la simulation/).click();
     await waitFor(fixture, () => expect(getText(root, 'The simulation service is busy. Try again in a few seconds.')).toBeTruthy());
   });
 });

@@ -64,17 +64,17 @@ describe('StoryFeed page', () => {
 
   it('renders one 9:16 player per story with its badges, skill and resume point', async () => {
     const { root } = await render();
-    expect(root.querySelector('h1')?.textContent).toBe('FinStories');
+    expect(root.querySelector('h1')?.textContent).toBe('Histoires financières');
     const items = Array.from(root.querySelectorAll<HTMLElement>('section.st-item'));
-    expect(items.map((i) => i.getAttribute('aria-label'))).toEqual(['1 of 2: Story first', '2 of 2: Story second']);
+    expect(items.map((i) => i.getAttribute('aria-label'))).toEqual(['1 sur 2 : Story first', '2 sur 2 : Story second']);
     expect(items[0].querySelector('.st-stage')?.getAttribute('data-character')).toBe('ADAM');
     const badges = (item: HTMLElement) => Array.from(item.querySelectorAll('.badge')).map((b) => b.textContent);
-    expect(badges(items[0])).toEqual(['Adam', 'Trader débutant', 'For your weakest skill', 'Updated since you watched']);
-    expect(badges(items[1])).toEqual(['Youssef', 'Trader débutant', 'Watched', 'Watched an earlier version']);
-    expect(items[0].textContent).toContain('Skill: Portfolio Diversification · 1:05 · resumes at 0:12');
+    expect(badges(items[0])).toEqual(['Adam', 'Trader débutant', 'Pour votre compétence la plus faible', 'Mis à jour depuis votre visionnage']);
+    expect(badges(items[1])).toEqual(['Youssef', 'Trader débutant', 'Vu', 'Version antérieure vue']);
+    expect(items[0].textContent).toContain('Compétence : Diversification du portefeuille · 1:05 · reprise à 0:12');
     expect(items[0].querySelector('a.btn-sm')?.getAttribute('href')).toBe('/learn/missions/spread-the-risk');
-    expect(items[0].querySelector('.st-transcript')?.textContent).toContain('Ordered for you: stories on Portfolio Diversification come first.');
-    expect(items[1].querySelector('.st-transcript')?.textContent).not.toContain('Ordered for you');
+    expect(items[0].querySelector('.st-transcript')?.textContent).toContain('Ordre personnalisé : les histoires sur Diversification du portefeuille viennent en premier.');
+    expect(items[1].querySelector('.st-transcript')?.textContent).not.toContain('Ordre personnalisé');
     expect(items[0].querySelector('.st-status[role="status"]')?.textContent).toContain("Chargement de l'histoire…");
   });
 
@@ -87,7 +87,7 @@ describe('StoryFeed page', () => {
     try {
       query.next(convertToParamMap({ story: 'second' }));
       await render();
-      expect(scrolled).toEqual(['2 of 2: Story second']);
+      expect(scrolled).toEqual(['2 sur 2 : Story second']);
     } finally {
       Element.prototype.scrollIntoView = original;
     }
@@ -96,14 +96,14 @@ describe('StoryFeed page', () => {
   it('shows an empty state when there are no stories', async () => {
     feed.mockResolvedValue({ weakestCompetency: null, stories: [] });
     const { root } = await render();
-    expect(root.querySelector('.ws-emptyTitle')?.textContent).toBe('No stories yet');
+    expect(root.querySelector('.ws-emptyTitle')?.textContent).toBe('Aucune histoire pour le moment');
   });
 
   it('explains a failed feed and retries', async () => {
     feed.mockRejectedValueOnce(new ApiError(500, 'Stories are down.'));
     const { fixture, root } = await render();
     const error = root.querySelector('.ws-empty[data-tone="error"]');
-    expect(error?.textContent).toContain('FinStories unavailable');
+    expect(error?.textContent).toContain('Histoires financières indisponibles');
     expect(error?.textContent).toContain('Stories are down.');
     (error?.querySelector('button') as HTMLButtonElement).click();
     await settle(fixture);

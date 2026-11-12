@@ -8,20 +8,20 @@ import { ColumnChartComponent, type ActuarialMessage, type ChartMarker } from '.
 
 /* The result panels of apps/web/src/components/actuarial/MonteCarloLab.tsx. Every figure is read from the stored run. */
 
-export const FREQUENCY_LABEL = { BINOMIAL: 'Binomial', POISSON: 'Poisson' } as const;
-export const SEVERITY_LABEL = { DETERMINISTIC: 'Fixed', GAMMA: 'Gamma', LOGNORMAL: 'Lognormal' } as const;
+export const FREQUENCY_LABEL = { BINOMIAL: 'Binomiale', POISSON: 'Poisson' } as const;
+export const SEVERITY_LABEL = { DETERMINISTIC: 'Fixe', GAMMA: 'Gamma', LOGNORMAL: 'Log-normale' } as const;
 const DASH = '\u2014';
 
 const unbroken = (text: string) => text.replace(/ /g, '\u00a0');
 const range = (i: Interval, format: (v: number) => string) => `${unbroken(format(i.lower))} – ${unbroken(format(i.upper))}`;
 
 export function runName(run: Pick<SimulationRunSummary, 'label' | 'seed'>): string {
-  return run.label ? `“${run.label}”` : `the run with seed ${run.seed}`;
+  return run.label ? `« ${run.label} »` : `l'exécution de graine ${run.seed}`;
 }
 
 function within(value: boolean | null): string {
   if (value === null) return DASH;
-  return value ? 'Yes' : 'No';
+  return value ? 'Oui' : 'Non';
 }
 
 @Component({
@@ -32,8 +32,7 @@ function within(value: boolean | null): string {
   template: `
     <svg mtrIcon name="info" [size]="16" />
     <span>
-      <strong>Simulated values from fictional assumptions.</strong> Each figure is a Monte Carlo estimate shown with a 95% confidence interval, next to the exact model value when it
-      can be computed. No observed claims data is used.
+      <strong>Valeurs simulées à partir d'hypothèses fictives.</strong> Chaque chiffre est une estimation Monte Carlo avec un intervalle de confiance à 95 %, à côté de la valeur exacte du modèle lorsqu'elle est calculable. Aucune donnée de sinistres observée n'est utilisée.
     </span>
   `,
 })
@@ -47,7 +46,7 @@ export class SimulatedNoteComponent {}
   template: `
     @let r = run().results;
     @let p = r.probabilities;
-    <div mtr-kpi label="Simulated mean E[S]" icon="actuarial" [hint]="meanHint()">
+    <div mtr-kpi label="Moyenne simulée E[S]" icon="actuarial" [hint]="meanHint()">
       <span class="num">{{ tndShort(r.statistics.mean) }}</span>
     </div>
     <div mtr-kpi label="99.5% VaR" [hint]="'TVaR ' + tndShort(tail().tailValueAtRisk)">
@@ -55,7 +54,7 @@ export class SimulatedNoteComponent {}
     </div>
     <div
       mtr-kpi
-      label="P(claims > claims budget)"
+      label="P(sinistres > budget sinistres)"
       [hint]="'95% CI ' + interval(p.claimsExceedBudget.interval)"
       [tone]="p.claimsExceedBudget.simulated > 0.25 ? 'warning' : 'default'"
     >
@@ -63,13 +62,13 @@ export class SimulatedNoteComponent {}
     </div>
     <div
       mtr-kpi
-      label="P(capital insufficient)"
+      label="P(capital insuffisant)"
       [hint]="'95% CI ' + interval(p.capitalInsufficient.interval)"
       [tone]="p.capitalInsufficient.simulated > 0.005 ? 'warning' : 'default'"
     >
       <span class="num">{{ probability(p.capitalInsufficient.simulated) }}</span>
     </div>
-    <div mtr-kpi label="Expected shortfall" hint="E[(S − budget − capital)⁺]">
+    <div mtr-kpi label="Déficit attendu" hint="E[(S − budget − capital)⁺]">
       <span class="num">{{ tndShort(r.expectedShortfall) }}</span>
     </div>
   `,
@@ -85,7 +84,7 @@ export class RunKpisComponent {
   });
   protected readonly meanHint = computed(() => {
     const r = this.run().results;
-    return `95% CI ${range(r.statistics.meanInterval, tndShort)}; exact ${tndShort(r.analytic.mean)}`;
+    return `IC 95 % ${range(r.statistics.meanInterval, tndShort)} ; exact ${tndShort(r.analytic.mean)}`;
   });
 }
 
@@ -96,32 +95,32 @@ export class RunKpisComponent {
   host: { style: 'display: contents' },
   template: `
     @let r = run().results;
-    <section mtr-panel panelId="distribution" heading="Simulated distribution of total claims" [description]="'Share of the ' + count(r.simulations) + ' simulated periods in each range of total claims S.'">
+    <section mtr-panel panelId="distribution" heading="Distribution simulée des sinistres totaux" [description]="'Part des ' + count(r.simulations) + ' périodes simulées dans chaque tranche de sinistres totaux S.'">
       <dl class="ac-stats">
         <div>
-          <dt>Median</dt>
+          <dt>Médiane</dt>
           <dd>{{ tnd(r.statistics.median) }}</dd>
         </div>
         <div>
-          <dt>Standard deviation</dt>
+          <dt>Écart-type</dt>
           <dd>
             {{ tnd(r.statistics.sd) }}
             <span class="ac-hint">Exact {{ tnd(r.analytic.sd) }}</span>
           </dd>
         </div>
         <div>
-          <dt>Skewness</dt>
+          <dt>Asymétrie</dt>
           <dd>{{ r.statistics.skewness === null ? dash : decimal(r.statistics.skewness, 3) }}</dd>
         </div>
         <div>
-          <dt>Smallest, largest</dt>
+          <dt>Min, max</dt>
           <dd>{{ tndShort(r.statistics.min) }}, {{ tndShort(r.statistics.max) }}</dd>
         </div>
         <div>
-          <dt>Claims per period</dt>
+          <dt>Sinistres par période</dt>
           <dd>
             {{ decimal(r.claimCount.mean, 2) }}
-            <span class="ac-hint">Exact {{ decimal(r.claimCount.analyticMean, 2) }}; at most {{ count(r.claimCount.max) }}</span>
+            <span class="ac-hint">Exact {{ decimal(r.claimCount.analyticMean, 2) }} ; au plus {{ count(r.claimCount.max) }}</span>
           </dd>
         </div>
       </dl>
@@ -133,13 +132,13 @@ export class RunKpisComponent {
         [markers]="markers()"
         [formatX]="tndShort"
         [formatY]="ratio1"
-        seriesLabel="Share of simulated periods"
+        seriesLabel="Part des périodes simulées"
         [summary]="summary()"
       ></figure>
       @if (r.histogram.above > 0) {
         <p class="ac-note">
-          {{ count(r.histogram.above) }} periods above {{ tndShort(r.histogram.from + r.histogram.binWidth * r.histogram.counts.length) }} (beyond the 99.9% quantile) are included in every
-          statistic but not drawn.
+          {{ count(r.histogram.above) }} périodes au-dessus de {{ tndShort(r.histogram.from + r.histogram.binWidth * r.histogram.counts.length) }} (au-delà du quantile 99,9 %) sont incluses dans chaque
+          statistique mais non tracées.
         </p>
       }
     </section>
@@ -162,8 +161,8 @@ export class DistributionPanelComponent {
     const t = r.thresholds;
     const tail = r.risk.find((x) => x.level === 0.995);
     const markers: ChartMarker[] = [
-      { label: 'Simulated mean', value: r.statistics.mean, tone: 'cyan' },
-      { label: 'Claims budget', value: t.claimsBudget, tone: 'amber' },
+      { label: 'Moyenne simulée', value: r.statistics.mean, tone: 'cyan' },
+      { label: 'Budget sinistres', value: t.claimsBudget, tone: 'amber' },
       { label: 'Budget + capital', value: t.capitalThreshold, tone: 'neg' },
     ];
     if (tail) markers.push({ label: '99.5% VaR', value: tail.valueAtRisk, tone: 'brand' });
@@ -171,7 +170,7 @@ export class DistributionPanelComponent {
   });
   protected readonly summary = computed(() => {
     const r = this.run().results;
-    return `Histogram of ${count(r.simulations)} simulated totals. Mean ${tnd(r.statistics.mean)}; ${probability(r.probabilities.claimsExceedBudget.simulated)} of periods exceed the claims budget of ${tnd(r.thresholds.claimsBudget)}.`;
+    return `Histogramme de ${count(r.simulations)} totaux simulés. Moyenne ${tnd(r.statistics.mean)} ; ${probability(r.probabilities.claimsExceedBudget.simulated)} des périodes dépassent le budget sinistres de ${tnd(r.thresholds.claimsBudget)}.`;
   });
 }
 
@@ -182,33 +181,33 @@ export class DistributionPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let t = run().results.thresholds;
-    <section mtr-panel panelId="thresholds" heading="Premium and capital thresholds" description="What the simulated claims are compared with.">
+    <section mtr-panel panelId="thresholds" heading="Seuils de prime et de capital" description="À quoi les sinistres simulés sont comparés.">
       <dl class="ac-stats" style="margin-bottom: 0">
         <div>
-          <dt>Premium charged P</dt>
+          <dt>Prime encaissée P</dt>
           <dd>
             {{ tnd(t.premiumCharged) }}
-            <span class="ac-hint">{{ t.premiumSource === 'MODEL' ? 'Model gross premium' : 'Entered by you; model premium ' + tnd(t.modelGrossPremium) }}</span>
+            <span class="ac-hint">{{ t.premiumSource === 'MODEL' ? 'Prime brute du modèle' : 'Saisie par vous ; prime du modèle ' + tnd(t.modelGrossPremium) }}</span>
           </dd>
         </div>
         <div>
-          <dt>Fixed expenses F</dt>
+          <dt>Frais fixes F</dt>
           <dd>{{ tnd(t.fixedExpenses) }}</dd>
         </div>
         <div>
-          <dt>Variable expenses vP</dt>
+          <dt>Frais variables vP</dt>
           <dd>{{ tnd(t.variableExpenses) }}</dd>
         </div>
         <div>
-          <dt>Claims budget B = P − F − vP</dt>
+          <dt>Budget sinistres B = P − F − vP</dt>
           <dd>{{ tnd(t.claimsBudget) }}</dd>
         </div>
         <div>
-          <dt>Initial capital C</dt>
+          <dt>Capital initial C</dt>
           <dd>{{ tnd(t.initialCapital) }}</dd>
         </div>
         <div>
-          <dt>Capital threshold B + C</dt>
+          <dt>Seuil de capital B + C</dt>
           <dd>{{ tnd(t.capitalThreshold) }}</dd>
         </div>
       </dl>
@@ -230,25 +229,25 @@ export class ThresholdPanelComponent {
     <section
       mtr-panel
       panelId="comparison"
-      heading="Simulated against exact"
-      description="Simulated estimates with their 95% confidence intervals; exact values come from the model itself, not from the simulation."
+      heading="Simulé contre exact"
+      description="Estimations simulées avec intervalles de confiance à 95 % ; les valeurs exactes viennent du modèle lui-même, pas de la simulation."
     >
       <div class="table-wrap ac-rows">
         <table class="data-table">
-          <caption class="sr-only">Simulated estimates with 95% confidence intervals and exact model values</caption>
+          <caption class="sr-only">Estimations simulées avec intervalles à 95 % et valeurs exactes du modèle</caption>
           <thead>
             <tr>
-              <th scope="col">Quantity</th>
-              <th scope="col" class="num">Simulated</th>
-              <th scope="col" class="num">Exact (model)</th>
-              <th scope="col" class="num">Exact in interval</th>
+              <th scope="col">Grandeur</th>
+              <th scope="col" class="num">Simulé</th>
+              <th scope="col" class="num">Exact (modèle)</th>
+              <th scope="col" class="num">Exact dans l'intervalle</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th scope="row">
-                Mean E[S]
-                <span class="ac-hint">Normal interval, ± 1.96 sd/√n</span>
+                Moyenne E[S]
+                <span class="ac-hint">Intervalle normal, ± 1,96 écart-type/√n</span>
               </th>
               <td class="num">
                 {{ tndWhole(r.statistics.mean) }}
@@ -261,7 +260,7 @@ export class ThresholdPanelComponent {
               <tr>
                 <th scope="row">
                   {{ row.label }}
-                  <span class="ac-hint">{{ row.hint }}; {{ count(row.value.count) }} of {{ count(r.simulations) }} periods; Wilson interval</span>
+                  <span class="ac-hint">{{ row.hint }} ; {{ count(row.value.count) }} sur {{ count(r.simulations) }} périodes ; intervalle de Wilson</span>
                 </th>
                 <td class="num">
                   {{ probability(row.value.simulated) }}
@@ -276,14 +275,14 @@ export class ThresholdPanelComponent {
       </div>
       <div class="table-wrap ac-rows" style="margin-top: var(--space-4)">
         <table class="data-table">
-          <caption class="sr-only">Simulated value-at-risk and tail value-at-risk with 95% confidence intervals and exact values</caption>
+          <caption class="sr-only">VaR et TVaR simulés avec intervalles à 95 % et valeurs exactes</caption>
           <thead>
             <tr>
-              <th scope="col">Level</th>
-              <th scope="col" class="num">VaR simulated</th>
-              <th scope="col" class="num">VaR exact</th>
-              <th scope="col" class="num">TVaR simulated</th>
-              <th scope="col" class="num">TVaR exact</th>
+              <th scope="col">Niveau</th>
+              <th scope="col" class="num">VaR simulée</th>
+              <th scope="col" class="num">VaR exacte</th>
+              <th scope="col" class="num">TVaR simulée</th>
+              <th scope="col" class="num">TVaR exacte</th>
             </tr>
           </thead>
           <tbody>
@@ -297,7 +296,7 @@ export class ThresholdPanelComponent {
                 <td class="num">{{ row.exactValueAtRisk === null ? dash : tndWhole(row.exactValueAtRisk) }}</td>
                 <td class="num">
                   {{ tndWhole(row.tailValueAtRisk) }}
-                  <span class="ac-hint">{{ row.tailValueAtRiskInterval ? '95%: ' + wholeRange(row.tailValueAtRiskInterval) : 'Too few tail periods for an interval' }}</span>
+                  <span class="ac-hint">{{ row.tailValueAtRiskInterval ? '95 % : ' + wholeRange(row.tailValueAtRiskInterval) : 'Trop peu de périodes en queue pour un intervalle' }}</span>
                 </td>
                 <td class="num">{{ row.exactTailValueAtRisk === null ? dash : tndWhole(row.exactTailValueAtRisk) }}</td>
               </tr>
@@ -306,8 +305,7 @@ export class ThresholdPanelComponent {
         </table>
       </div>
       <p class="ac-note">
-        {{ exactNote() }} About 1 interval in 20 misses the exact value by chance alone; a miss on a single line is not an error. VaR intervals come from order statistics; TVaR intervals are
-        asymptotic and need at least 10 periods beyond the VaR. Simulated amounts are shown in whole dinars.
+        {{ exactNote() }} Environ 1 intervalle sur 20 manque la valeur exacte par le seul effet du hasard ; un échec sur une seule ligne n'est pas une erreur. Les intervalles de VaR viennent des statistiques d'ordre ; ceux de TVaR sont asymptotiques et nécessitent au moins 10 périodes au-delà de la VaR. Les montants simulés sont affichés en dinars entiers.
       </p>
     </section>
   `,
@@ -326,18 +324,18 @@ export class ComparisonPanelComponent {
   protected readonly probabilityRows = computed<{ label: string; hint: string; value: SimulatedProbability }[]>(() => {
     const p = this.run().results.probabilities;
     return [
-      { label: 'P(S > claims budget)', hint: 'Technical underwriting loss', value: p.claimsExceedBudget },
-      { label: 'P(S > premium charged)', hint: 'Claims alone exceed the premium', value: p.claimsExceedPremium },
-      { label: 'P(S > budget + capital)', hint: 'Capital insufficient at the end of the period', value: p.capitalInsufficient },
+      { label: 'P(S > budget sinistres)', hint: 'Perte technique de souscription', value: p.claimsExceedBudget },
+      { label: 'P(S > prime encaissée)', hint: 'Les sinistres seuls dépassent la prime', value: p.claimsExceedPremium },
+      { label: 'P(S > budget + capital)', hint: 'Capital insuffisant en fin de période', value: p.capitalInsufficient },
     ];
   });
 
   protected readonly exactNote = computed(() => {
     const distribution = this.run().results.analytic.distribution;
-    if (!distribution.available) return `Exact distribution unavailable: ${distribution.reason}`;
+    if (!distribution.available) return `Distribution exacte indisponible : ${distribution.reason}`;
     return distribution.method === 'PANJER'
-      ? 'Exact values: Panjer recursion on the same model, as in the pricing studio.'
-      : 'Exact values: closed-form distribution of the same model (every claim costs the same).';
+      ? 'Valeurs exactes : récursion de Panjer sur le même modèle, comme dans le studio de tarification.'
+      : 'Valeurs exactes : distribution en forme close du même modèle (chaque sinistre coûte le même montant).';
   });
 }
 
@@ -348,7 +346,7 @@ export class ComparisonPanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let c = chart();
-    <section mtr-panel panelId="exceedance" heading="Exceedance curve" description="Probability that total claims exceed each amount.">
+    <section mtr-panel panelId="exceedance" heading="Courbe de dépassement" description="Probabilité que les sinistres totaux dépassent chaque montant.">
       <figure mtr-line-chart [series]="c.series" [formatY]="ratio0" [yMin]="0" [height]="180" [xLabels]="c.xLabels" [summary]="c.summary"></figure>
     </section>
   `,
@@ -359,14 +357,14 @@ export class ExceedancePanelComponent {
   protected readonly chart = computed(() => {
     const curve = this.run().results.exceedanceCurve;
     const hasExact = curve.every((pt) => pt.exact !== null);
-    const series: ChartSeries[] = [{ label: 'Simulated P(S > x)', values: curve.map((pt) => pt.simulated), tone: 'brand' }];
-    if (hasExact) series.push({ label: 'Exact P(S > x)', values: curve.map((pt) => pt.exact ?? 0), tone: 'cyan', dashed: true });
+    const series: ChartSeries[] = [{ label: 'P(S > x) simulée', values: curve.map((pt) => pt.simulated), tone: 'brand' }];
+    if (hasExact) series.push({ label: 'P(S > x) exacte', values: curve.map((pt) => pt.exact ?? 0), tone: 'cyan', dashed: true });
     const first = curve[0].threshold;
     const last = curve[curve.length - 1].threshold;
     return {
       series,
       xLabels: [tndShort(first), tndShort(last)] as [string, string],
-      summary: `Exceedance probability from ${tnd(first)} to ${tnd(last)}${hasExact ? ', simulated and exact' : ', simulated only'}.`,
+      summary: `Probabilité de dépassement de ${tnd(first)} à ${tnd(last)}${hasExact ? ', simulée et exacte' : ', simulée seulement'}.`,
     };
   });
 }
@@ -378,7 +376,7 @@ export class ExceedancePanelComponent {
   host: { style: 'display: contents' },
   template: `
     @let c = chart();
-    <section mtr-panel panelId="convergence" heading="Convergence of the mean" description="Running estimate of E[S] with its 95% band as periods are added.">
+    <section mtr-panel panelId="convergence" heading="Convergence de la moyenne" description="Estimation courante de E[S] avec sa bande à 95 % au fur et à mesure des périodes.">
       <figure mtr-line-chart [series]="c.series" [formatY]="tndShort" [height]="180" [xLabels]="c.xLabels" [summary]="c.summary"></figure>
     </section>
   `,
@@ -392,15 +390,15 @@ export class ConvergencePanelComponent {
     const first = points[0];
     const last = points[points.length - 1];
     const series: ChartSeries[] = [
-      { label: 'Running mean', values: points.map((pt) => pt.mean), tone: 'brand' },
-      { label: 'Upper 95% bound', values: points.map((pt) => pt.upper), tone: 'muted', dashed: true },
-      { label: 'Lower 95% bound', values: points.map((pt) => pt.lower), tone: 'muted', dashed: true },
-      { label: 'Exact E[S]', values: points.map(() => exact), tone: 'cyan', dashed: true },
+      { label: 'Moyenne courante', values: points.map((pt) => pt.mean), tone: 'brand' },
+      { label: 'Borne sup. 95 %', values: points.map((pt) => pt.upper), tone: 'muted', dashed: true },
+      { label: 'Borne inf. 95 %', values: points.map((pt) => pt.lower), tone: 'muted', dashed: true },
+      { label: 'E[S] exact', values: points.map(() => exact), tone: 'cyan', dashed: true },
     ];
     return {
       series,
-      xLabels: [`${count(first.simulations)} periods`, `${count(last.simulations)} periods`] as [string, string],
-      summary: `Running mean of total claims from ${count(first.simulations)} to ${count(last.simulations)} periods, ending at ${tnd(last.mean)} against an exact ${tnd(exact)}.`,
+      xLabels: [`${count(first.simulations)} périodes`, `${count(last.simulations)} périodes`] as [string, string],
+      summary: `Moyenne courante des sinistres totaux de ${count(first.simulations)} à ${count(last.simulations)} périodes, terminant à ${tnd(last.mean)} face à un exact de ${tnd(exact)}.`,
     };
   });
 }
@@ -414,20 +412,20 @@ export class ConvergencePanelComponent {
     @let r = run().results;
     @if (outdated()) {
       <div class="form-error-banner" role="status">
-        The results below belong to the run with seed {{ run().seed }}. The inputs have changed since; press Run simulation to recompute.
+        Les résultats ci-dessous correspondent à l'exécution de graine {{ run().seed }}. Les entrées ont changé depuis ; relancez la simulation pour recalculer.
       </div>
     }
     @if (run().stale) {
       <div class="form-error-banner" role="status">
-        This run was computed with an older engine version ({{ run().engineVersion }}). Run it again to use the current engine.
+        Cette exécution a été calculée avec une version antérieure du moteur ({{ run().engineVersion }}). Relancez-la pour utiliser le moteur actuel.
       </div>
     }
     <p class="ac-runMeta">
       <span>
-        <strong>{{ run().label ?? 'Unlabelled run' }}</strong>
+        <strong>{{ run().label ?? 'Exécution sans nom' }}</strong>
       </span>
-      <span>{{ frequencyLabel[run().portfolio.frequency] }} × {{ severityLabel[run().portfolio.severity] }}, {{ count(run().portfolio.policies) }} policies</span>
-      <span>{{ count(r.simulations) }} periods, seed <span class="num">{{ r.seed }}</span></span>
+      <span>{{ frequencyLabel[run().portfolio.frequency] }} × {{ severityLabel[run().portfolio.severity] }}, {{ count(run().portfolio.policies) }} polices</span>
+      <span>{{ count(r.simulations) }} périodes, graine <span class="num">{{ r.seed }}</span></span>
       <span>{{ r.engineVersion }}, {{ count(run().durationMs) }} ms</span>
     </p>
     <mtr-distribution-panel [run]="run()" />
@@ -453,24 +451,24 @@ export class RunResultsComponent {
   imports: [...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="runs" heading="Your runs" [description]="description()">
+    <section mtr-panel panelId="runs" heading="Vos exécutions" [description]="description()">
       @if (message(); as m) {
         <p [class]="m.tone === 'error' ? 'field-error' : 'field-hint'" [attr.role]="m.tone === 'error' ? 'alert' : 'status'">{{ m.text }}</p>
       }
       @if (history(); as h) {
         @if (h.runs.length === 0) {
-          <div mtr-empty-state icon="info" heading="No runs yet" description="Every completed simulation is listed here so you can compare and reload it."></div>
+          <div mtr-empty-state icon="info" heading="Aucune exécution" description="Chaque simulation terminée est listée ici pour la comparer et la recharger."></div>
         } @else {
           <div class="table-wrap ac-rows">
             <table class="data-table">
-              <caption class="sr-only">Your simulation runs, newest first</caption>
+              <caption class="sr-only">Vos exécutions de simulation, les plus récentes en premier</caption>
               <thead>
                 <tr>
-                  <th scope="col">Run</th>
-                  <th scope="col" class="num">Mean</th>
-                  <th scope="col" class="num">99.5% VaR</th>
+                  <th scope="col">Exécution</th>
+                  <th scope="col" class="num">Moyenne</th>
+                  <th scope="col" class="num">VaR 99,5 %</th>
                   <th scope="col" class="num">P(S &gt; budget)</th>
-                  <th scope="col" class="num">P(capital insufficient)</th>
+                  <th scope="col" class="num">P(capital insuffisant)</th>
                   <th scope="col"><span class="sr-only">Actions</span></th>
                 </tr>
               </thead>
@@ -478,13 +476,13 @@ export class RunResultsComponent {
                 @for (s of h.runs; track s.id) {
                   <tr [attr.aria-current]="s.id === activeId() ? 'true' : null">
                     <th scope="row">
-                      {{ s.label ?? 'Unlabelled run' }}
+                      {{ s.label ?? 'Exécution sans nom' }}
                       <span class="ac-hint"
-                        >{{ count(s.simulations) }} periods, seed {{ s.seed }}, {{ frequencyLabel[s.portfolio.frequency] }} × {{ severityLabel[s.portfolio.severity] }}, capital
+                        >{{ count(s.simulations) }} périodes, graine {{ s.seed }}, {{ frequencyLabel[s.portfolio.frequency] }} × {{ severityLabel[s.portfolio.severity] }}, capital
                         {{ tndShort(s.headline.initialCapital) }}, {{ createdAt(s.createdAt) }}</span
                       >
                       @if (s.stale) {
-                        <span class="ac-hint">Older engine version</span>
+                        <span class="ac-hint">Version antérieure du moteur</span>
                       }
                     </th>
                     <td class="num">{{ tndShort(s.headline.mean) }}</td>
@@ -529,20 +527,20 @@ export class SimulationRunsPanelComponent {
   protected readonly createdAt = (iso: string) => new Date(iso).toLocaleString('en-GB');
   protected readonly description = computed(() => {
     const kept = this.history()?.kept;
-    return `Compare runs side by side. ${kept ? `The ${kept} most recent are kept. ` : ''}Each keeps its inputs, seed and summary results, never the individual simulated losses.`;
+    return `Comparez les exécutions côte à côte. ${kept ? `Les ${kept} plus récentes sont conservées. ` : ''}Chacune garde ses entrées, sa graine et ses résultats de synthèse, jamais les sinistres simulés individuels.`;
   });
 }
 
 const SIMULATION_METHOD = [
-  'Period       N ~ Binomial or Poisson (exact samplers), then S = X₁ + … + X_N',
-  'Severity     Fixed: S = m·N   Gamma: S ~ Gamma(N·α, θ)   Lognormal: N draws of exp(μ + σZ)',
-  'Stream       mulberry32 seeded generator; the same seed and inputs give the same results',
-  'Mean         S̄ ± 1.96·s/√n',
-  'VaR_α        the ⌈nα⌉-th smallest simulated total; 95% interval from order statistics',
-  'TVaR_α       mean of the totals at or above VaR_α (discrete tail); asymptotic interval',
-  'Probability  share of periods above the threshold; Wilson 95% interval',
-  'Budget       B = P − F − v·P     Capital insufficient: S > B + C',
-  'Shortfall    E[(S − B − C)⁺]',
+  'Période      N ~ Binomiale ou Poisson (échantillonnage exact), puis S = X₁ + … + X_N',
+  'Sévérité     Fixe : S = m·N   Gamma : S ~ Gamma(N·α, θ)   Log-normale : N tirages de exp(μ + σZ)',
+  'Flux         générateur mulberry32 avec graine ; mêmes graine et entrées → mêmes résultats',
+  'Moyenne      S̄ ± 1,96·s/√n',
+  'VaR_α        le ⌈nα⌉-ième total simulé le plus petit ; intervalle à 95 % par statistiques d\'ordre',
+  'TVaR_α       moyenne des totaux ≥ VaR_α (queue discrète) ; intervalle asymptotique',
+  'Probabilité  part des périodes au-dessus du seuil ; intervalle de Wilson à 95 %',
+  'Budget       B = P − F − v·P     Capital insuffisant : S > B + C',
+  'Déficit      E[(S − B − C)⁺]',
 ].join('\n');
 
 @Component({
@@ -551,13 +549,12 @@ const SIMULATION_METHOD = [
   imports: [...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="method" heading="How the simulation works">
+    <section mtr-panel panelId="method" heading="Comment la simulation fonctionne">
       <details class="ac-explain">
-        <summary>Show the method</summary>
+        <summary>Afficher la méthode</summary>
         <pre class="ac-formula">{{ method }}</pre>
         <p class="ac-note">
-          Individual simulated losses are summarised on the server and never stored. Investment income, reinsurance and regulatory capital rules are out of scope; “capital insufficient” only
-          means claims exceed the claims budget plus the capital entered here.
+          Les sinistres simulés individuels sont résumés sur le serveur et ne sont jamais stockés. Revenus de placement, réassurance et règles réglementaires de capital sont hors périmètre ; « capital insuffisant » signifie seulement que les sinistres dépassent le budget sinistres plus le capital saisi ici.
         </p>
       </details>
     </section>

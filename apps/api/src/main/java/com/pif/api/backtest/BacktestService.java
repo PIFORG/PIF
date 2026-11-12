@@ -157,12 +157,12 @@ public class BacktestService {
 
   private static List<String> assumptions() {
     return List.of(
-        "Prices are FICTIONAL deterministic daily closes from SimulatedMarketProvider (pif-simulated-v1).",
-        "Execution convention NEXT_CLOSE: signal after close t fills at close t+1 (no look-ahead).",
-        "Fractional shares allowed; no lot-size or depth constraints in v1.",
-        "Commission = notional x feeBps / 10_000; slippage shifts fill vs mid by slippageBps.",
-        "No dividends, corporate actions, borrowing, or overnight financing.",
-        "Annualization uses 365 calendar days and sqrt365 for volatility/Sharpe.",
-        "Synchronous result only - no job queue, no persistence of runs.");
+        "Les prix sont des clôtures journalières déterministes FICTIONAL du SimulatedMarketProvider (pif-simulated-v1).",
+        "Convention d'exécution NEXT_CLOSE : signal après la clôture t, exécution à la clôture t+1 (pas de look-ahead).",
+        "Fractions d'actions autorisées ; pas de taille de lot ni de contrainte de profondeur en v1.",
+        "Commission = notionnel × feeBps / 10 000 ; slippage décale l'exécution par rapport au mid de slippageBps.",
+        "Pas de dividendes, opérations sur titres, emprunt ni financement overnight.",
+        "Annualisation sur 365 jours civils et √365 pour volatilité/Sharpe.",
+        "Résultat synchrone uniquement — pas de file de jobs, pas de persistance des exécutions.");
   }
 }

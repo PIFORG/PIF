@@ -158,7 +158,7 @@ describe('Dashboard page', () => {
     expect(items[1].querySelector('a')?.textContent).toBe('Briefing');
     expect(items[1].querySelector('a')?.getAttribute('href')).toBe('/learn/missions/protect-your-capital');
     expect(items[2].textContent).toContain('Niveau recommandé :');
-    expect(items[2].textContent).toContain('Voir une FinStory');
+    expect(items[2].textContent).toContain('Voir une histoire financière');
     expect(items[2].querySelector('a')?.getAttribute('href')).toBe('/stories');
     expect(learning.textContent).not.toContain('not migrated');
   });

@@ -20,7 +20,7 @@ import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { OrderTicketComponent } from './order-ticket.component';
 import { emptyTicket, type TicketDraft } from './ticket-draft';
-import { dateTime, describeTradingError, dt, pct, price, shortTime, units } from './trading-format';
+import { dateTime, describeTradingError, dt, pct, price, sectorLabel, shortTime, units } from './trading-format';
 import {
   CreatePortfolioFormComponent,
   PortfolioPickerComponent,
@@ -123,6 +123,7 @@ export class TradingDeskPage {
   protected readonly units = units;
   protected readonly shortTime = shortTime;
   protected readonly dateTime = dateTime;
+  protected readonly sectorLabel = sectorLabel;
 
   protected readonly portfolio = computed(() => this.portfolios()?.find((p) => p.id === this.activeId()) ?? null);
   protected readonly symbol = computed(() => this.draft().symbol);
@@ -160,7 +161,7 @@ export class TradingDeskPage {
     return {
       enough: true as const,
       series,
-      summary: `${symbol} mid price over ${this.range()}: from ${price(first?.mid)} to ${price(last?.mid)} DT${rangeChange !== null ? `, ${pct(rangeChange, true)}` : ''}.`,
+      summary: `${symbol}, cours médian sur ${this.range()} : de ${price(first?.mid)} à ${price(last?.mid)} DT${rangeChange !== null ? `, ${pct(rangeChange, true)}` : ''}.`,
       xLabels: [first ? dateTime(first.at) : '', last ? dateTime(last.at) : ''] as [string, string],
       minSpan: (last?.mid ?? 1) * 0.01,
       resolution: history.resolution,

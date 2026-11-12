@@ -298,7 +298,7 @@ public class LearningService {
             "type",c.command().type(),"summary",LearningViews.describeCommand(c.command()),"rationale",c.command().isPlaceOrder()?c.command().rationale():null,
             "outcome",c.outcome(),"at",Db.iso(c.created()))).toList(),"equityCurve",curve(l.state()),
         "news",l.ctx().mission().scenario().events().stream().filter(e->e.step()<=l.state().step)
-            .map(e->map("id",e.id(),"step",e.step(),"headline",e.headline(),"sentiment",e.sentiment())).toList(),"branches",branches);
+            .map(e->map("id",e.id(),"step",e.step(),"headline",LearningFr.get("mission."+l.ctx().mission().slug()+".event."+e.id()+".headline",e.headline()),"sentiment",e.sentiment())).toList(),"branches",branches);
   }
   public Map<String,Object> branch(AuthUser user,UUID id,int from,String strategy) {
     return tx.execute(status->{
@@ -328,7 +328,7 @@ public class LearningService {
       if(i>=a.commands().size()||i>=b.commands().size()||!a.commands().get(i).command().equals(b.commands().get(i).command())) { divergence=i+1;break; }
     }
     return map("missionSlug",a.session().slug(),"missionTitle",LearningFr.missionTitle(a.ctx().mission().slug(),a.ctx().mission().title()),"divergenceSeq",divergence,
-        "note","Replays use exactly the same market path. They are counterfactual practice with hindsight, so they never change your competency profile.",
+        "note", LearningFr.timemachineCompareNote(),
         "sessions",List.of(comparison(a),comparison(b)));
   }
   public Map<String,Object> profile(AuthUser user) {
@@ -357,7 +357,7 @@ public class LearningService {
         "recommendations",Mastery.recommend(MISSIONS,progress,mastery,user.user().experienceLevel()).stream().map(Mastery.Recommendation::toJson).toList(),
         "calibration",map("ratedOrders",rated,"observations",observed,"minimumOrders",Assessments.CALIBRATION_MIN_ORDERS,"interpretable",observed>=Assessments.CALIBRATION_MIN_ORDERS,
             "brierScore",observed>0?brier/observed:null,"meanConfidence",rated>0?confidence/rated:null,"hitRate",observed>0?hits/observed:null,"signals",signals,
-            "note","Retrospective and not part of any score. Each rated order is compared with the equal-weight market of its mission from the fill to the end. Below "+Assessments.CALIBRATION_MIN_ORDERS+" orders this is mostly noise, and an unfavourable outcome alone is not evidence of overconfidence."));
+            "note", LearningFr.profileCalibrationNote(Assessments.CALIBRATION_MIN_ORDERS)));
   }
   private static double num(Object o) { return o instanceof Number n?n.doubleValue():0; }
 }
