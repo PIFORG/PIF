@@ -1,0 +1,14 @@
+{
+  "name": "@pif/db-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Test-only helpers (argon2/MFA). SQL migration history under prisma/ is reference-only. No Prisma Client required for journeys.",
+  "scripts": {
+    "harness:generate": "echo Prisma generate is optional and unused by Spring/Angular journeys"
+  },
+  "dependencies": {
+    "argon2": "^0.41.1",
+    "otplib": "^12.0.1"
+  }
+}

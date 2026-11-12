@@ -1,0 +1,106 @@
+<section class="adm-section" aria-labelledby="audit-heading">
+  <div class="adm-sectionHead">
+    <div>
+      <h2 id="audit-heading">Journal d'audit</h2>
+      <p>
+        Événements de sécurité et d'administration, du plus récent au plus ancien. Les données personnelles associées à un
+        événement ne sont pas affichées ici.
+      </p>
+    </div>
+  </div>
+
+  <form class="adm-toolbar" (submit)="apply($event)">
+    <label class="field">
+      <span>Type d'événement</span>
+      <input
+        [value]="draft().eventType"
+        (input)="setDraft('eventType', $any($event.target).value)"
+        placeholder="ex. LOGIN_FAILURE"
+        maxlength="80"
+      />
+    </label>
+    <label class="field">
+      <span>Résultat</span>
+      <select [value]="draft().outcome" (change)="setDraft('outcome', $any($event.target).value)">
+        <option value="">Tous</option>
+        <option value="SUCCESS">Succès</option>
+        <option value="FAILURE">Échec</option>
+        <option value="DENIED">Refusé</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>ID du compte</span>
+      <input
+        [value]="draft().subjectUserId"
+        (input)="setDraft('subjectUserId', $any($event.target).value)"
+        spellcheck="false"
+      />
+    </label>
+    <label class="field">
+      <span>Du</span>
+      <input type="date" [value]="draft().fromDate" (input)="setDraft('fromDate', $any($event.target).value)" />
+    </label>
+    <label class="field">
+      <span>Au</span>
+      <input type="date" [value]="draft().toDate" (input)="setDraft('toDate', $any($event.target).value)" />
+    </label>
+    <button type="submit" class="btn btn-secondary">Appliquer les filtres</button>
+    <button type="button" class="btn btn-ghost" (click)="clear()">Effacer</button>
+  </form>
+
+  <mtr-form-error [message]="error()" />
+  <div aria-live="polite" [attr.aria-busy]="loading()">
+    @if (loading()) {
+      <p role="status">Chargement des événements…</p>
+    }
+    @if (loaded(); as data) {
+      @if (data.items.length === 0) {
+        <p>Aucun événement ne correspond à ces filtres.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption class="sr-only">Événements d'audit</caption>
+            <thead>
+              <tr>
+                <th scope="col">Heure</th>
+                <th scope="col">Événement</th>
+                <th scope="col">Résultat</th>
+                <th scope="col">Compte</th>
+                <th scope="col">Acteur</th>
+                <th scope="col">Détails</th>
+                <th scope="col">ID de corrélation</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (event of data.items; track event.id) {
+                <tr>
+                  <td>{{ formatDateTime(event.createdAt) }}</td>
+                  <td>{{ event.eventType }}</td>
+                  <td>{{ event.outcome }}</td>
+                  <td><code>{{ event.subjectUserId ?? '—' }}</code></td>
+                  <td><code>{{ event.actorUserId ?? '—' }}</code></td>
+                  <td>{{ formatContext(event.context) }}</td>
+                  <td><code>{{ event.correlationId ?? '—' }}</code></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+
+  @if (loaded(); as data) {
+    @if (data.total > 0) {
+      <nav class="adm-pagination" aria-label="Pagination">
+        <button type="button" class="btn btn-ghost" [disabled]="page() <= 1" (click)="page.set(max(1, page() - 1))">
+          Précédent
+        </button>
+        <span>Page {{ page() }} sur {{ totalPages() }} ({{ data.total }} événements)</span>
+        <button type="button" class="btn btn-ghost" [disabled]="page() >= totalPages()" (click)="page.set(page() + 1)">
+          Suivant
+        </button>
+      </nav>
+    }
+  }
+</section>

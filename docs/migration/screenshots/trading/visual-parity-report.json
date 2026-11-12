@@ -1,0 +1,1186 @@
+{
+  "generatedAt": "2026-11-11T19:35:31.781Z",
+  "apps": {
+    "next": "http://localhost:3000",
+    "angular": "http://localhost:4200"
+  },
+  "channelTolerance": 32,
+  "pageErrors": [],
+  "results": [
+    {
+      "scenario": "dashboard",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x1787",
+      "angularSize": "1440x1735",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "1440x1735",
+      "differingPixels": 45232,
+      "differingPercent": 1.81,
+      "exactlyDifferingPixels": 292492,
+      "maxChannelDelta": 244,
+      "differenceBox": {
+        "x": 282,
+        "y": 28,
+        "width": 1124,
+        "height": 1673
+      }
+    },
+    {
+      "scenario": "dashboard",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x2473",
+      "angularSize": "768x2421",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "768x2421",
+      "differingPixels": 44221,
+      "differingPercent": 2.378,
+      "exactlyDifferingPixels": 243040,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 25,
+        "y": 1499,
+        "width": 718,
+        "height": 888
+      }
+    },
+    {
+      "scenario": "dashboard",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x3882",
+      "angularSize": "375x3830",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "375x3830",
+      "differingPixels": 44199,
+      "differingPercent": 3.077,
+      "exactlyDifferingPixels": 200334,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 18,
+        "y": 2403,
+        "width": 339,
+        "height": 1321
+      }
+    },
+    {
+      "scenario": "dashboard",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x1787",
+      "angularSize": "1440x1735",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "1440x1735",
+      "differingPixels": 57693,
+      "differingPercent": 2.309,
+      "exactlyDifferingPixels": 292525,
+      "maxChannelDelta": 237,
+      "differenceBox": {
+        "x": 280,
+        "y": 967,
+        "width": 1128,
+        "height": 768
+      }
+    },
+    {
+      "scenario": "dashboard",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x2473",
+      "angularSize": "768x2421",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "768x2421",
+      "differingPixels": 57024,
+      "differingPercent": 3.067,
+      "exactlyDifferingPixels": 243146,
+      "maxChannelDelta": 237,
+      "differenceBox": {
+        "x": 23,
+        "y": 1499,
+        "width": 722,
+        "height": 922
+      }
+    },
+    {
+      "scenario": "dashboard",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x3882",
+      "angularSize": "375x3830",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "375x3830",
+      "differingPixels": 56507,
+      "differingPercent": 3.934,
+      "exactlyDifferingPixels": 200408,
+      "maxChannelDelta": 237,
+      "differenceBox": {
+        "x": 16,
+        "y": 2403,
+        "width": 343,
+        "height": 1359
+      }
+    },
+    {
+      "scenario": "dashboard-sample",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2279",
+      "angularSize": "1440x2227",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "1440x2227",
+      "differingPixels": 89355,
+      "differingPercent": 2.786,
+      "exactlyDifferingPixels": 463160,
+      "maxChannelDelta": 247,
+      "differenceBox": {
+        "x": 280,
+        "y": 317,
+        "width": 1128,
+        "height": 1876
+      }
+    },
+    {
+      "scenario": "dashboard-sample",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4512",
+      "angularSize": "375x4460",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "375x4460",
+      "differingPixels": 59430,
+      "differingPercent": 3.553,
+      "exactlyDifferingPixels": 253186,
+      "maxChannelDelta": 250,
+      "differenceBox": {
+        "x": 16,
+        "y": 426,
+        "width": 343,
+        "height": 3928
+      }
+    },
+    {
+      "scenario": "dashboard-loading",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x1333",
+      "angularSize": "1440x1333",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "requests held (loading)",
+      "comparedArea": "1440x1333",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 139,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "markets",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x1719",
+      "angularSize": "1440x1719",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "1440x1719",
+      "differingPixels": 571,
+      "differingPercent": 0.023,
+      "exactlyDifferingPixels": 2771,
+      "maxChannelDelta": 166,
+      "differenceBox": {
+        "x": 509,
+        "y": 28,
+        "width": 846,
+        "height": 1288
+      }
+    },
+    {
+      "scenario": "markets",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x1963",
+      "angularSize": "768x1963",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "768x1963",
+      "differingPixels": 1474,
+      "differingPercent": 0.098,
+      "exactlyDifferingPixels": 4933,
+      "maxChannelDelta": 82,
+      "differenceBox": {
+        "x": 247,
+        "y": 309,
+        "width": 434,
+        "height": 1221
+      }
+    },
+    {
+      "scenario": "markets",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x2647",
+      "angularSize": "375x2647",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "375x2647",
+      "differingPixels": 67,
+      "differingPercent": 0.007,
+      "exactlyDifferingPixels": 993,
+      "maxChannelDelta": 53,
+      "differenceBox": {
+        "x": 145,
+        "y": 434,
+        "width": 151,
+        "height": 1417
+      }
+    },
+    {
+      "scenario": "markets",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x1719",
+      "angularSize": "1440x1719",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "1440x1719",
+      "differingPixels": 452,
+      "differingPercent": 0.018,
+      "exactlyDifferingPixels": 2742,
+      "maxChannelDelta": 84,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 846,
+        "height": 1348
+      }
+    },
+    {
+      "scenario": "markets",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x1963",
+      "angularSize": "768x1963",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "768x1963",
+      "differingPixels": 1391,
+      "differingPercent": 0.092,
+      "exactlyDifferingPixels": 4835,
+      "maxChannelDelta": 79,
+      "differenceBox": {
+        "x": 247,
+        "y": 309,
+        "width": 434,
+        "height": 1221
+      }
+    },
+    {
+      "scenario": "markets",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x2647",
+      "angularSize": "375x2647",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 3,
+      "replayMismatches": [],
+      "comparedArea": "375x2647",
+      "differingPixels": 33,
+      "differingPercent": 0.003,
+      "exactlyDifferingPixels": 939,
+      "maxChannelDelta": 47,
+      "differenceBox": {
+        "x": 202,
+        "y": 432,
+        "width": 93,
+        "height": 1418
+      }
+    },
+    {
+      "scenario": "markets-loading",
+      "theme": "light",
+      "app": "angular",
+      "error": "Field #password not found"
+    },
+    {
+      "scenario": "markets-error",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x970",
+      "angularSize": "1440x970",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "1440x970",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 81,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "markets-error",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x1492",
+      "angularSize": "375x1492",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "375x1492",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 30,
+      "maxChannelDelta": 5,
+      "differenceBox": null
+    },
+    {
+      "scenario": "trading",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2236",
+      "angularSize": "1440x2236",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2236",
+      "differingPixels": 87,
+      "differingPercent": 0.003,
+      "exactlyDifferingPixels": 748,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 767,
+        "y": 259,
+        "width": 335,
+        "height": 731
+      }
+    },
+    {
+      "scenario": "trading",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x3474",
+      "angularSize": "768x3474",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "768x3474",
+      "differingPixels": 275,
+      "differingPercent": 0.01,
+      "exactlyDifferingPixels": 1263,
+      "maxChannelDelta": 79,
+      "differenceBox": {
+        "x": 98,
+        "y": 313,
+        "width": 583,
+        "height": 3057
+      }
+    },
+    {
+      "scenario": "trading",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4152",
+      "angularSize": "375x4152",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x4152",
+      "differingPixels": 86,
+      "differingPercent": 0.006,
+      "exactlyDifferingPixels": 518,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 148,
+        "y": 434,
+        "width": 137,
+        "height": 1117
+      }
+    },
+    {
+      "scenario": "trading",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x2236",
+      "angularSize": "1440x2236",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2236",
+      "differingPixels": 99,
+      "differingPercent": 0.003,
+      "exactlyDifferingPixels": 736,
+      "maxChannelDelta": 77,
+      "differenceBox": {
+        "x": 356,
+        "y": 259,
+        "width": 745,
+        "height": 1873
+      }
+    },
+    {
+      "scenario": "trading",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x3474",
+      "angularSize": "768x3474",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "768x3474",
+      "differingPixels": 287,
+      "differingPercent": 0.011,
+      "exactlyDifferingPixels": 1262,
+      "maxChannelDelta": 84,
+      "differenceBox": {
+        "x": 97,
+        "y": 313,
+        "width": 584,
+        "height": 3057
+      }
+    },
+    {
+      "scenario": "trading",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x4152",
+      "angularSize": "375x4152",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x4152",
+      "differingPixels": 93,
+      "differingPercent": 0.006,
+      "exactlyDifferingPixels": 508,
+      "maxChannelDelta": 77,
+      "differenceBox": {
+        "x": 92,
+        "y": 434,
+        "width": 193,
+        "height": 3541
+      }
+    },
+    {
+      "scenario": "trading-no-portfolio",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x1313",
+      "angularSize": "1440x1313",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 4,
+      "replayMismatches": [],
+      "comparedArea": "1440x1313",
+      "differingPixels": 134,
+      "differingPercent": 0.007,
+      "exactlyDifferingPixels": 721,
+      "maxChannelDelta": 60,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 846,
+        "height": 793
+      }
+    },
+    {
+      "scenario": "trading-no-portfolio",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x2612",
+      "angularSize": "375x2612",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 4,
+      "replayMismatches": [],
+      "comparedArea": "375x2612",
+      "differingPixels": 13,
+      "differingPercent": 0.001,
+      "exactlyDifferingPixels": 277,
+      "maxChannelDelta": 41,
+      "differenceBox": {
+        "x": 187,
+        "y": 1304,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "scenario": "trading-ticket-validation",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2236",
+      "angularSize": "1440x2236",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2236",
+      "differingPixels": 182,
+      "differingPercent": 0.006,
+      "exactlyDifferingPixels": 1044,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 846,
+        "height": 731
+      }
+    },
+    {
+      "scenario": "trading-ticket-validation",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4152",
+      "angularSize": "375x4152",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x4152",
+      "differingPixels": 59,
+      "differingPercent": 0.004,
+      "exactlyDifferingPixels": 494,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 148,
+        "y": 812,
+        "width": 47,
+        "height": 739
+      }
+    },
+    {
+      "scenario": "trading-order-preview",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2375",
+      "angularSize": "1440x2375",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 8,
+      "replayMismatches": [],
+      "comparedArea": "1440x2375",
+      "differingPixels": 197,
+      "differingPercent": 0.006,
+      "exactlyDifferingPixels": 1249,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 846,
+        "height": 902
+      }
+    },
+    {
+      "scenario": "trading-order-preview",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4409",
+      "angularSize": "375x4409",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 8,
+      "replayMismatches": [],
+      "comparedArea": "375x4409",
+      "differingPixels": 74,
+      "differingPercent": 0.004,
+      "exactlyDifferingPixels": 700,
+      "maxChannelDelta": 72,
+      "differenceBox": {
+        "x": 148,
+        "y": 812,
+        "width": 87,
+        "height": 1694
+      }
+    },
+    {
+      "scenario": "trading-loading",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x900",
+      "angularSize": "1440x900",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "requests held (loading)",
+      "comparedArea": "1440x900",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 63,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "trading-loading",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x1298",
+      "angularSize": "375x1298",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "requests held (loading)",
+      "comparedArea": "375x1298",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 13,
+      "maxChannelDelta": 4,
+      "differenceBox": null
+    },
+    {
+      "scenario": "trading-error",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x900",
+      "angularSize": "1440x900",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "1440x900",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 67,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "trading-error",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x1296",
+      "angularSize": "375x1296",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "375x1296",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 15,
+      "maxChannelDelta": 4,
+      "differenceBox": null
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2781",
+      "angularSize": "1440x2781",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2781",
+      "differingPixels": 22634,
+      "differingPercent": 0.565,
+      "exactlyDifferingPixels": 93017,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 897,
+        "height": 1506
+      }
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "light",
+      "width": 768,
+      "nextSize": "768x3971",
+      "angularSize": "768x4010",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "768x3971",
+      "differingPixels": 105697,
+      "differingPercent": 3.466,
+      "exactlyDifferingPixels": 389377,
+      "maxChannelDelta": 247,
+      "differenceBox": {
+        "x": 25,
+        "y": 311,
+        "width": 718,
+        "height": 3612
+      }
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x5027",
+      "angularSize": "375x5143",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x5027",
+      "differingPixels": 76733,
+      "differingPercent": 4.07,
+      "exactlyDifferingPixels": 231169,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 18,
+        "y": 727,
+        "width": 339,
+        "height": 4257
+      }
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "dark",
+      "width": 1440,
+      "nextSize": "1440x2781",
+      "angularSize": "1440x2781",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2781",
+      "differingPixels": 22011,
+      "differingPercent": 0.55,
+      "exactlyDifferingPixels": 92684,
+      "maxChannelDelta": 243,
+      "differenceBox": {
+        "x": 356,
+        "y": 259,
+        "width": 1052,
+        "height": 2414
+      }
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "dark",
+      "width": 768,
+      "nextSize": "768x3971",
+      "angularSize": "768x4010",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "768x3971",
+      "differingPixels": 94387,
+      "differingPercent": 3.095,
+      "exactlyDifferingPixels": 388857,
+      "maxChannelDelta": 237,
+      "differenceBox": {
+        "x": 23,
+        "y": 311,
+        "width": 722,
+        "height": 3651
+      }
+    },
+    {
+      "scenario": "portfolios",
+      "theme": "dark",
+      "width": 375,
+      "nextSize": "375x5027",
+      "angularSize": "375x5143",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "angularCheck": "passed",
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x5027",
+      "differingPixels": 74629,
+      "differingPercent": 3.959,
+      "exactlyDifferingPixels": 230769,
+      "maxChannelDelta": 237,
+      "differenceBox": {
+        "x": 16,
+        "y": 727,
+        "width": 343,
+        "height": 4296
+      }
+    },
+    {
+      "scenario": "portfolios-history-trades",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2572",
+      "angularSize": "1440x2572",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2572",
+      "differingPixels": 22610,
+      "differingPercent": 0.61,
+      "exactlyDifferingPixels": 93003,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 897,
+        "height": 1506
+      }
+    },
+    {
+      "scenario": "portfolios-history-trades",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x4818",
+      "angularSize": "375x4934",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x4818",
+      "differingPixels": 68970,
+      "differingPercent": 3.817,
+      "exactlyDifferingPixels": 221807,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 18,
+        "y": 482,
+        "width": 339,
+        "height": 4294
+      }
+    },
+    {
+      "scenario": "portfolios-history-cash",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x2777",
+      "angularSize": "1440x2777",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "1440x2777",
+      "differingPixels": 22714,
+      "differingPercent": 0.568,
+      "exactlyDifferingPixels": 93046,
+      "maxChannelDelta": 239,
+      "differenceBox": {
+        "x": 509,
+        "y": 259,
+        "width": 897,
+        "height": 2356
+      }
+    },
+    {
+      "scenario": "portfolios-history-cash",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x5024",
+      "angularSize": "375x5140",
+      "sameSize": false,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 7,
+      "replayMismatches": [],
+      "comparedArea": "375x5024",
+      "differingPixels": 75717,
+      "differingPercent": 4.019,
+      "exactlyDifferingPixels": 231663,
+      "maxChannelDelta": 247,
+      "differenceBox": {
+        "x": 18,
+        "y": 482,
+        "width": 339,
+        "height": 4500
+      }
+    },
+    {
+      "scenario": "portfolios-no-portfolio",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x900",
+      "angularSize": "1440x900",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "1440x900",
+      "differingPixels": 1295925,
+      "differingPercent": 99.994,
+      "exactlyDifferingPixels": 1296000,
+      "maxChannelDelta": 247,
+      "differenceBox": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "scenario": "portfolios-no-portfolio",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x812",
+      "angularSize": "375x812",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "replayedApiBodies": 2,
+      "replayMismatches": [],
+      "comparedArea": "375x812",
+      "differingPixels": 543,
+      "differingPercent": 0.178,
+      "exactlyDifferingPixels": 745,
+      "maxChannelDelta": 222,
+      "differenceBox": {
+        "x": 50,
+        "y": 512,
+        "width": 62,
+        "height": 14
+      }
+    },
+    {
+      "scenario": "portfolios-loading",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x900",
+      "angularSize": "1440x900",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "requests held (loading)",
+      "comparedArea": "1440x900",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 61,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "portfolios-loading",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x812",
+      "angularSize": "375x812",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "requests held (loading)",
+      "comparedArea": "375x812",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 10,
+      "maxChannelDelta": 4,
+      "differenceBox": null
+    },
+    {
+      "scenario": "portfolios-error",
+      "theme": "light",
+      "width": 1440,
+      "nextSize": "1440x900",
+      "angularSize": "1440x900",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "1440x900",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 61,
+      "maxChannelDelta": 7,
+      "differenceBox": null
+    },
+    {
+      "scenario": "portfolios-error",
+      "theme": "light",
+      "width": 375,
+      "nextSize": "375x812",
+      "angularSize": "375x812",
+      "sameSize": true,
+      "horizontalOverflow": {
+        "next": 0,
+        "angular": 0
+      },
+      "simulatedApiState": "HTTP 503 (error)",
+      "comparedArea": "375x812",
+      "differingPixels": 0,
+      "differingPercent": 0,
+      "exactlyDifferingPixels": 10,
+      "maxChannelDelta": 4,
+      "differenceBox": null
+    },
+    {
+      "check": "trader portfolio unchanged by both apps while displayed",
+      "passed": true
+    }
+  ]
+}

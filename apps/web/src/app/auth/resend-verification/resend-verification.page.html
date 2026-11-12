@@ -1,0 +1,38 @@
+<mtr-auth-layout
+  [title]="'Renvoyer la vérification'"
+  lead="Demandez un nouveau lien de vérification par courriel. Les anciens liens cessent de fonctionner dès qu'un nouveau est envoyé."
+  [showFooter]="true"
+>
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+  <form (submit)="onSubmit($event)" novalidate>
+    <mtr-form-field
+      fieldId="email"
+      label="Courriel"
+      type="email"
+      autocomplete="email"
+      name="email"
+      [error]="form.errors().email"
+      [value]="form.values().email"
+      (valueChange)="form.set('email', $event)"
+    />
+    <button
+      type="submit"
+      class="btn btn-primary"
+      style="width: 100%"
+      [disabled]="form.submitting() || cooldown.active()"
+    >
+      {{
+        form.submitting()
+          ? 'Envoi…'
+          : cooldown.active()
+            ? 'Renvoyer dans ' + cooldown.remaining() + ' s'
+            : 'Envoyer le courriel de vérification'
+      }}
+    </button>
+  </form>
+
+  <ng-container ngProjectAs="[authFooter]">
+    <a routerLink="/login">Retour à la connexion</a>
+  </ng-container>
+</mtr-auth-layout>

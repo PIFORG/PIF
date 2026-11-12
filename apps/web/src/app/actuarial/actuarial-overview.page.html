@@ -1,0 +1,227 @@
+<div class="page-shell ac-labShell">
+  <mtr-page-heading
+    [eyebrow]="copy.eyebrow"
+    [title]="copy.labTitle"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="copy.labDescription"
+  >
+    <a mtrHeadingActions routerLink="/actuarial/pricing" class="btn btn-primary">{{ copy.openPricing }}</a>
+  </mtr-page-heading>
+  <nav mtr-actuarial-tabs></nav>
+  <p mtr-estimate-note></p>
+
+  @if (error()) {
+    <div mtr-empty-state tone="error" icon="alert" heading="The actuarial overview could not load" [description]="error()"></div>
+  } @else if (data(); as d) {
+    @let r = d.reference.pricing;
+    <div class="ac-researchHero" aria-hidden="true"></div>
+    <div class="ac-kpis ac-researchKpis">
+      <div mtr-kpi label="Policies" icon="actuarial" [hint]="decimal(r.frequency.exposure, 2) + ' policy-years'">
+        <span class="num">{{ count(r.frequency.policies) }}</span>
+      </div>
+      <div mtr-kpi label="Expected claims" [hint]="'Severity ' + tnd(r.severity.mean) + ' each'">
+        <span class="num">{{ decimal(r.frequency.mean, 2) }}</span>
+      </div>
+      <div mtr-kpi label="Expected claim cost E[S]" [hint]="'sd ' + tndShort(r.aggregate.sd)">
+        <span class="num">{{ tndShort(r.aggregate.mean) }}</span>
+      </div>
+      <div mtr-kpi label="Gross premium" [hint]="tnd(r.premium.perPolicy.grossPremium) + ' per policy'">
+        <span class="num">{{ tndShort(r.premium.totals.grossPremium) }}</span>
+      </div>
+      <div
+        mtr-kpi
+        label="P(underwriting loss)"
+        [hint]="'Expected result ' + tndShort(r.premium.totals.expectedUnderwritingResult)"
+        [tone]="(r.probabilities.underwritingLoss ?? 0) > 0.25 ? 'warning' : 'default'"
+      >
+        <span class="num">{{ probability(r.probabilities.underwritingLoss) }}</span>
+      </div>
+    </div>
+
+    <div class="ac-twoUp" style="margin-bottom: var(--space-4)">
+      <section mtr-panel panelId="reference" [heading]="d.reference.name" [description]="d.reference.description">
+        <span mtrPanelBadge class="badge badge-info">Fictional</span>
+        @if (r.aggregate.histogram; as h) {
+          <figure
+            mtr-column-chart
+            [from]="h.from"
+            [binWidth]="h.binWidth"
+            [values]="h.probabilities"
+            [markers]="markers()"
+            [formatX]="tndShort"
+            [formatY]="ratio1"
+            seriesLabel="Probability of total claims in range"
+            [summary]="chartSummary()"
+          ></figure>
+        }
+        <dl class="ac-stats" style="margin-top: var(--space-4); margin-bottom: 0">
+          <div>
+            <dt>Loss ratio</dt>
+            <dd>{{ ratio(r.premium.ratios.loss, 1) }}</dd>
+          </div>
+          <div>
+            <dt>Combined ratio</dt>
+            <dd>{{ ratio(r.premium.ratios.combined, 1) }}</dd>
+          </div>
+          <div>
+            <dt>99.5% quantile of claims</dt>
+            <dd>{{ quantile995() }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section mtr-panel panelId="data-kinds" heading="What the numbers are">
+        <ul class="ac-legendList">
+          <li><strong>Observed:</strong> none. This lab holds no real claims or policy data; the reserving studio uses fictional triangles or the ones you enter.</li>
+          <li><strong>Estimated:</strong> every figure here. Exact formulas and exact or Panjer distributions computed on the server from fictional assumptions.</li>
+          <li>
+            <strong>Simulated:</strong> Monte Carlo lab results. Seeded, reproducible estimates shown with 95% confidence intervals and compared with the exact values.
+          </li>
+        </ul>
+        <p class="ac-note">Model version {{ d.modelVersion }}. Amounts in {{ d.currency }} (DT).</p>
+      </section>
+    </div>
+
+    <section mtr-panel panelId="workspaces" heading="Espaces de recherche" description="Construits par étapes. Seuls les espaces terminés sont ouverts.">
+      <ul class="ac-workspaces ac-researchPods">
+        @for (w of d.workspaces; track w.id) {
+          <li>
+            <div class="ac-workspace" [attr.data-status]="w.status">
+              <h3>{{ w.title }}</h3>
+              <p>{{ workspaceText(w.id) }}</p>
+              @if (w.status === 'AVAILABLE' && workspaceHref(w.id); as href) {
+                <a [routerLink]="href" class="btn btn-secondary btn-sm">Open<span class="sr-only"> {{ w.title }}</span></a>
+              } @else {
+                <span class="badge badge-muted">Planned</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="ac-stack" style="margin-top: var(--space-4)">
+      <section
+        mtr-panel
+        panelId="recent"
+        heading="Your recent scenarios"
+        [description]="d.scenarios.available ? d.scenarios.count + ' of ' + d.scenarios.limit + ' saved.' : undefined"
+      >
+        @if (!d.scenarios.available) {
+          <div mtr-empty-state icon="info" heading="Saved scenarios unavailable" [description]="d.scenarios.reason"></div>
+        } @else if (d.scenarios.recent.length === 0) {
+          <div mtr-empty-state icon="info" heading="No saved scenarios yet" description="Price a portfolio in the studio and save it to see it here.">
+            <a mtrEmptyAction routerLink="/actuarial/pricing" class="btn btn-secondary btn-sm">Go to the pricing studio</a>
+          </div>
+        } @else {
+          <div class="table-wrap ac-rows">
+            <table class="data-table">
+              <caption class="sr-only">Your most recently updated scenarios</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col" class="num">Premium per policy</th>
+                  <th scope="col" class="num">Expected claims</th>
+                  <th scope="col" class="num">Combined ratio</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of d.scenarios.recent; track s.id) {
+                  <tr>
+                    <th scope="row">{{ s.name }}</th>
+                    <td class="num">{{ tnd(s.headline.grossPremiumPerPolicy) }}</td>
+                    <td class="num">{{ tnd(s.headline.expectedClaims) }}</td>
+                    <td class="num">{{ ratio(s.headline.combinedRatio, 1) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section
+        mtr-panel
+        panelId="recent-runs"
+        heading="Your recent simulations"
+        [description]="d.simulations.available ? d.simulations.count + ' kept (the ' + d.simulations.kept + ' most recent).' : undefined"
+      >
+        @if (!d.simulations.available) {
+          <div mtr-empty-state icon="info" heading="Simulation history unavailable" [description]="d.simulations.reason"></div>
+        } @else if (d.simulations.recent.length === 0) {
+          <div mtr-empty-state icon="info" heading="No simulations yet" description="Run a seeded Monte Carlo simulation to see its tail risk here.">
+            <a mtrEmptyAction routerLink="/actuarial/monte-carlo" class="btn btn-secondary btn-sm">Go to the Monte Carlo lab</a>
+          </div>
+        } @else {
+          <div class="table-wrap ac-rows">
+            <table class="data-table">
+              <caption class="sr-only">Your most recent simulation runs</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Run</th>
+                  <th scope="col" class="num">Simulated mean</th>
+                  <th scope="col" class="num">99.5% VaR</th>
+                  <th scope="col" class="num">P(capital insufficient)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of d.simulations.recent; track s.id) {
+                  <tr>
+                    <th scope="row">
+                      {{ s.label ?? 'Unlabelled run' }}
+                      <span class="ac-hint">{{ count(s.simulations) }} periods, seed {{ s.seed }}</span>
+                    </th>
+                    <td class="num">{{ tndShort(s.headline.mean) }}</td>
+                    <td class="num">{{ s.headline.valueAtRisk995 === null ? dash : tndShort(s.headline.valueAtRisk995) }}</td>
+                    <td class="num">{{ probability(s.headline.probabilityCapitalInsufficient) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section
+        mtr-panel
+        panelId="recent-reserving"
+        heading="Your recent reserving runs"
+        [description]="d.reserving.available ? d.reserving.count + ' kept (the ' + d.reserving.kept + ' most recent).' : undefined"
+      >
+        @if (!d.reserving.available) {
+          <div mtr-empty-state icon="info" heading="Reserving history unavailable" [description]="d.reserving.reason"></div>
+        } @else if (d.reserving.recent.length === 0) {
+          <div mtr-empty-state icon="info" heading="No reserving runs yet" description="Analyse a development triangle and save the run to see it here.">
+            <a mtrEmptyAction routerLink="/actuarial/reserving" class="btn btn-secondary btn-sm">Go to the reserving studio</a>
+          </div>
+        } @else {
+          <div class="table-wrap ac-rows">
+            <table class="data-table">
+              <caption class="sr-only">Your most recent reserving runs</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Run</th>
+                  <th scope="col" class="num">Valuation year</th>
+                  <th scope="col" class="num">Saved</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (run of d.reserving.recent; track run.id) {
+                  <tr>
+                    <th scope="row">{{ run.label }}</th>
+                    <td class="num">{{ run.valuationYear }}</td>
+                    <td class="num">{{ savedDate(run.createdAt) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </div>
+  } @else {
+    <section mtr-panel heading="Reference portfolio">
+      <div mtr-panel-skeleton [rows]="5"></div>
+    </section>
+  }
+</div>

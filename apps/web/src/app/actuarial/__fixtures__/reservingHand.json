@@ -1,0 +1,691 @@
+{
+  "generatedBy": "pif-reserving-1.0.0",
+  "request": {
+    "data": {
+      "firstOrigin": 2023,
+      "paid": [
+        [
+          100,
+          150,
+          165
+        ],
+        [
+          120,
+          186
+        ],
+        [
+          130
+        ]
+      ],
+      "incurred": [
+        [
+          160,
+          170,
+          168
+        ],
+        [
+          190,
+          210
+        ],
+        [
+          200
+        ]
+      ],
+      "premiums": [
+        200,
+        220,
+        240
+      ]
+    },
+    "assumptions": {
+      "average": "VOLUME_WEIGHTED",
+      "latestDiagonals": null,
+      "tail": {
+        "paid": 1,
+        "incurred": 1
+      },
+      "selectedFactors": {
+        "paid": null,
+        "incurred": null
+      },
+      "expectedLossRatio": 0.8
+    }
+  },
+  "results": {
+    "modelVersion": "pif-reserving-1.0.0",
+    "firstOrigin": 2023,
+    "origins": [
+      2023,
+      2024,
+      2025
+    ],
+    "valuationYear": 2025,
+    "averaging": {
+      "method": "VOLUME_WEIGHTED",
+      "latestDiagonals": null
+    },
+    "chainLadder": {
+      "paid": {
+        "basis": "PAID",
+        "factors": [
+          {
+            "from": 1,
+            "to": 2,
+            "pairs": 2,
+            "volumeWeighted": 1.5272727272727273,
+            "simpleAverage": 1.525,
+            "latestDiagonals": null,
+            "min": 1.5,
+            "max": 1.55,
+            "estimated": 1.5272727272727273,
+            "selected": 1.5272727272727273,
+            "source": "ESTIMATED"
+          },
+          {
+            "from": 2,
+            "to": 3,
+            "pairs": 1,
+            "volumeWeighted": 1.1,
+            "simpleAverage": 1.1,
+            "latestDiagonals": null,
+            "min": 1.1,
+            "max": 1.1,
+            "estimated": 1.1,
+            "selected": 1.1,
+            "source": "ESTIMATED"
+          }
+        ],
+        "tail": 1,
+        "cdf": [
+          1.6800000000000002,
+          1.1,
+          1
+        ],
+        "percentDeveloped": [
+          0.5952380952380952,
+          0.9090909090909091,
+          1
+        ],
+        "linkRatios": [
+          [
+            1.5,
+            1.1
+          ],
+          [
+            1.55
+          ],
+          []
+        ],
+        "incremental": [
+          [
+            100,
+            50,
+            15
+          ],
+          [
+            120,
+            66
+          ],
+          [
+            130
+          ]
+        ],
+        "projected": [
+          [
+            100,
+            150,
+            165
+          ],
+          [
+            120,
+            186,
+            204.60000000000002
+          ],
+          [
+            130,
+            198.54545454545456,
+            218.40000000000003
+          ]
+        ],
+        "origins": [
+          {
+            "origin": 2023,
+            "age": 3,
+            "latest": 165,
+            "cdf": 1,
+            "ultimate": 165,
+            "development": 0
+          },
+          {
+            "origin": 2024,
+            "age": 2,
+            "latest": 186,
+            "cdf": 1.1,
+            "ultimate": 204.60000000000002,
+            "development": 18.600000000000023
+          },
+          {
+            "origin": 2025,
+            "age": 1,
+            "latest": 130,
+            "cdf": 1.6800000000000002,
+            "ultimate": 218.40000000000003,
+            "development": 88.40000000000003
+          }
+        ],
+        "totals": {
+          "latest": 481,
+          "ultimate": 588,
+          "development": 107.00000000000006
+        }
+      },
+      "incurred": {
+        "basis": "INCURRED",
+        "factors": [
+          {
+            "from": 1,
+            "to": 2,
+            "pairs": 2,
+            "volumeWeighted": 1.0857142857142856,
+            "simpleAverage": 1.0838815789473686,
+            "latestDiagonals": null,
+            "min": 1.0625,
+            "max": 1.105263157894737,
+            "estimated": 1.0857142857142856,
+            "selected": 1.0857142857142856,
+            "source": "ESTIMATED"
+          },
+          {
+            "from": 2,
+            "to": 3,
+            "pairs": 1,
+            "volumeWeighted": 0.9882352941176471,
+            "simpleAverage": 0.9882352941176471,
+            "latestDiagonals": null,
+            "min": 0.9882352941176471,
+            "max": 0.9882352941176471,
+            "estimated": 0.9882352941176471,
+            "selected": 0.9882352941176471,
+            "source": "ESTIMATED"
+          }
+        ],
+        "tail": 1,
+        "cdf": [
+          1.0729411764705883,
+          0.9882352941176471,
+          1
+        ],
+        "percentDeveloped": [
+          0.9320175438596491,
+          1.0119047619047619,
+          1
+        ],
+        "linkRatios": [
+          [
+            1.0625,
+            0.9882352941176471
+          ],
+          [
+            1.105263157894737
+          ],
+          []
+        ],
+        "incremental": [
+          [
+            160,
+            10,
+            -2
+          ],
+          [
+            190,
+            20
+          ],
+          [
+            200
+          ]
+        ],
+        "projected": [
+          [
+            160,
+            170,
+            168
+          ],
+          [
+            190,
+            210,
+            207.52941176470588
+          ],
+          [
+            200,
+            217.14285714285714,
+            214.58823529411765
+          ]
+        ],
+        "origins": [
+          {
+            "origin": 2023,
+            "age": 3,
+            "latest": 168,
+            "cdf": 1,
+            "ultimate": 168,
+            "development": 0
+          },
+          {
+            "origin": 2024,
+            "age": 2,
+            "latest": 210,
+            "cdf": 0.9882352941176471,
+            "ultimate": 207.52941176470588,
+            "development": -2.470588235294116
+          },
+          {
+            "origin": 2025,
+            "age": 1,
+            "latest": 200,
+            "cdf": 1.0729411764705883,
+            "ultimate": 214.58823529411765,
+            "development": 14.588235294117652
+          }
+        ],
+        "totals": {
+          "latest": 578,
+          "ultimate": 590.1176470588235,
+          "development": 12.117647058823536
+        }
+      }
+    },
+    "paidVsIncurred": {
+      "origins": [
+        {
+          "origin": 2023,
+          "paidUltimate": 165,
+          "incurredUltimate": 168,
+          "difference": -3,
+          "relativeDifference": -0.017857142857142905
+        },
+        {
+          "origin": 2024,
+          "paidUltimate": 204.60000000000002,
+          "incurredUltimate": 207.52941176470588,
+          "difference": -2.9294117647058613,
+          "relativeDifference": -0.014115646258503256
+        },
+        {
+          "origin": 2025,
+          "paidUltimate": 218.40000000000003,
+          "incurredUltimate": 214.58823529411765,
+          "difference": 3.811764705882382,
+          "relativeDifference": 0.017763157894737036
+        }
+      ],
+      "totals": {
+        "paidUltimate": 588,
+        "incurredUltimate": 590.1176470588235,
+        "difference": -2.117647058823536,
+        "relativeDifference": -0.0035885167464114742
+      }
+    },
+    "reserves": {
+      "origins": [
+        {
+          "origin": 2023,
+          "premium": 200,
+          "paid": 165,
+          "incurred": 168,
+          "caseReserve": 3
+        },
+        {
+          "origin": 2024,
+          "premium": 220,
+          "paid": 186,
+          "incurred": 210,
+          "caseReserve": 24
+        },
+        {
+          "origin": 2025,
+          "premium": 240,
+          "paid": 130,
+          "incurred": 200,
+          "caseReserve": 70
+        }
+      ],
+      "totals": {
+        "premium": 660,
+        "paid": 481,
+        "incurred": 578,
+        "caseReserve": 97
+      }
+    },
+    "methods": [
+      {
+        "method": "CHAIN_LADDER_PAID",
+        "available": true,
+        "origins": [
+          {
+            "origin": 2023,
+            "ultimate": 165,
+            "unpaid": 0,
+            "ibnr": -3
+          },
+          {
+            "origin": 2024,
+            "ultimate": 204.60000000000002,
+            "unpaid": 18.600000000000023,
+            "ibnr": -5.399999999999977
+          },
+          {
+            "origin": 2025,
+            "ultimate": 218.40000000000003,
+            "unpaid": 88.40000000000003,
+            "ibnr": 18.400000000000034
+          }
+        ],
+        "totals": {
+          "ultimate": 588,
+          "unpaid": 107.00000000000006,
+          "ibnr": 10.000000000000057
+        }
+      },
+      {
+        "method": "CHAIN_LADDER_INCURRED",
+        "available": true,
+        "origins": [
+          {
+            "origin": 2023,
+            "ultimate": 168,
+            "unpaid": 3,
+            "ibnr": 0
+          },
+          {
+            "origin": 2024,
+            "ultimate": 207.52941176470588,
+            "unpaid": 21.529411764705884,
+            "ibnr": -2.470588235294116
+          },
+          {
+            "origin": 2025,
+            "ultimate": 214.58823529411765,
+            "unpaid": 84.58823529411765,
+            "ibnr": 14.588235294117652
+          }
+        ],
+        "totals": {
+          "ultimate": 590.1176470588235,
+          "unpaid": 109.11764705882354,
+          "ibnr": 12.117647058823536
+        }
+      },
+      {
+        "method": "EXPECTED_LOSS_RATIO",
+        "available": true,
+        "origins": [
+          {
+            "origin": 2023,
+            "ultimate": 160,
+            "unpaid": -5,
+            "ibnr": -8
+          },
+          {
+            "origin": 2024,
+            "ultimate": 176,
+            "unpaid": -10,
+            "ibnr": -34
+          },
+          {
+            "origin": 2025,
+            "ultimate": 192,
+            "unpaid": 62,
+            "ibnr": -8
+          }
+        ],
+        "totals": {
+          "ultimate": 528,
+          "unpaid": 47,
+          "ibnr": -50
+        }
+      },
+      {
+        "method": "BORNHUETTER_FERGUSON_PAID",
+        "available": true,
+        "origins": [
+          {
+            "origin": 2023,
+            "ultimate": 165,
+            "unpaid": 0,
+            "ibnr": -3
+          },
+          {
+            "origin": 2024,
+            "ultimate": 202,
+            "unpaid": 16,
+            "ibnr": -8
+          },
+          {
+            "origin": 2025,
+            "ultimate": 207.71428571428572,
+            "unpaid": 77.71428571428572,
+            "ibnr": 7.714285714285722
+          }
+        ],
+        "totals": {
+          "ultimate": 574.7142857142858,
+          "unpaid": 93.71428571428572,
+          "ibnr": -3.2857142857142776
+        }
+      },
+      {
+        "method": "BORNHUETTER_FERGUSON_INCURRED",
+        "available": true,
+        "origins": [
+          {
+            "origin": 2023,
+            "ultimate": 168,
+            "unpaid": 3,
+            "ibnr": 0
+          },
+          {
+            "origin": 2024,
+            "ultimate": 207.90476190476193,
+            "unpaid": 21.904761904761926,
+            "ibnr": -2.0952380952380736
+          },
+          {
+            "origin": 2025,
+            "ultimate": 213.05263157894737,
+            "unpaid": 83.05263157894737,
+            "ibnr": 13.05263157894737
+          }
+        ],
+        "totals": {
+          "ultimate": 588.9573934837093,
+          "unpaid": 107.9573934837093,
+          "ibnr": 10.957393483709296
+        }
+      }
+    ],
+    "reconciliation": {
+      "holds": true,
+      "maxDifference": 0
+    },
+    "sensitivity": {
+      "scenarios": [
+        {
+          "id": "base",
+          "label": "Base assumptions",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 107.00000000000006,
+            "CHAIN_LADDER_INCURRED": 109.11764705882354,
+            "EXPECTED_LOSS_RATIO": 47,
+            "BORNHUETTER_FERGUSON_PAID": 93.71428571428572,
+            "BORNHUETTER_FERGUSON_INCURRED": 107.9573934837093
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": 0,
+            "CHAIN_LADDER_INCURRED": 0,
+            "EXPECTED_LOSS_RATIO": 0,
+            "BORNHUETTER_FERGUSON_PAID": 0,
+            "BORNHUETTER_FERGUSON_INCURRED": 0
+          },
+          "note": null
+        },
+        {
+          "id": "simple-average",
+          "label": "Factors: simple average of link ratios",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 106.67500000000001,
+            "CHAIN_LADDER_INCURRED": 108.75541795665637,
+            "EXPECTED_LOSS_RATIO": 47,
+            "BORNHUETTER_FERGUSON_PAID": 93.54396423248883,
+            "BORNHUETTER_FERGUSON_INCURRED": 107.65481609942918
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": -0.3250000000000455,
+            "CHAIN_LADDER_INCURRED": -0.36222910216716286,
+            "EXPECTED_LOSS_RATIO": 0,
+            "BORNHUETTER_FERGUSON_PAID": -0.17032148179688988,
+            "BORNHUETTER_FERGUSON_INCURRED": -0.30257738428011294
+          },
+          "note": null
+        },
+        {
+          "id": "latest-diagonals",
+          "label": "Factors: volume-weighted, latest 2 calendar years",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 107.00000000000006,
+            "CHAIN_LADDER_INCURRED": 109.11764705882354,
+            "EXPECTED_LOSS_RATIO": 47,
+            "BORNHUETTER_FERGUSON_PAID": 93.71428571428572,
+            "BORNHUETTER_FERGUSON_INCURRED": 107.9573934837093
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": 0,
+            "CHAIN_LADDER_INCURRED": 0,
+            "EXPECTED_LOSS_RATIO": 0,
+            "BORNHUETTER_FERGUSON_PAID": 0,
+            "BORNHUETTER_FERGUSON_INCURRED": 0
+          },
+          "note": null
+        },
+        {
+          "id": "tail-up",
+          "label": "Tail factors +0.05",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 136.4000000000001,
+            "CHAIN_LADDER_INCURRED": 138.62352941176474,
+            "EXPECTED_LOSS_RATIO": 47,
+            "BORNHUETTER_FERGUSON_PAID": 114.3945578231293,
+            "BORNHUETTER_FERGUSON_INCURRED": 132.57846998448505
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": 29.400000000000034,
+            "CHAIN_LADDER_INCURRED": 29.5058823529412,
+            "EXPECTED_LOSS_RATIO": 0,
+            "BORNHUETTER_FERGUSON_PAID": 20.68027210884358,
+            "BORNHUETTER_FERGUSON_INCURRED": 24.621076500775757
+          },
+          "note": null
+        },
+        {
+          "id": "loss-ratio-up",
+          "label": "Expected loss ratio +10% (88.0%)",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 107.00000000000006,
+            "CHAIN_LADDER_INCURRED": 109.11764705882354,
+            "EXPECTED_LOSS_RATIO": 99.80000000000007,
+            "BORNHUETTER_FERGUSON_PAID": 103.08571428571432,
+            "BORNHUETTER_FERGUSON_INCURRED": 109.05313283208022
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": 0,
+            "CHAIN_LADDER_INCURRED": 0,
+            "EXPECTED_LOSS_RATIO": 52.80000000000007,
+            "BORNHUETTER_FERGUSON_PAID": 9.371428571428595,
+            "BORNHUETTER_FERGUSON_INCURRED": 1.0957393483709268
+          },
+          "note": null
+        },
+        {
+          "id": "loss-ratio-down",
+          "label": "Expected loss ratio −10% (72.0%)",
+          "unpaid": {
+            "CHAIN_LADDER_PAID": 107.00000000000006,
+            "CHAIN_LADDER_INCURRED": 109.11764705882354,
+            "EXPECTED_LOSS_RATIO": -5.7999999999999545,
+            "BORNHUETTER_FERGUSON_PAID": 84.34285714285716,
+            "BORNHUETTER_FERGUSON_INCURRED": 106.86165413533837
+          },
+          "change": {
+            "CHAIN_LADDER_PAID": 0,
+            "CHAIN_LADDER_INCURRED": 0,
+            "EXPECTED_LOSS_RATIO": -52.799999999999955,
+            "BORNHUETTER_FERGUSON_PAID": -9.371428571428567,
+            "BORNHUETTER_FERGUSON_INCURRED": -1.0957393483709268
+          },
+          "note": null
+        }
+      ],
+      "factors": [
+        {
+          "basis": "PAID",
+          "from": 1,
+          "to": 2,
+          "change": 2.1840000000000828
+        },
+        {
+          "basis": "PAID",
+          "from": 2,
+          "to": 3,
+          "change": 4.230000000000132
+        },
+        {
+          "basis": "INCURRED",
+          "from": 1,
+          "to": 2,
+          "change": 2.1458823529411575
+        },
+        {
+          "basis": "INCURRED",
+          "from": 2,
+          "to": 3,
+          "change": 4.2211764705882615
+        }
+      ]
+    },
+    "cashFlows": {
+      "basis": "CHAIN_LADDER_PAID",
+      "currency": "TND",
+      "valuationYear": 2025,
+      "discounting": "NONE",
+      "periods": [
+        {
+          "calendarYear": 2026,
+          "expectedPayment": 87.14545454545458
+        },
+        {
+          "calendarYear": 2027,
+          "expectedPayment": 19.854545454545473
+        }
+      ],
+      "afterLastDevelopmentYear": 0,
+      "total": 107.00000000000006
+    },
+    "warnings": [
+      {
+        "code": "PAID_SINGLE_PAIR",
+        "message": "The paid factors 2–3 rest on a single accident year; consider selecting them with judgement."
+      },
+      {
+        "code": "PAID_TAIL",
+        "message": "The last paid factor (1.1000) shows development is still under way, but the tail factor is 1: no development is assumed after development year 3."
+      },
+      {
+        "code": "INCURRED_SINGLE_PAIR",
+        "message": "The incurred factors 2–3 rest on a single accident year; consider selecting them with judgement."
+      },
+      {
+        "code": "EXPECTED_LOSS_RATIO_NEGATIVE_UNPAID",
+        "message": "Expected loss ratio gives an ultimate below the amount already paid for 2023, 2024."
+      }
+    ]
+  }
+}

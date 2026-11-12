@@ -160,13 +160,13 @@ All preference fields are optional, and only real JSON booleans are accepted for
   "role": "INVESTOR",
   "experienceLevel": "BEGINNER",
   "experienceLevelNotice": "Experience level tailors learning content only. It is not an investment suitability assessment or a trading certification.",
-  "capabilities": { "trading": false, "portfolio": false, "learning": false, "aiAnalysis": false, "stressTesting": false, "actuarial": false, "admin": false },
+  "capabilities": { "trading": true, "portfolio": true, "learning": true, "aiAnalysis": false, "stressTesting": false, "actuarial": true, "admin": false },
   "requiredActions": [],
-  "modules": [{ "id": "portfolio", "label": "Virtual portfolio", "permitted": true, "available": false }]
+  "modules": [{ "id": "portfolio", "label": "Virtual portfolio", "permitted": true, "available": true }, { "id": "ai", "label": "AI analysis", "permitted": true, "available": false }]
 }
 ```
 
-- Every business module reports `available: false` because none is implemented yet.
+- A capability is `true` only when its module is both permitted and available (implemented). As of 9 Nov 2026, AI analysis and bank stress testing are not implemented and report `available: false`.
 - `requiredActions` contains `ENROLL_MFA_FOR_ADMIN` when admin MFA is required but not yet enrolled.
 
 ## `errorCode` values

@@ -1,0 +1,45 @@
+{
+  "email": "actuary-mwct9acs@spring-actuarial-journey.test",
+  "results": [
+    {
+      "name": "A1. actuarial overview shows the reference portfolio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A2. pricing studio shows reference gross premium / expected claims",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A3. scenario name field available",
+      "ok": true,
+      "detail": "act-scenario-name"
+    },
+    {
+      "name": "A4. scenario saved (listed or success)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A5. Monte Carlo seed field set",
+      "ok": true,
+      "detail": "mc-seed=20261109"
+    },
+    {
+      "name": "A6. Monte Carlo results rendered from Spring",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A7. reserving analysis shows method results",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A8. Spring persisted the pricing scenario",
+      "ok": true,
+      "detail": "[\"Journey mwct9acs\"]"
+    }
+  ]
+}

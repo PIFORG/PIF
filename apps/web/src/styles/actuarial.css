@@ -1,0 +1,696 @@
+/* apps/web/src/components/actuarial/actuarial.module.css with an ac- prefix. Uses the workspace tokens only; no new design system. */
+
+/* ---------- Research lab shell ---------- */
+
+.ac-labShell {
+  position: relative;
+}
+
+.ac-labShell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(820px 420px at 85% -8%, color-mix(in srgb, var(--mtr-brand) 12%, transparent), transparent 68%),
+    radial-gradient(620px 360px at 4% 20%, color-mix(in srgb, var(--mtr-cyan) 8%, transparent), transparent 70%);
+}
+
+.ac-researchHero {
+  height: 6px;
+  margin: 0 0 var(--space-4);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--mtr-brand), var(--mtr-cyan), var(--mtr-brand));
+  opacity: 0.85;
+}
+
+.ac-labRule {
+  border: 0;
+  height: 1px;
+  margin: 0 0 var(--space-4);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--mtr-brand) 45%, var(--mtr-border)), transparent);
+}
+
+.ac-researchDesk {
+  align-items: stretch;
+}
+
+.ac-specColumn .ws-panel {
+  border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mtr-brand) 4%, var(--mtr-surface)), var(--mtr-surface));
+}
+
+.ac-specColumn .ws-panelHead {
+  border-bottom-color: color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-border));
+}
+
+.ac-vizColumn .ws-panel {
+  border-color: color-mix(in srgb, var(--mtr-cyan) 18%, var(--mtr-border));
+}
+
+.ac-researchKpis .ws-kpi {
+  border-color: color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--mtr-brand) 6%, var(--mtr-surface)), var(--mtr-surface));
+}
+
+.ac-researchPods .ac-workspace {
+  border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--mtr-brand) 5%, var(--mtr-surface)), var(--mtr-surface));
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+
+.ac-researchPods .ac-workspace[data-status='AVAILABLE'] {
+  border-left: 3px solid var(--mtr-brand);
+}
+
+.ac-pricingShell .ac-form fieldset legend,
+.ac-monteShell .ac-form fieldset legend,
+.ac-reserveShell .ac-form fieldset legend {
+  color: var(--mtr-brand-text);
+}
+
+.ac-form .ac-fieldset {
+  padding-bottom: var(--space-4);
+  border-bottom-color: color-mix(in srgb, var(--mtr-brand) 12%, var(--mtr-border));
+}
+
+/* ---------- Workspace tabs ---------- */
+
+.ac-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.ac-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a.ac-tab:hover {
+  color: var(--mtr-text);
+  border-color: var(--mtr-border-strong);
+}
+
+.ac-tab[aria-current='page'] {
+  color: var(--mtr-brand-text);
+  background: var(--mtr-brand-soft);
+  border-color: color-mix(in srgb, var(--mtr-brand) 40%, var(--mtr-border));
+  box-shadow: inset 0 -2px 0 var(--mtr-brand);
+}
+
+.ac-tab[aria-disabled='true'] {
+  color: var(--mtr-text-3);
+  background: transparent;
+  border-style: dashed;
+}
+
+.ac-tabNote {
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+/* ---------- Provenance ---------- */
+
+.ac-provenance {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+}
+
+.ac-provenance strong {
+  color: var(--mtr-text);
+}
+
+/* ---------- Layout ---------- */
+
+.ac-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.ac-studio {
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.ac-formColumn {
+  min-width: 0;
+  position: sticky;
+  top: var(--space-4);
+}
+
+.ac-results {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  transition: opacity var(--dur-base) var(--ease);
+}
+
+.ac-results[data-busy='true'] {
+  opacity: 0.6;
+}
+
+.ac-twoUp {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.ac-stack {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- Assumptions form ---------- */
+
+.ac-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ac-fieldset {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 var(--space-4);
+  border: 0;
+  border-bottom: 1px solid var(--mtr-border);
+  min-width: 0;
+}
+
+.ac-fieldset:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ac-fieldset legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.ac-fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.ac-fieldRow .field,
+.ac-fieldset .field {
+  margin: 0;
+  min-width: 0;
+}
+
+.ac-segmented {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--mtr-sunken);
+  border: 1px solid var(--mtr-border);
+}
+
+.ac-segmented[data-count='3'] {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.ac-segmented button {
+  min-height: 2.25rem;
+  min-width: 0;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--mtr-text-2);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ac-segmented button[aria-pressed='true'] {
+  background: var(--mtr-elevated);
+  color: var(--mtr-text);
+  box-shadow: inset 0 0 0 1px var(--mtr-border-strong);
+}
+
+.ac-segmented button:focus-visible {
+  outline: 2px solid var(--mtr-brand);
+  outline-offset: 1px;
+}
+
+.ac-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.ac-toolbar .field {
+  margin: 0;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.ac-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Results ---------- */
+
+.ac-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+
+.ac-stats div {
+  min-width: 0;
+}
+
+.ac-stats dt {
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+.ac-stats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ac-hint {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--mtr-text-3);
+}
+
+.ac-rows tbody th {
+  background: transparent;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--mtr-text);
+  white-space: normal;
+  min-width: 11rem;
+}
+
+.ac-rows table.data-table th,
+.ac-rows table.data-table td {
+  padding: 0.5rem 0.7rem;
+}
+
+.ac-rows td .ac-hint {
+  white-space: normal;
+}
+
+.ac-rows tr[data-total='true'] th,
+.ac-rows tr[data-total='true'] td {
+  font-weight: 700;
+  border-top: 1px solid var(--mtr-border-strong);
+}
+
+.ac-pos {
+  color: var(--mtr-pos);
+}
+
+.ac-neg {
+  color: var(--mtr-neg);
+}
+
+.ac-warnings {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.ac-formula {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--mtr-sunken);
+  border: 1px solid var(--mtr-border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--mtr-text-2);
+}
+
+.ac-explain summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.ac-explain[open] summary {
+  margin-bottom: var(--space-3);
+}
+
+.ac-note {
+  margin: var(--space-3) 0 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Overview ---------- */
+
+.ac-workspaces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ac-workspace {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  height: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.ac-workspace > :last-child {
+  justify-self: start;
+}
+
+.ac-workspace[data-status='PLANNED'] {
+  border-style: dashed;
+}
+
+.ac-workspace h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.ac-workspace p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.ac-legendList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.ac-legendList strong {
+  color: var(--mtr-text);
+}
+
+.ac-saveForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.ac-saveForm .field {
+  margin: 0;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.ac-rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* ---------- Monte Carlo lab ---------- */
+
+.ac-seedField {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  justify-items: start;
+  min-width: 0;
+}
+
+.ac-seedField > .field {
+  width: 100%;
+}
+
+.ac-runMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.ac-runMeta strong {
+  color: var(--mtr-text);
+}
+
+.ac-rows tr[aria-current='true'] th,
+.ac-rows tr[aria-current='true'] td {
+  background: var(--mtr-elevated);
+}
+
+/* ---------- Reserving studio ---------- */
+
+.ac-segmented[data-count='4'] {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.ac-toolbar > .ac-segmented {
+  flex: 0 1 auto;
+}
+
+.ac-toolbar > .ac-segmented button {
+  padding: 0 var(--space-3);
+}
+
+.ac-triangleInput {
+  min-height: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  resize: vertical;
+}
+
+.ac-factorInput {
+  width: 6.5rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.5rem;
+  text-align: right;
+}
+
+.ac-compact table th,
+.ac-compact table td {
+  padding: 0.5rem 0.6rem;
+}
+
+.ac-compact tbody th {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.ac-triangle table th,
+.ac-triangle table td {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.ac-triangle thead th:first-child {
+  white-space: normal;
+  width: 4.5rem;
+}
+
+.ac-triangle tbody th,
+.ac-triangle tfoot th,
+.ac-triangle thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--mtr-surface);
+  color: var(--mtr-text);
+  font-weight: 600;
+}
+
+.ac-triangle thead th:first-child {
+  background: var(--mtr-elevated);
+  color: var(--mtr-text-3);
+}
+
+.ac-triangle td[data-kind='latest'] {
+  font-weight: 700;
+  color: var(--mtr-text);
+}
+
+.ac-triangle td[data-kind='projected'] {
+  background: var(--mtr-sunken);
+  color: var(--mtr-text-3);
+  font-style: italic;
+}
+
+.ac-triangle td[data-kind='missing'] {
+  background: var(--mtr-amber-soft);
+  color: var(--mtr-amber);
+}
+
+.ac-triangle tfoot td,
+.ac-triangle tfoot th {
+  font-weight: 700;
+  border-top: 1px solid var(--mtr-border-strong);
+}
+
+.ac-subhead {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--mtr-text);
+}
+
+@media (max-width: 1280px) {
+  .ac-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .ac-studio {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ac-formColumn {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .ac-twoUp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .ac-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .ac-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ac-fieldRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ac-rows tbody th {
+    min-width: 8rem;
+  }
+
+  .ac-toolbar > .ac-segmented {
+    flex: 1 1 100%;
+  }
+
+  .ac-segmented[data-count='4'] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-results {
+    transition: none;
+  }
+}
+
+/* ---------- Column chart (the column and marker rules of apps/web/src/components/charts/Charts.module.css) ---------- */
+
+.ch-column {
+  fill: var(--mtr-brand);
+  opacity: 0.72;
+}
+
+.ch-columnSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--mtr-brand);
+  opacity: 0.72;
+}
+
+.ch-marker {
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  stroke: var(--mtr-brand);
+}
+
+.ch-marker[data-tone='cyan'] {
+  stroke: var(--mtr-cyan);
+}
+
+.ch-marker[data-tone='amber'] {
+  stroke: var(--mtr-amber);
+}
+
+.ch-marker[data-tone='neg'] {
+  stroke: var(--mtr-neg);
+}

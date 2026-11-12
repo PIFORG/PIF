@@ -1,0 +1,75 @@
+<div class="page-shell ac-labShell ac-pricingShell">
+  <mtr-page-heading
+    [eyebrow]="copy.eyebrow"
+    [title]="copy.pricingTitle"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="copy.pricingDescription"
+  />
+  <nav mtr-actuarial-tabs></nav>
+
+  @if (loadError()) {
+    <div mtr-empty-state tone="error" icon="alert" heading="The pricing studio could not load" [description]="loadError()"></div>
+  } @else {
+    <p mtr-estimate-note></p>
+    @if (result(); as r) {
+      <div mtr-premium-kpis [result]="r"></div>
+    }
+    <hr class="ac-labRule" aria-hidden="true" />
+    <div class="ac-studio ac-researchDesk">
+      <div class="ac-formColumn ac-specColumn">
+        <section mtr-panel panelId="assumptions" heading="Hypothèses du modèle" description="Chaque changement est recalculé côté serveur.">
+          @if (form() && presets()) {
+            <form
+              mtr-assumptions-form
+              [form]="form()!"
+              [errors]="validation()?.errors ?? {}"
+              [presets]="presets()!"
+              [presetId]="presetId()"
+              (preset)="applyPreset($event)"
+              (changed)="update($event)"
+            >
+              @if (hasErrors()) {
+                <svg mtrIcon name="alert" [size]="14" /> Fix the highlighted fields to recalculate.
+              } @else if (busy()) {
+                <svg mtrIcon name="refresh" [size]="14" /> Calculating…
+              } @else {
+                <svg mtrIcon name="check" [size]="14" /> Results are up to date.
+              }
+            </form>
+          } @else {
+            <div mtr-panel-skeleton [rows]="8"></div>
+          }
+        </section>
+      </div>
+      <div class="ac-results ac-vizColumn" [attr.data-busy]="busy() ? 'true' : null" [attr.aria-busy]="busy()">
+        @if (error()) {
+          <div class="form-error-banner" role="alert">{{ error() }}</div>
+        }
+        @if (result()?.warnings?.length) {
+          <div class="form-error-banner" role="status">
+            <ul class="ac-warnings">
+              @for (w of result()!.warnings; track w) {
+                <li>{{ w }}</li>
+              }
+            </ul>
+          </div>
+        }
+        @if (result(); as r) {
+          <mtr-premium-build-up [result]="r" />
+          <mtr-loss-distribution-panel [result]="r" />
+          <div class="ac-twoUp">
+            <mtr-frequency-panel [result]="r" />
+            <mtr-severity-panel [result]="r" />
+          </div>
+          <mtr-pricing-sensitivity-panel [result]="r" />
+          <mtr-scenarios-panel [form]="form()" (loaded)="loadScenario($event)" />
+          <mtr-pricing-formula-panel />
+        } @else {
+          <section mtr-panel heading="Results">
+            <div mtr-panel-skeleton [rows]="6"></div>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</div>

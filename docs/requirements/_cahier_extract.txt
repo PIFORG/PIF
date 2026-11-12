@@ -1,0 +1,253 @@
+ 
+ 
+Élaboré par : Equipe PIF 
+ 
+Année Universitaire : 2026-2027 
+N.B: Ce document est susceptible d'être ajusté et d'accueillir de nouvelles idées et fonctionnalités 
+que vous pourriez proposer, en vue d'une éventuelle expansion de son contenu. 
+ 
+ 
+ 
+Simulateur de Salle de Marché 
+ 
+ 
+1. Introduction 
+Votre client, un expert financier, souhaite développer un simulateur de salle de marché à l'intention 
+de ses collaborateurs et de ses clients. Ce simulateur doit permettre aux utilisateurs, qu'ils soient de 
+nouveaux traders ou des traders professionnels, de comprendre et de pratiquer les opérations et les 
+mécanismes de trading et d'investissement sur les marchés financiers.  
+Le système devra proposer un environnement interactif permettant de simuler des opérations 
+financières, d'analyser les marchés, de gérer des portefeuilles virtuels et d'évaluer les risques 
+associés aux différentes décisions d'investissement. Une composante d'intelligence artificielle devra 
+également être intégrée afin d'améliorer les capacités d'analyse, de prédiction et d'aide à la décision. 
+ 
+2. Objectifs du projet 
+Le projet a pour objectifs principaux : 
+• Créer une expérience interactive et pédagogique pour les nouveaux utilisateurs afin qu’ils 
+apprennent le trading et l’investissement sur les marchés financiers. 
+• Permettre aux utilisateurs de s’exercer à la négociation d’actifs financiers, tels que les actions, 
+obligations, matières premières et devises. 
+• Fournir des informations en temps réel sur les marchés financiers, y compris les cotations, les 
+graphiques et les actualités. 
+• Permettre aux utilisateurs de construire et de gérer un portefeuille virtuel. 
+• Mettre à disposition des outils d’analyse technique et fondamentale. 
+• Intégrer des mécanismes d’évaluation et de gestion des risques avant et après les transactions. 
+• Exploiter l’intelligence artificielle pour réaliser des analyses, des prédictions et des 
+recommandations. 
+• Développer un module d’AI Stress Testing permettant d’évaluer la résilience des établissements 
+bancaires face à différents scénarios économiques et financiers défavorables. 
+• Appliquer le Stress Testing aux banques conventionnelles et non conventionnelles. 
+• Intégrer des techniques d’Explainable AI (XAI) afin de rendre les résultats des modèles 
+d’intelligence artificielle interprétables et compréhensibles. 
+ 
+3. Caractéristiques du simulateur 
+ Le simulateur de salle de marché devra offrir les fonctionnalités suivantes : 
+3.1. Interface Utilisateur 
+• Une interface utilisateur conviviale et intuitive. 
+• Un tableau de bord personnalisé pour chaque utilisateur. 
+
+• Un suivi du portefeuille virtuel de chaque utilisateur. 
+• Un affichage des positions ouvertes et fermées. 
+• Un affichage des performances du portefeuille. 
+• Un accès à des informations économiques et financières en temps réel. 
+• Une visualisation graphique des données financières. 
+• Un affichage des indicateurs de performance et de risque. 
+• Un espace permettant de consulter les résultats des simulations et des analyses effectuées par les 
+modèles d’IA. 
+ 
+3.2. Trading et Investissement 
+Le simulateur devra permettre aux utilisateurs de réaliser des opérations virtuelles sur différents marchés 
+financiers. 
+Opérations 
+• La possibilité pour les utilisateurs de passer des ordres d’achat et de vente sur une variété d’actifs 
+financiers. 
+• La simulation de l’exécution des ordres. 
+• Le suivi des positions et des transactions. 
+• La gestion d’un portefeuille virtuel. 
+• La consultation de l’historique des transactions. 
+Gestion du risque 
+• Développer une logique pour l’évaluation du risque avant chaque transaction. 
+• Calculer différents indicateurs permettant d’évaluer le risque associé à une position ou à un 
+portefeuille. 
+• Mettre en place des mécanismes de gestion de portefeuille (exemple: Stop-loss ,Take-profit, 
+Gestion de l’exposition ,Diversification du portefeuille,etc..) 
+Analyse financière 
+• Des outils d’analyse technique et fondamentale pour aider les utilisateurs dans leurs décisions 
+d’investissement. 
+• L’accès à des données historiques pour effectuer des analyses rétrospectives, notamment le 
+backtesting. 
+• La possibilité de tester différentes stratégies d’investissement. 
+• La comparaison des performances de plusieurs stratégies. 
+ 
+3.3. Formation et Apprentissage 
+Le simulateur devra également constituer un outil pédagogique permettant aux utilisateurs de se 
+familiariser avec les marchés financiers. 
+Il devra intégrer : 
+• Des modules de formation interactifs sur les concepts de trading et d’investissement. 
+• Des explications sur les différents types d’actifs financiers. 
+• Des exercices pratiques. 
+• Des simulateurs de stratégies de trading avancées. 
+• Des scénarios de marché permettant de mettre les utilisateurs dans différentes situations. 
+• Des concours et des défis pour encourager l’engagement des utilisateurs. 
+• Des indicateurs permettant de suivre la progression des utilisateurs. 
+• Des évaluations et des quiz permettant de vérifier les connaissances acquises. 
+3.4. Intelligence Artificielle (IA) 
+Le simulateur de salle de marché devra intégrer des fonctionnalités basées sur l’intelligence artificielle, 
+permettant aux utilisateurs de bénéficier d’outils d’analyse avancée, d’automatisation et de prédiction. 
+3.4.1. Prédiction et analyse des marchés 
+• L’IA pourra être utilisée pour proposer des prédictions sur les tendances du marché en se basant 
+sur des données en temps réel et historiques. 
+• Les utilisateurs pourront recevoir des recommandations automatiques pour optimiser leurs 
+portefeuilles virtuels grâce à des analyses basées sur des modèles d’apprentissage automatique. 
+• L’IA permettra d’identifier des tendances et des anomalies dans les données financières. 
+• Des modèles de Machine Learning pourront être utilisés pour analyser les performances et les 
+risques des différents actifs. 
+3.4.2. Agent intelligent de trading 
+• Développer un agent utilisant des algorithmes avancés d’intelligence artificielle permettant de 
+prendre des décisions d’achat ou de vente afin d’optimiser les rendements. 
+• L’agent pourra analyser les données historiques et les informations disponibles sur le marché. 
+• L’agent pourra proposer des stratégies d’investissement adaptées aux conditions du marché. 
+• Les décisions de l’agent devront pouvoir être analysées et évaluées par l’utilisateur. 
+3.4.3. Analyse des sentiments 
+• L’IA permettra d’automatiser l’analyse des sentiments du marché à partir de sources d’actualités 
+financières. 
+• Cette analyse pourra permettre d’identifier les tendances émergentes. 
+• Les informations issues de l’analyse des sentiments pourront être intégrées aux modèles de 
+prédiction et d’aide à la décision. 
+3.5. AI Stress Testing des établissements bancaires 
+Une fonctionnalité spécifique devra être développée afin d’utiliser l’intelligence artificielle pour réaliser des 
+Stress Tests sur les établissements bancaires. 
+L’objectif est d’évaluer la capacité de résistance d’une banque face à des situations économiques et 
+financières défavorables. 
+3.5.1. Génération de scénarios de stress 
+Le système devra permettre de définir et/ou de générer différents scénarios économiques et financiers 
+défavorables, par exemple : 
+• Une augmentation importante des taux d’intérêt ; 
+• Une baisse importante des marchés financiers ; 
+• Une augmentation du chômage ; 
+• Une récession économique ; 
+• Une augmentation du taux de défaut des emprunteurs ; 
+• Une dégradation de la qualité des actifs ; 
+• Une baisse importante des revenus ; 
+• Des chocs simultanés sur plusieurs facteurs économiques. 
+L’IA pourra être utilisée afin d’identifier les scénarios pertinents et d’analyser leurs conséquences 
+potentielles. 
+3.5.2. Application aux banques conventionnelles et non conventionnelles 
+Le module devra prendre en considération deux catégories d’établissements (Banques conventionnelles/ 
+Banques non conventionnelles)  
+L’objectif sera notamment de permettre une analyse comparative de leur comportement face aux 
+différents scénarios de stress. 
+Le système pourra prendre en considération les spécificités des modèles bancaires étudiés afin d’évaluer 
+l’impact des différents chocs sur leurs indicateurs financiers et de risque. 
+3.5.3. Modèles d’IA pour le Stress Testing 
+Des modèles de Machine Learning et/ou de Deep Learning pourront être utilisés pour : 
+• Prédire l’évolution de certains indicateurs financiers ; 
+• Identifier les facteurs ayant le plus d’impact sur la situation financière de la banque ; 
+• Estimer les pertes potentielles ; 
+• Détecter les situations de vulnérabilité ; 
+• Évaluer la résilience des établissements bancaires ; 
+• Comparer différents scénarios de stress. 
+Les étudiants pourront comparer plusieurs modèles afin d’identifier les approches les plus performantes. 
+3.5.4. Analyse des résultats 
+Le système devra présenter les résultats du Stress Testing sous forme de : 
+• Tableaux de bord ; 
+• Graphiques ; 
+• Indicateurs de risque ; 
+• Évolution des performances avant et après le scénario de stress; 
+• Comparaison entre différents scénarios ; 
+• Comparaison entre banques conventionnelles et non conventionnelles. 
+L’utilisateur devra pouvoir visualiser clairement l’impact de chaque scénario sur les indicateurs étudiés. 
+ 
+3.6. Explainable AI (XAI) 
+Afin d’améliorer la transparence des modèles d’intelligence artificielle, le projet devra intégrer un volet 
+Explainable AI (XAI). 
+L’objectif est de permettre aux utilisateurs de comprendre pourquoi un modèle d’IA produit une 
+prédiction ou une évaluation de risque donnée. 
+3.6.1. Interprétation des prédictions 
+Le système devra permettre d’identifier : 
+• Les variables ayant le plus contribué à une prédiction ; 
+• Le sens de leur contribution; 
+• Les facteurs expliquant une augmentation ou une diminution du risque ; 
+• Les principales caractéristiques ayant influencé la décision du modèle. 
+3.6.2. Explication des Stress Tests 
+Les techniques XAI devront également être utilisées pour expliquer les résultats du Stress Testing. 
+Par exemple, le système pourra permettre de répondre à des questions telles que : 
+• Quels facteurs ont le plus contribué à l’augmentation du risque ? 
+• Pourquoi une banque est-elle plus vulnérable à un scénario donné ? 
+• Quels indicateurs ont le plus influencé la prédiction des pertes ? 
+• Pourquoi deux banques réagissent-elles différemment au même scénario ? 
+• Quels facteurs expliquent la différence entre une banque conventionnelle et une banque non 
+conventionnelle ? 
+3.6.3. Visualisation des explications 
+Les explications produites par les modèles devront être présentées de manière compréhensible à travers : 
+• Des graphiques d’importance des variables ; 
+• Des visualisations des contributions des variables ; 
+• Des tableaux explicatifs ; 
+• Des comparaisons entre scénarios ; 
+• Des explications locales et/ou globales des modèles. 
+3.7. Module d’Actuariat 
+Le simulateur de salle de marché devra intégrer un module dédié à l’actuariat, permettant aux utilisateurs 
+de modéliser des produits d’assurance et de simuler les différents aspects liés à la gestion des risques. 
+• Les utilisateurs devront créer des modèles prédictifs pour estimer les primes d’assurance en 
+fonction des caractéristiques des assurés et des risques sous-jacents. 
+• Le module permettra de prédire les marges de prime, c’est-à-dire la différence entre les primes 
+collectées et les sinistres attendus, afin d’évaluer la rentabilité des produits d’assurance. 
+• Les utilisateurs pourront modéliser les conditions de survenance de sinistres, afin de prédire la 
+probabilité qu’un sinistre survienne selon les paramètres du contrat d’assurance. 
+• Le module intégrera également des modèles pour estimer le montant des indemnisations, également 
+appelé provisionnement des sinistres, permettant de simuler l’argent qui devra être remboursé aux 
+assurés en cas de sinistre. 
+ 
+4. Sécurité et Confidentialité 
+La sécurité des données des utilisateurs est une priorité. 
+Le simulateur devra inclure : 
+• Un système d’authentification sécurisé pour les comptes utilisateurs. 
+• Une gestion des rôles et des autorisations. 
+• Le chiffrement des données sensibles pour garantir la confidentialité des informations. 
+• Une gestion sécurisée des données financières. 
+• La protection des données utilisateurs. 
+• La sécurisation des accès aux différentes fonctionnalités du simulateur. 
+• La traçabilité des opérations importantes effectuées sur la plateforme. 
+ 
+5. Administration et Gestion 
+Le simulateur doit permettre à l’administrateur de gérer efficacement : 
+• Les comptes utilisateurs et leurs autorisations. 
+• Les données du marché et les actualités. 
+• Les modules de formation et les contenus pédagogiques. 
+• Les données utilisées par les modèles d’intelligence artificielle. 
+• Les scénarios de Stress Testing. 
+• Les paramètres des simulations. 
+• Les modèles d’IA utilisés par la plateforme. 
+• Les résultats des simulations. 
+• Les utilisateurs et leurs performances. 
+• Les différents scénarios de marché. 
+L’administrateur devra également pouvoir consulter les statistiques globales de la plateforme et 
+superviser son fonctionnement. 
+ 
+Pour vous familiariser avec les salles de marchés et les simulateurs correspondants, nous vous 
+recommandons de vous inscrire à l'un des simulateurs en ligne suivants : 
+ 
+En français : 
+http://www.goldenboys.fr/ 
+http://www.boursematch.com/ 
+http://fun-trades.com/ 
+http://www.traderon-line.com/ 
+http://www.nettrader.fr/ 
+http://www.jeudebourse.com/executable/bourse.pl 
+http://www.bourse-academie.com/ 
+En anglais : http://www.stocktrak.com/ 
+http://www.virtualtrader.co.uk/ 
+http://www.vivatrader.com/ 
+http://www.marketwatch.com/game/ 
+http://www.howthemarketworks.com/ 
+http://www.optionshouse.com/virtual/ 
+http://www.weseed.com/ 
+http://www.nobletrading.com/virtual-stock-trading.php 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,65 @@
+{
+  "email": "learner-mwct914k@spring-learning-journey.test",
+  "results": [
+    {
+      "name": "L1. Learning Hub lists 10 playable missions",
+      "ok": true,
+      "detail": "{\"missions\":10,\"links\":10,\"planned\":0}"
+    },
+    {
+      "name": "L2. briefing shows assessment weights",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L3. mission session started on Angular",
+      "ok": true,
+      "detail": "/learn/sessions/a8a6072d-0911-4cbb-9ba4-8136b2b270a3"
+    },
+    {
+      "name": "L4. ticket refuses an order without a reason",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L5. two market buys executed by Spring",
+      "ok": true,
+      "detail": "filled=2"
+    },
+    {
+      "name": "L6. positions reflect the fills",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L7. rule-based mentor answers",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L8. mission completed by Spring",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L9. assessment shows four components",
+      "ok": true,
+      "detail": "components=4"
+    },
+    {
+      "name": "L10. Time Machine HOLD rewind compared side by side in Angular",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L11. FinStories feed renders without a placeholder",
+      "ok": true,
+      "detail": "{\"cards\":4,\"empty\":false,\"title\":\"FinStories\",\"feed\":true}"
+    },
+    {
+      "name": "L12. Spring learning profile has an assessed attempt",
+      "ok": true,
+      "detail": "{\"passed\":0,\"evidenced\":5,\"stats\":{\"missionsPassed\":0,\"missionsAttempted\":1,\"assessedSessions\":1,\"implementedMissions\":6,\"playableMissions\":10}}"
+    }
+  ]
+}

@@ -48,3 +48,16 @@ docker-data/
 
 # Local mail previews (contain live single-use links)
 .mail-preview/
+
+# Local Java toolchain and Maven output
+.tools/
+apps/api/target/
+apps/api/target-*/
+*.jar
+!**/maven-wrapper.jar
+
+# Angular local cache
+apps/web/.angular/
+
+# Test harness install (generated Prisma client)
+tools/db-harness/node_modules/

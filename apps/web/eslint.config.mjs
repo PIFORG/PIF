@@ -1,38 +1,41 @@
 // @ts-check
-// Built from the individual plugins rather than `eslint-config-next`, whose babel parser
-// is resolved from `next` and fails when `next` is not hoisted next to the config package.
-import nextPlugin from '@next/eslint-plugin-next';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
+import eslint from '@eslint/js';
+import angular from 'angular-eslint';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-export default [
-  { ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts', 'coverage/**', '*.config.*'] },
-  ...tsPlugin.configs['flat/recommended'],
-  react.configs.flat.recommended,
-  react.configs.flat['jsx-runtime'],
-  jsxA11y.flatConfigs.recommended,
-  nextPlugin.flatConfig.coreWebVitals,
+export default defineConfig([
+  { ignores: ['dist/**', '.angular/**', 'node_modules/**', 'coverage/**'] },
   {
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.browser, ...globals.node },
-    },
-    plugins: { 'react-hooks': reactHooks },
-    settings: { react: { version: 'detect' }, next: { rootDir: import.meta.dirname } },
+    files: ['src/**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommended,
+      tseslint.configs.stylistic,
+      angular.configs.tsRecommended,
+    ],
+    processor: angular.processInlineTemplates,
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react/prop-types': 'off',
-      '@typescript-eslint/no-unused-vars': [
+      // Attribute selectors (e.g. section[mtr-panel]) keep the styled element itself as the host, so CSS ported from
+      // apps/web that relies on direct children (`.module > :last-child`, grid items) still matches.
+      '@angular-eslint/component-selector': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        { type: ['element', 'attribute'], prefix: 'mtr', style: 'kebab-case' },
       ],
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      '@angular-eslint/directive-selector': [
+        'error',
+        { type: 'attribute', prefix: 'mtr', style: 'camelCase' },
+      ],
     },
   },
-];
+  {
+    files: ['src/**/*.html'],
+    extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
+  },
+  {
+    files: ['server/**/*.mjs'],
+    extends: [eslint.configs.recommended],
+    languageOptions: { globals: globals.node },
+  },
+]);

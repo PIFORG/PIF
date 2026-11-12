@@ -1,0 +1,96 @@
+<div class="page-shell st-cinemaShell">
+  <mtr-page-heading
+    [eyebrow]="copy.eyebrow"
+    [title]="copy.storiesTitle"
+    status="LIVE_INTEGRATED"
+    [description]="copy.storiesDescription"
+  >
+    <a mtrHeadingActions routerLink="/learn" class="btn btn-secondary">{{ copy.backToHub }}</a>
+  </mtr-page-heading>
+
+  @if (error()) {
+    <div mtr-empty-state tone="error" heading="FinStories unavailable" [description]="error()">
+      <button mtrEmptyAction type="button" class="btn btn-secondary" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (stories(); as list) {
+    @if (list.length === 0) {
+      <div mtr-empty-state heading="No stories yet" description="New stories will appear here."></div>
+    } @else {
+      @let weak = weakest();
+      <div class="st-cinemaFrame" aria-hidden="true">
+        <span class="st-cinemaVignette"></span>
+        <span class="st-cinemaGrain"></span>
+      </div>
+      <div class="st-feed" #feed aria-label="FinStories feed">
+        <div class="st-feedRail" aria-hidden="true">
+          @for (story of list; track story.slug; let index = $index) {
+            <button
+              type="button"
+              class="st-railDot"
+              [attr.data-active]="index === activeIndex() ? 'true' : null"
+              [attr.aria-label]="'Épisode ' + (index + 1)"
+              (click)="goTo(index)"
+            ></button>
+          }
+        </div>
+        @for (story of list; track story.slug; let index = $index) {
+          @let resumesAt = resumeAt(story);
+          <section
+            class="st-item"
+            #item
+            [attr.data-index]="index"
+            [attr.data-active]="index === activeIndex() ? 'true' : null"
+            [attr.aria-label]="index + 1 + ' of ' + list.length + ': ' + story.title"
+          >
+            <div
+              mtr-story-player
+              [summary]="story"
+              [active]="index === activeIndex()"
+              [preload]="index === activeIndex() + 1"
+              [muted]="muted()"
+              [captions]="captions()"
+              [reducedMotion]="reducedMotion()"
+              [speechAvailable]="speechAvailable()"
+              [hasNext]="index < list.length - 1"
+              (toggleMute)="toggleMute()"
+              (toggleCaptions)="toggleCaptions()"
+              (next)="goTo(index + 1)"
+              (progressSaved)="onProgress($event)"
+            ></div>
+            <aside class="st-side st-episodeCard">
+              <div style="display: flex; flex-wrap: wrap; gap: var(--space-2)">
+                <span class="badge badge-muted">{{ characterName[story.character] }}</span>
+                <span class="badge badge-muted">{{ levelLabel[story.level] }}</span>
+                @if (story.recommended) {
+                  <span class="badge badge-info">For your weakest skill</span>
+                }
+                @if (story.progress.completed) {
+                  <span class="badge badge-active">Watched</span>
+                }
+                @if (story.progress.watchedEarlierVersion) {
+                  <span class="badge badge-muted">Watched an earlier version</span>
+                }
+                @if (story.progress.updatedSinceLastWatch) {
+                  <span class="badge badge-info">Updated since you watched</span>
+                }
+              </div>
+              <h2>{{ story.title }}</h2>
+              <p>{{ story.summary }}</p>
+              <p>Skill: {{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}{{ resumesAt > 0 ? ' · resumes at ' + clock(resumesAt) : '' }}</p>
+              @if (story.relatedMissionSlug) {
+                <a [routerLink]="['/learn/missions', story.relatedMissionSlug]" class="btn btn-secondary btn-sm" style="justify-self: start">Practise it in MarketQuest</a>
+              }
+              <div style="display: flex; gap: var(--space-2)">
+                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index - 1)" [disabled]="index === 0">Previous story</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index + 1)" [disabled]="index === list.length - 1">Next story</button>
+              </div>
+              <p class="st-transcript">Motion graphics rendered in your browser from the story script; no video file is involved. Narration, when switched on, uses your browser's text-to-speech. These are fictional, illustrative scenarios.{{ weak && index === 0 ? ' Ordered for you: stories on ' + competencyLabel[weak] + ' come first.' : '' }}</p>
+            </aside>
+          </section>
+        }
+      </div>
+    }
+  } @else {
+    <div mtr-panel-skeleton [rows]="6"></div>
+  }
+</div>

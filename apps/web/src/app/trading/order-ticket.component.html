@@ -1,0 +1,172 @@
+@if (portfolio(); as current) {
+  <form class="tr-ticket" (submit)="onSubmit($event)" novalidate aria-label="Order ticket">
+    <div class="field">
+      <label class="field-label" for="ticket-symbol">Instrument</label>
+      <select
+        id="ticket-symbol"
+        class="select"
+        (change)="update({ symbol: value($event) })"
+        [attr.aria-invalid]="showErrors() && !!errors().symbol"
+      >
+        @if (!draft().symbol) {
+          <option value="">Choose an instrument</option>
+        }
+        @for (i of instruments(); track i.symbol) {
+          <option [value]="i.symbol" [selected]="i.symbol === draft().symbol">{{ i.symbol }} · {{ i.name }}</option>
+        }
+      </select>
+      @if (showErrors() && errors().symbol) {
+        <p class="field-error">{{ errors().symbol }}</p>
+      }
+    </div>
+
+    <div class="tr-segmented" role="group" aria-label="Side">
+      @for (side of sides; track side) {
+        <button type="button" [attr.data-side]="side" [attr.aria-pressed]="draft().side === side" (click)="update({ side })">{{ side === 'BUY' ? 'Buy' : 'Sell' }}</button>
+      }
+    </div>
+
+    <div class="tr-segmented" data-count="3" role="group" aria-label="Order type">
+      @for (type of types; track type) {
+        <button type="button" [attr.aria-pressed]="draft().type === type" (click)="update({ type })">{{ typeLabel[type] }}</button>
+      }
+    </div>
+    @if (showErrors() && errors().type) {
+      <p class="field-error" role="alert">{{ errors().type }}</p>
+    }
+
+    <div class="tr-fieldRow">
+      <div class="field">
+        <label class="field-label" for="ticket-quantity">Units</label>
+        <input
+          id="ticket-quantity"
+          class="input num"
+          inputmode="numeric"
+          autocomplete="off"
+          [value]="draft().quantity"
+          (input)="update({ quantity: value($event) })"
+          [attr.aria-invalid]="showErrors() && !!errors().quantity"
+          aria-describedby="ticket-quantity-hint"
+        />
+        <p id="ticket-quantity-hint" [class]="showErrors() && errors().quantity ? 'field-error' : 'field-hint'">
+          @if (showErrors() && errors().quantity) {
+            {{ errors().quantity }}
+          } @else if (draft().side === 'SELL') {
+            You hold {{ units(held()) }}.
+          } @else {
+            Cash available {{ dt(current.availableCash) }}
+          }
+        </p>
+      </div>
+      @if (draft().type !== 'MARKET') {
+        <div class="field">
+          <label class="field-label" for="ticket-price">{{ draft().type === 'LIMIT' ? 'Limit price (DT)' : 'Stop price (DT)' }}</label>
+          <input
+            id="ticket-price"
+            class="input num"
+            inputmode="decimal"
+            autocomplete="off"
+            [value]="draft().type === 'LIMIT' ? draft().limitPrice : draft().stopPrice"
+            (input)="update(draft().type === 'LIMIT' ? { limitPrice: value($event) } : { stopPrice: value($event) })"
+            [attr.aria-invalid]="showErrors() && !!priceError()"
+            aria-describedby="ticket-price-hint"
+          />
+          <p id="ticket-price-hint" [class]="showErrors() && priceError() ? 'field-error' : 'field-hint'">
+            @if (showErrors() && priceError()) {
+              {{ priceError() }}
+            } @else if (quote(); as q) {
+              Bid {{ price(q.bid) }} · Ask {{ price(q.ask) }}
+            } @else {
+              No quote available.
+            }
+          </p>
+        </div>
+      }
+    </div>
+
+    @if (draft().type === 'STOP' && draft().side === 'SELL') {
+      <p class="tr-muted">A stop-loss waits until the bid falls to your stop price, then sells at the bid. It protects a position you hold.</p>
+    }
+    @if (draft().type === 'MARKET') {
+      <p class="tr-muted">A market order fills now at the best price, up to the size available; any rest is cancelled, never left working.</p>
+    }
+
+    @if (notice()) {
+      <p class="tr-toast" data-tone="amber" role="status">{{ notice() }}</p>
+    }
+
+    @if (review(); as r) {
+      <section class="tr-review" [attr.data-tone]="r.rejection ? 'neg' : null" aria-live="polite" aria-label="Order preview">
+        <h3>{{ r.rejection ? 'This order would be rejected' : reviewTitle() }}</h3>
+        @if (r.rejection) {
+          <p>{{ r.rejection.message }} Change the order and preview it again.</p>
+        }
+        <dl class="tr-reviewRows">
+          <div>
+            <dt>{{ draft().side === 'BUY' ? (draft().type === 'LIMIT' ? 'Limit price (the most you pay)' : 'Ask price now') : 'Bid price now' }}</dt>
+            <dd>{{ price(r.referencePrice) }} DT</dd>
+          </div>
+          @if (r.executesNow) {
+            <div>
+              <dt>Units that fill now</dt>
+              <dd>{{ units(r.fillableNow) }}</dd>
+            </div>
+          } @else {
+            <div>
+              <dt>Fills now</dt>
+              <dd>No, it waits</dd>
+            </div>
+          }
+          <div>
+            <dt>Estimated amount</dt>
+            <dd>{{ dt(r.estimate.notional) }}</dd>
+          </div>
+          <div>
+            <dt>Estimated fee</dt>
+            <dd>{{ dt(r.estimate.fee) }}</dd>
+          </div>
+          <div data-total="true">
+            <dt>{{ draft().side === 'BUY' ? 'Estimated total cost' : 'Estimated proceeds' }}</dt>
+            <dd>{{ dt(r.estimate.total) }}</dd>
+          </div>
+          <div>
+            <dt>{{ draft().side === 'BUY' ? 'Cash available' : 'Units held' }}</dt>
+            <dd>{{ draft().side === 'BUY' ? dt(r.availableCash) : units(r.held) }}</dd>
+          </div>
+        </dl>
+        @if (r.warnings.length) {
+          <ul class="tr-warnings">
+            @for (warning of r.warnings; track warning) {
+              <li>{{ warning }}</li>
+            }
+          </ul>
+        }
+        <p class="tr-muted">
+          Quote {{ price(r.quote.bid) }} / {{ price(r.quote.ask) }} at {{ shortTime(r.quote.asOf) }}.
+          {{ expired() ? 'This quote has expired; confirming will refresh the preview first.' : 'Valid until ' + shortTime(r.quote.validUntil) + '.' }}
+        </p>
+      </section>
+    }
+
+    @if (error()) {
+      <p class="form-error-banner" role="alert">{{ error() }}</p>
+    }
+
+    <div class="tr-actions">
+      @if (confirmable()) {
+        <button type="submit" [class]="'btn ' + (draft().side === 'BUY' ? 'btn-primary' : 'btn-danger')" [disabled]="busy() !== null">{{ busy() === 'submit' ? 'Placing order…' : busy() === 'preview' ? 'Refreshing…' : expired() ? 'Refresh preview' : 'Confirm ' + sideWord() }}</button>
+        <button type="button" class="btn btn-ghost" [disabled]="busy() !== null" (click)="preview.set(null)">Edit</button>
+      } @else {
+        <button type="submit" class="btn btn-primary" [disabled]="busy() !== null">{{ busy() === 'preview' ? 'Checking…' : 'Preview order' }}</button>
+      }
+    </div>
+    <p class="tr-muted">Prices are fictional and simulated; trades move virtual money only.</p>
+  </form>
+} @else {
+  <div
+    mtr-empty-state
+    icon="portfolio"
+    heading="Create a portfolio to trade"
+    description="Orders are placed against a virtual portfolio with its own cash and positions."
+  ></div>
+}

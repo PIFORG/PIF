@@ -1,0 +1,334 @@
+<div class="page-shell lr-reviewShell">
+  @if (session(); as s) {
+    @if (timeline(); as t) {
+      <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)">
+        <a routerLink="/learn">MarketQuest</a> / <a [routerLink]="'/learn/missions/' + s.missionSlug">{{ s.mission.title }}</a> / Review
+      </nav>
+      <mtr-page-heading
+        [eyebrow]="isReplay() ? 'Time Machine replay · practice only' : 'Mission review'"
+        [title]="s.mission.title"
+        [description]="
+          isReplay()
+            ? 'This replay used the same market path as your original attempt. It is scored for comparison but never changes your competency profile.'
+            : 'How your decisions were assessed, and what would have happened if you had chosen differently.'
+        "
+      >
+        <ng-container mtrHeadingActions>
+          @if (s.status === 'ACTIVE') {
+            <a [routerLink]="'/learn/sessions/' + s.id" class="btn btn-primary">Resume mission</a>
+          } @else {
+            <a [routerLink]="'/learn/missions/' + s.missionSlug" class="btn btn-secondary">Réessayer</a>
+          }
+          @if (isReplay() && s.parentSessionId) {
+            <button type="button" class="btn btn-secondary" (click)="compareWith(s.parentSessionId)" [disabled]="busy() !== null">Compare with original</button>
+          }
+        </ng-container>
+      </mtr-page-heading>
+
+      @if (actionError()) {
+        <div class="notice form-error-banner" role="alert">{{ actionError() }}</div>
+      }
+
+      @if (s.status === 'ACTIVE') {
+        <div class="lr-banner" role="status">
+          <p>This mission is still in progress. The assessment and the Time Machine open once it ends.</p>
+        </div>
+      }
+
+      @if (assessment(); as a) {
+        <div class="lr-kpis">
+          <div
+            mtr-kpi
+            label="Score"
+            icon="challenge"
+            [tone]="a.passed ? 'positive' : 'negative'"
+            [hint]="'Pass mark ' + a.passThreshold + (a.requiredObjectivesMet ? '' : ' · required objectives not met')"
+          >
+            <span class="lr-row">{{ a.total }}<span [class]="a.passed ? 'badge badge-active' : 'badge badge-danger'">{{ a.passed ? 'Passed' : 'Not passed' }}</span></span>
+          </div>
+          <div mtr-kpi label="Final value" icon="portfolio" [hint]="'Return ' + pct(a.metrics.totalReturnPct, 2)">{{ formatDT(a.metrics.equity) }}</div>
+          <div mtr-kpi label="Max drawdown" icon="risk" [hint]="'Largest position ' + pct(a.metrics.maxWeightPct)">{{ pct(a.metrics.maxDrawdownPct) }}</div>
+          <div
+            mtr-kpi
+            label="Mentor help"
+            icon="ai"
+            [tone]="a.assisted ? 'warning' : 'default'"
+            [hint]="a.assisted ? 'Assisted attempts count for less in your profile.' : 'Unassisted attempt'"
+          >
+            {{ a.assisted ? a.hintsUsed + ' hint(s)' : 'None' }}
+          </div>
+        </div>
+
+        @if (a.failedByRule) {
+          <div class="lr-banner" data-tone="neg" role="status">
+            <p><strong>Failed by rule.</strong> {{ a.failureReason }}</p>
+          </div>
+        }
+
+        <div class="lr-layout">
+          <div class="lr-col">
+            <section
+              mtr-panel
+              panelId="components"
+              heading="How the score was built"
+              description="Each component lists the evidence behind it. Components that could not be judged are left out and their weight is shared among the rest."
+            >
+              <div class="lr-stack">
+                @for (c of a.components; track c.key) {
+                  <section class="lr-competency" [attr.aria-label]="componentLabel[c.key]">
+                    <div class="lr-competencyHead">
+                      <strong>{{ componentLabel[c.key] }}</strong>
+                      <span class="num">{{ componentScore(c) }}</span>
+                    </div>
+                    <div mtr-meter [value]="c.score" [label]="componentLabel[c.key] + ' score'"></div>
+                    <ul class="lr-bullets">
+                      @for (e of c.evidence; track e.label) {
+                        <li>
+                          <strong>{{ e.label }}</strong>{{ e.score !== null ? ' (' + round(e.score) + ')' : '' }}: {{ e.detail }}
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                }
+              </div>
+            </section>
+
+            <div class="lr-twoUp">
+              <section mtr-panel panelId="strengths" heading="What went well">
+                @if (a.strengths.length) {
+                  <ul class="lr-bullets">
+                    @for (item of a.strengths; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="lr-muted">No clear strengths were observed this time.</p>
+                }
+              </section>
+              <section mtr-panel panelId="improvements" heading="What to work on">
+                @if (a.improvements.length) {
+                  <ul class="lr-bullets">
+                    @for (item of a.improvements; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="lr-muted">Nothing major to improve.</p>
+                }
+              </section>
+            </div>
+          </div>
+
+          <div class="lr-col">
+            <section mtr-panel panelId="objectives" heading="Objectives">
+              <ul mtr-objective-list [objectives]="a.objectives"></ul>
+            </section>
+
+            <section
+              mtr-panel
+              panelId="competency-evidence"
+              heading="Competency evidence"
+              [description]="a.countsTowardProfile ? 'Added to your profile.' : 'Practice replay: not added to your profile.'"
+            >
+              <div class="lr-stack">
+                @for (c of competencyScores(); track c.competency) {
+                  <div class="lr-competency">
+                    <div class="lr-competencyHead">
+                      <strong>{{ c.label }}</strong>
+                      <span class="num">{{ c.score === null ? 'Not observed' : round(c.score) }}</span>
+                    </div>
+                    <div mtr-meter [value]="c.score" [label]="c.label + ' evidence'"></div>
+                  </div>
+                }
+              </div>
+            </section>
+
+            <section mtr-panel panelId="debrief" heading="Debrief" description="A short debrief generated by fixed rules from this session's evidence.">
+              <span mtrPanelBadge class="lr-source">Rule-based · no AI provider</span>
+              @if (debrief(); as d) {
+                <div class="lr-mentor">
+                  <span class="lr-source"><svg mtrIcon name="info" [size]="12" /> {{ d.sourceLabel }} · {{ d.topic }}</span>
+                  <p>{{ d.message }}</p>
+                  @if (d.questions.length) {
+                    <ul>
+                      @for (q of d.questions; track q) {
+                        <li>{{ q }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+              } @else {
+                <button type="button" class="btn btn-secondary" (click)="loadDebrief()" [disabled]="busy() !== null">{{ busy() === 'debrief' ? 'Preparing…' : 'Show debrief' }}</button>
+              }
+            </section>
+
+            @if (a.calibration.orders > 0) {
+              <section
+                mtr-panel
+                panelId="calibration"
+                heading="Confidence check"
+                [description]="
+                  marketAdjusted()
+                    ? 'Not part of your score. Each rated order is compared with this mission\'s equal-weight market from the fill to the end.'
+                    : 'Looks back at the final prices, so it is for reflection only and is not part of your score.'
+                "
+              >
+                <dl class="lr-metricGrid">
+                  <div>
+                    <dt>Rated orders</dt>
+                    <dd>{{ a.calibration.orders }}</dd>
+                  </div>
+                  <div>
+                    <dt>Average confidence</dt>
+                    <dd>{{ pct(a.calibration.meanConfidence, 0) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ marketAdjusted() ? 'Beat the market by the end' : 'Favourable by the end' }}</dt>
+                    <dd>{{ pct(a.calibration.hitRate, 0) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Brier score</dt>
+                    <dd>{{ a.calibration.brierScore === null ? '—' : a.calibration.brierScore.toFixed(3) }}</dd>
+                  </div>
+                </dl>
+                @if (marketAdjusted() && !a.calibration.interpretable) {
+                  <p class="lr-muted">{{ calibrationNote() }}</p>
+                }
+                @if (marketAdjusted()) {
+                  @if (a.calibration.signals?.length) {
+                    <h3 class="eyebrow" style="margin: 0">What your ratings showed when you placed the orders</h3>
+                    <ul class="lr-muted" style="margin: 0; padding-left: 1.1rem">
+                      @for (sig of a.calibration.signals; track sig.id) {
+                        <li>{{ sig.detail }}</li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="lr-muted">No warning patterns in how you rated these orders when you placed them.</p>
+                  }
+                }
+              </section>
+            }
+          </div>
+        </div>
+      } @else if (s.status === 'ABANDONED') {
+        <div class="lr-banner" role="status">
+          <p>This attempt was abandoned, so it was not assessed. You can still rewind it in the Time Machine below.</p>
+        </div>
+      }
+
+      <section
+        mtr-panel
+        panelId="time-machine"
+        heading="Financial Time Machine"
+        description="Pick a decision and replay the mission from that point on exactly the same market path. Replays are practice with hindsight and never change your profile."
+      >
+        <div class="lr-timeMachineStage" aria-hidden="true">
+          <span class="lr-timeMachineRing"></span>
+          <span class="lr-timeMachineBeam"></span>
+        </div>
+        <p class="lr-timeMachineTag"><svg mtrIcon name="rewind" [size]="14" /> Market Trading Room · practice replay</p>
+        <div class="lr-layout lr-timeMachineLayout" style="margin-bottom: 0">
+          <div class="lr-col">
+            @if (timelineChart(); as chart) {
+              <figure
+                mtr-line-chart
+                [series]="chart.series"
+                [xCount]="chart.xCount"
+                [height]="180"
+                [summary]="chart.summary"
+                [formatY]="formatEquityAxis"
+                [xLabels]="chart.xLabels"
+              ></figure>
+            }
+            @if (t.news.length) {
+              <ul class="lr-list">
+                @for (n of t.news; track n.id) {
+                  <li class="lr-small">
+                    <strong class="num">{{ stepWord() }} {{ n.step }}</strong>&ngsp;· {{ n.headline }}
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <div class="lr-col">
+            @if (decisions().length) {
+              <fieldset style="border: 0; padding: 0; margin: 0" [disabled]="!t.canBranch || busy() !== null">
+                <legend class="eyebrow" style="margin-bottom: var(--space-2)">Your decisions</legend>
+                <ol class="lr-timeline">
+                  @for (d of decisions(); track d.seq) {
+                    <li [attr.data-type]="d.type" [attr.data-outcome]="d.outcome" [attr.data-selected]="fromSeq() === d.seq ? 'true' : null">
+                      <label class="lr-small" [style.cursor]="t.canBranch ? 'pointer' : null"
+                        ><input
+                          type="radio"
+                          name="branch-point"
+                          [value]="d.seq"
+                          [checked]="fromSeq() === d.seq"
+                          (change)="fromSeq.set(d.seq)"
+                          class="sr-only" /><strong>{{ stepWord() }} {{ d.step }}</strong>&ngsp;{{ decisionText(d) }}</label
+                      >
+                      <span class="lr-muted">#{{ d.seq }}</span>
+                    </li>
+                  }
+                </ol>
+              </fieldset>
+            } @else {
+              <p class="lr-muted">No decisions were recorded.</p>
+            }
+
+            @if (t.canBranch && decisions().length) {
+              <div class="lr-stack">
+                <div class="field" style="margin-bottom: 0">
+                  <label for="branch-strategy">From the selected decision…</label>
+                  <select id="branch-strategy" class="select" (change)="setStrategy($any($event.target).value)">
+                    <option value="HOLD" [selected]="strategy() === 'HOLD'">What if I had done nothing more? (instant result)</option>
+                    <option value="MANUAL" [selected]="strategy() === 'MANUAL'">Let me play it again differently</option>
+                  </select>
+                </div>
+                <button type="button" class="btn btn-primary" (click)="branch()" [disabled]="fromSeq() === null || busy() !== null">
+                  <svg mtrIcon name="rewind" [size]="16" />
+                  {{ busy() === 'branch' ? 'Rewinding…' : fromSeq() === null ? 'Select a decision to rewind' : 'Rewind to decision #' + fromSeq() }}
+                </button>
+              </div>
+            }
+
+            @if (t.branches.length) {
+              <div class="lr-stack">
+                <h3 class="eyebrow" style="margin: 0">Replays of this attempt</h3>
+                <ul class="lr-list">
+                  @for (b of t.branches; track b.id) {
+                    <li class="lr-spread">
+                      <span class="lr-small">From decision #{{ b.branchFromSeq }} · {{ b.status.toLowerCase() }}{{ b.assessment ? ' · score ' + b.assessment.total : '' }}</span>
+                      <span class="lr-row">
+                        @if (b.status === 'ACTIVE') {
+                          <a [routerLink]="'/learn/sessions/' + b.id" class="btn btn-ghost btn-sm">Continue</a>
+                        }
+                        <button type="button" class="btn btn-secondary btn-sm" (click)="compareWith(b.id)" [disabled]="busy() !== null">
+                          {{ busy() === 'compare-' + b.id ? 'Comparing…' : 'Compare' }}
+                        </button>
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      @if (comparison(); as c) {
+        <div style="margin-top: var(--space-4)">
+          <section mtr-panel panelId="comparison" heading="Side by side" description="Same market, different decisions.">
+            <div mtr-comparison-view [comparison]="c" [steps]="s.state.steps"></div>
+          </section>
+        </div>
+      }
+    }
+  } @else if (error()) {
+    <div mtr-empty-state tone="error" heading="Review unavailable" [description]="error()">
+      <a mtrEmptyAction routerLink="/learn" class="btn btn-secondary">Back to MarketQuest</a>
+    </div>
+  } @else {
+    <div mtr-panel-skeleton [rows]="10"></div>
+  }
+</div>

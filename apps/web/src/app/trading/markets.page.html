@@ -1,0 +1,139 @@
+<div class="page-shell tr-room tr-markets">
+  <mtr-page-heading
+    [eyebrow]="'Données de marché'"
+    [title]="'Marchés'"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="'Cotations de l\'univers d\'instruments fictifs négociés par chaque portefeuille et chaque mission. Les prix sont simulés ; aucun n\'est un prix de marché réel.'"
+  >
+    <button mtrHeadingActions type="button" class="btn btn-secondary" (click)="load()"><svg mtrIcon name="refresh" [size]="16" /> Actualiser</button>
+  </mtr-page-heading>
+
+  @if (market(); as data) {
+    <p mtr-provenance-note [provenance]="data.provenance" [asOf]="data.asOf"></p>
+  }
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+
+  <div class="tr-kpis tr-tape">
+    <div mtr-kpi label="Instruments" icon="markets" hint="Actions et fonds, cotés en DT">{{ instrumentCount() }}</div>
+    <div mtr-kpi label="Période de cotation" icon="clock" [hint]="periodHint()">{{ quotePeriod() }}</div>
+    <div
+      mtr-kpi
+      label="Meilleure perf. depuis la clôture"
+      icon="arrow-up"
+      [hint]="best()?.hint"
+      [tone]="best() && best()!.change > 0 ? 'positive' : best() && best()!.change < 0 ? 'negative' : 'default'"
+    >
+      @if (best(); as b) {
+        <span mtr-signed-amount [value]="b.change" kind="pct"></span>
+      } @else {
+        {{ dash }}
+      }
+    </div>
+    <div
+      mtr-kpi
+      label="Pire perf. depuis la clôture"
+      icon="arrow-down"
+      [hint]="worst()?.hint"
+      [tone]="worst() && worst()!.change < 0 ? 'negative' : worst() && worst()!.change > 0 ? 'positive' : 'default'"
+    >
+      @if (worst(); as w) {
+        <span mtr-signed-amount [value]="w.change" kind="pct"></span>
+      } @else {
+        {{ dash }}
+      }
+    </div>
+  </div>
+
+  <div class="tr-stack tr-marketStack">
+    <div class="tr-watchStrip">
+      <section mtr-panel heading="Liste de suivi" description="Instruments que vous suivez. L'étoile les active ici et sur la salle des marchés.">
+        @if (!market()) {
+          <div mtr-panel-skeleton [rows]="2"></div>
+        } @else if (watchlist().length === 0) {
+          <div mtr-empty-state icon="markets" heading="Votre liste de suivi est vide" description="Utilisez l'étoile à côté d'un instrument ci-dessous pour le suivre."></div>
+        } @else {
+          <mtr-instrument-table [instruments]="watchlist()" [watched]="watched()" caption="Liste de suivi" (toggleWatch)="toggleWatch($event)" />
+        }
+      </section>
+    </div>
+
+    <div class="tr-universe">
+      <section mtr-panel heading="Tous les instruments" [description]="market() ? visible().length + ' affiché' + (visible().length > 1 ? 's' : '') + ' sur ' + market()!.instruments.length : undefined">
+        @if (market(); as snap) {
+          <p class="tr-sourceLine">
+            <span class="tr-sourceTag">{{ snap.provenance.kind === 'FICTIONAL' ? 'Prix fictifs' : snap.provenance.kind }}</span>
+            <span>{{ snap.provenance.providerId }}</span>
+            <span class="tr-sourceSep" aria-hidden="true">·</span>
+            <span>Devise {{ snap.provenance.currency }}</span>
+            <span class="tr-sourceSep" aria-hidden="true">·</span>
+            <span>Cotation {{ dateTime(snap.asOf) }}</span>
+          </p>
+        }
+        <div class="tr-search tr-command">
+          <label class="sr-only" for="markets-search">Rechercher des instruments</label>
+          <input id="markets-search" class="input" type="search" placeholder="Rechercher symbole, nom, secteur" [value]="query()" (input)="query.set(value($event))" />
+          <label class="sr-only" for="markets-class">Classe d'actifs</label>
+          <select id="markets-class" class="select" (change)="setAssetClass($event)">
+            <option value="ALL" [selected]="assetClass() === 'ALL'">Toutes les classes</option>
+            <option value="EQUITY" [selected]="assetClass() === 'EQUITY'">Actions</option>
+            <option value="FUND" [selected]="assetClass() === 'FUND'">Fonds</option>
+          </select>
+          <label class="sr-only" for="markets-sector">Secteur</label>
+          <select id="markets-sector" class="select" (change)="setSector($event)">
+            <option value="ALL" [selected]="sector() === 'ALL'">Tous les secteurs</option>
+            @for (name of sectors(); track name) {
+              <option [value]="name" [selected]="sector() === name">{{ name }}</option>
+            }
+          </select>
+        </div>
+        @if (!market()) {
+          @if (error()) {
+            <div mtr-empty-state tone="error" heading="Données de marché indisponibles" [description]="error()"></div>
+          } @else {
+            <div mtr-panel-skeleton [rows]="6"></div>
+          }
+        } @else if (visible().length === 0) {
+          <div mtr-empty-state icon="markets" heading="Aucun résultat" description="Essayez une autre recherche ou une autre classe d'actifs."></div>
+        } @else {
+          <mtr-instrument-table [instruments]="visible()" [watched]="watched()" caption="Tous les instruments" (toggleWatch)="toggleWatch($event)" />
+        }
+      </section>
+    </div>
+
+    @if (status(); as s) {
+      <div class="tr-reference">
+        <section mtr-panel heading="Comment ces prix sont produits" [description]="s.provenance.description">
+          <dl class="tr-metricGrid">
+            <div>
+              <dt>Source</dt>
+              <dd>{{ s.provenance.providerId }}</dd>
+            </div>
+            <div>
+              <dt>Nature des données</dt>
+              <dd>{{ s.provenance.kind === 'FICTIONAL' ? 'Fictives (simulées)' : s.provenance.kind }}</dd>
+            </div>
+            <div>
+              <dt>Début de l'historique</dt>
+              <dd>{{ dateTime(s.dataStart) }}</dd>
+            </div>
+            <div>
+              <dt>Heure serveur</dt>
+              <dd>{{ dateTime(s.serverTime) }}</dd>
+            </div>
+            <div>
+              <dt>Horaires de négociation</dt>
+              <dd>{{ s.tradingHours }}</dd>
+            </div>
+            <div>
+              <dt>Frais</dt>
+              <dd>{{ feeSummary() || dash }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+    }
+  </div>
+</div>

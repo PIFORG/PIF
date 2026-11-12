@@ -1,0 +1,731 @@
+/* Market Trading Room — dashboard cockpit (db- prefix) */
+
+.db-cockpit {
+  --db-hero-radius: var(--radius-lg);
+}
+
+/* ---------- Identity & banners ---------- */
+
+.db-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+}
+
+.db-identityNote {
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+  max-width: 36rem;
+}
+
+.db-sampleBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--mtr-amber) 40%, var(--mtr-border));
+  border-radius: var(--radius-md);
+  background: var(--mtr-amber-soft);
+}
+
+.db-sampleBanner p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text);
+}
+
+.db-pendingValue {
+  color: var(--mtr-text-3);
+}
+
+.db-muted {
+  color: var(--mtr-text-3);
+  font-size: 0.8125rem;
+}
+
+/* Screen-reader KPI mirror (keeps tests + a11y without duplicate UI) */
+.db-srKpi {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Hero cockpit ---------- */
+
+.db-hero {
+  margin-bottom: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--db-hero-radius);
+  border: 1px solid color-mix(in srgb, var(--mtr-brand) 28%, var(--mtr-border));
+  background:
+    radial-gradient(ellipse 85% 55% at 8% -10%, color-mix(in srgb, var(--mtr-brand) 22%, transparent), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 110%, color-mix(in srgb, var(--mtr-cyan) 14%, transparent), transparent 50%),
+    linear-gradient(165deg, color-mix(in srgb, var(--mtr-surface) 92%, var(--mtr-brand) 8%), var(--mtr-canvas));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 12%, transparent) inset,
+    var(--shadow-md);
+}
+
+.db-heroHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
+}
+
+.db-heroBrand {
+  min-width: 0;
+}
+
+.db-heroEyebrow {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mtr-brand-text);
+  margin-bottom: var(--space-1);
+}
+
+.db-heroTitle {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--mtr-text);
+  letter-spacing: -0.02em;
+}
+
+.db-heroSubtitle {
+  margin: var(--space-1) 0 0;
+  font-size: 0.875rem;
+  color: var(--mtr-text-2);
+  max-width: 40rem;
+}
+
+.db-heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.db-heroGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 2.2fr) minmax(200px, 0.75fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.db-heroValue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.db-heroPrimary {
+  position: relative;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--mtr-elevated) 70%, transparent);
+  border: 1px solid var(--mtr-border);
+}
+
+.db-heroLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mtr-text-3);
+}
+
+.db-heroEquity {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--mtr-text);
+}
+
+.db-heroReturn {
+  font-size: 0.9375rem;
+}
+
+.db-heroPulse {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.db-heroOps {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--mtr-border-strong);
+  background: color-mix(in srgb, var(--mtr-surface) 60%, transparent);
+}
+
+.db-heroOpsLabel {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mtr-text-3);
+  margin-bottom: var(--space-2);
+}
+
+.db-heroSessionCount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* KPI tiles inside hero — compact, not uniform cards */
+.db-hero .db-heroKpi.ws-kpi {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: none;
+}
+
+.db-hero .db-heroKpiCompact .ws-kpiValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.db-hero .db-heroKpiRisk {
+  background: color-mix(in srgb, var(--mtr-amber-soft) 55%, var(--mtr-surface));
+  border-color: color-mix(in srgb, var(--mtr-amber) 35%, var(--mtr-border));
+}
+
+.db-heroPanel.ws-panel {
+  height: 100%;
+  margin: 0;
+  border: 1px solid var(--mtr-border);
+  background: color-mix(in srgb, var(--mtr-surface) 85%, transparent);
+  box-shadow: none;
+}
+
+.db-heroLineChart {
+  display: block;
+  width: 100%;
+}
+
+/* Risk pod */
+.db-riskPod {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--mtr-amber) 25%, var(--mtr-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mtr-elevated) 90%, var(--mtr-brand) 10%), var(--mtr-surface));
+}
+
+.db-riskHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--mtr-text);
+}
+
+.db-riskDemo {
+  margin-left: auto;
+}
+
+.db-riskStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.db-riskStats dt {
+  margin: 0;
+  color: var(--mtr-text-3);
+  font-weight: 500;
+}
+
+.db-riskStats dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--mtr-text);
+}
+
+.db-riskPending {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+  line-height: 1.45;
+}
+
+.db-readinessRing {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-canvas);
+}
+
+.db-readinessRing[data-level='complete'] {
+  border-color: color-mix(in srgb, var(--mtr-pos) 45%, var(--mtr-border));
+  background: var(--mtr-pos-soft);
+}
+
+.db-readinessPct {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.db-readinessRing[data-level='complete'] .db-readinessPct {
+  color: var(--mtr-pos);
+}
+
+.db-readinessLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Market intelligence strip ---------- */
+
+.db-marketStrip {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  overflow: hidden;
+}
+
+.db-marketStripHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.db-marketStripTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mtr-cyan);
+}
+
+.db-marketStripEmpty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.db-ticker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: var(--space-1);
+}
+
+.db-ticker li {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-elevated);
+  font-size: 0.8125rem;
+}
+
+.db-tickerSym {
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.db-tickerName {
+  color: var(--mtr-text-3);
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-tickerLast {
+  font-weight: 600;
+}
+
+/* ---------- Analytical canvas ---------- */
+
+.db-canvas {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  align-items: start;
+}
+
+.db-canvasCell {
+  min-width: 0;
+}
+
+.db-canvasWide {
+  grid-column: span 7;
+}
+
+.db-canvasTall {
+  grid-column: span 5;
+}
+
+.db-canvasInsights {
+  grid-column: span 4;
+}
+
+.db-canvasSide {
+  grid-column: span 4;
+}
+
+.db-canvasLearning {
+  grid-column: span 12;
+}
+
+.db-canvasFull {
+  grid-column: 1 / -1;
+  margin-bottom: var(--space-4);
+}
+
+.db-compactTable th,
+.db-compactTable td {
+  padding: 0.45rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.db-compactTable th:first-child,
+.db-compactTable td:first-child {
+  padding-left: 0;
+}
+
+.db-compactTable th:last-child,
+.db-compactTable td:last-child {
+  padding-right: 0;
+}
+
+.db-compactTable th {
+  background: transparent;
+  color: var(--mtr-text-3);
+  font-size: 0.68rem;
+}
+
+/* Contextual insights */
+.db-insights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.db-insights li {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mtr-border);
+  background: color-mix(in srgb, var(--mtr-brand-soft) 35%, var(--mtr-elevated));
+}
+
+.db-insightIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--mtr-brand-soft);
+  color: var(--mtr-brand-text);
+  border: 1px solid color-mix(in srgb, var(--mtr-brand) 25%, transparent);
+}
+
+.db-insightText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+
+.db-insightText strong {
+  font-weight: 600;
+  color: var(--mtr-text);
+}
+
+.db-insightText > span {
+  color: var(--mtr-text-2);
+  line-height: 1.4;
+}
+
+/* ---------- Readiness ---------- */
+
+.db-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.db-progressTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--mtr-elevated);
+  overflow: hidden;
+}
+
+.db-progressTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mtr-brand);
+  transition: width var(--dur-slow) var(--ease);
+}
+
+.db-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.db-checklist li {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.db-checkIcon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--mtr-amber);
+  background: var(--mtr-amber-soft);
+}
+
+.db-checklist li[data-done='true'] .db-checkIcon {
+  color: var(--mtr-pos);
+  background: var(--mtr-pos-soft);
+}
+
+.db-checkText,
+.db-sessionText,
+.db-moduleText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+
+.db-checkText strong,
+.db-sessionText strong,
+.db-moduleText strong {
+  font-weight: 600;
+  color: var(--mtr-text);
+}
+
+.db-checkText > span,
+.db-sessionText > span,
+.db-moduleText > span {
+  color: var(--mtr-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Sessions ---------- */
+
+.db-sessionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.db-sessionList li {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.db-sessionIcon,
+.db-moduleIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--mtr-elevated);
+  color: var(--mtr-text-2);
+  border: 1px solid var(--mtr-border);
+}
+
+.db-sessionList .db-sessionMore {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-3);
+}
+
+/* ---------- Modules ---------- */
+
+.db-modules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.db-module {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.db-module > :last-child {
+  grid-column: 2;
+  justify-self: start;
+}
+
+a.db-module:hover {
+  text-decoration: none;
+  border-color: var(--mtr-border-strong);
+  background: var(--mtr-hover);
+  box-shadow: none;
+}
+
+.db-module[aria-disabled='true'] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.db-moduleIcon {
+  color: var(--mtr-brand-text);
+  background: var(--mtr-brand-soft);
+  border-color: transparent;
+}
+
+/* MarketQuest learning panel emphasis */
+#learning.ws-panel {
+  border-color: color-mix(in srgb, var(--mtr-brand) 32%, var(--mtr-border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--mtr-brand-soft) 40%, var(--mtr-surface)), var(--mtr-surface));
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1280px) {
+  .db-heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .db-canvasWide,
+  .db-canvasTall,
+  .db-canvasInsights,
+  .db-canvasSide,
+  .db-canvasLearning {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 1100px) {
+  .db-canvasSide {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 760px) {
+  .db-hero {
+    padding: var(--space-4);
+  }
+
+  .db-heroHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .db-canvasSide {
+    grid-column: span 12;
+  }
+
+  .db-ticker li {
+    max-width:  min(92vw, 420px);
+  }
+
+  .db-insights li {
+    grid-template-columns: 32px 1fr;
+  }
+
+  .db-insights li .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .db-riskStats {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,371 @@
+<div class="page-shell lr-playerShell">
+  @if (session(); as s) {
+    @if (draft(); as d) {
+      <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)">
+        <a routerLink="/learn">MarketQuest</a> / <a [routerLink]="'/learn/missions/' + s.missionSlug">{{ s.mission.title }}</a>
+      </nav>
+      <mtr-page-heading
+        [eyebrow]="s.kind === 'REPLAY' ? 'Time Machine replay · practice only' : levelLabel[s.mission.level]"
+        [title]="s.mission.title"
+        [description]="s.kind === 'REPLAY' ? 'Same market path as your original attempt. Replays never change your competency profile.' : s.mission.summary"
+      />
+
+      <div class="lr-toolbar lr-cockpitBar" role="region" aria-label="Mission controls">
+        <span class="lr-cockpitGlow" aria-hidden="true"></span>
+        <div class="lr-clock">
+          <strong class="num">{{ stepWord() }} {{ s.state.step }} of {{ s.state.steps }}</strong>
+          <div class="lr-clockTrack" aria-hidden="true"><span [style.width.%]="(s.state.step / s.state.steps) * 100"></span></div>
+          <span class="num">{{ formatDT(s.state.portfolio.equity) }}</span>
+          <span mtr-change [value]="s.state.metrics.totalReturnPct / 100"></span>
+          @if (maxLoss(); as limit) {
+            <span [class]="lossPct() > limit * 0.7 ? 'badge badge-danger' : 'badge badge-muted'" [attr.title]="'Distance to the loss limit'"
+              >Loss limit {{ limit }} % · used {{ (lossPct() > 0 ? lossPct() : 0).toFixed(1) }} %</span
+            >
+          }
+          @if (s.assisted) {
+            <span class="badge badge-pending">Assisted</span>
+          }
+        </div>
+        <div class="lr-row">
+          @if (!ended()) {
+            @if (confirmAbandon()) {
+              <span class="lr-small">Abandon this attempt? It will not be assessed.</span>
+              <button type="button" class="btn btn-danger btn-sm" (click)="abandon()" [disabled]="busy() !== null">Yes, abandon</button>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="confirmAbandon.set(false)">Keep playing</button>
+            } @else {
+              @if (!s.state.marketClosed) {
+                <a href="#ticket" class="btn btn-secondary btn-sm lr-ticketJump">Order ticket</a>
+              }
+              <button type="button" class="btn btn-ghost btn-sm" (click)="confirmAbandon.set(true)" [disabled]="busy() !== null">Abandon</button>
+            }
+            @if (s.state.marketClosed) {
+              <button type="button" class="btn btn-primary" (click)="send({ type: 'FINISH' }, 'finish')" [disabled]="disabled()">
+                {{ busy() === 'finish' ? 'Scoring…' : 'Finish and get assessed' }}
+              </button>
+            } @else {
+              <button type="button" class="btn btn-primary" (click)="send({ type: 'ADVANCE' }, 'advance')" [disabled]="disabled()">
+                {{ busy() === 'advance' ? 'Advancing…' : 'Next ' + s.state.stepLabel }} <svg mtrIcon name="arrow-right" [size]="16" />
+              </button>
+            }
+          } @else {
+            <a [routerLink]="'/learn/sessions/' + s.id + '/review'" class="btn btn-primary"
+              >{{ s.status === 'ABANDONED' ? 'Open the Time Machine' : 'See your assessment' }} <svg mtrIcon name="arrow-right" [size]="16"
+            /></a>
+          }
+        </div>
+      </div>
+
+      @if (ended()) {
+        <div class="lr-banner" [attr.data-tone]="s.status === 'COMPLETED' ? 'pos' : 'neg'" role="status">
+          <p>
+            <strong>{{ s.status === 'COMPLETED' ? 'Mission complete.' : s.status === 'FAILED' ? 'Mission failed.' : 'Mission abandoned.' }}</strong
+            >&ngsp;{{ s.state.failureReason ?? (s.status === 'COMPLETED' ? 'Your decisions have been assessed.' : '') }}
+          </p>
+        </div>
+      } @else if (s.state.marketClosed) {
+        <div class="lr-banner" role="status">
+          <p><strong>The market has closed for this mission.</strong> Open orders have expired. Finish to see your assessment.</p>
+        </div>
+      }
+
+      @if (notice(); as n) {
+        <p class="lr-toast" [attr.data-tone]="n.tone === 'info' ? null : n.tone" [attr.role]="n.tone === 'neg' ? 'alert' : 'status'">{{ n.text }}</p>
+      }
+
+      <div class="lr-layout">
+        <div class="lr-col">
+          <section
+            mtr-panel
+            panelId="chart"
+            [heading]="selected() + ' · ' + selectedName()"
+            description="Prices up to today only. The empty space on the right is the future you have not seen yet."
+          >
+            @if (chart(); as c) {
+              <figure mtr-line-chart [series]="c.series" [xCount]="c.xCount" [summary]="c.summary" [formatY]="formatPrice" [xLabels]="c.xLabels"></figure>
+            } @else {
+              <div mtr-panel-skeleton [rows]="4"></div>
+            }
+          </section>
+
+          <section mtr-panel panelId="quotes" heading="Market" description="Buy at the ask, sell at the bid. Depth is the number of shares offered at the best price today.">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Asset</th>
+                    <th scope="col" class="num">Bid</th>
+                    <th scope="col" class="num">Ask</th>
+                    <th scope="col" class="num">Spread</th>
+                    <th scope="col" class="num">Depth</th>
+                    <th scope="col" class="num">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (q of s.state.quotes; track q.symbol) {
+                    <tr class="lr-quoteRow" [attr.data-selected]="q.symbol === selected() ? 'true' : null">
+                      <td>
+                        <button type="button" class="btn btn-ghost btn-sm" [attr.aria-pressed]="q.symbol === selected()" (click)="selectSymbol(q.symbol)">
+                          <strong>{{ q.symbol }}</strong></button
+                        >&ngsp;<span class="lr-muted">{{ q.sector }}</span>
+                      </td>
+                      <td class="num">{{ q.bid.toFixed(3) }}</td>
+                      <td class="num">{{ q.ask.toFixed(3) }}</td>
+                      <td class="num">{{ q.spreadBps.toFixed(0) }} bp</td>
+                      <td class="num">{{ units(q.depth) }}</td>
+                      <td class="num"><span mtr-change [value]="q.changePct / 100"></span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section
+            mtr-panel
+            panelId="positions"
+            heading="Positions"
+            [description]="'Cash ' + formatDT(s.state.portfolio.cash) + ' · reserved for open buys ' + formatDT(s.state.portfolio.reservedCash)"
+          >
+            @if (s.state.portfolio.positions.length) {
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Asset</th>
+                      <th scope="col" class="num">Shares</th>
+                      <th scope="col" class="num">Avg cost</th>
+                      <th scope="col" class="num">Value</th>
+                      <th scope="col" class="num">Unrealised</th>
+                      <th scope="col" class="num">Weight</th>
+                      <th scope="col"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (p of s.state.portfolio.positions; track p.symbol) {
+                      <tr>
+                        <td>
+                          <strong>{{ p.symbol }}</strong>
+                        </td>
+                        <td class="num">{{ units(p.quantity) }}</td>
+                        <td class="num">{{ p.averageCost.toFixed(3) }}</td>
+                        <td class="num">{{ formatDT(p.marketValue) }}</td>
+                        <td class="num"><span mtr-change [value]="p.unrealizedPnl" kind="money" currency="TND"></span></td>
+                        <td class="num">{{ p.weightPct.toFixed(1) }} %</td>
+                        <td>
+                          @if (!ended()) {
+                            <span class="lr-row">
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                (click)="prefill({ symbol: p.symbol, side: 'SELL', type: 'MARKET', quantity: '' + p.quantity })"
+                              >
+                                Sell
+                              </button>
+                              @if (canStop()) {
+                                <button type="button" class="btn btn-ghost btn-sm" (click)="protect(p)">Protect</button>
+                              }
+                            </span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="lr-muted">No positions. Everything is in cash.</p>
+            }
+          </section>
+
+          <section mtr-panel panelId="orders" heading="Orders">
+            @if (s.state.orders.length) {
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ stepWord() }}</th>
+                      <th scope="col">Order</th>
+                      <th scope="col" class="num">Filled</th>
+                      <th scope="col" class="num">Price</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Reason</th>
+                      <th scope="col"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (o of s.state.orders; track o.id) {
+                      <tr>
+                        <td class="num">{{ o.createdStep }}</td>
+                        <td>{{ o.side === 'BUY' ? 'Buy' : 'Sell' }} {{ units(o.quantity) }} {{ o.symbol }} · {{ o.type.toLowerCase() }}</td>
+                        <td class="num">{{ o.filledQuantity }}/{{ o.quantity }}</td>
+                        <td class="num">{{ orderPrice(o) }}</td>
+                        <td>
+                          <span [class]="orderStatusBadge[o.status]" [attr.title]="o.statusReason">{{ orderStatus(o) }}</span>
+                          @if (o.statusReason) {
+                            <span class="sr-only"> {{ o.statusReason }}</span>
+                          }
+                        </td>
+                        <td class="lr-small">{{ rationaleLabel[o.rationale] }}</td>
+                        <td>
+                          @if (o.status === 'OPEN' && !ended()) {
+                            <button type="button" class="btn btn-ghost btn-sm" (click)="send({ type: 'CANCEL_ORDER', orderId: o.id }, 'cancel')" [disabled]="disabled()">
+                              Annuler
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="lr-muted">No orders yet.</p>
+            }
+          </section>
+
+          <div class="lr-twoUp">
+            <section mtr-panel panelId="equity" heading="Portfolio value">
+              @if (equityChart(); as e) {
+                <figure
+                  mtr-line-chart
+                  [series]="e.series"
+                  [xCount]="e.xCount"
+                  [summary]="e.summary"
+                  [height]="160"
+                  [minSpan]="e.minSpan"
+                  [formatY]="formatEquity"
+                  [xLabels]="e.xLabels"
+                ></figure>
+              }
+            </section>
+            <section mtr-panel panelId="risk" heading="Risk">
+              <dl mtr-mission-metrics [state]="s.state"></dl>
+            </section>
+          </div>
+        </div>
+
+        <div class="lr-col">
+          <div #ticketRef>
+            <section
+              mtr-panel
+              panelId="ticket"
+              heading="Order ticket"
+              [description]="ended() ? 'This mission has ended.' : 'Every order needs a reason. It is part of your assessment.'"
+            >
+              <form mtr-mission-ticket [session]="s" [draft]="d" (draftChange)="setDraft($event)" [disabled]="disabled()" (submitted)="placeOrder()"></form>
+            </section>
+          </div>
+
+          <section mtr-panel panelId="objectives" heading="Objectives">
+            <ul mtr-objective-list [objectives]="s.state.objectives"></ul>
+          </section>
+
+          <section mtr-panel panelId="news" heading="News" description="Headlines appear on the day they happen — never earlier.">
+            @if (s.state.news.length) {
+              <div class="lr-stack">
+                @for (n of s.state.news; track n.id) {
+                  <article class="lr-news" [attr.data-sentiment]="n.sentiment" [attr.data-fresh]="n.step === s.state.step ? 'true' : null">
+                    <span class="lr-muted">{{ stepWord() }} {{ n.step }} · {{ n.sentiment.toLowerCase() }}</span>
+                    <strong>{{ n.headline }}</strong>
+                    <p>{{ n.body }}</p>
+                  </article>
+                }
+              </div>
+            } @else {
+              <p class="lr-muted">No news yet.</p>
+            }
+          </section>
+
+          <section
+            mtr-panel
+            panelId="mentor"
+            heading="Mentor"
+            description="Feedback from fixed rules applied to what you can see right now. Asking marks this attempt as assisted."
+          >
+            <span mtrPanelBadge class="lr-source">Rule-based · no AI provider</span>
+            <div class="lr-stack">
+              @if (mentor(); as m) {
+                <div class="lr-mentor" aria-live="polite">
+                  <span class="lr-source"><svg mtrIcon name="info" [size]="12" /> {{ m.sourceLabel }} · {{ m.topic }}</span>
+                  <p>{{ m.message }}</p>
+                  @if (m.questions.length) {
+                    <ul>
+                      @for (q of m.questions; track q) {
+                        <li>{{ q }}</li>
+                      }
+                    </ul>
+                  }
+                  @if (m.evidence.length) {
+                    <details>
+                      <summary class="lr-small">Based on</summary>
+                      <ul class="lr-small">
+                        @for (e of m.evidence; track e) {
+                          <li>{{ e }}</li>
+                        }
+                      </ul>
+                    </details>
+                  }
+                </div>
+              }
+              @if (!ended()) {
+                <div class="lr-row">
+                  <label class="sr-only" for="mentor-mode">Mentor style</label>
+                  <select id="mentor-mode" class="select" style="width: auto; flex: 1" (change)="mentorMode.set($any($event.target).value)">
+                    <option value="GUIDED" [selected]="(mentorMode() ?? s.mentorMode) === 'GUIDED'">Guided advice</option>
+                    <option value="SOCRATIC" [selected]="(mentorMode() ?? s.mentorMode) === 'SOCRATIC'">Socratic questions</option>
+                    <option value="CRITICAL" [selected]="(mentorMode() ?? s.mentorMode) === 'CRITICAL'">Critical challenge</option>
+                  </select>
+                  <button type="button" class="btn btn-secondary" (click)="askMentor()" [disabled]="disabled()">{{ busy() === 'mentor' ? 'Thinking…' : 'Ask' }}</button>
+                </div>
+              }
+              @if (s.state.hintsUsed) {
+                <p class="lr-muted">Mentor used {{ s.state.hintsUsed }} time(s) in this attempt.</p>
+              }
+            </div>
+          </section>
+
+          @if (s.state.stressScenarios.length) {
+            <section mtr-panel panelId="stress" heading="Stress test" description="See what a shock would do to your current holdings. It does not change the market.">
+              <div class="lr-stack">
+                @for (sc of s.state.stressScenarios; track sc.id) {
+                  <div class="lr-spread">
+                    <span class="lr-small"
+                      ><strong>{{ sc.name }}</strong><br />{{ sc.description }}</span
+                    >
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="send({ type: 'RUN_STRESS_TEST', scenarioId: sc.id }, 'stress')" [disabled]="disabled()">
+                      Run
+                    </button>
+                  </div>
+                }
+                @if (stressTests().length) {
+                  <ul class="lr-list">
+                    @for (t of stressTests(); track $index) {
+                      <li class="lr-preview">
+                        <div>
+                          <strong>{{ t.name }}</strong>
+                          <span class="lr-muted">{{ stepWord() }} {{ t.step }}</span>
+                        </div>
+                        <div>
+                          <span>Estimated impact</span>
+                          <strong class="num">{{ formatDT(t.impact) }} ({{ t.impactPct.toFixed(1) }} %)</strong>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            </section>
+          }
+
+          <p class="lr-muted">{{ s.mission.provenance }}</p>
+        </div>
+      </div>
+    }
+  } @else if (loadError()) {
+    <div mtr-empty-state tone="error" heading="Mission unavailable" [description]="loadError()">
+      <a mtrEmptyAction routerLink="/learn" class="btn btn-secondary">Back to MarketQuest</a>
+    </div>
+  } @else {
+    <div mtr-panel-skeleton [rows]="10"></div>
+  }
+</div>

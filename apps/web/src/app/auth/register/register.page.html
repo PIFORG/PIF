@@ -1,0 +1,61 @@
+<mtr-auth-layout
+  [title]="'Créez votre compte'"
+  lead="Commencez à vous entraîner avec du capital virtuel. Nous vérifions votre courriel avant l'accès à la salle de marché."
+  [showFooter]="true"
+>
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+
+  <form (submit)="onSubmit($event)" novalidate>
+    <mtr-form-field
+      label="Prénom"
+      autocomplete="given-name"
+      name="firstName"
+      [error]="form.errors().firstName"
+      [value]="form.values().firstName"
+      (valueChange)="form.set('firstName', $event)"
+    />
+    <mtr-form-field
+      label="Nom"
+      autocomplete="family-name"
+      name="lastName"
+      [error]="form.errors().lastName"
+      [value]="form.values().lastName"
+      (valueChange)="form.set('lastName', $event)"
+    />
+    <mtr-form-field
+      label="Courriel"
+      type="email"
+      autocomplete="email"
+      name="email"
+      [error]="form.errors().email"
+      [value]="form.values().email"
+      (valueChange)="form.set('email', $event)"
+    />
+    <mtr-password-field
+      label="Mot de passe"
+      autocomplete="new-password"
+      [hint]="passwordHint"
+      name="password"
+      [error]="form.errors().password"
+      [value]="form.values().password"
+      (valueChange)="form.set('password', $event)"
+    />
+    <mtr-password-strength-hint [password]="form.values().password" />
+    <mtr-password-field
+      label="Confirmer le mot de passe"
+      autocomplete="new-password"
+      name="confirmPassword"
+      [error]="form.errors().confirmPassword"
+      [value]="form.values().confirmPassword"
+      (valueChange)="form.set('confirmPassword', $event)"
+    />
+    <button type="submit" class="btn btn-primary" [disabled]="form.submitting()">
+      {{ form.submitting() ? 'Création du compte…' : 'Créer un compte investisseur' }}
+    </button>
+  </form>
+
+  <ng-container ngProjectAs="[authFooter]">
+    <span>Déjà inscrit ? <a routerLink="/login">Se connecter</a></span>
+  </ng-container>
+</mtr-auth-layout>

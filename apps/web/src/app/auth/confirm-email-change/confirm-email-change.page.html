@@ -1,0 +1,26 @@
+<mtr-auth-layout
+  [title]="'Confirmez votre nouveau courriel'"
+  lead="La confirmation bascule votre compte vers cette adresse. Rien ne change tant que vous n'avez pas appuyé sur le bouton."
+  [showFooter]="true"
+>
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+  @if (success()) {
+    <a routerLink="/login" class="btn btn-primary" style="width: 100%">Continuer vers la connexion</a>
+  } @else {
+    <p>
+      {{
+        token()
+          ? 'Vous serez déconnecté sur tous les appareils après confirmation.'
+          : 'Aucun jeton de confirmation n\'a été trouvé. Rouvrez le lien reçu par courriel.'
+      }}
+    </p>
+    <button type="button" class="btn btn-primary" style="width: 100%" (click)="confirm()" [disabled]="busy() || !token()">
+      {{ busy() ? 'Confirmation…' : 'Confirmer le nouveau courriel' }}
+    </button>
+  }
+
+  <ng-container ngProjectAs="[authFooter]">
+    <a routerLink="/login">Retour à la connexion</a>
+  </ng-container>
+</mtr-auth-layout>

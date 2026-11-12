@@ -1,0 +1,47 @@
+<section class="adm-section" aria-labelledby="admin-overview-heading">
+  <div class="adm-sectionHead">
+    <div>
+      <h2 id="admin-overview-heading">Vue d'ensemble de la plateforme</h2>
+      <p>Indicateurs de comptes en direct issus de l'API d'identité.</p>
+    </div>
+    <a routerLink="/admin/users" class="btn btn-secondary">Gérer les utilisateurs</a>
+  </div>
+
+  <mtr-form-error [message]="error()" />
+  @if (loading()) {
+    <p role="status">Chargement de la vue d'ensemble…</p>
+  }
+
+  @if (loaded(); as data) {
+    <div class="grid-stats">
+      @for (tile of tiles(); track tile.label) {
+        <article class="stat-tile">
+          <div class="label">{{ tile.label }}</div>
+          <div class="value">{{ tile.value ?? '—' }}</div>
+        </article>
+      }
+    </div>
+    @if (data.eventTotals.items.length) {
+      <div class="adm-sectionBlock">
+        <h3>Événements des {{ data.eventTotals.windowDays }} derniers jours</h3>
+        <ul class="adm-feed">
+          @for (item of data.eventTotals.items.slice(0, 12); track item.eventType + '-' + item.outcome) {
+            <li>{{ item.eventType }} · {{ item.outcome }} · {{ item.count }}</li>
+          }
+        </ul>
+      </div>
+    }
+    <div class="adm-sectionBlock">
+      <h3>Événements de sécurité récents</h3>
+      @if (data.recentEvents.length === 0) {
+        <p>Aucun événement récent.</p>
+      } @else {
+        <ul class="adm-feed">
+          @for (event of data.recentEvents; track event.id) {
+            <li>{{ event.eventType }} · {{ event.outcome }} · {{ formatDateTime(event.createdAt) }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

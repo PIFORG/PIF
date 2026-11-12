@@ -1,0 +1,198 @@
+@if (user(); as user) {
+  <div style="display: grid; gap: 1.25rem">
+    <section class="card-panel" aria-labelledby="account-heading">
+      <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem">
+        <h2 id="account-heading" style="margin: 0">Compte</h2>
+        <mtr-account-status-badge [status]="user.status" />
+      </div>
+      <dl class="definition-list">
+        <div>
+          <dt>Courriel</dt>
+          <dd>
+            {{ user.email }}
+            @if (user.emailVerified) {
+              <span class="badge badge-active">Vérifié</span>
+            } @else {
+              <span class="badge badge-pending">Non vérifié</span>
+              <a routerLink="/resend-verification">Envoyer un nouveau lien</a>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Membre depuis</dt>
+          <dd>{{ memberSince() }}</dd>
+        </div>
+        <div>
+          <dt>Dernière connexion</dt>
+          <dd>{{ lastSignIn() }}</dd>
+        </div>
+        <div>
+          <dt>Vérification en deux étapes</dt>
+          <dd>{{ user.mfaEnabled ? 'Activée' : 'Désactivée' }} · <a routerLink="/settings/security">Paramètres de sécurité</a></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card-panel" aria-labelledby="profile-heading">
+      <h2 id="profile-heading">Profil et préférences</h2>
+      <mtr-form-error [message]="error()" />
+      <mtr-form-success [message]="success()" />
+      <form (submit)="onSubmit($event)" novalidate>
+        <div class="field">
+          <label for="firstName">Prénom</label>
+          <input
+            id="firstName"
+            name="firstName"
+            class="input"
+            [attr.aria-invalid]="errors().firstName ? true : null"
+            [attr.aria-describedby]="errors().firstName ? 'firstName-error' : null"
+            [value]="form().firstName"
+            (input)="setText('firstName', $any($event.target).value)"
+          />
+          @if (errors().firstName; as message) {
+            <span id="firstName-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="lastName">Nom</label>
+          <input
+            id="lastName"
+            name="lastName"
+            class="input"
+            [attr.aria-invalid]="errors().lastName ? true : null"
+            [attr.aria-describedby]="errors().lastName ? 'lastName-error' : null"
+            [value]="form().lastName"
+            (input)="setText('lastName', $any($event.target).value)"
+          />
+          @if (errors().lastName; as message) {
+            <span id="lastName-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="experienceLevel">Niveau d'expérience</label>
+          <select
+            id="experienceLevel"
+            name="experienceLevel"
+            class="select"
+            [attr.aria-invalid]="errors().experienceLevel ? true : null"
+            [attr.aria-describedby]="errors().experienceLevel ? 'experienceLevel-hint experienceLevel-error' : 'experienceLevel-hint'"
+            (change)="setText('experienceLevel', $any($event.target).value)"
+          >
+            <option value="BEGINNER" [selected]="form().experienceLevel === 'BEGINNER'">Débutant</option>
+            <option value="INTERMEDIATE" [selected]="form().experienceLevel === 'INTERMEDIATE'">Intermédiaire</option>
+            <option value="ADVANCED" [selected]="form().experienceLevel === 'ADVANCED'">Avancé</option>
+          </select>
+          <span id="experienceLevel-hint" class="field-hint">
+            Adapte uniquement le contenu pédagogique. Ce n'est pas une évaluation d'adéquation à l'investissement.
+          </span>
+          @if (errors().experienceLevel; as message) {
+            <span id="experienceLevel-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="preferredCurrency">Devise d'affichage</label>
+          <select
+            id="preferredCurrency"
+            name="preferredCurrency"
+            class="select"
+            [attr.aria-invalid]="errors().preferredCurrency ? true : null"
+            [attr.aria-describedby]="errors().preferredCurrency ? 'preferredCurrency-hint preferredCurrency-error' : 'preferredCurrency-hint'"
+            (change)="setText('preferredCurrency', $any($event.target).value)"
+          >
+            @for (code of currencies(); track code) {
+              <option [value]="code" [selected]="form().preferredCurrency === code">{{ code }}</option>
+            }
+          </select>
+          <span id="preferredCurrency-hint" class="field-hint">
+            Enregistrée pour les modules portefeuille et trading. Les missions d'apprentissage et l'espace d'exemple sont
+            libellés en dinars tunisiens (DT) et ne sont pas convertis. Aucun argent réel n'est en jeu.
+          </span>
+          @if (errors().preferredCurrency; as message) {
+            <span id="preferredCurrency-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="timezone">Fuseau horaire</label>
+          <select
+            id="timezone"
+            name="timezone"
+            class="select"
+            [attr.aria-invalid]="errors().timezone ? true : null"
+            [attr.aria-describedby]="errors().timezone ? 'timezone-error' : null"
+            (change)="setText('timezone', $any($event.target).value)"
+          >
+            @for (zone of timeZones(); track zone) {
+              <option [value]="zone" [selected]="form().timezone === zone">{{ zone }}</option>
+            }
+          </select>
+          @if (errors().timezone; as message) {
+            <span id="timezone-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="chartTheme">Thème des graphiques</label>
+          <select
+            id="chartTheme"
+            name="chartTheme"
+            class="select"
+            [attr.aria-invalid]="errors().chartTheme ? true : null"
+            [attr.aria-describedby]="errors().chartTheme ? 'chartTheme-error' : null"
+            (change)="setText('chartTheme', $any($event.target).value)"
+          >
+            @for (theme of chartThemes; track theme) {
+              <option [value]="theme" [selected]="form().chartTheme === theme">{{ themeLabels[theme] }}</option>
+            }
+          </select>
+          @if (errors().chartTheme; as message) {
+            <span id="chartTheme-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="trainingDifficulty">Difficulté d'entraînement</label>
+          <select
+            id="trainingDifficulty"
+            name="trainingDifficulty"
+            class="select"
+            [attr.aria-invalid]="errors().trainingDifficulty ? true : null"
+            [attr.aria-describedby]="errors().trainingDifficulty ? 'trainingDifficulty-error' : null"
+            (change)="setText('trainingDifficulty', $any($event.target).value)"
+          >
+            @for (level of difficulties; track level) {
+              <option [value]="level" [selected]="form().trainingDifficulty === level">{{ difficultyLabels[level] }}</option>
+            }
+          </select>
+          @if (errors().trainingDifficulty; as message) {
+            <span id="trainingDifficulty-error" class="field-error" role="alert">{{ message }}</span>
+          }
+        </div>
+        <fieldset class="field" style="border: none; padding: 0">
+          <legend style="font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem">Notifications et accessibilité</legend>
+          <p class="field-hint" style="margin-top: 0">
+            Les alertes de sécurité du compte (mot de passe, courriel, connexion et changements de vérification en deux
+            étapes) sont toujours envoyées. Les choix courriel ci-dessous sont enregistrés pour de futurs messages
+            optionnels ; aucun n'est encore envoyé.
+          </p>
+          <label style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem">
+            <input type="checkbox" name="notifyEmailSecurity" [checked]="form().notifyEmailSecurity" (change)="setCheck('notifyEmailSecurity', $any($event.target).checked)" />
+            Conseils de sécurité optionnels par courriel
+          </label>
+          <label style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem">
+            <input type="checkbox" name="notifyMarketDigest" [checked]="form().notifyMarketDigest" (change)="setCheck('notifyMarketDigest', $any($event.target).checked)" />
+            Synthèses de marché par courriel
+          </label>
+          <label style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem">
+            <input type="checkbox" name="reduceMotion" [checked]="form().reduceMotion" (change)="setCheck('reduceMotion', $any($event.target).checked)" />
+            Réduire les animations
+          </label>
+          <label style="display: flex; gap: 0.5rem">
+            <input type="checkbox" name="highContrast" [checked]="form().highContrast" (change)="setCheck('highContrast', $any($event.target).checked)" />
+            Contraste élevé
+          </label>
+        </fieldset>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+          {{ submitting() ? 'Enregistrement…' : 'Enregistrer le profil' }}
+        </button>
+      </form>
+    </section>
+  </div>
+}

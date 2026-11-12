@@ -1,0 +1,332 @@
+<div class="page-shell tr-room tr-deskPage">
+  <mtr-page-heading
+    [eyebrow]="'Négociation virtuelle'"
+    [title]="'Salle des marchés'"
+    [status]="'LIVE_INTEGRATED'"
+    [description]="'Passez des ordres au marché, à cours limité et stop-loss sur un portefeuille virtuel. Chaque prix, frais et exécution provient du serveur.'"
+  >
+    @if (pickable(); as list) {
+      <mtr-portfolio-picker mtrHeadingActions [portfolios]="list" [activeId]="activeId()" (changed)="activeId.set($event)" />
+    }
+  </mtr-page-heading>
+
+  @if (market(); as data) {
+    <p mtr-provenance-note [provenance]="data.provenance" [asOf]="data.asOf"></p>
+  }
+
+  @if (portfolioError()) {
+    <p class="form-error-banner" role="alert">{{ portfolioError() }}</p>
+  }
+
+  @if (toast(); as t) {
+    <div class="tr-toast" [attr.data-tone]="t.tone" role="status">
+      {{ t.text }}
+      <button type="button" class="btn btn-ghost btn-sm" (click)="toast.set(null)">Fermer</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <section mtr-panel heading="Portefeuille">
+      <div mtr-panel-skeleton [rows]="3"></div>
+    </section>
+  } @else if (portfolio(); as p) {
+    <div class="tr-kpis tr-tape">
+      <div mtr-kpi label="Capitaux propres" icon="portfolio" hint="Trésorerie plus positions au mid">{{ dt(p.equity) }}</div>
+      <div mtr-kpi label="Trésorerie disponible" icon="bank" [hint]="p.reservedCash > 0 ? dt(p.reservedCash) + ' réservée pour les ordres' : 'Rien de réservé'">{{ dt(p.availableCash) }}</div>
+      <div
+        mtr-kpi
+        label="Profit"
+        icon="markets"
+        [tone]="p.profit > 0 ? 'positive' : p.profit < 0 ? 'negative' : 'default'"
+        [hint]="'Réalisé ' + dt(p.realizedPnl) + ' · frais ' + dt(p.feesPaid)"
+      >
+        <span mtr-signed-amount [value]="p.profit"></span>
+      </div>
+      <div mtr-kpi label="Ordres ouverts" icon="trading">
+        {{ units(p.openOrders) }}
+        <span mtrKpiHint class="ws-kpiHint"><a class="btn btn-ghost btn-sm" routerLink="/portfolios">Performance et risque</a></span>
+      </div>
+    </div>
+  } @else if (!portfolioError()) {
+    <section mtr-panel heading="Commencer avec un portefeuille virtuel" description="Choisissez un nom et une trésorerie de départ. Vous pouvez détenir jusqu'à 5 portefeuilles.">
+      <mtr-create-portfolio-form (created)="onCreated($event)" />
+    </section>
+  }
+
+  <div class="tr-desk">
+    <div class="tr-areaMarket">
+      <section mtr-panel heading="Instruments" [description]="market() ? visible().length + ' / ' + market()!.instruments.length + ' instruments' : undefined">
+        <div class="tr-search">
+          <label class="sr-only" for="desk-search">Rechercher des instruments</label>
+          <input id="desk-search" class="input" type="search" placeholder="Rechercher symbole, nom, secteur" [value]="query()" (input)="query.set(value($event))" />
+          <label class="sr-only" for="desk-filter">Filtrer</label>
+          <select id="desk-filter" class="select" (change)="setFilter($event)">
+            <option value="ALL" [selected]="filter() === 'ALL'">Tous</option>
+            <option value="WATCHLIST" [selected]="filter() === 'WATCHLIST'">Liste de suivi</option>
+            <option value="EQUITY" [selected]="filter() === 'EQUITY'">Actions</option>
+            <option value="FUND" [selected]="filter() === 'FUND'">Fonds</option>
+          </select>
+        </div>
+        @if (marketError()) {
+          <div mtr-empty-state tone="error" heading="Données de marché indisponibles" [description]="marketError()">
+            <button mtrEmptyAction type="button" class="btn btn-secondary btn-sm" (click)="loadMarket()">Réessayer</button>
+          </div>
+        } @else if (!market()) {
+          <div mtr-panel-skeleton [rows]="6"></div>
+        } @else if (visible().length === 0) {
+          <div
+            mtr-empty-state
+            icon="markets"
+            [heading]="filter() === 'WATCHLIST' ? 'Votre liste de suivi est vide' : 'Aucun résultat'"
+            [description]="filter() === 'WATCHLIST' ? 'Utilisez l\'étoile à côté d\'un instrument pour le suivre.' : 'Essayez une autre recherche.'"
+          ></div>
+        } @else {
+          <ul class="tr-instruments">
+            @for (i of visible(); track i.symbol) {
+              <li class="tr-instrumentRow" [attr.data-selected]="i.symbol === symbol()" [attr.data-status]="i.status" [attr.data-class]="i.assetClass">
+                <button type="button" class="tr-instrumentButton" [attr.aria-pressed]="i.symbol === symbol()" (click)="selectSymbol(i.symbol)">
+                  <span class="tr-symbolLine">
+                    <strong>{{ i.symbol }}</strong>
+                    @if (i.status === 'HALTED') {
+                      <span class="badge badge-danger">Suspendu</span>
+                    }
+                  </span>
+                  <span class="tr-instrumentName">{{ i.name }}</span>
+                  <span class="tr-instrumentMeta">{{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ i.sector }}</span>
+                  <span class="tr-instrumentPrice">
+                    <span class="num">{{ price(i.quote?.mid) }}</span>
+                    @if (i.changePct !== null) {
+                      <span mtr-signed-amount [value]="i.changePct / 100" kind="pct"></span>
+                    } @else {
+                      <span class="tr-muted">Pas encore de clôture</span>
+                    }
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  class="tr-watchToggle"
+                  [attr.aria-pressed]="watched().has(i.symbol)"
+                  [attr.aria-label]="(watched().has(i.symbol) ? 'Retirer ' : 'Ajouter ') + i.symbol + (watched().has(i.symbol) ? ' de la liste de suivi' : ' à la liste de suivi')"
+                  (click)="toggleWatch(i.symbol)"
+                >
+                  <svg mtrIcon name="star" [size]="16" />
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+
+    <div class="tr-areaChart">
+      <section
+        mtr-panel
+        [heading]="instrument() ? instrument()!.symbol + ' · ' + instrument()!.name : 'Instrument'"
+        [description]="instrument() ? (instrument()!.assetClass === 'FUND' ? 'Fonds' : 'Action') + ' · ' + instrument()!.sector + (instrument()!.status === 'HALTED' ? ' · négociation suspendue' : '') : undefined"
+      >
+        @if (instrument(); as inst) {
+          <div class="tr-chartHead">
+            <div>
+              <div class="tr-bigPrice">{{ price(inst.quote?.mid) }} <small>DT mid</small></div>
+              @if (inst.changePct !== null) {
+                <span><span mtr-signed-amount [value]="inst.changePct / 100" kind="pct"></span>&ngsp;<span class="tr-muted">depuis la clôture précédente</span></span>
+              }
+            </div>
+            <div class="tr-ranges" role="group" aria-label="Plage du graphique">
+              @for (r of ranges; track r) {
+                <button type="button" [attr.aria-pressed]="range() === r" (click)="range.set(r)">{{ r }}</button>
+              }
+            </div>
+          </div>
+          @if (historyError()) {
+            <div mtr-empty-state tone="error" heading="Historique indisponible" [description]="historyError()"></div>
+          } @else if (chart(); as c) {
+            @if (c.enough) {
+              <figure
+                mtr-line-chart
+                [series]="c.series"
+                [summary]="c.summary"
+                [formatY]="formatAxis"
+                [xLabels]="c.xLabels"
+                [minSpan]="c.minSpan"
+                [height]="340"
+              ></figure>
+              <p class="tr-muted">
+                Prix mid {{ c.resolution }}@if (c.rangeChange !== null) { · <span mtr-signed-amount [value]="c.rangeChange" kind="pct"></span> sur la plage}
+              </p>
+            } @else {
+              <div
+                mtr-empty-state
+                icon="clock"
+                heading="Historique insuffisant pour cette plage"
+                description="Le marché simulé démarre le 1er janvier 2026 ; choisissez une plage plus longue."
+              ></div>
+            }
+          } @else {
+            <div mtr-panel-skeleton [rows]="4"></div>
+          }
+          @if (inst.quote; as q) {
+            <p class="tr-contextLabel">Carnet, frais et position</p>
+            <dl class="tr-quoteGrid">
+              <div>
+                <dt>Bid</dt>
+                <dd>{{ price(q.bid) }}</dd>
+              </div>
+              <div>
+                <dt>Ask</dt>
+                <dd>{{ price(q.ask) }}</dd>
+              </div>
+              <div>
+                <dt>Spread</dt>
+                <dd>{{ q.spreadBps.toFixed(1) }} bps</dd>
+              </div>
+              <div>
+                <dt>Quantité au meilleur prix</dt>
+                <dd>{{ units(q.depth) }}</dd>
+              </div>
+              <div>
+                <dt>Heure de cotation</dt>
+                <dd>{{ shortTime(q.asOf) }}</dd>
+              </div>
+              <div>
+                <dt>Frais</dt>
+                <dd>{{ (inst.fees.feeBps / 100).toFixed(2) }} % · min {{ dt(inst.fees.minFee) }}</dd>
+              </div>
+              <div>
+                <dt>Vous détenez</dt>
+                <dd>{{ held() ? units(held()!.quantity) : '0' }}</dd>
+              </div>
+              <div>
+                <dt>Votre P&amp;L</dt>
+                <dd>
+                  @if (held(); as h) {
+                    <span mtr-signed-amount [value]="h.unrealizedPnl"></span>
+                  } @else {
+                    {{ dash }}
+                  }
+                </dd>
+              </div>
+            </dl>
+          } @else {
+            <p class="tr-muted">Aucune cotation n'est disponible pour cet instrument pour le moment.</p>
+          }
+        } @else if (market()) {
+          <div mtr-empty-state icon="markets" heading="Choisissez un instrument"></div>
+        } @else {
+          <div mtr-panel-skeleton [rows]="4"></div>
+        }
+      </section>
+    </div>
+
+    <div class="tr-areaTicket">
+      <section mtr-panel heading="Ticket d'ordre" [description]="portfolio() ? 'Négociation sur ' + portfolio()!.name : undefined">
+        @if (loading() || !market()) {
+          <div mtr-panel-skeleton [rows]="6"></div>
+        } @else {
+          <mtr-order-ticket
+            [portfolio]="portfolio()"
+            [instruments]="market()!.instruments"
+            [(draft)]="draft"
+            (result)="onResult($event)"
+            (stale)="onStale()"
+          />
+        }
+      </section>
+
+      @if (portfolio(); as book) {
+        <details class="tr-fold" open>
+          <summary>
+            <span>Positions</span>
+            <span class="tr-foldMeta">{{ units(book.positions.length) }} · {{ shortTime(book.asOf) }}</span>
+          </summary>
+          <div class="tr-foldBody">
+            <p class="tr-foldNote">Valorisées au mid. Vendre recharge le ticket sur la vente.</p>
+            <mtr-positions-table [positions]="book.positions" [tradable]="true" (trade)="selectSymbol($event.symbol, $event.side)" />
+          </div>
+        </details>
+        <details class="tr-fold" open>
+          <summary>
+            <span>Risque et trésorerie</span>
+            <span class="tr-foldMeta">{{ dt(book.availableCash) }} dispo.</span>
+          </summary>
+          <div class="tr-foldBody">
+            <dl class="tr-riskStrip">
+              <div>
+                <dt>Disponible</dt>
+                <dd>{{ dt(book.availableCash) }}</dd>
+              </div>
+              <div>
+                <dt>Réservée</dt>
+                <dd>{{ dt(book.reservedCash) }}</dd>
+              </div>
+              <div>
+                <dt>Positions</dt>
+                <dd>{{ dt(book.positionsValue) }}</dd>
+              </div>
+              <div>
+                <dt>P&amp;L latent</dt>
+                <dd><span mtr-signed-amount [value]="book.unrealizedPnl"></span></dd>
+              </div>
+              <div>
+                <dt>P&amp;L réalisé</dt>
+                <dd><span mtr-signed-amount [value]="book.realizedPnl"></span></dd>
+              </div>
+              <div>
+                <dt>Frais payés</dt>
+                <dd>{{ dt(book.feesPaid) }}</dd>
+              </div>
+              <div>
+                <dt>Coût de spread</dt>
+                <dd>{{ dt(book.spreadCost) }}</dd>
+              </div>
+              <div>
+                <dt>Plafond de position</dt>
+                <dd>{{ book.maxPositionWeightPct }} %</dd>
+              </div>
+            </dl>
+            <p class="tr-foldActions"><a routerLink="/portfolios" class="btn btn-ghost btn-sm">VaR, stress et historique</a></p>
+          </div>
+        </details>
+      }
+    </div>
+  </div>
+
+  @if (portfolio(); as p) {
+    <div class="tr-secondary">
+      <details class="tr-fold" open>
+        <summary>
+          <span>Ordres en cours</span>
+          <span class="tr-foldMeta">Limite et stop-loss en attente de leur prix</span>
+        </summary>
+        <div class="tr-foldBody">
+          @if (openOrders(); as orders) {
+            <mtr-orders-table
+              [orders]="orders"
+              [cancellable]="true"
+              [cancelling]="cancelling()"
+              emptyTitle="Aucun ordre en cours"
+              emptyDescription="Les ordres à cours limité et stop-loss apparaissent ici jusqu'à exécution, expiration ou annulation."
+              (cancelOrder)="cancelOrder($event)"
+            />
+          } @else {
+            <div mtr-panel-skeleton [rows]="3"></div>
+          }
+        </div>
+      </details>
+      <details class="tr-fold">
+        <summary>
+          <span>Transactions récentes</span>
+          <span class="tr-foldMeta">Dernières exécutions de ce portefeuille</span>
+        </summary>
+        <div class="tr-foldBody">
+          <p class="tr-foldActions"><a routerLink="/portfolios" class="btn btn-ghost btn-sm">Historique complet</a></p>
+          @if (trades(); as list) {
+            <mtr-trades-table [executions]="list" />
+          } @else {
+            <div mtr-panel-skeleton [rows]="3"></div>
+          }
+        </div>
+      </details>
+    </div>
+  }
+</div>

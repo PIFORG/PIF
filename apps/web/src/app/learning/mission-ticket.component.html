@@ -1,0 +1,131 @@
+<div class="lr-segmented" role="group" aria-label="Order side">
+  @for (side of sides; track side) {
+    <button
+      type="button"
+      [attr.data-side]="side"
+      [attr.aria-pressed]="draft().side === side"
+      [disabled]="disabled() || (draft().type === 'STOP' && side === 'BUY')"
+      (click)="update({ side })"
+    >
+      {{ side === 'BUY' ? 'Buy' : 'Sell' }}
+    </button>
+  }
+</div>
+<div class="lr-fieldRow">
+  <div class="field">
+    <label for="ticket-symbol">Asset</label>
+    <select id="ticket-symbol" class="select" [disabled]="disabled()" (change)="update({ symbol: $any($event.target).value })">
+      @for (q of session().state.quotes; track q.symbol) {
+        <option [value]="q.symbol" [selected]="q.symbol === draft().symbol">{{ q.symbol }} · {{ q.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="ticket-type">Order type</label>
+    <select id="ticket-type" class="select" [disabled]="disabled()" (change)="changeType($any($event.target).value)">
+      @for (t of rules().allowedOrderTypes; track t) {
+        <option [value]="t" [selected]="t === draft().type">{{ t === 'MARKET' ? 'Market' : t === 'LIMIT' ? 'Limit' : 'Stop (protective sell)' }}</option>
+      }
+    </select>
+  </div>
+</div>
+<div class="lr-fieldRow">
+  <div class="field">
+    <label for="ticket-qty">Quantity</label>
+    <input
+      id="ticket-qty"
+      class="input num"
+      inputmode="numeric"
+      [value]="draft().quantity"
+      [disabled]="disabled()"
+      (input)="update({ quantity: trimmed($event) })"
+    />
+  </div>
+  @if (draft().type !== 'MARKET') {
+    <div class="field">
+      <label for="ticket-price">{{ draft().type === 'LIMIT' ? 'Limit price (DT)' : 'Stop price (DT)' }}</label>
+      <input
+        id="ticket-price"
+        class="input num"
+        inputmode="decimal"
+        [value]="draft().price"
+        [disabled]="disabled()"
+        (input)="update({ price: trimmed($event) })"
+      />
+    </div>
+  }
+</div>
+<div class="lr-fieldRow">
+  <div class="field">
+    <label for="ticket-rationale">Why?</label>
+    <select
+      id="ticket-rationale"
+      class="select"
+      [disabled]="disabled()"
+      [attr.aria-invalid]="touched() && !draft().rationale ? 'true' : null"
+      (change)="update({ rationale: $any($event.target).value })"
+    >
+      <option value="" [selected]="draft().rationale === ''">Choose a reason…</option>
+      @for (r of rationales; track r) {
+        <option [value]="r" [selected]="draft().rationale === r">{{ rationaleLabel[r] }}</option>
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="ticket-confidence">{{ rules().requireConfidence ? 'Confidence (required)' : 'Confidence (optional)' }}</label>
+    <select
+      id="ticket-confidence"
+      class="select"
+      [disabled]="disabled()"
+      [attr.aria-invalid]="touched() && rules().requireConfidence && !draft().confidence ? 'true' : null"
+      (change)="update({ confidence: $any($event.target).value })"
+    >
+      <option value="" [selected]="draft().confidence === ''">{{ rules().requireConfidence ? 'How sure are you?' : 'Not rated' }}</option>
+      @for (c of confidenceOptions; track c) {
+        <option [value]="c" [selected]="draft().confidence === c">{{ c }} % sure it works out</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="lr-preview" id="ticket-preview" aria-live="polite" [attr.aria-busy]="checking() || null">
+  <div>
+    <span>Estimated price</span>
+    <span class="num">{{ estimate() ? formatDT(estimate()!.price, 3) : '—' }}</span>
+  </div>
+  <div>
+    <span>Commission</span>
+    <span class="num">{{ estimate() ? formatDT(estimate()!.fee) : '—' }}</span>
+  </div>
+  <div>
+    <strong>{{ draft().side === 'BUY' ? 'Estimated cost' : 'Estimated proceeds' }}</strong>
+    <strong class="num">{{ estimate() ? formatDT(estimate()!.total) : '—' }}</strong>
+  </div>
+  <div>
+    <span>Available cash</span>
+    <span class="num">{{ formatDT(session().state.portfolio.availableCash) }}</span>
+  </div>
+  @if (refusal()) {
+    <p class="field-error" style="margin: 0">{{ refusal() }}</p>
+  }
+  @if (unavailable()) {
+    <p class="lr-muted" style="margin: 0">The order check is unavailable right now. The server still validates the order when you place it.</p>
+  }
+</div>
+@if (touched() && formErrors().length) {
+  <ul class="field-error" role="alert" style="margin: 0; padding-left: 1.1rem">
+    @for (e of formErrors(); track e) {
+      <li>{{ e }}</li>
+    }
+  </ul>
+}
+@if (preview()?.warnings?.length) {
+  <ul class="lr-muted" style="margin: 0; padding-left: 1.1rem">
+    @for (w of preview()!.warnings; track w) {
+      <li>{{ w }}</li>
+    }
+  </ul>
+}
+<button type="submit" [class]="'btn ' + (draft().side === 'BUY' ? 'btn-primary' : 'btn-danger')" [disabled]="disabled()">
+  {{ draft().side === 'BUY' ? 'Place buy order' : 'Place sell order' }}
+</button>

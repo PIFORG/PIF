@@ -1,0 +1,63 @@
+<section aria-labelledby="sessions-heading">
+  <div style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem">
+    <div>
+      <h2 id="sessions-heading" style="margin-bottom: 0.35rem">Connexions actives</h2>
+      <p style="margin: 0">Navigateurs et appareils actuellement connectés à votre compte.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-start">
+      <button type="button" class="btn btn-secondary" (click)="open('others')" [disabled]="others() === 0">
+        Déconnecter les autres sessions
+      </button>
+      <button type="button" class="btn btn-danger" (click)="open('all')">Déconnecter partout</button>
+    </div>
+  </div>
+
+  <mtr-form-error [message]="error()" />
+  <mtr-form-success [message]="success()" />
+
+  @if (loading()) {
+    <p role="status">Chargement des sessions…</p>
+  }
+
+  <div style="display: grid; gap: 0.9rem">
+    @for (session of sessions(); track session.id) {
+      <mtr-session-card [session]="session" [busy]="busyId() === session.id" (revoke)="onRevoke($event)" />
+    }
+  </div>
+
+  @if (!loading() && sessions().length === 0) {
+    <p role="status">Aucune session active trouvée.</p>
+  }
+
+  <mtr-confirm-dialog
+    [open]="dialog() === 'others'"
+    heading="Déconnecter toutes les autres sessions ?"
+    description="Vous restez connecté ici. Les autres navigateurs et appareils devront se reconnecter."
+    confirmLabel="Déconnecter les autres"
+    [danger]="true"
+    [busy]="busyDialog()"
+    [error]="dialogError()"
+    [hasFields]="true"
+    (cancelled)="!busyDialog() && dialog.set(null)"
+    (confirmed)="revokeOthers()"
+  >
+    <mtr-step-up-fields
+      idPrefix="revoke-others"
+      [mfaEnabled]="mfaEnabled()"
+      [values]="stepUp.values()"
+      (changed)="stepUp.patch($event)"
+    />
+  </mtr-confirm-dialog>
+
+  <mtr-confirm-dialog
+    [open]="dialog() === 'all'"
+    heading="Déconnecter partout ?"
+    description="Toutes les sessions se terminent, y compris celle-ci. Vous devrez vous reconnecter sur chaque appareil."
+    confirmLabel="Déconnecter partout"
+    [danger]="true"
+    [busy]="busyDialog()"
+    [error]="dialogError()"
+    (cancelled)="!busyDialog() && dialog.set(null)"
+    (confirmed)="logoutEverywhere()"
+  />
+</section>
