@@ -263,9 +263,9 @@ function timeline(overrides: Partial<Timeline> = {}): Timeline {
     missionTitle: 'Protect Your Capital',
     canBranch: true,
     decisions: [
-      { seq: 1, step: 0, type: 'PLACE_ORDER', summary: 'BUY 100 AAA market', rationale: 'LONG_TERM_VIEW', outcome: 'ACCEPTED', at: '2026-11-10T09:01:00.000Z' },
+      { seq: 1, step: 0, type: 'PLACE_ORDER', summary: 'Achat 100 AAA au marché', rationale: 'LONG_TERM_VIEW', outcome: 'ACCEPTED', at: '2026-11-10T09:01:00.000Z' },
       { seq: 2, step: 1, type: 'REQUEST_HINT', summary: 'Asked the mentor', rationale: null, outcome: 'ACCEPTED', at: '2026-11-10T09:02:00.000Z' },
-      { seq: 3, step: 1, type: 'PLACE_ORDER', summary: 'SELL 500 AAA market', rationale: 'TAKE_PROFIT', outcome: 'REJECTED', at: '2026-11-10T09:03:00.000Z' },
+      { seq: 3, step: 1, type: 'PLACE_ORDER', summary: 'Vente 500 AAA au marché', rationale: 'TAKE_PROFIT', outcome: 'REJECTED', at: '2026-11-10T09:03:00.000Z' },
       { seq: 4, step: 1, type: 'ADVANCE', summary: 'Advance', rationale: null, outcome: 'ACCEPTED', at: '2026-11-10T09:04:00.000Z' },
     ],
     equityCurve: [
@@ -710,8 +710,8 @@ describe('SessionReviewPage', () => {
     const { fixture, root } = await render(SessionReviewPage, { id: 's-1' });
     const items = Array.from(root.querySelectorAll('.lr-timeline li'));
     expect(items.map((li) => words(li))).toEqual([
-      'Jour 0 · BUY 100 AAA market · Vision long terme #1',
-      'Jour 1 · SELL 500 AAA market · Prendre des bénéfices · rejeté #3',
+      'Jour 0 · Achat 100 AAA au marché · Vision long terme #1',
+      'Jour 1 · Vente 500 AAA au marché · Prendre des bénéfices · rejeté #3',
       'Jour 1 · Advance #4',
     ]);
     expect(items[1].getAttribute('data-outcome')).toBe('REJECTED');

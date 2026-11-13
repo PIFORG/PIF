@@ -200,6 +200,31 @@ public final class StoryCatalog {
                   visual("type", "lesson", "points", List.of("Stops trigger at the stop and fill at the next bid.",
                       "Overnight gaps skip levels.", "Position size is your real protection."))))));
 
+  /**
+   * The computed amounts each caption quotes, in the order of its {@code {n}} placeholders in the French overlay
+   * (learning_fr.properties). The English captions above embed the same constants, so both languages always show
+   * the same arithmetic. Scenes without a computed amount have no entry.
+   */
+  private static final Map<String, List<Double>> CAPTION_VALUES = Map.ofEntries(
+      Map.entry("sarah-and-the-market-crash.s1", List.of(SARAH_START)),
+      Map.entry("sarah-and-the-market-crash.s2", List.of(SARAH_START, SARAH_DECISION)),
+      Map.entry("sarah-and-the-market-crash.s4", List.of(SARAH_SOLD)),
+      Map.entry("sarah-and-the-market-crash.s5", List.of(SARAH_RECOVERED, SARAH_SOLD)),
+      Map.entry("sarah-and-the-market-crash.s7", List.of(SARAH_TROUGH, SARAH_DRAWDOWN_PCT)),
+      Map.entry("sarah-and-the-market-crash.s8", List.of(SARAH_RECOVERED, SARAH_GAP_AT_TROUGH)),
+      Map.entry("adam-first-order.a3", List.of(ADAM_MARKET)),
+      Map.entry("adam-first-order.a5", List.of(ADAM_LIMIT)),
+      Map.entry("youssef-all-in.y3", List.of(YOUSSEF_A)),
+      Map.entry("youssef-all-in.y5", List.of(YOUSSEF_B)),
+      Map.entry("youssef-all-in.y6", List.of(20_000 * 0.1, 4_000 * 0.1)),
+      Map.entry("youssef-and-the-gap.g3", List.of(GAP_HOLD)),
+      Map.entry("youssef-and-the-gap.g5", List.of(GAP_STOP)));
+
+  /** Computed amounts quoted by a scene's caption, in placeholder order; empty when the caption quotes none. */
+  public static List<Double> captionValues(String storySlug, String sceneId) {
+    return CAPTION_VALUES.getOrDefault(storySlug + "." + sceneId, List.of());
+  }
+
   public static StoryDefinition find(String slug) {
     for (StoryDefinition s : STORIES) {
       if (s.slug().equals(slug)) return s;

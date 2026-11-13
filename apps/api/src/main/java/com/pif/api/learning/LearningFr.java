@@ -1,7 +1,13 @@
 package com.pif.api.learning;
 
-import java.text.MessageFormat;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -21,8 +27,29 @@ public final class LearningFr {
     }
   }
 
+  /**
+   * Replaces {@code {0}}, {@code {1}}… in the overlay text. Unlike {@link MessageFormat}, apostrophes are ordinary
+   * characters here: French text is full of them ("l'ordre"), and MessageFormat would silently drop them together
+   * with the placeholder that follows.
+   */
   public static String format(String key, String fallback, Object... args) {
-    return MessageFormat.format(get(key, fallback), args);
+    return fill(get(key, fallback), args);
+  }
+
+  static String fill(String template, Object... args) {
+    String out = template;
+    for (int i = 0; i < args.length; i++) out = out.replace("{" + i + "}", String.valueOf(args[i]));
+    return out;
+  }
+
+  /** French number text: non-breaking space between thousands, decimal comma, at most two decimals. */
+  public static String number(double value) {
+    DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.FRENCH);
+    symbols.setGroupingSeparator(' ');
+    symbols.setDecimalSeparator(',');
+    DecimalFormat format = new DecimalFormat("#,##0.##", symbols);
+    format.setRoundingMode(RoundingMode.HALF_UP);
+    return format.format(value);
   }
 
   public static String missionTitle(String slug, String fallback) {
@@ -45,8 +72,34 @@ public final class LearningFr {
     return get("story." + slug + ".summary", fallback);
   }
 
-  public static String sceneCaption(String storySlug, String sceneId, String fallback) {
-    return get("story.scene." + storySlug + "." + sceneId, fallback);
+  /**
+   * French caption of a story scene. {@code values} are the amounts the scene computes (StoryCatalog.captionValues);
+   * they fill the caption's placeholders as French numbers, so the story never shows a raw "{0}".
+   */
+  public static String sceneCaption(String storySlug, String sceneId, String fallback, List<Double> values) {
+    Object[] args = values.stream().map(LearningFr::number).toArray();
+    return fill(get("story.scene." + storySlug + "." + sceneId, fallback), args);
+  }
+
+  /**
+   * French copy of a scene's visual: chart and outcome labels, headline text and lesson points are translated when
+   * the overlay has them; numbers, series and types are left untouched.
+   */
+  public static Map<String, Object> sceneVisual(String storySlug, String sceneId, Map<String, Object> visual) {
+    String base = "story.visual." + storySlug + "." + sceneId + ".";
+    Map<String, Object> out = new LinkedHashMap<>(visual);
+    for (String field : List.of("label", "text")) {
+      if (out.get(field) instanceof String original) out.put(field, get(base + field, original));
+    }
+    if (out.get("points") instanceof List<?> points) {
+      List<Object> translated = new ArrayList<>();
+      for (int i = 0; i < points.size(); i++) {
+        Object point = points.get(i);
+        translated.add(point instanceof String original ? get(base + "point." + i, original) : point);
+      }
+      out.put("points", translated);
+    }
+    return out;
   }
 
   public static String provenance(String fallback) {

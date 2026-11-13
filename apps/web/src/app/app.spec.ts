@@ -100,7 +100,7 @@ describe('application routes', () => {
     expect(root.querySelector('[aria-current="page"].nav-link')?.textContent?.trim()).toBe('Profil');
   });
 
-  it('states plainly that an unmigrated workspace screen is still served by the Next.js application', async () => {
+  it('states plainly, in French, that an unregistered workspace screen is not part of the active application', async () => {
     const pending = WORKSPACE_NAV.flatMap((g) => g.items).find((i) => !MIGRATED_ROUTES.includes(i.href) && !i.href.startsWith('/settings/'));
     if (!pending) return;
     status.set('authenticated');
@@ -109,7 +109,7 @@ describe('application routes', () => {
     await settle(harness);
     const root = harness.routeNativeElement as HTMLElement;
     expect(root.querySelector('h1')?.textContent).toBe(pending.label);
-    expect(root.textContent).toContain('has not been migrated to the Angular application yet');
+    expect(root.textContent).toContain("Ce chemin ne fait pas partie de l'application active.");
   });
 
   it('hides the administration group from investors', async () => {
@@ -123,7 +123,7 @@ describe('application routes', () => {
   it('uses the public layout for unmigrated public pages', async () => {
     const harness = await RouterTestingHarness.create('/legal/terms');
     await settle(harness);
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Not available yet');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Pas encore disponible');
   });
 
   describe('migrated identity screens', () => {

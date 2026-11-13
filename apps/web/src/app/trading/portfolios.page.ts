@@ -107,7 +107,7 @@ export class CashFlowFormComponent {
     this.invalid()
       ? 'Saisissez un montant positif jusqu\'à 1 000 000 DT, avec au plus 3 décimales.'
       : this.type() === 'WITHDRAWAL'
-        ? `Jusqu\'à ${dt(this.portfolio().availableCash)} est disponible au retrait.`
+        ? `Jusqu'à ${dt(this.portfolio().availableCash)} est disponible au retrait.`
         : 'Trésorerie virtuelle uniquement.',
   );
 
