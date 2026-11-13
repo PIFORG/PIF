@@ -127,7 +127,7 @@ describe('BacktestingPage', () => {
     const { fixture, root } = await render();
     expect(root.querySelector('h1')?.textContent).toBe('Tests historiques');
     expect(marketApi.instruments).toHaveBeenCalled();
-    await (fixture.componentInstance as any).run();
+    await (fixture.componentInstance as unknown as Runnable).run();
     await settle(fixture);
     expect(backtestApi.run).toHaveBeenCalled();
     expect(root.textContent).toMatch(/Fictional|FICTIONAL/i);
@@ -138,8 +138,13 @@ describe('BacktestingPage', () => {
   it('surfaces a run error without inventing metrics', async () => {
     backtestApi.run.mockRejectedValue(new ApiError(503, 'Service unavailable.'));
     const { fixture, root } = await render();
-    await (fixture.componentInstance as any).run();
+    await (fixture.componentInstance as unknown as Runnable).run();
     await settle(fixture);
     expect(root.textContent).toContain('Service unavailable.');
   });
 });
+
+/** The page's protected run action, reached the way the template's submit button calls it. */
+interface Runnable {
+  run(): Promise<void>;
+}

@@ -87,7 +87,7 @@ describe('StoryPlayer', () => {
     buttonNamed(root, 'Scène suivante').click();
     fixture.detectChanges();
     expect(root.querySelector('.st-reel')?.textContent).toBe('Épisode 3 · Remontons le temps');
-    expect(root.querySelector('.st-rewindTitle')?.textContent).toBe("Let's rewind!");
+    expect(root.querySelector('.st-rewindTitle')?.textContent).toBe('Revenons en arrière !');
     buttonNamed(root, 'Scène précédente').click();
     fixture.detectChanges();
     expect(root.querySelector('.st-caption')?.textContent).toBe('If you chose A: Sarah sells.');

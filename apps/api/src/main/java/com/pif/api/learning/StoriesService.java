@@ -56,7 +56,8 @@ public class StoriesService {
     var scenes=new ArrayList<Map<String,Object>>();
     for(var scene:s.scenes()) {
       var json=new LinkedHashMap<>(scene.toJson());
-      json.put("caption",LearningFr.sceneCaption(s.slug(),scene.id(),scene.caption()));
+      json.put("caption",LearningFr.sceneCaption(s.slug(),scene.id(),scene.caption(),StoryCatalog.captionValues(s.slug(),scene.id())));
+      json.put("visual",LearningFr.sceneVisual(s.slug(),scene.id(),scene.visual()));
       scenes.add(json);
     }
     value.put("scenes",scenes);

@@ -160,8 +160,8 @@ export class BacktestingPage {
   }
 }
 
-type BacktestRunRequestParams = {
+interface BacktestRunRequestParams {
   shortPeriod?: number;
   longPeriod?: number;
   rebalanceEvery?: number;
-};
+}
