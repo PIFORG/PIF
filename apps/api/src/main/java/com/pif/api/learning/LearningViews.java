@@ -29,7 +29,6 @@ import com.pif.api.learning.engine.Simulator.OrderPreview;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /** Response shapes of apps/api/src/learning/learning.view.ts, with TypeScript property order. */
@@ -368,10 +367,15 @@ public final class LearningViews {
   public static String describeCommand(Command command) {
     switch (command.type()) {
       case "PLACE_ORDER": {
-        String price = "LIMIT".equals(command.orderType()) ? " @ " + jsText(command.limitPrice()) + " DT"
-            : "STOP".equals(command.orderType()) ? " stop " + jsText(command.stopPrice()) + " DT" : "";
-        return command.side() + " " + jsText(command.quantity()) + " " + command.symbol() + " "
-            + command.orderType().toLowerCase(Locale.ROOT) + price;
+        // Display text only: the quantity and prices are the command's own values, printed as the engine prints them.
+        String side = "SELL".equals(command.side()) ? LearningFr.get("cmd.side.sell", "Vente")
+            : LearningFr.get("cmd.side.buy", "Achat");
+        String terms = "LIMIT".equals(command.orderType())
+            ? LearningFr.format("cmd.order.limit", "à cours limité à {0} DT", jsText(command.limitPrice()))
+            : "STOP".equals(command.orderType())
+                ? LearningFr.format("cmd.order.stop", "stop à {0} DT", jsText(command.stopPrice()))
+                : LearningFr.get("cmd.order.market", "au marché");
+        return side + " " + jsText(command.quantity()) + " " + command.symbol() + " " + terms;
       }
       case "CANCEL_ORDER":
         return LearningFr.format("cmd.cancel", "Annuler l'ordre {0}", command.orderId());
@@ -380,7 +384,8 @@ public final class LearningViews {
       case "FINISH":
         return LearningFr.get("cmd.finish", "Terminer la mission");
       case "RUN_STRESS_TEST":
-        return LearningFr.format("cmd.stress", "Test de résistance : {0}", command.scenarioId());
+        return LearningFr.format("cmd.stress", "Test de résistance : {0}",
+            LearningFr.stressName(command.scenarioId(), command.scenarioId()));
       case "REQUEST_HINT":
         return LearningFr.get("cmd.hint", "Question posée au mentor");
       default:

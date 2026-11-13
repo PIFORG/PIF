@@ -457,8 +457,7 @@ public final class Simulator {
       Double used = state.liquidityUsed.get(order.symbol + ":" + order.side);
       double available = Math.max(0, ExecutionRules.remainingDepth(quote, used == null ? 0 : used));
       if (order.quantity > available) {
-        warnings.add("Seulement " + com.pif.api.web.JsNumbers.toLocaleEnUs(available) + " unités sont proposées au meilleur "
-            + ("BUY".equals(order.side) ? "offre" : "demande")
+        warnings.add("Seulement " + Js.str(available) + " unités sont proposées au " + Wording.bestPriceFor(order.side)
             + " actuellement ; un ordre au marché exécute ce volume et annule le reste.");
       }
     }
@@ -468,7 +467,8 @@ public final class Simulator {
           : "Ce cours limité attend que le marché atteigne votre prix ou que la mission se termine.");
     }
     if ("STOP".equals(order.type)) {
-      warnings.add("Un stop vend à la demande une fois atteint. Après un gap, le cours peut être inférieur à votre stop.");
+      warnings.add("Un stop vend au prix acheteur une fois son seuil atteint. Après un gap, ce prix peut être "
+          + "inférieur à votre stop.");
     }
     return new OrderPreview(seq, true, null, null, estimate, List.copyOf(warnings));
   }
@@ -503,10 +503,9 @@ public final class Simulator {
             + dt(order.fills.get(0).price()) + " DT.");
       }
       if ("OPEN".equals(order.status)) {
-        String book = "BUY".equals(order.side) ? "offre" : "demande";
         cancelOrder(state, order, seq, "Seulement " + Js.str(filled) + " sur " + Js.str(order.quantity)
-            + " unités étaient disponibles au meilleur " + book
-            + " ; les ordres au marché sont immédiats ou annulés, le reste a été annulé.");
+            + " unités étaient disponibles au " + Wording.bestPriceFor(order.side)
+            + " ; un ordre au marché s'exécute immédiatement ou s'annule : le reste a été annulé.");
       }
       return new Outcome("ACCEPTED", order.statusReason == null ? "" : order.statusReason);
     }
@@ -527,12 +526,12 @@ public final class Simulator {
           + " DT jusqu'à ce que le marché l'atteigne ou que la mission se termine.");
     }
     return new Outcome("ACCEPTED", "Ordre stop armé à " + dt(stopPrice == null ? 0 : stopPrice)
-        + " DT. Il vend à la demande lorsque celle-ci tombe au niveau du stop ou en dessous.");
+        + " DT. Il vend au prix acheteur dès que celui-ci tombe au niveau du stop ou en dessous.");
   }
 
   private static String advance(Context ctx, SimState state, int seq) {
     if (isMarketClosed(ctx, state)) {
-      throw new SimulationError("MARKET_CLOSED", "C'est la dernière étape. Terminez la mission pour voir votre évaluation.");
+      throw new SimulationError("MARKET_CLOSED", "C'est la dernière séance. Terminez la mission pour voir votre évaluation.");
     }
     state.step += 1;
     state.liquidityUsed = new LinkedHashMap<>();
@@ -567,9 +566,9 @@ public final class Simulator {
           cancelOrder(state, order, seq, "L'horizon de la mission s'est terminé avant la complétion de cet ordre.", "EXPIRED");
         }
       }
-      return "Dernière " + label + " atteinte. Passez votre portefeuille en revue, puis terminez la mission.";
+      return Wording.lastStepReached(label) + ". Passez votre portefeuille en revue, puis terminez la mission.";
     }
-    return "Passage à " + label + " " + state.step + " sur " + ctx.mission().scenario().steps() + ".";
+    return Wording.movedTo(label, state.step, ctx.mission().scenario().steps());
   }
 
   private static Double shockFor(StressScenarioDefinition scenario, String symbol) {
@@ -673,7 +672,7 @@ public final class Simulator {
       case "FINISH" -> {
         if (!isMarketClosed(ctx, state)) {
           throw new SimulationError("MISSION_NOT_OVER",
-              "Avancez jusqu'à la dernière " + ctx.mission().scenario().stepLabel() + " avant de terminer.");
+              "Avancez jusqu'" + Wording.toLastStep(ctx.mission().scenario().stepLabel()) + " avant de terminer.");
         }
         state.status = "COMPLETED";
         emit(state, "MISSION_COMPLETED", seq, data("equity", equityOf(ctx, state)));

@@ -76,6 +76,7 @@ export const routes: Routes = [
       { path: 'actuarial/pricing', loadComponent: () => import('./actuarial/pricing-studio.page').then((m) => m.PricingStudioPage) },
       { path: 'actuarial/monte-carlo', loadComponent: () => import('./actuarial/monte-carlo-lab.page').then((m) => m.MonteCarloLabPage) },
       { path: 'actuarial/reserving', loadComponent: () => import('./actuarial/reserving-studio.page').then((m) => m.ReservingStudioPage) },
+      { path: 'stress-testing', loadComponent: () => import('./stress/stress-testing.page').then((m) => m.StressTestingPage) },
       ...PREVIEW_MODULE_ROUTES.map((slug) => ({
         path: slug,
         data: { module: slug },

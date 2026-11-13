@@ -26,6 +26,17 @@ export function sceneAt(scenes: StoryScene[], positionMs: number): ScenePosition
   return { index: 0, start: 0, local: 0 };
 }
 
+/**
+ * Next playback position while the narrator is still speaking: playback may move within the current scene but stops
+ * on its last frame instead of entering the next one, so a sentence is never cut. Never moves backwards.
+ */
+export function holdForSpeech(scenes: StoryScene[], positionMs: number, nextMs: number): number {
+  if (scenes.length === 0) return nextMs;
+  const at = sceneAt(scenes, positionMs);
+  const lastFrame = at.start + scenes[at.index].durationMs - 1;
+  return Math.max(positionMs, Math.min(nextMs, lastFrame));
+}
+
 export function sceneStart(scenes: StoryScene[], index: number): number {
   return scenes.slice(0, Math.max(0, index)).reduce((s, scene) => s + scene.durationMs, 0);
 }

@@ -1,0 +1,659 @@
+<div class="page-shell bs-shell">
+  <mtr-page-heading
+    [eyebrow]="nav.groupResearch"
+    title="Tests de résistance bancaire"
+    [status]="'LIVE_INTEGRATED'"
+    description="Appliquez un même scénario macroéconomique défavorable à une banque conventionnelle et à une banque participative fictives, puis comparez l'effet sur leurs pertes, leur capital et leur liquidité à un an."
+  />
+
+  <p class="bs-notice" role="note">
+    <strong>Moteur déterministe, banques fictives.</strong>
+    Les résultats découlent des hypothèses affichées ; ils illustrent des mécanismes et ne décrivent aucune banque réelle.
+    Le volet IA est un émulateur appris sur des scénarios calculés par ce moteur : le résultat du moteur reste la référence.
+  </p>
+
+  @if (loadError()) {
+    <p class="form-error-banner" role="alert">{{ loadError() }}</p>
+  }
+
+  @if (catalog(); as cat) {
+    <section mtr-panel heading="Constructeur de scénario" description="Choisissez un scénario prédéfini, puis ajustez chaque choc et l'intensité globale.">
+      <div class="bs-presets" role="group" aria-label="Scénarios prédéfinis">
+        @for (p of cat.presets; track p.id) {
+          <button type="button" class="bs-preset" [attr.aria-pressed]="presetId() === p.id" (click)="selectPreset(p.id)" [title]="p.description">
+            {{ p.name }}
+          </button>
+        }
+      </div>
+
+      <form class="bs-builder" (submit)="$event.preventDefault(); run()">
+        <div class="bs-factors">
+          @for (def of cat.factors; track def.key) {
+            <div class="bs-factor" [attr.data-active]="factorValue(def.key) !== def.neutral">
+              <label [for]="'f-' + def.key">{{ def.label }} <span class="bs-unit">({{ def.unit }})</span></label>
+              <div class="bs-factorInputs">
+                <input
+                  type="range"
+                  [id]="'f-range-' + def.key"
+                  [min]="def.min"
+                  [max]="def.max"
+                  [step]="factorStep(def)"
+                  [value]="factorValue(def.key)"
+                  (input)="slide(def.key, $any($event.target).value)"
+                  (change)="settleScenario()"
+                  [attr.aria-label]="def.label"
+                />
+                <input
+                  class="input bs-number"
+                  type="number"
+                  [id]="'f-' + def.key"
+                  [min]="def.min"
+                  [max]="def.max"
+                  [step]="factorStep(def)"
+                  [value]="factorValue(def.key)"
+                  (change)="setFactor(def.key, $any($event.target).value); settleScenario()"
+                />
+              </div>
+              <p class="field-hint">{{ def.description }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="bs-runBar">
+          <label class="bs-intensity" for="intensity">
+            Intensité globale des chocs : <strong>× {{ num(intensity(), 2) }}</strong>
+            <input id="intensity" type="range" min="0" [max]="cat.maxIntensity" step="0.05" [value]="intensity()" (input)="slideIntensity($any($event.target).value)" (change)="settleScenario()" />
+          </label>
+          <span class="bs-scenarioName">{{ scenarioName() }}</span>
+          <button type="submit" class="btn btn-primary" [disabled]="running()">{{ running() ? 'Calcul…' : 'Lancer le test de résistance' }}</button>
+        </div>
+      </form>
+      @if (runError()) {
+        <p class="form-error-banner" role="alert">{{ runError() }}</p>
+      }
+    </section>
+  } @else if (!loadError()) {
+    <div mtr-panel-skeleton [rows]="4"></div>
+  }
+
+  @if (result(); as r) {
+    <div class="bs-results" [attr.data-busy]="running() && !livePreview()">
+      <p class="bs-live" role="status" aria-live="polite" [attr.data-state]="livePreview() ? 'preview' : stale() ? 'pending' : 'exact'">
+        @if (livePreview()) {
+          <span class="bs-liveDot" aria-hidden="true"></span> Aperçu IA en direct · calcul exact au relâchement du curseur
+        } @else if (stale()) {
+          Calcul exact en cours…
+        } @else {
+          Résultat exact du moteur · {{ r.scenario.name }}
+        }
+      </p>
+      <section class="bs-verdicts" aria-label="Résultat par banque">
+        @for (b of r.banks; track b.id) {
+          @let g = gauges()[b.id];
+          <article class="bs-verdict" [attr.data-tone]="g.isPreview ? g.zone : statusTone[b.resilience.status]" [attr.data-preview]="g.isPreview">
+            <header>
+              <span class="bs-kind">{{ b.kindLabel }}</span>
+              <h2>{{ b.name }}</h2>
+              <span class="bs-status">{{ g.isPreview ? 'Estimation de l’IA, à confirmer par le moteur' : b.resilience.statusLabel }}</span>
+            </header>
+            <div class="bs-path" aria-label="Ratio CET1 : initial, scénario central à un an, scénario de stress à un an">
+              <div><span>Initial</span><strong class="num">{{ ratio(b.projections.initial.cet1Ratio) }}</strong></div>
+              <div><span>Central à 1 an</span><strong class="num">{{ ratio(b.projections.baseline.cet1Ratio) }}</strong></div>
+              <div [attr.data-preview]="g.isPreview">
+                <span>{{ g.isPreview ? 'Aperçu IA' : 'Stress à 1 an' }}</span>
+                <strong class="num">{{ ratio(g.stressedValue) }}</strong>
+              </div>
+            </div>
+            <div class="bs-gauge" role="img" [attr.aria-label]="'Ratio CET1 sous stress ' + ratio(g.stressedValue) + ', seuil 7 %, coussin 9,5 %'">
+              <div class="bs-gaugeTrack">
+                <span class="bs-gaugeZone" data-zone="negative" [style.width.%]="g.minimum"></span>
+                <span class="bs-gaugeZone" data-zone="warning" [style.left.%]="g.minimum" [style.width.%]="g.buffer - g.minimum"></span>
+                <span class="bs-gaugeZone" data-zone="positive" [style.left.%]="g.buffer" [style.width.%]="100 - g.buffer"></span>
+                <span class="bs-gaugeMark" data-mark="baseline" [style.left.%]="g.baseline" title="Central à 1 an"></span>
+                <span class="bs-gaugeMark" data-mark="stressed" [attr.data-preview]="g.isPreview" [style.left.%]="g.stressed" title="Sous stress"></span>
+              </div>
+              <div class="bs-gaugeScale" aria-hidden="true">
+                <span [style.left.%]="0">0 %</span>
+                <span [style.left.%]="g.minimum">7 %</span>
+                <span [style.left.%]="g.buffer">9,5 %</span>
+                <span [style.left.%]="100">20 %</span>
+              </div>
+            </div>
+            @if (previewCheck(b); as pc) {
+              <p class="bs-previewCheck">L'aperçu IA annonçait <strong class="num">{{ ratio(pc.value) }}</strong> · écart <span class="num">{{ pp(pc.error) }}</span> avec le moteur</p>
+            }
+            <ul class="bs-checks">
+              @for (c of b.resilience.checks; track c.key) {
+                <li [attr.data-ok]="c.ok">
+                  <span>{{ c.label }}</span>
+                  <span class="num">{{ ratio(c.value, 1) }} <small>/ seuil {{ ratio(c.threshold, 0) }}</small></span>
+                </li>
+              }
+            </ul>
+            <p class="bs-depletion">
+              Érosion du CET1 : <strong class="num">{{ num(b.resilience.cet1DepletionPp, 2) }} pp</strong>
+              @if (b.resilience.capitalShortfall > 0) {
+                · Besoin de capital : <strong class="num">{{ mdt(b.resilience.capitalShortfall) }}</strong>
+              }
+              @if (b.resilience.liquidityShortfall > 0) {
+                · Manque de liquidité : <strong class="num">{{ mdt(b.resilience.liquidityShortfall) }}</strong>
+              }
+            </p>
+          </article>
+        }
+      </section>
+
+      @if (mirrors(); as ms) {
+        <section mtr-panel heading="Qui absorbe le choc ?" [description]="'D’où vient la perte, et qui la supporte. ' + ms[0].reference + ', en M DT. Hauteurs à la même échelle pour les deux banques.'">
+          <div class="bs-mirrors">
+            @for (m of ms; track m.id) {
+              <figure class="bs-mirror">
+                <figcaption><strong>{{ m.name }}</strong> <span class="num">{{ mdt(m.total) }}</span></figcaption>
+                <div class="bs-mirrorStage">
+                  <div class="bs-mirrorCol" [style.height.%]="m.height" aria-label="Sources de la perte">
+                    @for (s of m.sources; track s.key) {
+                      <span class="bs-block" [attr.data-kind]="s.kind" [style.height.%]="s.share" [title]="s.label + ' : ' + mdt(s.amount)">
+                        @if (s.share >= 14) {<em>{{ s.label }}</em>}
+                      </span>
+                    }
+                  </div>
+                  <span class="bs-mirrorArrow" aria-hidden="true">→</span>
+                  <div class="bs-mirrorCol" [style.height.%]="m.height" aria-label="Qui absorbe la perte">
+                    @for (a of m.absorbers; track a.key) {
+                      <span class="bs-block" [attr.data-kind]="a.kind" [attr.data-role]="'absorber'" [style.height.%]="a.share" [title]="a.label + ' : ' + mdt(a.amount)">
+                        @if (a.share >= 14) {<em>{{ a.label }}</em>}
+                      </span>
+                    }
+                  </div>
+                </div>
+                <div class="bs-mirrorLegend">
+                  <ul aria-label="D'où vient la perte">
+                    @for (s of m.sources; track s.key) {
+                      <li><span class="bs-dot" [attr.data-kind]="s.kind"></span>{{ s.label }} <span class="num">{{ mdt(s.amount) }}</span></li>
+                    }
+                  </ul>
+                  <ul aria-label="Qui la supporte">
+                    @for (a of m.absorbers; track a.key) {
+                      <li><span class="bs-dot" [attr.data-kind]="a.kind" data-role="absorber"></span>{{ a.label }} <span class="num">{{ mdt(a.amount) }}</span></li>
+                    }
+                  </ul>
+                </div>
+              </figure>
+            }
+          </div>
+        </section>
+      }
+
+      <section mtr-panel heading="Pourquoi les deux banques réagissent différemment" [description]="r.scenario.name + ' · intensité × ' + num(r.scenario.intensity, 2)">
+        <ul class="bs-explain">
+          @for (line of r.comparison.explanation; track line) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </section>
+
+      <div class="bs-twoUp">
+        <section mtr-panel heading="Contribution de chaque facteur au ratio CET1" description="Décomposition de Shapley exacte de la variation par rapport au scénario central. La somme des barres égale la variation totale.">
+          @if (attribution(); as a) {
+            <div class="bs-legend" aria-hidden="true">
+              <span class="bs-swatch" data-bank="CONVENTIONAL"></span> Conventionnelle
+              <span class="bs-swatch" data-bank="PARTICIPATIVE"></span> Participative
+            </div>
+            <div class="table-wrap">
+            <table class="data-table bs-attribution">
+              <caption class="sr-only">Contribution de chaque facteur à la variation du ratio CET1, en points de pourcentage</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Facteur</th>
+                  <th scope="col" class="num">Conv.</th>
+                  <th scope="col" aria-hidden="true"></th>
+                  <th scope="col" class="num">Part.</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of a.rows; track row.factor) {
+                  <tr [attr.data-active]="row.active">
+                    <th scope="row">{{ row.label }}</th>
+                    <td class="num">{{ pp(row.conventional) }}</td>
+                    <td class="bs-barCell" aria-hidden="true">
+                      <div class="bs-diverging">
+                        <span class="bs-bar" data-bank="CONVENTIONAL" [attr.data-sign]="row.conventional < 0 ? 'neg' : 'pos'" [style.width.%]="row.convWidth"></span>
+                        <span class="bs-bar" data-bank="PARTICIPATIVE" [attr.data-sign]="row.participative < 0 ? 'neg' : 'pos'" [style.width.%]="row.partWidth"></span>
+                      </div>
+                    </td>
+                    <td class="num">{{ pp(row.participative) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">Variation totale</th>
+                  <td class="num">{{ pp(a.totals.conventional) }}</td>
+                  <td></td>
+                  <td class="num">{{ pp(a.totals.participative) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+            </div>
+          }
+        </section>
+
+        <section mtr-panel heading="Sensibilité à l'intensité du scénario" description="Ratio CET1 projeté quand tous les chocs sont multipliés de 0 à 2.">
+          @if (sensitivityChart(); as c) {
+            <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="formatPercentAxis" [xLabels]="c.xLabels"></figure>
+          }
+        </section>
+      </div>
+
+      <section mtr-panel heading="Indicateurs avant et après le choc" description="Initial : bilan de départ. Central : projection à un an sans choc. Stress : projection à un an sous le scénario.">
+        <div class="table-wrap">
+          <table class="data-table bs-metrics">
+            <thead>
+              <tr>
+                <th scope="col">Indicateur</th>
+                @for (b of r.banks; track b.id) {
+                  <th scope="col" class="num">{{ bankLabel(b.id) }} · initial</th>
+                  <th scope="col" class="num">central</th>
+                  <th scope="col" class="num">stress</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Ratio CET1</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">{{ ratio(b.projections.initial.cet1Ratio) }}</td>
+                  <td class="num">{{ ratio(b.projections.baseline.cet1Ratio) }}</td>
+                  <td class="num bs-strong">{{ ratio(b.projections.stressed.cet1Ratio) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Fonds propres CET1</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">{{ mdt(b.projections.initial.cet1) }}</td>
+                  <td class="num">{{ mdt(b.projections.baseline.cet1) }}</td>
+                  <td class="num bs-strong">{{ mdt(b.projections.stressed.cet1) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Actifs pondérés des risques</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">{{ mdt(b.projections.initial.rwa) }}</td>
+                  <td class="num">{{ mdt(b.projections.baseline.rwa) }}</td>
+                  <td class="num bs-strong">{{ mdt(b.projections.stressed.rwa) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Ratio de levier</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">{{ ratio(b.projections.initial.leverageRatio) }}</td>
+                  <td class="num">{{ ratio(b.projections.baseline.leverageRatio) }}</td>
+                  <td class="num bs-strong">{{ ratio(b.projections.stressed.leverageRatio) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Liquidité à 30 jours (LCR)</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">{{ ratio(b.projections.initial.lcr, 1) }}</td>
+                  <td class="num">{{ ratio(b.projections.baseline.lcr, 1) }}</td>
+                  <td class="num bs-strong">{{ ratio(b.projections.stressed.lcr, 1) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Résultat net de l'année</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">—</td>
+                  <td class="num">{{ mdt(b.projections.baseline.netIncome) }}</td>
+                  <td class="num bs-strong">{{ mdt(b.projections.stressed.netIncome) }}</td>
+                }
+              </tr>
+              <tr>
+                <th scope="row">Coût du risque</th>
+                @for (b of r.banks; track b.id) {
+                  <td class="num">—</td>
+                  <td class="num">{{ mdt(b.projections.baseline.creditCost) }}</td>
+                  <td class="num bs-strong">{{ mdt(b.projections.stressed.creditCost) }}</td>
+                }
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bs-bankTabs" role="tablist" aria-label="Détail par banque">
+        @for (b of r.banks; track b.id) {
+          <button type="button" role="tab" class="bs-preset" [attr.aria-selected]="selectedBank() === b.id" [attr.aria-pressed]="selectedBank() === b.id" (click)="selectedBank.set(b.id)">
+            {{ b.name }}
+          </button>
+        }
+      </div>
+
+      @if (selected(); as b) {
+        <div class="bs-twoUp">
+          <section mtr-panel heading="Du capital initial au capital sous stress" [description]="'Chaque étape en M DT ; la somme mène de ' + mdt(bridge()?.start ?? 0) + ' à ' + mdt(bridge()?.end ?? 0) + '.'">
+            @if (bridge(); as br) {
+              <ol class="bs-bridge">
+                <li class="bs-bridgeTotal"><span>Capital CET1 initial</span><strong class="num">{{ mdt(br.start) }}</strong></li>
+                @for (s of br.steps; track s.key) {
+                  <li>
+                    <span>{{ s.label }}</span>
+                    <span class="bs-bridgeBar" aria-hidden="true"><span [attr.data-direction]="s.direction" [style.width.%]="s.width"></span></span>
+                    <strong class="num" [attr.data-direction]="s.direction">{{ mdt(s.amount, 1, true) }}</strong>
+                  </li>
+                }
+                <li class="bs-bridgeTotal"><span>Capital CET1 sous stress</span><strong class="num">{{ mdt(br.end) }}</strong></li>
+              </ol>
+            }
+          </section>
+
+          <section mtr-panel heading="Lecture de la décomposition" [description]="b.attribution.methodLabel">
+            @if (waterfall(); as w) {
+              <figure class="bs-waterfall" [attr.aria-label]="'Cascade du ratio CET1 de ' + ratio(w.start.value) + ' à ' + ratio(w.end.value)">
+                <div class="bs-wfRow" data-kind="total">
+                  <span class="bs-wfLabel">Central à 1 an</span>
+                  <span class="bs-wfTrack"><span class="bs-wfMarker" [style.left.%]="w.start.at"></span><span class="bs-wfThreshold" [style.left.%]="w.threshold"></span></span>
+                  <span class="bs-wfValue num">{{ ratio(w.start.value) }}</span>
+                </div>
+                @for (row of w.rows; track row.factor) {
+                  <div class="bs-wfRow">
+                    <span class="bs-wfLabel">{{ row.label }}</span>
+                    <span class="bs-wfTrack">
+                      <span class="bs-wfBar" [attr.data-sign]="row.sign" [style.left.%]="row.left" [style.width.%]="row.width"></span>
+                      <span class="bs-wfThreshold" [style.left.%]="w.threshold"></span>
+                    </span>
+                    <span class="bs-wfValue num" [attr.data-sign]="row.sign">{{ pp(row.value) }}</span>
+                  </div>
+                }
+                <div class="bs-wfRow" data-kind="total">
+                  <span class="bs-wfLabel">Sous stress à 1 an</span>
+                  <span class="bs-wfTrack"><span class="bs-wfMarker" data-end="true" [style.left.%]="w.end.at"></span><span class="bs-wfThreshold" [style.left.%]="w.threshold"></span></span>
+                  <span class="bs-wfValue num">{{ ratio(w.end.value) }}</span>
+                </div>
+                <figcaption class="field-hint">Chaque barre part du niveau atteint par les facteurs précédents (ordonnés par effet décroissant). Ligne pointillée : seuil CET1 de 7 %.</figcaption>
+              </figure>
+            }
+            <ul class="bs-explain">
+              @for (line of b.attribution.explanation; track line) {
+                <li>{{ line }}</li>
+              }
+            </ul>
+            @if (b.participativeMechanisms; as m) {
+              <h3 class="bs-subhead">Mécanismes propres à la banque participative</h3>
+              <dl class="bs-dl">
+                <div><dt>Comptes participatifs (PSIA)</dt><dd class="num">{{ mdt(m.psia, 0) }} · {{ ratio(m.psiaShareOfAssets, 0) }} des actifs</dd></div>
+                <div><dt>Réserve PER utilisée</dt><dd class="num">{{ mdt(m.perUsed) }}</dd></div>
+                <div><dt>Risque commercial déplacé (net)</dt><dd class="num">{{ mdt(m.dcrCost) }}</dd></div>
+                <div><dt>Pertes sur les actifs financés par les PSIA</dt><dd class="num">{{ mdt(m.psiaPoolLoss) }}</dd></div>
+                <div><dt>Réserve IRR utilisée</dt><dd class="num">{{ mdt(m.irrUsed) }}</dd></div>
+                <div><dt>Pertes absorbées par les titulaires</dt><dd class="num">{{ mdt(m.psiaAbsorbed) }}</dd></div>
+                <div><dt>Facteur alpha (actifs pondérés)</dt><dd class="num">{{ num(m.alpha, 2) }}</dd></div>
+              </dl>
+            }
+          </section>
+        </div>
+
+        <section mtr-panel heading="Risque de crédit et de financement" description="Pertes attendues = PD × LGD × EAD, avant et après le choc.">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Portefeuille</th>
+                  <th scope="col" class="num">Exposition</th>
+                  <th scope="col" class="num">PD avant → après</th>
+                  <th scope="col" class="num">LGD avant → après</th>
+                  <th scope="col" class="num">Perte attendue avant → après</th>
+                  <th scope="col" class="num">Valeur résiduelle</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of b.credit; track s.key) {
+                  <tr>
+                    <th scope="row">{{ s.label }}</th>
+                    <td class="num">{{ mdt(s.ead, 0) }}</td>
+                    <td class="num">{{ prob(s.pdBase) }} → <strong>{{ prob(s.pdStressed) }}</strong></td>
+                    <td class="num">{{ ratio(s.lgdBase, 0) }} → <strong>{{ ratio(s.lgdStressed, 0) }}</strong></td>
+                    <td class="num">{{ mdt(s.eclBase) }} → <strong>{{ mdt(s.eclStressed) }}</strong></td>
+                    <td class="num">{{ s.residualValueLoss > 0 ? mdt(-s.residualValueLoss) : '—' }}</td>
+                  </tr>
+                }
+                @for (s of b.profitAndLossSharing; track s.key) {
+                  <tr>
+                    <th scope="row">{{ s.label }}</th>
+                    <td class="num">{{ mdt(s.exposure, 0) }}</td>
+                    <td class="num" colspan="2">Taux de perte partagé {{ prob(s.lossRateBase) }} → <strong>{{ prob(s.lossRateStressed) }}</strong></td>
+                    <td class="num">{{ mdt(s.lossBase) }} → <strong>{{ mdt(s.lossStressed) }}</strong></td>
+                    <td class="num">—</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        @if (ai(); as a) {
+          <section mtr-panel heading="Estimation par l'IA et explication du modèle" description="Arbres de régression avec gradient boosting, comparés au résultat exact du moteur et à une régression linéaire. Variations par rapport au scénario central, en points de pourcentage.">
+            @if (a.outside.length > 0) {
+              <p class="bs-warning" role="note">
+                Hors domaine d'entraînement : {{ a.outside.join(', ') }}. Les arbres n'extrapolent pas ; l'estimation est moins fiable.
+              </p>
+            }
+            <div class="bs-twoUp">
+              @for (t of a.targets; track t.id) {
+                <div class="bs-aiTarget">
+                  <h3 class="bs-subhead">{{ t.estimate.label }}</h3>
+                  <dl class="bs-dl">
+                    <div><dt>Moteur (exact)</dt><dd class="num"><strong>{{ pts(t.estimate.engine) }}</strong></dd></div>
+                    <div><dt>IA (gradient boosting)</dt><dd class="num">{{ pts(t.estimate.gbm) }} · écart {{ pts(t.estimate.gbmError) }}</dd></div>
+                    <div><dt>Régression linéaire</dt><dd class="num">{{ pts(t.estimate.linear) }} · écart {{ pts(t.estimate.linearError) }}</dd></div>
+                    <div>
+                      <dt>Fidélité de l'explication</dt>
+                      <dd>
+                        {{ fidelity(t.estimate.sameTopFactor) }}
+                        @if (t.estimate.explanationGap !== null) {
+                          · écart relatif {{ share(t.estimate.explanationGap) }}
+                        }
+                      </dd>
+                    </div>
+                  </dl>
+                  <div class="bs-legend" aria-hidden="true">
+                    <span class="bs-swatch" data-src="model"></span> IA (Shapley du modèle)
+                    <span class="bs-swatch" data-src="engine"></span> Moteur (Shapley exact)
+                  </div>
+                  <div class="table-wrap">
+                    <table class="data-table bs-attribution">
+                      <caption class="sr-only">Contributions des facteurs selon le modèle d'IA et selon le moteur, en points de pourcentage</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Facteur</th>
+                          <th scope="col" class="num">IA</th>
+                          <th scope="col" aria-hidden="true"></th>
+                          <th scope="col" class="num">Moteur</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of t.rows; track row.factor) {
+                          <tr [attr.data-active]="row.active">
+                            <th scope="row">{{ row.label }}</th>
+                            <td class="num">{{ pts(row.model) }}</td>
+                            <td class="bs-barCell" aria-hidden="true">
+                              <div class="bs-diverging">
+                                <span class="bs-bar" data-src="model" [attr.data-sign]="row.model < 0 ? 'neg' : 'pos'" [style.width.%]="row.modelWidth"></span>
+                                <span class="bs-bar" data-src="engine" [attr.data-sign]="row.engine < 0 ? 'neg' : 'pos'" [style.width.%]="row.engineWidth"></span>
+                              </div>
+                            </td>
+                            <td class="num">{{ pts(row.engine) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            </div>
+            <p class="field-hint">
+              Valeurs de Shapley exactes du modèle (256 combinaisons des 8 facteurs), avec le scénario sans choc comme référence : elles expliquent la prédiction de l'IA, pas la réalité. Leur comparaison avec la décomposition du moteur mesure si le modèle s'appuie sur les mêmes facteurs que le moteur.
+            </p>
+          </section>
+        }
+
+        @if (selectedProfile(); as p) {
+          <section mtr-panel [heading]="'Profil de référence · ' + p.name" [description]="p.description">
+            <ul class="bs-specs">
+              @for (s of p.specificities; track s) {
+                <li>{{ s }}</li>
+              }
+            </ul>
+            <div class="bs-sheet">
+              <div>
+                <h3 class="bs-subhead">Actif</h3>
+                <ul>
+                  @for (l of p.balanceSheet.assets; track l.key) {
+                    <li><span>{{ l.label }}</span><span class="num">{{ mdt(l.amount, 0) }}</span></li>
+                  }
+                  <li class="bs-sheetTotal"><span>Total</span><span class="num">{{ mdt(p.balanceSheet.totalAssets, 0) }}</span></li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="bs-subhead">Passif et fonds propres</h3>
+                <ul>
+                  @for (l of p.balanceSheet.liabilities; track l.key) {
+                    <li><span>{{ l.label }}</span><span class="num">{{ mdt(l.amount, 0) }}</span></li>
+                  }
+                  <li><span>Fonds propres CET1</span><span class="num">{{ mdt(p.balanceSheet.cet1, 0) }}</span></li>
+                  <li class="bs-sheetTotal"><span>Total</span><span class="num">{{ mdt(p.balanceSheet.totalLiabilitiesAndEquity, 0) }}</span></li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        }
+      }
+
+      @if (modelCard(); as card) {
+        <section mtr-panel heading="Volet IA : fiche du modèle" [description]="card.purpose + ' Version ' + card.modelVersion + '.'">
+          <p class="bs-notice" role="note">{{ card.nature }}</p>
+
+          <h3 class="bs-subhead">Comparaison des modèles sur des scénarios jamais vus</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Cible</th>
+                  <th scope="col">Modèle</th>
+                  <th scope="col" class="num">R² test</th>
+                  <th scope="col" class="num">Erreur moyenne test</th>
+                  <th scope="col" class="num">R² extrapolation</th>
+                  <th scope="col" class="num">Erreur moyenne extrapolation</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of targets; track t.id) {
+                  @for (m of card.models; track m.id) {
+                    <tr>
+                      <th scope="row">{{ m.id === 'MEAN' ? card.targets[t.id].label : '' }}</th>
+                      <td>{{ m.label }}</td>
+                      <td class="num">{{ r2(card.targets[t.id].metrics.test[m.id].r2) }}</td>
+                      <td class="num">{{ errorPts(card.targets[t.id].metrics.test[m.id].mae) }}</td>
+                      <td class="num">{{ r2(card.targets[t.id].metrics.extrapolation[m.id].r2) }}</td>
+                      <td class="num">{{ errorPts(card.targets[t.id].metrics.extrapolation[m.id].mae) }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="field-hint">Erreur moyenne : écart absolu moyen avec le moteur, en points de pourcentage. Le jeu « extrapolation » contient des chocs plus sévères que l'entraînement.</p>
+
+          <h3 class="bs-subhead">Détection des franchissements de seuil</h3>
+          <p class="field-hint">{{ card.breachDetection.definition }}</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Jeu</th>
+                  <th scope="col">Modèle</th>
+                  <th scope="col" class="num">Franchissements réels</th>
+                  <th scope="col" class="num">Précision</th>
+                  <th scope="col" class="num">Rappel</th>
+                  <th scope="col" class="num">Exactitude</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of breachRows(); track row.key) {
+                  <tr>
+                    <th scope="row">{{ row.split }}</th>
+                    <td>{{ row.model }}</td>
+                    <td class="num">{{ num(row.scores.actualBreaches) }} / {{ num(row.scores.rows) }}</td>
+                    <td class="num">{{ share(row.scores.precision) }}</td>
+                    <td class="num">{{ share(row.scores.recall) }}</td>
+                    <td class="num">{{ share(row.scores.accuracy) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (importance(); as imp) {
+            <h3 class="bs-subhead">Importance globale des facteurs (permutation, jeu de test)</h3>
+            <div class="bs-twoUp">
+              @for (t of imp; track t.id) {
+                <div>
+                  <p class="field-hint">{{ t.label }} · hausse de l'erreur quadratique moyenne quand on mélange le facteur · {{ t.rounds }} arbres</p>
+                  <ul class="bs-importance">
+                    @for (row of t.rows; track row.feature) {
+                      <li>
+                        <span>{{ row.label }}</span>
+                        <span class="bs-bridgeBar" aria-hidden="true"><span [style.width.%]="row.width"></span></span>
+                        <span class="num">{{ num(row.gbm, 3) }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+
+          <h3 class="bs-subhead">Protocole</h3>
+          <ul class="bs-small">
+            @for (line of card.protocol.description; track line) {
+              <li>{{ line }}</li>
+            }
+            <li>{{ num(card.protocol.trainingRows) }} lignes d'entraînement, {{ num(card.protocol.validationRows) }} de validation, {{ num(card.protocol.testRows) }} de test et {{ num(card.protocol.extrapolationRows) }} d'extrapolation (une ligne par banque et par scénario).</li>
+          </ul>
+          <h3 class="bs-subhead">Modèles comparés</h3>
+          <ul class="bs-small">
+            @for (m of card.models; track m.id) {
+              <li><strong>{{ m.label }}</strong> : {{ m.description }}</li>
+            }
+          </ul>
+          <h3 class="bs-subhead">Limites du volet IA</h3>
+          <ul class="bs-small">
+            @for (l of card.limitations; track l) {
+              <li>{{ l }}</li>
+            }
+          </ul>
+        </section>
+      } @else if (modelError()) {
+        <p class="form-error-banner" role="alert">{{ modelError() }}</p>
+      } @else {
+        <div mtr-panel-skeleton [rows]="3" aria-label="Chargement de la fiche du modèle"></div>
+      }
+
+      <div class="bs-twoUp">
+        <section mtr-panel heading="Hypothèses du modèle" [description]="'Version ' + r.modelVersion">
+          <ul class="bs-small">
+            @for (a of r.assumptions; track a) {
+              <li>{{ a }}</li>
+            }
+          </ul>
+        </section>
+        <section mtr-panel heading="Limites et précautions de lecture">
+          <ul class="bs-small">
+            @for (l of r.limitations; track l) {
+              <li>{{ l }}</li>
+            }
+          </ul>
+        </section>
+      </div>
+    </div>
+  }
+</div>
