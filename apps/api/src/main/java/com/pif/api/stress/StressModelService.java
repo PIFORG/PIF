@@ -64,6 +64,59 @@ public class StressModelService {
     return trained().card();
   }
 
+  /** True once the background training has finished; previews never wait for it. */
+  public boolean ready() {
+    return trained != null;
+  }
+
+  /**
+   * Instant model estimate for both banks, used while the user is still adjusting the shocks. Returns
+   * {@code ready: false} instead of blocking when the model is still training. The exact engine result remains the
+   * reference and is computed separately.
+   */
+  public Map<String, Object> preview(StressFactors f) {
+    Map<String, Object> out = new LinkedHashMap<>();
+    Trained t = trained;
+    out.put("ready", t != null);
+    out.put("modelVersion", MODEL_VERSION);
+    out.put("factors", f.toJson());
+    if (t == null) {
+      out.put("banks", List.of());
+      return out;
+    }
+    List<Object> banks = new ArrayList<>();
+    for (BankProfile bank : BankProfile.ALL) {
+      StressEngine.Ratios base = StressEngine.run(bank, StressFactors.NEUTRAL).ratios();
+      double[] x = ScenarioDataset.features(f, bank);
+      double cet1Change = t.models().get(Target.CET1_CHANGE_PP).gbm().predict(x);
+      double lcrChange = t.models().get(Target.LCR_CHANGE_PP).gbm().predict(x);
+      Map<String, Object> b = new LinkedHashMap<>();
+      b.put("id", bank.id());
+      b.put("cet1ChangePp", StressService.round(cet1Change, 6));
+      b.put("lcrChangePp", StressService.round(lcrChange, 6));
+      b.put("cet1Ratio", StressService.round(base.cet1Ratio() + cet1Change / 100, 6));
+      b.put("lcr", StressService.round(base.lcr() + lcrChange / 100, 6));
+      b.put("baselineCet1Ratio", StressService.round(base.cet1Ratio(), 6));
+      b.put("baselineLcr", StressService.round(base.lcr(), 6));
+      banks.add(b);
+    }
+    out.put("banks", banks);
+    out.put("outsideTrainingRange", outsideTrainingRange(f));
+    return out;
+  }
+
+  static List<Object> outsideTrainingRange(StressFactors f) {
+    List<Object> outside = new ArrayList<>();
+    for (int i = 0; i < StressFactors.DEFINITIONS.size(); i++) {
+      double v = f.get(i);
+      StressFactors.Definition d = StressFactors.DEFINITIONS.get(i);
+      if (v != d.neutral() && (v < ScenarioDataset.TRAINING_RANGE[i][0] || v > ScenarioDataset.TRAINING_RANGE[i][1])) {
+        outside.add(d.key());
+      }
+    }
+    return outside;
+  }
+
   /** Trains in the background once the application is up, so the first user request does not wait for it. */
   @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
   public void warmUp() {
@@ -322,15 +375,7 @@ public class StressModelService {
     for (int i = 0; i < players.length; i++) players[i] = i;
 
     Map<String, Object> out = new LinkedHashMap<>();
-    List<Object> outside = new ArrayList<>();
-    for (int i = 0; i < players.length; i++) {
-      double v = f.get(i);
-      StressFactors.Definition d = StressFactors.DEFINITIONS.get(i);
-      if (v != d.neutral() && (v < ScenarioDataset.TRAINING_RANGE[i][0] || v > ScenarioDataset.TRAINING_RANGE[i][1])) {
-        outside.add(d.key());
-      }
-    }
-    out.put("outsideTrainingRange", outside);
+    out.put("outsideTrainingRange", outsideTrainingRange(f));
     for (Target target : Target.values()) {
       Fitted fitted = t.models().get(target);
       double gbm = fitted.gbm().predict(x);

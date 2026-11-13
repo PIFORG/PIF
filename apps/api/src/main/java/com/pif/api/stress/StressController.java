@@ -50,6 +50,19 @@ public class StressController {
     return service.catalog();
   }
 
+  @PostMapping("/preview")
+  @Throttle(limit = 300, ttlSeconds = 60)
+  @ApiDocs.Body("RunStressTestDto")
+  @Operation(summary = "Instant machine-learning preview of a scenario",
+      description = "Emulator estimate of the one-year CET1 ratio and LCR of both banks, for live feedback while the "
+          + "shocks are being adjusted. Returns ready=false while the model is still training. Not the reference "
+          + "result: POST /stress/run computes the exact one.")
+  public Map<String, Object> preview(HttpServletRequest req) {
+    AuthUser.from(req);
+    StressDtos.RunRequest r = StressDtos.run(JsonBodyCache.get(req, mapper));
+    return models.preview(r.factors().scaled(r.intensity()));
+  }
+
   @PostMapping("/run")
   @Throttle(limit = 30, ttlSeconds = 60)
   @ApiDocs.Body("RunStressTestDto")

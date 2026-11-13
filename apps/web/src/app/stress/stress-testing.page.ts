@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { describeApiError } from '../core/api/errors';
 import {
   StressApi,
+  type AbsorptionItem,
   type BankId,
   type BankRun,
   type EmulatorTarget,
@@ -11,6 +12,8 @@ import {
   type ResilienceStatus,
   type StressCatalog,
   type StressFactorValues,
+  type StressPreview,
+  type StressRunRequest,
   type StressRunResult,
 } from '../core/api/stress-api';
 import { FR } from '../core/i18n/fr';
@@ -20,6 +23,11 @@ import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { mdt, num, pp, prob, pts, ratio } from './stress-format';
 
 const DEFAULT_PRESET = 'recession';
+/** Delay before asking the model for a preview while a slider moves, and before running the engine once it stops. */
+const PREVIEW_DELAY_MS = 80;
+const RUN_DELAY_MS = 350;
+/** Top of the capital gauge, as a ratio. */
+const GAUGE_TOP = 0.2;
 
 const STATUS_TONE: Record<ResilienceStatus, 'positive' | 'warning' | 'negative'> = {
   RESILIENT: 'positive',
@@ -31,6 +39,18 @@ const STATUS_TONE: Record<ResilienceStatus, 'positive' | 'warning' | 'negative'>
  * Bank stress testing: one scenario applied to a conventional and a participative fictional bank. Every figure comes
  * from POST /api/stress/run; the page only formats and lays out what the server computed.
  */
+interface Gauge {
+  /** Positions on the gauge, in % of its width. */
+  minimum: number;
+  buffer: number;
+  baseline: number;
+  stressed: number;
+  stressedValue: number;
+  lcrValue: number;
+  isPreview: boolean;
+  zone: 'positive' | 'warning' | 'negative';
+}
+
 @Component({
   selector: 'mtr-stress-testing-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +63,17 @@ export class StressTestingPage {
   private readonly api = inject(StressApi);
   private destroyed = false;
   private runSeq = 0;
+  private previewSeq = 0;
+  private previewTimer: ReturnType<typeof setTimeout> | null = null;
+  private runTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** The latest model preview, and the request it answers. */
+  protected readonly preview = signal<StressPreview | null>(null);
+  private readonly previewKey = signal<string | null>(null);
+  /** The request the displayed engine result answers. */
+  private readonly resultKey = signal<string | null>(null);
+  /** The preview that was on screen for exactly the request the engine has just confirmed, to show its error. */
+  protected readonly confirmedPreview = signal<StressPreview | null>(null);
 
   protected readonly nav = FR.nav;
   protected readonly catalog = signal<StressCatalog | null>(null);
@@ -147,6 +178,99 @@ export class StressTestingPage {
 
   protected readonly formatPercentAxis = (v: number) => `${num(v, 1)} %`;
 
+  private readonly currentKey = computed(() => (this.factors() ? JSON.stringify(this.requestBody()) : null));
+
+  /** True while the shocks on screen differ from those of the displayed engine result. */
+  protected readonly stale = computed(() => this.result() !== null && this.currentKey() !== this.resultKey());
+
+  /** The model preview for the shocks on screen, shown only while the exact result is out of date. */
+  protected readonly livePreview = computed(() => {
+    const p = this.preview();
+    if (!p?.ready || !this.stale() || this.previewKey() !== this.currentKey()) return null;
+    return p;
+  });
+
+  /** Capital gauge per bank: thresholds, the one-year baseline and the stressed value (exact or previewed). */
+  protected readonly gauges = computed(() => {
+    const r = this.result();
+    if (!r) return {} as Record<BankId, Gauge>;
+    const live = this.livePreview();
+    const pos = (v: number) => Math.max(0, Math.min(100, (v / GAUGE_TOP) * 100));
+    const out = {} as Record<BankId, Gauge>;
+    for (const b of r.banks) {
+      const previewed = live?.banks.find((p) => p.id === b.id) ?? null;
+      const stressed = previewed ? previewed.cet1Ratio : b.projections.stressed.cet1Ratio;
+      out[b.id] = {
+        minimum: pos(r.thresholds.cet1Minimum),
+        buffer: pos(r.thresholds.cet1Minimum + r.thresholds.cet1Buffer),
+        baseline: pos(b.projections.baseline.cet1Ratio),
+        stressed: pos(stressed),
+        stressedValue: stressed,
+        lcrValue: previewed ? previewed.lcr : b.projections.stressed.lcr,
+        isPreview: previewed !== null,
+        zone: stressed < r.thresholds.cet1Minimum ? 'negative'
+          : stressed < r.thresholds.cet1Minimum + r.thresholds.cet1Buffer ? 'warning' : 'positive',
+      };
+    }
+    return out;
+  });
+
+  /** "Who bears the shock": both banks on one height scale, so their losses compare at a glance. */
+  protected readonly mirrors = computed(() => {
+    const r = this.result();
+    if (!r) return null;
+    const max = Math.max(1e-9, ...r.banks.map((b) => b.lossAbsorption.total));
+    const blocks = (items: AbsorptionItem[], total: number) =>
+      items.map((i) => ({ ...i, share: total > 0 ? (i.amount / total) * 100 : 0 }));
+    return r.banks.map((b) => ({
+      id: b.id,
+      name: b.name,
+      total: b.lossAbsorption.total,
+      height: (b.lossAbsorption.total / max) * 100,
+      sources: blocks(b.lossAbsorption.sources, b.lossAbsorption.total),
+      absorbers: blocks(b.lossAbsorption.absorbers, b.lossAbsorption.total),
+      reference: b.lossAbsorption.reference,
+    }));
+  });
+
+  /** SHAP-style waterfall of the selected bank: from the one-year baseline to the stressed CET1 ratio, factor by factor. */
+  protected readonly waterfall = computed(() => {
+    const b = this.selected();
+    const r = this.result();
+    if (!b || !r) return null;
+    const start = b.projections.baseline.cet1Ratio;
+    const end = b.projections.stressed.cet1Ratio;
+    const steps = b.attribution.cet1Ratio
+      .filter((c) => Math.abs(c.value) > 1e-7)
+      .sort((x, y) => Math.abs(y.value) - Math.abs(x.value));
+    let level = start;
+    const raw = steps.map((s) => {
+      const from = level;
+      level += s.value;
+      return { ...s, from, to: level };
+    });
+    const values = [start, end, r.thresholds.cet1Minimum, ...raw.map((s) => s.to)];
+    const span = Math.max(...values) - Math.min(...values) || 0.01;
+    const lo = Math.min(...values) - span * 0.06;
+    const hi = Math.max(...values) + span * 0.06;
+    const x = (v: number) => ((v - lo) / (hi - lo)) * 100;
+    return {
+      start: { value: start, at: x(start) },
+      end: { value: end, at: x(end) },
+      threshold: x(r.thresholds.cet1Minimum),
+      lo,
+      hi,
+      rows: raw.map((s) => ({
+        factor: s.factor,
+        label: s.label,
+        value: s.value,
+        left: x(Math.min(s.from, s.to)),
+        width: Math.max(0.6, (Math.abs(s.value) / (hi - lo)) * 100),
+        sign: s.value < 0 ? 'neg' : 'pos',
+      })),
+    };
+  });
+
   /** Model estimate of the selected bank, with contribution bars scaled to the largest |φ| of model or engine. */
   protected readonly ai = computed(() => {
     const est = this.selected()?.aiEstimate;
@@ -211,8 +335,61 @@ export class StressTestingPage {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => (this.destroyed = true));
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
+      if (this.previewTimer) clearTimeout(this.previewTimer);
+      if (this.runTimer) clearTimeout(this.runTimer);
+    });
     void this.load();
+  }
+
+  private requestBody(): StressRunRequest {
+    const preset = this.presetId();
+    const factors = this.factors() ?? undefined;
+    return preset === null ? { factors, intensity: this.intensity() } : { scenario: preset, intensity: this.intensity() };
+  }
+
+  /** While a slider moves: update the value and ask the model for an instant estimate. */
+  protected slide(key: FactorKey, raw: string): void {
+    this.setFactor(key, raw);
+    this.schedulePreview();
+  }
+
+  protected slideIntensity(raw: string): void {
+    this.setIntensity(raw);
+    this.schedulePreview();
+  }
+
+  /** Once the user lets go (or types a value): compute the exact result. */
+  protected settleScenario(): void {
+    if (this.runTimer) clearTimeout(this.runTimer);
+    this.runTimer = setTimeout(() => {
+      this.runTimer = null;
+      void this.run();
+    }, RUN_DELAY_MS);
+  }
+
+  private schedulePreview(): void {
+    if (this.previewTimer) clearTimeout(this.previewTimer);
+    this.previewTimer = setTimeout(() => {
+      this.previewTimer = null;
+      void this.requestPreview();
+    }, PREVIEW_DELAY_MS);
+  }
+
+  private async requestPreview(): Promise<void> {
+    if (!this.factors()) return;
+    const body = this.requestBody();
+    const key = JSON.stringify(body);
+    const seq = ++this.previewSeq;
+    try {
+      const preview = await this.api.preview(body);
+      if (this.destroyed || seq !== this.previewSeq) return;
+      this.preview.set(preview);
+      this.previewKey.set(key);
+    } catch {
+      // A failed preview only delays feedback: the exact run that follows reports any real error.
+    }
   }
 
   private async load(): Promise<void> {
@@ -295,22 +472,34 @@ export class StressTestingPage {
   protected async run(): Promise<void> {
     const factors = this.factors();
     if (!factors) return;
+    if (this.runTimer) {
+      clearTimeout(this.runTimer);
+      this.runTimer = null;
+    }
     const seq = ++this.runSeq;
+    const body = this.requestBody();
     this.running.set(true);
     this.runError.set(null);
     try {
-      const preset = this.presetId();
-      const result = await this.api.run(
-        preset === null ? { factors, intensity: this.intensity() } : { scenario: preset, intensity: this.intensity() },
-      );
+      const result = await this.api.run(body);
       if (this.destroyed || seq !== this.runSeq) return;
+      const key = JSON.stringify(body);
+      this.confirmedPreview.set(this.previewKey() === key && this.preview()?.ready ? this.preview() : null);
       this.result.set(result);
+      this.resultKey.set(key);
     } catch (err) {
       if (this.destroyed || seq !== this.runSeq) return;
       this.runError.set(describeApiError(err, "Le test de résistance n'a pas pu être exécuté."));
     } finally {
       if (!this.destroyed && seq === this.runSeq) this.running.set(false);
     }
+  }
+
+  /** "The AI preview announced x % (error y pp)" for a bank, once the engine has confirmed the previewed scenario. */
+  protected previewCheck(b: BankRun): { value: number; error: number } | null {
+    if (this.stale()) return null;
+    const p = this.confirmedPreview()?.banks.find((x) => x.id === b.id);
+    return p ? { value: p.cet1Ratio, error: p.cet1Ratio - b.projections.stressed.cet1Ratio } : null;
   }
 
   protected bankLabel(id: BankId): string {

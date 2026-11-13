@@ -488,7 +488,7 @@ kbd,
   align-items: center;
   gap: 0.35rem;
   padding: 0.12rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
