@@ -14,7 +14,25 @@ les tests sur base PostgreSQL sont reportés). Détail : [`STRESS_TESTING_BANCAI
   régression linéaire, validé sur des jeux jamais vus (R² test CET1 0,983, LCR 0,9998 ; dégradation hors domaine
   mesurée et signalée), explications globales et locales (§3.6). Détail : [`MODELES_IA_ET_EVALUATION.md`](MODELES_IA_ET_EVALUATION.md).
   Tests : backend **3 846, 0 échec** ; Angular **293, 0 échec** ; vérifié dans le navigateur.
-- Non livré : historique des exécutions, horizon pluriannuel.
+- **Incrément 3 (design) le 13 novembre** : aperçu IA en direct pendant le réglage (confirmé par le moteur, écart
+  affiché), vue « Qui absorbe le choc ? », jauges de capital, cascade façon SHAP. Tests : backend **3 849, 0 échec** ;
+  Angular **296, 0 échec** ; vérifié dans le navigateur (par lecture de la page : le volet était masqué, pas de capture
+  en largeur de bureau).
+- CSS corrigé le 13 novembre : commentaire cassé de `globals.css` (perte de toute la palette du thème sombre),
+  collision de classes `st-` avec FinStories (préfixe renommé `bs-`), doublons de thème inutilisés mis à la corbeille.
+- Non livré : historique des exécutions, horizon pluriannuel, test de résistance inversé, carte de vulnérabilité.
+- **FinStories, 13 novembre** : narration toujours en voix française (la voix `en-US` lisait le texte français avec
+  un accent anglais), meilleure voix choisie automatiquement (voix neuronales d'Edge en priorité), sélecteur de voix
+  mémorisé, texte adapté à l'oral, scène qui attend la fin de la phrase, montants des visuels au format français.
+  Tests Angular **302, 0 échec**. Limite : la qualité dépend des voix installées dans le navigateur ; une voix
+  humaine identique partout demanderait des fichiers audio pré-générés.
+- **FinStories, design « story »** : galerie (anneaux de progression, affiches animées par personnage, statut
+  Nouveau / En cours / Vu) ; une histoire s'ouvre en plein écran (zoom), toucher à droite / à gauche pour changer de
+  scène, maintenir pour mettre en pause, glisser ↑ ↓, flèches ou molette pour passer d'une histoire à l'autre (le fil
+  vertical est conservé), Échap pour fermer, enchaînement automatique, `?story=` ouvre directement l'histoire,
+  animations désactivées avec « réduire les animations ». Correction : l'horloge du lecteur ne recule plus et ne
+  saute plus après une image bloquée. Tests Angular **308, 0 échec**, lint et build OK ; vérifié dans le navigateur.
+  Le bundle initial passe à 599,8 kB (budget 500 kB, dépassement déjà existant, +10 kB de CSS).
 
 **Attention — modifications extérieures non vérifiées.** Entre 00 h 47 et 00 h 50 le 13 novembre, des fichiers ont été
 modifiés hors de ce travail : `apps/web/src/styles/globals.css`, `actuarial.css`, `admin.css` (modifiés) et
@@ -33,7 +51,10 @@ Les tests d'intégration PostgreSQL (`database-tests`) restent à exécuter (auc
 - Modifications non commitées qui existaient avant le mandat : `backups/pre-mandat-uncommitted-20261112.patch`
   (`apps/api/.env.example` supprimé, `apps/api/README.md`, `apps/web/angular.json`, `package-lock.json`). Non modifiées depuis.
 - Références anglaises d'origine : versions de `learning-golden.json` et `trading-golden.json` au commit `20d1008`.
-- Base `PIF` : non modifiée pendant cette session.
+- Base `PIF` : aucune migration ni réinitialisation. Seules modifications, à la demande de l'utilisatrice : les
+  comptes de test `test@pif.tn` (investisseur) et `admin@pif.tn` (administrateur, créé le 13 novembre via
+  l'inscription puis rôle `ADMIN` et e-mail vérifié par une requête SQL limitée à ce compte). Identifiants dans
+  `.env.test-accounts.local` (ignoré par git).
 
 ## Résultats des tests exécutés
 
