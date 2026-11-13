@@ -73,6 +73,26 @@ function bank(id: BankId, stressedRatio: number, status: BankRun['resilience']['
       liquidityShortfall: 0,
     },
     capitalBridge: { start: 900, steps: [{ key: 'creditCost', label: 'Coût du risque de crédit', amount: -282.6 }], end: 617.4 },
+    lossAbsorption:
+      id === 'PARTICIPATIVE'
+        ? {
+            reference: 'Par rapport à la projection à un an du scénario central',
+            total: 300,
+            capitalConsumed: 200,
+            sources: [{ key: 'credit', label: 'Pertes de crédit et de financement', kind: 'CREDIT', amount: 300 }],
+            absorbers: [
+              { key: 'psia', label: 'Titulaires des comptes participatifs', kind: 'PSIA', amount: 60 },
+              { key: 'irr', label: "Réserve pour risque d'investissement (IRR)", kind: 'RESERVE', amount: 40 },
+              { key: 'cet1', label: 'Fonds propres CET1', kind: 'CAPITAL', amount: 200 },
+            ],
+          }
+        : {
+            reference: 'Par rapport à la projection à un an du scénario central',
+            total: 200,
+            capitalConsumed: 200,
+            sources: [{ key: 'credit', label: 'Pertes de crédit et de financement', kind: 'CREDIT', amount: 200 }],
+            absorbers: [{ key: 'cet1', label: 'Fonds propres CET1', kind: 'CAPITAL', amount: 200 }],
+          },
     credit: [
       { key: 'mortgage', label: 'Crédits immobiliers aux ménages', ead: 2200, pdBase: 0.015, pdStressed: 0.024, lgdBase: 0.2, lgdStressed: 0.26, eclBase: 6.6, eclStressed: 13.7, residualValueLoss: 0, newlyDefaulted: 19.8 },
     ],
@@ -215,7 +235,12 @@ async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
 }
 
 describe('StressTestingPage', () => {
-  let api: { catalog: ReturnType<typeof vi.fn>; run: ReturnType<typeof vi.fn>; model: ReturnType<typeof vi.fn> };
+  let api: {
+    catalog: ReturnType<typeof vi.fn>;
+    run: ReturnType<typeof vi.fn>;
+    model: ReturnType<typeof vi.fn>;
+    preview: ReturnType<typeof vi.fn>;
+  };
 
   async function render() {
     TestBed.configureTestingModule({
@@ -232,6 +257,16 @@ describe('StressTestingPage', () => {
       catalog: vi.fn().mockResolvedValue(catalog),
       run: vi.fn().mockResolvedValue(result()),
       model: vi.fn().mockResolvedValue(modelCard),
+      preview: vi.fn().mockResolvedValue({
+        ready: true,
+        modelVersion: 'pif-stress-emulator-1.0.0',
+        factors: NEUTRAL,
+        banks: [
+          { id: 'CONVENTIONAL', cet1ChangePp: -9, lcrChangePp: 0, cet1Ratio: 0.062, lcr: 1.6, baselineCet1Ratio: 0.152, baselineLcr: 1.6 },
+          { id: 'PARTICIPATIVE', cet1ChangePp: -7, lcrChangePp: 0, cet1Ratio: 0.085, lcr: 2.1, baselineCet1Ratio: 0.155, baselineLcr: 2.1 },
+        ],
+        outsideTrainingRange: [],
+      }),
     };
   });
 
@@ -239,7 +274,7 @@ describe('StressTestingPage', () => {
     const { root } = await render();
     expect(api.run).toHaveBeenCalledWith({ scenario: 'recession', intensity: 1 });
     expect(root.querySelector('h1')?.textContent).toBe('Tests de résistance bancaire');
-    const verdicts = Array.from(root.querySelectorAll('.st-verdict'));
+    const verdicts = Array.from(root.querySelectorAll('.bs-verdict'));
     expect(verdicts).toHaveLength(2);
     expect(verdicts[0].getAttribute('data-tone')).toBe('positive');
     expect(verdicts[1].getAttribute('data-tone')).toBe('negative');
@@ -257,7 +292,7 @@ describe('StressTestingPage', () => {
     expect(panel.textContent).toContain('Moteur (exact)');
     expect(panel.textContent).toContain('−2,97 pp'); // engine value of the conventional bank
     expect(panel.textContent).toContain('écart +0,12 pp');
-    expect(panel.querySelector('.st-warning')?.textContent).toContain("Choc de taux d'intérêt");
+    expect(panel.querySelector('.bs-warning')?.textContent).toContain("Choc de taux d'intérêt");
     expect(panel.textContent).toContain('Même facteur principal que le moteur');
   });
 
@@ -274,16 +309,70 @@ describe('StressTestingPage', () => {
     expect(card.textContent).toContain('pas des banques réelles');
   });
 
+  it('previews with the AI while a slider moves, then computes the exact result when it is released', async () => {
+    const { fixture, root } = await render();
+    expect(root.querySelector('.bs-live')?.getAttribute('data-state')).toBe('exact');
+    const slider = root.querySelector<HTMLInputElement>('#f-range-defaultMultiplier');
+    if (!slider) throw new Error('slider missing');
+    const runsBefore = api.run.mock.calls.length;
+    slider.value = '2';
+    slider.dispatchEvent(new Event('input'));
+    await new Promise((r) => setTimeout(r, 150));
+    await settle(fixture);
+    expect(api.preview).toHaveBeenCalled();
+    expect(api.preview.mock.calls.at(-1)?.[0].factors.defaultMultiplier).toBe(2);
+    expect(api.run.mock.calls.length).toBe(runsBefore); // no exact run while sliding
+    expect(root.querySelector('.bs-live')?.getAttribute('data-state')).toBe('preview');
+    const first = root.querySelector('.bs-verdict');
+    expect(first?.getAttribute('data-preview')).toBe('true');
+    expect(first?.textContent).toContain('Aperçu IA');
+    expect(first?.textContent).toContain('6,20');
+
+    slider.dispatchEvent(new Event('change'));
+    await new Promise((r) => setTimeout(r, 450));
+    await settle(fixture);
+    expect(api.run.mock.calls.length).toBe(runsBefore + 1);
+    expect(api.run.mock.calls.at(-1)?.[0].factors.defaultMultiplier).toBe(2);
+    expect(root.querySelector('.bs-live')?.getAttribute('data-state')).toBe('exact');
+    expect(root.querySelector('.bs-verdict')?.getAttribute('data-preview')).toBe('false');
+    // The confirmed preview stays visible with its error against the engine (6,20 % vs 12,23 %).
+    const check = root.querySelector('.bs-previewCheck')?.textContent ?? '';
+    expect(check).toContain('6,20');
+    expect(check).toContain('−6,03');
+  });
+
+  it('shows who bears the shock, with investment-account holders only for the participative bank', async () => {
+    const { root } = await render();
+    const mirrors = Array.from(root.querySelectorAll('.bs-mirror'));
+    expect(mirrors).toHaveLength(2);
+    expect(mirrors[0].querySelector('[data-kind="PSIA"]')).toBeNull();
+    expect(mirrors[1].querySelector('.bs-block[data-kind="PSIA"]')).not.toBeNull();
+    expect(mirrors[1].textContent).toContain('Titulaires des comptes participatifs');
+    // Same height scale: the participative bank's 300 M DT column is the tallest.
+    const heights = mirrors.map((m) => parseFloat((m.querySelector('.bs-mirrorCol') as HTMLElement).style.height));
+    expect(heights[0]).toBeCloseTo(200 / 3, 3);
+    expect(heights[1]).toBe(100);
+  });
+
+  it('draws the SHAP-style waterfall from the baseline to the stressed ratio', async () => {
+    const { root } = await render();
+    const rows = Array.from(root.querySelectorAll('.bs-waterfall .bs-wfRow'));
+    expect(rows[0].textContent).toContain('Central à 1 an');
+    expect(rows.at(-1)?.textContent).toContain('Sous stress à 1 an');
+    expect(rows.some((r) => r.textContent?.includes('Hausse directe des défauts'))).toBe(true);
+    expect(rows.some((r) => r.textContent?.includes("Choc de taux d'intérêt"))).toBe(false); // zero contribution
+  });
+
   it('keeps the stress results when the model card cannot be loaded', async () => {
     api.model.mockRejectedValue(new ApiError(503, 'Modèle indisponible.'));
     const { root } = await render();
-    expect(root.querySelectorAll('.st-verdict')).toHaveLength(2);
+    expect(root.querySelectorAll('.bs-verdict')).toHaveLength(2);
     expect(Array.from(root.querySelectorAll('[role="alert"]')).map((a) => a.textContent).join(' ')).toContain('Modèle indisponible.');
   });
 
   it('runs a preset by name and a customised scenario with its factors', async () => {
     const { fixture, root } = await render();
-    const rate = Array.from(root.querySelectorAll<HTMLButtonElement>('.st-presets .st-preset')).find((b) => b.textContent?.includes('Choc de taux'));
+    const rate = Array.from(root.querySelectorAll<HTMLButtonElement>('.bs-presets .bs-preset')).find((b) => b.textContent?.includes('Choc de taux'));
     rate?.click();
     await settle(fixture);
     expect(api.run).toHaveBeenLastCalledWith({ scenario: 'rate-shock', intensity: 1 });
@@ -292,13 +381,13 @@ describe('StressTestingPage', () => {
     if (!input) throw new Error('factor input missing');
     input.value = '2.5';
     input.dispatchEvent(new Event('change'));
-    root.querySelector<HTMLFormElement>('form.st-builder')?.dispatchEvent(new Event('submit'));
+    root.querySelector<HTMLFormElement>('form.bs-builder')?.dispatchEvent(new Event('submit'));
     await settle(fixture);
     const last = api.run.mock.calls.at(-1)?.[0];
     expect(last.scenario).toBeUndefined();
     expect(last.factors.defaultMultiplier).toBe(2.5);
     expect(last.factors.rateShockBps).toBe(300);
-    expect(root.querySelector('.st-scenarioName')?.textContent).toContain('Scénario personnalisé');
+    expect(root.querySelector('.bs-scenarioName')?.textContent).toContain('Scénario personnalisé');
   });
 
   it('clamps a typed factor to its accepted range', async () => {
@@ -307,7 +396,7 @@ describe('StressTestingPage', () => {
     if (!input) throw new Error('factor input missing');
     input.value = '5000';
     input.dispatchEvent(new Event('change'));
-    root.querySelector<HTMLFormElement>('form.st-builder')?.dispatchEvent(new Event('submit'));
+    root.querySelector<HTMLFormElement>('form.bs-builder')?.dispatchEvent(new Event('submit'));
     await settle(fixture);
     expect(api.run.mock.calls.at(-1)?.[0].factors.rateShockBps).toBe(800);
   });
@@ -315,7 +404,7 @@ describe('StressTestingPage', () => {
   it('switches the detail panels between the two banks', async () => {
     const { fixture, root } = await render();
     expect(root.textContent).not.toContain('Mécanismes propres à la banque participative');
-    const tab = Array.from(root.querySelectorAll<HTMLButtonElement>('.st-bankTabs button')).find((b) => b.textContent?.includes('participative'));
+    const tab = Array.from(root.querySelectorAll<HTMLButtonElement>('.bs-bankTabs button')).find((b) => b.textContent?.includes('participative'));
     tab?.click();
     await settle(fixture);
     expect(root.textContent).toContain('Mécanismes propres à la banque participative');
@@ -326,6 +415,6 @@ describe('StressTestingPage', () => {
     api.run.mockRejectedValue(new ApiError(503, 'Service indisponible.'));
     const { root } = await render();
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('Service indisponible.');
-    expect(root.querySelectorAll('.st-verdict')).toHaveLength(0);
+    expect(root.querySelectorAll('.bs-verdict')).toHaveLength(0);
   });
 });

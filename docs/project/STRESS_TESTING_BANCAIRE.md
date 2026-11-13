@@ -18,6 +18,9 @@ Version du modèle : `pif-bank-stress-1.0.0`. Code : `apps/api/src/main/java/com
 | Écran Angular `/stress-testing`, entièrement en français | Livré |
 | Modèle d'apprentissage automatique (§3.5.3) : émulateur par gradient boosting, comparé à la moyenne et à une régression linéaire, validé hors échantillon | Livré — voir `MODELES_IA_ET_EVALUATION.md` |
 | Explications du modèle (§3.6) : importance par permutation, Shapley du modèle comparé à celui du moteur | Livré |
+| Aperçu IA en direct pendant le réglage des chocs (`POST /api/stress/preview`), confirmé par le moteur au relâchement avec l'écart affiché | Livré |
+| « Qui absorbe le choc ? » : sources de la perte face à ce qui l'absorbe (fonds propres, impôt, PER, IRR, titulaires des PSIA), à la même échelle pour les deux banques ; équilibre vérifié pour les 9 scénarios × 2 banques | Livré |
+| Jauge de capital (seuil 7 %, coussin 9,5 %) et cascade de Shapley façon SHAP du scénario central au ratio sous stress | Livré |
 | Enregistrement et historique des exécutions | **Non livré** (aucune écriture en base) |
 | Projection pluriannuelle | **Non livré** (horizon unique d'un an) |
 

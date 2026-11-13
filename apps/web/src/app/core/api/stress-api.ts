@@ -144,6 +144,7 @@ export interface BankRun {
     liquidityShortfall: number;
   };
   capitalBridge: { start: number; steps: { key: string; label: string; amount: number }[]; end: number };
+  lossAbsorption: LossAbsorption;
   credit: CreditSegmentResult[];
   profitAndLossSharing: PlsResult[];
   participativeMechanisms?: {
@@ -167,6 +168,41 @@ export interface BankRun {
     explanation: string[];
   };
   aiEstimate?: AiEstimate;
+}
+
+export type AbsorptionKind = 'CREDIT' | 'SECURITIES' | 'MARGIN' | 'FEES' | 'DCR' | 'RESERVE' | 'PSIA' | 'TAX' | 'CAPITAL';
+
+export interface AbsorptionItem {
+  key: string;
+  label: string;
+  kind: AbsorptionKind;
+  /** M DT, always positive; the column says whether it is a source or an absorber. */
+  amount: number;
+}
+
+/** Where the shock comes from and who bears it, against the one-year baseline; both columns sum to `total`. */
+export interface LossAbsorption {
+  reference: string;
+  total: number;
+  capitalConsumed: number;
+  sources: AbsorptionItem[];
+  absorbers: AbsorptionItem[];
+}
+
+export interface StressPreview {
+  ready: boolean;
+  modelVersion: string;
+  factors: StressFactorValues;
+  banks: {
+    id: BankId;
+    cet1ChangePp: number;
+    lcrChangePp: number;
+    cet1Ratio: number;
+    lcr: number;
+    baselineCet1Ratio: number;
+    baselineLcr: number;
+  }[];
+  outsideTrainingRange?: FactorKey[];
 }
 
 export type EmulatorTarget = 'CET1_CHANGE_PP' | 'LCR_CHANGE_PP';
@@ -286,6 +322,10 @@ export class StressApi {
 
   run(body: StressRunRequest): Promise<StressRunResult> {
     return this.api.request<StressRunResult>('/stress/run', { method: 'POST', body });
+  }
+
+  preview(body: StressRunRequest): Promise<StressPreview> {
+    return this.api.request<StressPreview>('/stress/preview', { method: 'POST', body });
   }
 
   model(): Promise<ModelCard> {

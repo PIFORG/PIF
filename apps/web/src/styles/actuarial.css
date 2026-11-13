@@ -21,7 +21,7 @@
   height: 6px;
   margin: 0 0 var(--space-4);
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--mtr-brand), var(--mtr-cyan), var(--mtr-brand));
+  background: var(--color-surface);
   opacity: 0.85;
 }
 
@@ -29,7 +29,7 @@
   border: 0;
   height: 1px;
   margin: 0 0 var(--space-4);
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--mtr-brand) 45%, var(--mtr-border)), transparent);
+  background: var(--color-surface);
 }
 
 .ac-researchDesk {
@@ -38,7 +38,7 @@
 
 .ac-specColumn .ws-panel {
   border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--mtr-brand) 4%, var(--mtr-surface)), var(--mtr-surface));
+  background: var(--color-surface);
 }
 
 .ac-specColumn .ws-panelHead {
@@ -51,12 +51,12 @@
 
 .ac-researchKpis .ws-kpi {
   border-color: color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
-  background: linear-gradient(160deg, color-mix(in srgb, var(--mtr-brand) 6%, var(--mtr-surface)), var(--mtr-surface));
+  background: var(--color-surface);
 }
 
 .ac-researchPods .ac-workspace {
   border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
-  background: linear-gradient(165deg, color-mix(in srgb, var(--mtr-brand) 5%, var(--mtr-surface)), var(--mtr-surface));
+  background: var(--color-surface);
   box-shadow:
     var(--shadow-sm),
     inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);

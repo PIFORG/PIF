@@ -241,6 +241,7 @@ public class StressService {
     out.put("projections", projections);
     out.put("resilience", resilience(baseline, stressed));
     out.put("capitalBridge", capitalBridge(b, stressed));
+    out.put("lossAbsorption", lossAbsorption(baseline, stressed));
     out.put("credit", stressed.credit().stream().map(StressService::segmentJson).toList());
     out.put("profitAndLossSharing", stressed.pls().stream().map(StressService::plsJson).toList());
     if (b.participative() != null) out.put("participativeMechanisms", mechanisms(b, stressed));
@@ -348,6 +349,71 @@ public class StressService {
     out.put("start", b.cet1());
     out.put("steps", steps);
     out.put("end", round(b.cet1() + sum, 3));
+    return out;
+  }
+
+  /**
+   * Where the shock comes from and who bears it, against the one-year baseline (M DT). Each item is its signed
+   * contribution to the capital consumed, from the engine identity
+   * ΔCET1 = Δmarge + Δcommissions − Δcoût du risque − risque commercial déplacé + IRR + PSIA − Δimpôt + réévaluations.
+   * Positive items are sources of loss, negative ones absorb it; the capital consumed closes the balance, so both
+   * columns always add up to the same total.
+   */
+  static Map<String, Object> lossAbsorption(Outcome baseline, Outcome stressed) {
+    record Item(String key, String label, String kind, double value) {}
+    double marginChange = stressed.marginIncome() - baseline.marginIncome();
+    double feesChange = stressed.feesAndOther() - baseline.feesAndOther();
+    double revaluation = stressed.bondRevaluation() + stressed.equityRevaluation()
+        - baseline.bondRevaluation() - baseline.equityRevaluation();
+    List<Item> items = List.of(
+        new Item("credit", stressed.creditCost() >= baseline.creditCost() ? "Pertes de crédit et de financement"
+            : "Baisse du coût du risque", "CREDIT", stressed.creditCost() - baseline.creditCost()),
+        new Item("securities", revaluation <= 0 ? "Pertes de valeur des titres" : "Hausse de valeur des titres",
+            "SECURITIES", -revaluation),
+        new Item("margin", marginChange <= 0 ? "Baisse de la marge" : "Hausse de la marge", "MARGIN", -marginChange),
+        new Item("fees", feesChange <= 0 ? "Baisse des commissions" : "Hausse des commissions", "FEES", -feesChange),
+        new Item("dcr", "Risque commercial déplacé", "DCR", stressed.dcrCost() + stressed.perUsed()),
+        new Item("per", "Réserve d'égalisation des profits (PER)", "RESERVE", -stressed.perUsed()),
+        new Item("irr", "Réserve pour risque d'investissement (IRR)", "RESERVE", -stressed.irrUsed()),
+        new Item("psia", "Titulaires des comptes participatifs", "PSIA", -stressed.psiaAbsorbed()),
+        new Item("tax", stressed.tax() <= baseline.tax() ? "Moindre impôt" : "Impôt supplémentaire", "TAX",
+            stressed.tax() - baseline.tax()));
+    double consumed = baseline.ratios().cet1() - stressed.ratios().cet1();
+
+    List<Object> sources = new ArrayList<>();
+    List<Object> absorbers = new ArrayList<>();
+    double total = 0;
+    for (Item i : items) {
+      if (Math.abs(i.value()) < 1e-9) continue;
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("key", i.key());
+      m.put("label", i.label());
+      m.put("kind", i.kind());
+      m.put("amount", round(Math.abs(i.value()), 3));
+      if (i.value() > 0) {
+        sources.add(m);
+        total += i.value();
+      } else {
+        absorbers.add(m);
+      }
+    }
+    Map<String, Object> capital = new LinkedHashMap<>();
+    capital.put("key", "cet1");
+    capital.put("label", consumed >= 0 ? "Fonds propres CET1" : "Renforcement des fonds propres");
+    capital.put("kind", "CAPITAL");
+    capital.put("amount", round(Math.abs(consumed), 3));
+    if (consumed >= 0) {
+      absorbers.add(capital);
+    } else {
+      sources.add(capital);
+      total += -consumed;
+    }
+    Map<String, Object> out = new LinkedHashMap<>();
+    out.put("reference", "Par rapport à la projection à un an du scénario central");
+    out.put("total", round(total, 3));
+    out.put("capitalConsumed", round(consumed, 3));
+    out.put("sources", sources);
+    out.put("absorbers", absorbers);
     return out;
   }
 

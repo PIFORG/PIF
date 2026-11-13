@@ -77,6 +77,55 @@ class StressServiceTest {
   }
 
   @Test
+  void lossSourcesAndAbsorbersBalanceExactlyForEveryPresetAndBank() {
+    for (StressFactors.Preset preset : StressFactors.PRESETS) {
+      Map<String, Object> out = run(Map.of("scenario", preset.id()));
+      for (Object o : list(out.get("banks"))) {
+        Map<String, Object> bank = map(o);
+        Map<String, Object> la = map(bank.get("lossAbsorption"));
+        double sources = list(la.get("sources")).stream().mapToDouble(s -> d(map(s).get("amount"))).sum();
+        double absorbers = list(la.get("absorbers")).stream().mapToDouble(s -> d(map(s).get("amount"))).sum();
+        String what = preset.id() + " " + bank.get("id");
+        assertThat(sources).as(what).isCloseTo(absorbers, within(0.01));
+        assertThat(sources).as(what).isCloseTo(d(la.get("total")), within(0.01));
+        double consumed = d(map(map(bank.get("projections")).get("baseline")).get("cet1"))
+            - d(map(map(bank.get("projections")).get("stressed")).get("cet1"));
+        assertThat(d(la.get("capitalConsumed"))).as(what).isCloseTo(consumed, within(0.01));
+      }
+    }
+  }
+
+  @Test
+  void investmentAccountHoldersAppearAmongAbsorbersOnlyForTheParticipativeBank() {
+    Map<String, Object> out = run(Map.of("scenario", "combined-severe"));
+    for (Object o : list(out.get("banks"))) {
+      Map<String, Object> bank = map(o);
+      List<Object> keys = list(map(bank.get("lossAbsorption")).get("absorbers")).stream()
+          .map(a -> map(a).get("key")).toList();
+      if ("PARTICIPATIVE".equals(bank.get("id"))) assertThat(keys).contains("psia", "irr", "cet1");
+      else assertThat(keys).doesNotContain("psia", "irr", "per").contains("cet1");
+    }
+  }
+
+  @Test
+  void thePreviewReturnsModelEstimatesForBothBanksOnceTrained() {
+    Map<String, Object> preview = SharedModels.INSTANCE.preview(StressFactors.preset("recession").factors());
+    assertThat(preview.get("ready")).isEqualTo(true);
+    assertThat(list(preview.get("banks"))).hasSize(2);
+    for (Object o : list(preview.get("banks"))) {
+      Map<String, Object> b = map(o);
+      assertThat(d(b.get("cet1Ratio")))
+          .isCloseTo(d(b.get("baselineCet1Ratio")) + d(b.get("cet1ChangePp")) / 100, within(1e-5));
+    }
+    Map<String, Object> exact = run(Map.of("scenario", "recession"));
+    double exactCet1 = d(map(map(map(list(exact.get("banks")).get(0)).get("projections")).get("stressed"))
+        .get("cet1Ratio"));
+    // Within the training domain the preview is close to the engine (documented test MAE ≈ 0.26 pp).
+    assertThat(d(map(list(preview.get("banks")).get(0)).get("cet1Ratio"))).isCloseTo(exactCet1, within(0.01));
+    assertThat(new StressModelService().preview(StressFactors.NEUTRAL).get("ready")).isEqualTo(false);
+  }
+
+  @Test
   void theSevereScenarioBreachesTheCapitalThresholdAndTheBaselineDoesNot() {
     Map<String, Object> severe = run(Map.of("scenario", "combined-severe"));
     for (Object o : list(severe.get("banks"))) {
