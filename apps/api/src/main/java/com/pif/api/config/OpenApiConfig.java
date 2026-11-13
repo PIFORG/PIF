@@ -5,6 +5,7 @@ import com.pif.api.actuarial.ActuarialDtos;
 import com.pif.api.auth.AuthDtos;
 import com.pif.api.backtest.BacktestDtos;
 import com.pif.api.learning.LearningDtos;
+import com.pif.api.stress.StressDtos;
 import com.pif.api.trading.TradingDtos;
 import com.pif.api.web.ApiDocs;
 import com.pif.api.web.RouteAnnotations.Public;
@@ -73,6 +74,8 @@ public class OpenApiConfig {
       "Backtesting", "Synchronous historical strategy replay on fictional daily closes (no job queue in v1)",
       "Actuarial Lab", "Non-life insurance pricing: claim frequency and severity, aggregate loss, premiums and saved "
           + "scenarios (fictional data, model estimates)",
+      "Bank Stress Testing", "One-year stress tests of a conventional and a participative fictional bank: credit "
+          + "losses, capital, liquidity, exact Shapley attribution and comparison (deterministic, not stored)",
       "System Health", "Service and database availability");
 
   private static final Map<String, List<Parameter>> QUERIES = queries();
@@ -94,6 +97,7 @@ public class OpenApiConfig {
     BacktestDtos.openApiSchemas().forEach(components::addSchemas);
     LearningDtos.openApiSchemas().forEach(components::addSchemas);
     ActuarialDtos.openApiSchemas().forEach(components::addSchemas);
+    StressDtos.openApiSchemas().forEach(components::addSchemas);
     OpenAPI api = new OpenAPI()
         .info(new Info().title("Market Trading Room Simulator API").description(DESCRIPTION).version("1.0.0")
             .contact(new Contact()))

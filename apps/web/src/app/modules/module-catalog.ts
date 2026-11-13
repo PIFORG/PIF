@@ -355,4 +355,4 @@ export const MODULES: Record<string, ModuleDefinition> = {
 };
 
 /** Routes of apps/web that render ModulePreviewPage (apps/web/src/app/<slug>/page.tsx). */
-export const PREVIEW_MODULE_ROUTES = ['ai', 'challenges', 'explainability', 'strategies', 'stress-testing'] as const;
+export const PREVIEW_MODULE_ROUTES = ['ai', 'challenges', 'explainability', 'strategies'] as const;
