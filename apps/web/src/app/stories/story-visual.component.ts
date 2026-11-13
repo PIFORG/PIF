@@ -1,5 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { formatDT, type StoryCharacter } from '../core/api/learning-api';
+import type { StoryCharacter } from '../core/api/learning-api';
+
+/** Amounts in French notation, like the captions: 8 457,50 DT (never 8,457.50). */
+function dtFr(value: number, digits = 2): string {
+  const text = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(Math.abs(value));
+  return `${value < 0 ? '−' : ''}${text} DT`;
+}
+
+function oneDecimalFr(value: number): string {
+  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+}
 import type { StoryScene, StoryVisual } from '../core/api/stories-api';
 import { easeOut, sparkPath } from './story-timeline';
 
@@ -101,7 +111,7 @@ export class StoryVisualComponent {
     if (v.type !== 'intro') return null;
     const p = this.eased();
     const name = CHARACTER_NAME[v.character];
-    return { name, initial: name[0], scale: `scale(${0.85 + 0.15 * p})`, amount: formatDT(v.amount * p, 0) };
+    return { name, initial: name[0], scale: `scale(${0.85 + 0.15 * p})`, amount: dtFr(v.amount * p, 0) };
   });
 
   protected readonly headline = computed(() => {
@@ -139,11 +149,11 @@ export class StoryVisualComponent {
     const direction = delta < 0 ? 'down' : 'up';
     return {
       label: v.label,
-      value: formatDT(value, 2),
+      value: dtFr(value, 2),
       direction,
-      delta: `${direction === 'down' ? '▼' : '▲'} ${formatDT(Math.abs(delta))} (${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)} %)`,
+      delta: `${direction === 'down' ? '▼' : '▲'} ${dtFr(Math.abs(delta))} (${deltaPct >= 0 ? '+' : '−'}${oneDecimalFr(Math.abs(deltaPct))} %)`,
       spoken: direction === 'down' ? ' en baisse' : ' en hausse',
-      from: formatDT(v.from, 2),
+      from: dtFr(v.from, 2),
     };
   });
 
