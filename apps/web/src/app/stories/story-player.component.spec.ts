@@ -87,7 +87,7 @@ describe('StoryPlayer', () => {
     buttonNamed(root, 'Scène suivante').click();
     fixture.detectChanges();
     expect(root.querySelector('.st-reel')?.textContent).toBe('Épisode 3 · Remontons le temps');
-    expect(root.querySelector('.st-rewindTitle')?.textContent).toBe("Let's rewind!");
+    expect(root.querySelector('.st-rewindTitle')?.textContent).toBe('Revenons en arrière !');
     buttonNamed(root, 'Scène précédente').click();
     fixture.detectChanges();
     expect(root.querySelector('.st-caption')?.textContent).toBe('If you chose A: Sarah sells.');
@@ -103,10 +103,45 @@ describe('StoryPlayer', () => {
     expect(progress).toHaveBeenCalledWith('sarah-and-the-market-crash', 4000, undefined);
   });
 
-  it('labels narration as unavailable when the browser has no speech synthesis', async () => {
+  it('labels narration as unavailable when the device has no French voice', async () => {
     const { root } = await renderPlayer();
-    const narration = buttonNamed(root, /La narration n'est pas prise en charge/);
+    const narration = buttonNamed(root, /La narration n'est pas disponible : aucune voix française/);
     expect(narration.disabled).toBe(true);
+  });
+
+  it('narrates with the chosen French voice and the caption rewritten for the ear', async () => {
+    const spoken: { text: string; lang: string; voice: unknown; rate: number }[] = [];
+    const synth = { speak: vi.fn((u: { text: string; lang: string; voice: unknown; rate: number }) => spoken.push(u)), cancel: vi.fn() };
+    class Utterance {
+      lang = '';
+      voice: unknown = null;
+      rate = 1;
+      pitch = 1;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    try {
+      const { fixture, root } = await renderPlayer();
+      const julie = { name: 'Microsoft Julie - French (France)', lang: 'fr-FR', voiceURI: 'julie', localService: true, default: false };
+      fixture.componentRef.setInput('voice', julie);
+      fixture.componentRef.setInput('speechAvailable', true);
+      fixture.componentRef.setInput('muted', false);
+      await settle(fixture);
+      buttonNamed(root, 'Lecture').click();
+      await settle(fixture);
+      expect(synth.speak).toHaveBeenCalled();
+      const last = spoken.at(-1);
+      expect(last?.lang).toBe('fr-FR');
+      expect(last?.voice).toBe(julie);
+      expect(last?.rate).toBeLessThan(1);
+      expect(last?.text).toBe('What would you do? A or B?'); // emphasis capitals are not spelled out
+      expect(buttonNamed(root, 'Couper la narration').getAttribute('title')).toBe('Narration en français · voix Julie · France');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('answers the keyboard shortcuts on the player region', async () => {
@@ -120,5 +155,69 @@ describe('StoryPlayer', () => {
     fixture.componentRef.instance.toggleCaptions.subscribe(captions);
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', bubbles: true }));
     expect(captions).toHaveBeenCalledTimes(1);
+  });
+
+  describe('in full-screen story mode', () => {
+    const pointer = (type: string, x: number, y: number) => new MouseEvent(type, { clientX: x, clientY: y, bubbles: true });
+
+    async function renderImmersive() {
+      const rendered = await renderPlayer();
+      rendered.fixture.componentRef.setInput('immersive', true);
+      rendered.fixture.detectChanges();
+      const zones = rendered.root.querySelector<HTMLElement>('.st-tapZones');
+      if (!zones) throw new Error('No tap zones');
+      zones.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 500, right: 300, bottom: 500, x: 0, y: 0, toJSON: () => ({}) });
+      return { ...rendered, zones };
+    }
+
+    it('taps right for the next scene and left for the previous one', async () => {
+      const { fixture, root, zones } = await renderImmersive();
+      expect(root.getAttribute('data-immersive')).toBe('true');
+      zones.dispatchEvent(pointer('pointerdown', 250, 200));
+      zones.dispatchEvent(pointer('pointerup', 250, 200));
+      fixture.detectChanges();
+      expect(root.querySelector('.st-caption')?.textContent).toBe('If you chose A: Sarah sells.');
+      zones.dispatchEvent(pointer('pointerdown', 40, 200));
+      zones.dispatchEvent(pointer('pointerup', 40, 200));
+      fixture.detectChanges();
+      expect(root.querySelector('.st-caption')?.textContent).toBe('What would YOU do? A or B?');
+    });
+
+    it('pauses while held and hides the story chrome', async () => {
+      const { fixture, root, zones } = await renderImmersive();
+      buttonNamed(root, 'Lecture').click();
+      fixture.detectChanges();
+      zones.dispatchEvent(pointer('pointerdown', 150, 200));
+      await new Promise((resolve) => setTimeout(resolve, 260));
+      fixture.detectChanges();
+      expect(root.getAttribute('data-holding')).toBe('true');
+      expect(root.querySelector('.st-holdBadge')?.textContent).toContain('En pause');
+      expect(buttonNamed(root, 'Lecture')).toBeTruthy();
+      zones.dispatchEvent(pointer('pointerup', 150, 200));
+      fixture.detectChanges();
+      expect(root.getAttribute('data-holding')).toBeNull();
+      expect(buttonNamed(root, 'Pause')).toBeTruthy();
+      // Releasing a hold does not also skip a scene.
+      expect(root.querySelector('.st-caption')?.textContent).toBe('What would YOU do? A or B?');
+    });
+
+    it('turns a vertical swipe into a change of story', async () => {
+      const { fixture, root, zones } = await renderImmersive();
+      const swipes: string[] = [];
+      fixture.componentRef.instance.swipe.subscribe((direction) => swipes.push(direction));
+      zones.dispatchEvent(pointer('pointerdown', 150, 400));
+      zones.dispatchEvent(pointer('pointerup', 150, 200));
+      zones.dispatchEvent(pointer('pointerdown', 150, 100));
+      zones.dispatchEvent(pointer('pointerup', 160, 300));
+      fixture.detectChanges();
+      expect(swipes).toEqual(['up', 'down']);
+      expect(root.querySelector('.st-caption')?.textContent).toBe('What would YOU do? A or B?');
+    });
+
+    it('has no tap zones outside full-screen mode', async () => {
+      const { root } = await renderPlayer();
+      expect(root.querySelector('.st-tapZones')).toBeNull();
+      expect(root.getAttribute('data-immersive')).toBeNull();
+    });
   });
 });

@@ -61,3 +61,6 @@ apps/web/.angular/
 
 # Test harness install (generated Prisma client)
 tools/db-harness/node_modules/
+
+# Sauvegardes locales
+backups/

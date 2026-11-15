@@ -75,7 +75,7 @@ export const WORKSPACE_NAV: NavGroup[] = [
         status: 'DESIGNED_PENDING_BACKEND',
       },
       { href: '/ai', label: FR.nav.aiInsights, icon: 'ai', status: 'DESIGNED_PENDING_BACKEND' },
-      { href: '/stress-testing', label: FR.nav.bankStress, icon: 'bank', status: 'DESIGNED_PENDING_BACKEND' },
+      { href: '/stress-testing', label: FR.nav.bankStress, icon: 'bank', status: 'LIVE_INTEGRATED' },
       { href: '/explainability', label: FR.nav.explainableAi, icon: 'xai', status: 'DESIGNED_PENDING_BACKEND' },
     ],
   },

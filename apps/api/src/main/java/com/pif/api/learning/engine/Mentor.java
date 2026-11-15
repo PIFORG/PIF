@@ -165,8 +165,8 @@ public final class Mentor {
         && current.protectedSymbols().isEmpty()) {
       return new Diagnosis("UNPROTECTED", "Protection",
           List.of("Vous détenez " + String.join(", ", current.heldSymbols()) + " sans ordre stop."),
-          "Aucune position n'a de stop. Un stop vente se déclenche quand le bid atteint votre niveau ; il s'exécute "
-              + "au bid suivant, qui peut être plus bas après un gap.",
+          "Aucune position n'a de stop. Un ordre stop de vente se déclenche quand le prix acheteur atteint votre "
+              + "seuil ; il s'exécute au prix acheteur suivant, qui peut être plus bas après un gap.",
           List.of("À quel prix admettriez-vous que votre idée sur cette position était fausse ?",
               "Combien perdriez-vous dans ce cas ?"));
     }
@@ -177,7 +177,7 @@ public final class Mentor {
           "La majeure partie de votre capital est en liquidités. Cela évite les pertes, mais cette mission demande "
               + "de rester investi — l'enjeu est de gérer le risque en étant investi, pas d'éviter le marché.",
           List.of("Qu'est-ce qui vous rendrait à l'aise pour investir davantage ?",
-              "Comment investir tout en limitant votre downside ?"));
+              "Comment investir tout en limitant votre risque de baisse ?"));
     }
 
     return new Diagnosis("PLAN_CHECK", "Votre plan",
@@ -201,9 +201,8 @@ public final class Mentor {
     }
     if (last == null) return null;
     Consistency check = Assessments.rationaleConsistent(last);
-    String label = last.rationale.replace('_', ' ').toLowerCase(Locale.ROOT);
-    String fact = "Dernier ordre : " + last.side + " " + Js.str(last.quantity) + " " + last.symbol + " (" + last.type
-        + "), raison « " + label + " ».";
+    String fact = "Dernier ordre : " + Wording.side(last.side) + " de " + Js.str(last.quantity) + " " + last.symbol
+        + " (" + Wording.orderType(last.type) + "), motif « " + Wording.rationale(last.rationale) + " ».";
     return check.consistent()
         ? new Critique(fact, "Votre dernier ordre est cohérent avec la raison indiquée ("
             + check.why().toLowerCase(Locale.ROOT) + "). Maintenant arguez l'inverse : quel est le meilleur argument "

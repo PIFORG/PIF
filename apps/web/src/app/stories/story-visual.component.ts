@@ -1,5 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { formatDT, type StoryCharacter } from '../core/api/learning-api';
+import type { StoryCharacter } from '../core/api/learning-api';
+
+/** Amounts in French notation, like the captions: 8 457,50 DT (never 8,457.50). */
+function dtFr(value: number, digits = 2): string {
+  const text = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(Math.abs(value));
+  return `${value < 0 ? '−' : ''}${text} DT`;
+}
+
+function oneDecimalFr(value: number): string {
+  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+}
 import type { StoryScene, StoryVisual } from '../core/api/stories-api';
 import { easeOut, sparkPath } from './story-timeline';
 
@@ -18,23 +28,23 @@ export const CHARACTER_NAME: Record<StoryCharacter, string> = { SARAH: 'Sarah', 
       <div class="st-avatar" [style.transform]="v.scale" aria-hidden="true">{{ v.initial }}</div>
       <div [style.opacity]="fadeOpacity()" [style.transform]="fadeTransform()">
         <div class="st-name">{{ v.name }}</div>
-        <div class="st-label">Starting amount</div>
+        <div class="st-label">Montant de départ</div>
         <div class="st-big">{{ v.amount }}</div>
       </div>
     } @else if (headline(); as v) {
       <div class="st-headline" [attr.data-sentiment]="v.sentiment" [style.opacity]="fadeOpacity()" [style.transform]="fadeTransform()">
-        <span class="st-label">{{ v.sentiment === 'NEUTRAL' ? 'Coming up' : 'Breaking' }}</span>
+        <span class="st-label">{{ v.sentiment === 'NEUTRAL' ? 'À venir' : 'Dernière minute' }}</span>
         <strong>{{ v.text }}</strong>
       </div>
       @if (scene().kind === 'DECISION') {
         <div class="st-choices" aria-hidden="true" [style.opacity]="choicesOpacity()">
-          <p><span>A</span> or <span>B</span>?</p>
-          <small>Decide in your head — the story shows both paths.</small>
+          <p><span>A</span> ou <span>B</span> ?</p>
+          <small>Choisissez mentalement — l'histoire montre les deux chemins.</small>
         </div>
       }
     } @else if (allocation(); as v) {
       <div class="st-alloc">
-        <span class="st-label">Portfolio</span>
+        <span class="st-label">Portefeuille</span>
         @for (s of v; track s.label) {
           <div class="st-allocRow">
             <span>{{ s.label }} · {{ s.shown }} %</span>
@@ -54,7 +64,7 @@ export const CHARACTER_NAME: Record<StoryCharacter, string> = { SARAH: 'Sarah', 
       <span class="st-label">{{ v.label }}</span>
       <div class="st-big">{{ v.value }}</div>
       <div class="st-delta" [attr.data-direction]="v.direction" [style.opacity]="fadeOpacity()" [style.transform]="fadeTransform()">{{ v.delta }}<span class="sr-only">{{ v.spoken }}</span></div>
-      <span class="st-label" [style.opacity]="fadeOpacity()" [style.transform]="fadeTransform()">from {{ v.from }}</span>
+      <span class="st-label" [style.opacity]="fadeOpacity()" [style.transform]="fadeTransform()">au départ : {{ v.from }}</span>
     } @else if (visual().type === 'rewind') {
       <div class="st-rewind">
         <svg
@@ -69,11 +79,11 @@ export const CHARACTER_NAME: Record<StoryCharacter, string> = { SARAH: 'Sarah', 
           <path d="M3.5 10a6.5 6.5 0 1 0 2-4.7" />
           <path d="M3.5 3.5v3.5H7" />
         </svg>
-        <div class="st-rewindTitle">Let's rewind!</div>
-        <span class="st-label">Back to the decision</span>
+        <div class="st-rewindTitle">Revenons en arrière !</div>
+        <span class="st-label">Retour à la décision</span>
       </div>
     } @else if (lesson(); as v) {
-      <span class="st-label">Takeaways</span>
+      <span class="st-label">À retenir</span>
       <ul class="st-points">
         @for (point of v.points; track point; let i = $index) {
           <li
@@ -101,7 +111,7 @@ export class StoryVisualComponent {
     if (v.type !== 'intro') return null;
     const p = this.eased();
     const name = CHARACTER_NAME[v.character];
-    return { name, initial: name[0], scale: `scale(${0.85 + 0.15 * p})`, amount: formatDT(v.amount * p, 0) };
+    return { name, initial: name[0], scale: `scale(${0.85 + 0.15 * p})`, amount: dtFr(v.amount * p, 0) };
   });
 
   protected readonly headline = computed(() => {
@@ -125,8 +135,8 @@ export class StoryVisualComponent {
       label: v.label,
       tone: v.tone,
       d: sparkPath(v.series, 300, 160),
-      description: `Chart from ${first.toLocaleString('en-US')} to ${last.toLocaleString('en-US')}`,
-      last: last.toLocaleString('en-US', { maximumFractionDigits: 3 }),
+      description: `Graphique de ${first.toLocaleString('fr-FR')} à ${last.toLocaleString('fr-FR')}`,
+      last: last.toLocaleString('fr-FR', { maximumFractionDigits: 3 }),
     };
   });
 
@@ -139,11 +149,11 @@ export class StoryVisualComponent {
     const direction = delta < 0 ? 'down' : 'up';
     return {
       label: v.label,
-      value: formatDT(value, 2),
+      value: dtFr(value, 2),
       direction,
-      delta: `${direction === 'down' ? '▼' : '▲'} ${formatDT(Math.abs(delta))} (${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)} %)`,
-      spoken: direction === 'down' ? ' decrease' : ' increase',
-      from: formatDT(v.from, 2),
+      delta: `${direction === 'down' ? '▼' : '▲'} ${dtFr(Math.abs(delta))} (${deltaPct >= 0 ? '+' : '−'}${oneDecimalFr(Math.abs(deltaPct))} %)`,
+      spoken: direction === 'down' ? ' en baisse' : ' en hausse',
+      from: dtFr(v.from, 2),
     };
   });
 

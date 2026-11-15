@@ -1,4 +1,4 @@
-<div class="page-shell st-cinemaShell">
+<div class="page-shell st-cinemaShell" [attr.inert]="openIndex() !== null ? '' : null">
   <mtr-page-heading
     [eyebrow]="copy.eyebrow"
     [title]="copy.storiesTitle"
@@ -17,80 +17,204 @@
       <div mtr-empty-state heading="Aucune histoire pour le moment" description="Les nouvelles histoires apparaîtront ici."></div>
     } @else {
       @let weak = weakest();
-      <div class="st-cinemaFrame" aria-hidden="true">
-        <span class="st-cinemaVignette"></span>
-        <span class="st-cinemaGrain"></span>
-      </div>
-      <div class="st-feed" #feed aria-label="Fil des histoires financières">
-        <div class="st-feedRail" aria-hidden="true">
-          @for (story of list; track story.slug; let index = $index) {
-            <button
-              type="button"
-              class="st-railDot"
-              [attr.data-active]="index === activeIndex() ? 'true' : null"
-              [attr.aria-label]="'Épisode ' + (index + 1)"
-              (click)="goTo(index)"
-            ></button>
-          }
-        </div>
+
+      <!-- Story rings: one per episode, the ring shows how much has been watched. -->
+      <nav class="st-rings" aria-label="Accès rapide aux histoires">
         @for (story of list; track story.slug; let index = $index) {
-          @let resumesAt = resumeAt(story);
-          <section
-            class="st-item"
-            #item
-            [attr.data-index]="index"
-            [attr.data-active]="index === activeIndex() ? 'true' : null"
-            [attr.aria-label]="index + 1 + ' sur ' + list.length + ' : ' + story.title"
+          <button
+            type="button"
+            class="st-ring"
+            [attr.data-character]="story.character"
+            [attr.data-status]="status(story)"
+            [style.--watched]="watched(story)"
+            [attr.aria-label]="'Ouvrir l’histoire ' + (index + 1) + ' : ' + story.title"
+            (click)="open(index, $event.currentTarget)"
           >
-            <div
-              mtr-story-player
-              [summary]="story"
-              [active]="index === activeIndex()"
-              [preload]="index === activeIndex() + 1"
-              [muted]="muted()"
-              [captions]="captions()"
-              [reducedMotion]="reducedMotion()"
-              [speechAvailable]="speechAvailable()"
-              [hasNext]="index < list.length - 1"
-              (toggleMute)="toggleMute()"
-              (toggleCaptions)="toggleCaptions()"
-              (next)="goTo(index + 1)"
-              (progressSaved)="onProgress($event)"
-            ></div>
-            <aside class="st-side st-episodeCard">
-              <div style="display: flex; flex-wrap: wrap; gap: var(--space-2)">
-                <span class="badge badge-muted">{{ characterName[story.character] }}</span>
-                <span class="badge badge-muted">{{ levelLabel[story.level] }}</span>
-                @if (story.recommended) {
-                  <span class="badge badge-info">Pour votre compétence la plus faible</span>
-                }
-                @if (story.progress.completed) {
-                  <span class="badge badge-active">Vu</span>
-                }
-                @if (story.progress.watchedEarlierVersion) {
-                  <span class="badge badge-muted">Version antérieure vue</span>
-                }
-                @if (story.progress.updatedSinceLastWatch) {
-                  <span class="badge badge-info">Mis à jour depuis votre visionnage</span>
-                }
-              </div>
-              <h2>{{ story.title }}</h2>
-              <p>{{ story.summary }}</p>
-              <p>Compétence : {{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}{{ resumesAt > 0 ? ' · reprise à ' + clock(resumesAt) : '' }}</p>
-              @if (story.relatedMissionSlug) {
-                <a [routerLink]="['/learn/missions', story.relatedMissionSlug]" class="btn btn-secondary btn-sm" style="justify-self: start">S'entraîner dans le parcours</a>
+            <span class="st-ringAvatar" aria-hidden="true"><span>{{ characterName[story.character].charAt(0) }}</span></span>
+            <span class="st-ringName">{{ characterName[story.character] }}</span>
+          </button>
+        }
+      </nav>
+
+      <div class="st-galleryBar">
+        <p class="st-galleryHint">
+          <svg mtrIcon name="play" [size]="14" /> Touchez une histoire pour l’ouvrir en plein écran.
+          {{ weak ? 'Les histoires sur ' + competencyLabel[weak] + ' viennent en premier.' : '' }}
+        </p>
+        @if (voices().length > 0) {
+          <label class="st-voiceInline">
+            <span>Voix française</span>
+            <select class="input" [value]="voice()?.voiceURI ?? ''" (change)="chooseVoice($any($event.target).value)">
+              @for (v of voices(); track v.voiceURI) {
+                <option [value]="v.voiceURI" [selected]="v.voiceURI === voice()?.voiceURI">{{ voiceLabel(v) }}</option>
               }
-              <div style="display: flex; gap: var(--space-2)">
-                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index - 1)" [disabled]="index === 0">Histoire précédente</button>
-                <button type="button" class="btn btn-ghost btn-sm" (click)="goTo(index + 1)" [disabled]="index === list.length - 1">Histoire suivante</button>
-              </div>
-              <p class="st-transcript">Animations dessinées dans votre navigateur à partir du script ; aucun fichier vidéo. La narration, lorsqu'elle est activée, utilise la synthèse vocale du navigateur. Ce sont des scénarios fictifs et illustratifs.{{ weak && index === 0 ? ' Ordre personnalisé : les histoires sur ' + competencyLabel[weak] + ' viennent en premier.' : '' }}</p>
-            </aside>
-          </section>
+            </select>
+          </label>
         }
       </div>
+
+      <ul class="st-gallery" aria-label="Fil des histoires financières">
+        @for (story of list; track story.slug; let index = $index) {
+          @let state = status(story);
+          <li class="st-cardItem" [style.--delay]="index * 70 + 'ms'">
+            <button
+              type="button"
+              class="st-card"
+              [attr.data-character]="story.character"
+              [attr.data-status]="state"
+              [attr.aria-label]="index + 1 + ' sur ' + list.length + ' : ' + story.title + ' — ' + callToAction(story)"
+              (click)="open(index, $event.currentTarget)"
+            >
+              <span class="st-poster" aria-hidden="true">
+                <span class="st-posterGlow"></span>
+                <span class="st-posterBars">
+                  @for (bar of [42, 64, 38, 76, 55, 88, 70]; track $index) {
+                    <span [style.--h]="bar + '%'" [style.--i]="$index"></span>
+                  }
+                </span>
+                <span class="st-posterTop">
+                  <span class="st-posterAvatar">{{ characterName[story.character].charAt(0) }}</span>
+                  <span class="st-posterWho">{{ characterName[story.character] }}<small>Épisode {{ index + 1 }}</small></span>
+                  <span class="st-posterChip" [attr.data-status]="state">{{ state === 'DONE' ? 'Vu' : state === 'IN_PROGRESS' ? 'En cours' : 'Nouveau' }}</span>
+                </span>
+                <span class="st-posterPlay"><svg mtrIcon name="play" [size]="26" /></span>
+                <span class="st-posterTitle">{{ story.title }}</span>
+                <span class="st-posterProgress"><span [style.width.%]="watched(story)"></span></span>
+              </span>
+              <span class="st-cardBody">
+                <span class="st-cardBadges">
+                  <span class="badge badge-muted">{{ characterName[story.character] }}</span>
+                  <span class="badge badge-muted">{{ levelLabel[story.level] }}</span>
+                  @if (story.recommended) {
+                    <span class="badge badge-info">Pour votre compétence la plus faible</span>
+                  }
+                  @if (story.progress.watchedEarlierVersion) {
+                    <span class="badge badge-muted">Version antérieure vue</span>
+                  }
+                  @if (story.progress.updatedSinceLastWatch) {
+                    <span class="badge badge-info">Mis à jour depuis votre visionnage</span>
+                  }
+                </span>
+                <span class="st-cardSummary">{{ story.summary }}</span>
+                <span class="st-cardMeta">
+                  <span>{{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}</span>
+                  <span class="st-cardCta">{{ callToAction(story) }} <svg mtrIcon name="arrow-right" [size]="14" /></span>
+                </span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <p class="st-transcript">Animations dessinées dans votre navigateur à partir du script ; aucun fichier vidéo. La narration, lorsqu'elle est activée, lit les sous-titres avec une voix française de synthèse : chaque scène attend la fin de la phrase. Ce sont des scénarios fictifs et illustratifs.{{ weak ? ' Ordre personnalisé : les histoires sur ' + competencyLabel[weak] + ' viennent en premier.' : '' }}</p>
     }
   } @else {
     <div mtr-panel-skeleton [rows]="6"></div>
   }
 </div>
+
+@if (stories(); as list) {
+  @if (openStory(); as story) {
+    @let index = openIndex() ?? 0;
+    <div
+      class="st-viewer"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'Histoire ' + (index + 1) + ' sur ' + list.length + ' : ' + story.title"
+      [attr.data-character]="story.character"
+      (keydown)="onViewerKey($event)"
+      (wheel)="onWheel($event)"
+    >
+      <div class="st-viewerBackdrop" aria-hidden="true" (click)="close()"></div>
+
+      <div class="st-viewerBar">
+        <span class="st-viewerCount">Histoire {{ index + 1 }} / {{ list.length }}</span>
+        <button #closeButton type="button" class="st-viewerClose" aria-label="Fermer l’histoire" (click)="close()">
+          <svg mtrIcon name="close" [size]="20" />
+        </button>
+      </div>
+
+      <div class="st-viewerMain">
+        <div class="st-viewerStage" [attr.data-direction]="direction()">
+          @for (current of [story]; track current.slug) {
+            <div
+              mtr-story-player
+              class="st-viewerPlayer"
+              [summary]="current"
+              [active]="true"
+              [immersive]="true"
+              [muted]="muted()"
+              [captions]="captions()"
+              [reducedMotion]="reducedMotion()"
+              [speechAvailable]="speechAvailable()"
+              [voice]="voice()"
+              [hasNext]="index < list.length - 1"
+              (toggleMute)="toggleMute()"
+              (toggleCaptions)="toggleCaptions()"
+              (next)="go(1)"
+              (swipe)="onSwipe($event)"
+              (finished)="onFinished()"
+              (progressSaved)="onProgress($event)"
+            ></div>
+          }
+        </div>
+
+        <div class="st-viewerNav">
+          <button type="button" aria-label="Histoire précédente" [disabled]="index === 0" (click)="go(-1)">
+            <svg mtrIcon name="arrow-up" [size]="18" />
+          </button>
+          <span class="st-viewerDots" aria-hidden="true">
+            @for (s of list; track s.slug; let i = $index) {
+              <span [attr.data-active]="i === index ? 'true' : null"></span>
+            }
+          </span>
+          <button type="button" aria-label="Histoire suivante" [disabled]="index === list.length - 1" (click)="go(1)">
+            <svg mtrIcon name="arrow-down" [size]="18" />
+          </button>
+        </div>
+
+        <aside class="st-viewerInfo">
+          <div class="st-cardBadges">
+            <span class="badge badge-muted">{{ characterName[story.character] }}</span>
+            <span class="badge badge-muted">{{ levelLabel[story.level] }}</span>
+            @if (story.recommended) {
+              <span class="badge badge-info">Pour votre compétence la plus faible</span>
+            }
+            @if (story.progress.completed) {
+              <span class="badge badge-active">Vu</span>
+            }
+          </div>
+          <h2>{{ story.title }}</h2>
+          <p>{{ story.summary }}</p>
+          <p class="st-viewerMeta">Compétence : {{ competencyLabel[story.competency] }} · {{ clock(story.durationMs) }}</p>
+          @if (story.relatedMissionSlug) {
+            <a [routerLink]="['/learn/missions', story.relatedMissionSlug]" class="btn btn-secondary btn-sm" (click)="close()">S'entraîner dans le parcours</a>
+          }
+          <div class="st-voice">
+            @if (voices().length > 0) {
+              <label class="st-voiceLabel">
+                Voix de narration (française)
+                <select class="input" [value]="voice()?.voiceURI ?? ''" (change)="chooseVoice($any($event.target).value)">
+                  @for (v of voices(); track v.voiceURI) {
+                    <option [value]="v.voiceURI" [selected]="v.voiceURI === voice()?.voiceURI">{{ voiceLabel(v) }}</option>
+                  }
+                </select>
+              </label>
+              @if (naturalVoiceMissing()) {
+                <p class="st-voiceHint">Les voix installées ici sont des voix de synthèse classiques. Pour une voix française plus naturelle, ouvrez la plateforme dans Microsoft Edge : ses voix « naturelles » (Denise, Henri…) sont choisies automatiquement.</p>
+              }
+            } @else {
+              <p class="st-voiceHint">Aucune voix française n'est installée dans ce navigateur : la narration est désactivée plutôt que lue avec un accent étranger. Les sous-titres restent disponibles.</p>
+            }
+          </div>
+          <ul class="st-gestures">
+            <li><kbd>Toucher à droite</kbd> scène suivante · <kbd>à gauche</kbd> scène précédente</li>
+            <li><kbd>Maintenir</kbd> mettre en pause</li>
+            <li><kbd>Glisser ↑ ↓</kbd> ou <kbd>flèches ↑ ↓</kbd> changer d’histoire</li>
+            <li><kbd>Échap</kbd> fermer</li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  }
+}

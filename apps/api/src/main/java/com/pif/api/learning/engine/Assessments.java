@@ -251,7 +251,7 @@ public final class Assessments {
       case "REACT_TO_NEWS":
         return c.recentEventId() != null && !c.recentEventId().isEmpty()
             ? new Consistency(true, "Ordre placé peu après une actualité publiée.")
-            : new Consistency(false, "Aucune actualité n'avait été publiée lors des deux étapes précédentes.");
+            : new Consistency(false, "Aucune actualité n'avait été publiée lors des deux séances précédentes.");
       case "TAKE_PROFIT": {
         boolean ok = sell && (c.positionGain() == null ? 0 : c.positionGain()) > 0;
         return new Consistency(ok, ok ? "Vente d'une position en gain." : "Aucun gain latent à réaliser.");
@@ -346,7 +346,7 @@ public final class Assessments {
         if (acted) reviewed++;
       }
       evidence.add(new Evidence("Réaction aux événements défavorables", ((double) reviewed / relevant.size()) * 100,
-          "Vous avez examiné ou réagi à " + reviewed + " événement(s) défavorable(s) sur " + relevant.size() + " dans les deux étapes suivantes."));
+          "Vous avez examiné ou réagi à " + reviewed + " événement(s) défavorable(s) sur " + relevant.size() + " dans les deux séances suivantes."));
     }
 
     double reasonable = ctx.mission().scoring().maxReasonableTrades();
@@ -507,9 +507,9 @@ public final class Assessments {
     List<Ranked> weak = new ArrayList<>(all.stream().filter(r -> r.score() < 60).toList());
     weak.sort((a, b) -> Js.compare(a.score(), b.score()));
     List<String> strengths = strong.stream().limit(3)
-        .map(r -> r.evidence().label() + ": " + r.evidence().detail()).toList();
+        .map(r -> r.evidence().label() + " : " + r.evidence().detail()).toList();
     List<String> improvements = weak.stream().limit(3)
-        .map(r -> r.evidence().label() + ": " + r.evidence().detail()).toList();
+        .map(r -> r.evidence().label() + " : " + r.evidence().detail()).toList();
 
     return new Assessment(ASSESSMENT_ENGINE_VERSION, mission.slug(), mission.version(), total, passed,
         mission.scoring().passThreshold(), failedByRule, state.failureReason, requiredObjectivesMet, objectives,
