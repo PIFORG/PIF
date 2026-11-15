@@ -20,16 +20,22 @@ describe('order ticket draft', () => {
     expect(ticketErrors({ ...limit, limitPrice: '42.125' })).toEqual({});
   });
 
-  it('allows stops only on sells', () => {
+  it('allows stops and take-profits only on sells', () => {
     const stop = { ...emptyTicket('CTB'), type: 'STOP' as const, quantity: '10', stopPrice: '40' };
+    const takeProfit = { ...emptyTicket('CTB'), type: 'TAKE_PROFIT' as const, quantity: '10', stopPrice: '55' };
     expect(ticketErrors(stop).type).toContain('ventes de protection');
     expect(ticketErrors({ ...stop, side: 'SELL' })).toEqual({});
+    expect(ticketErrors(takeProfit).type).toContain('prises de bénéfices');
+    expect(ticketErrors({ ...takeProfit, side: 'SELL' })).toEqual({});
   });
 
   it('sends only the price field that matches the order type', () => {
     const draft = { ...emptyTicket('CTB'), type: 'LIMIT' as const, quantity: '10', limitPrice: '41.5', stopPrice: '39' };
     expect(toOrderTerms(draft)).toEqual({ symbol: 'CTB', side: 'BUY', type: 'LIMIT', quantity: 10, limitPrice: 41.5 });
     expect(toOrderTerms({ ...draft, type: 'MARKET' })).toEqual({ symbol: 'CTB', side: 'BUY', type: 'MARKET', quantity: 10 });
+    expect(
+      toOrderTerms({ ...emptyTicket('CTB'), side: 'SELL', type: 'TAKE_PROFIT', quantity: '10', stopPrice: '55' }),
+    ).toEqual({ symbol: 'CTB', side: 'SELL', type: 'TAKE_PROFIT', quantity: 10, stopPrice: 55 });
   });
 
   it('keys previews by exact terms', () => {

@@ -225,9 +225,12 @@ describe('RiskAnalyticsPage', () => {
 
   it('loads server risk metrics and surfaces unavailable reasons instead of silent zeros', async () => {
     const { root } = await render();
-    expect(root.querySelector('h1')?.textContent).toBe('Analyse des risques');
+    expect(root.querySelector('h1')?.textContent).toBe('Risques');
     expect(root.querySelector('.tr-provenance')?.textContent).toContain('Prix simulés fictifs');
-    expect(kpi(root, 'Drawdown maximal')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe(pct(0));
+    const tape = Array.from(root.querySelectorAll<HTMLElement>('.tr-tapeCell'));
+    const tapeOf = (label: string) => tape.find((c) => c.querySelector('.tr-tapeLabel')?.textContent === label);
+    const norm = (s: string | null | undefined) => (s ?? '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    expect(norm(tapeOf('Drawdown maximal')?.querySelector('.tr-tapeValue')?.textContent)).toBe(norm(pct(0)));
     expect(root.textContent).toContain('Indisponible : fewer than 20 daily observations.');
     expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Allocation par instrument et espèces');
     expect(root.textContent).toContain('Equity crash');

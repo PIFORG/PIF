@@ -160,7 +160,7 @@ export const MODULES: Record<string, ModuleDefinition> = {
   strategies: {
     slug: 'strategies',
     title: 'Stratégies et tests historiques',
-    group: 'Recherche et IA',
+    group: 'Analyses',
     icon: 'strategy',
     summary: 'Définir des stratégies fondées sur des règles et les rejouer sur des scénarios historiques pour voir comment elles se seraient comportées.',
     capabilities: [
@@ -189,8 +189,8 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   backtesting: {
     slug: 'backtesting',
-    title: 'Tests historiques',
-    group: 'Recherche et IA',
+    title: 'Tester une stratégie',
+    group: 'Analyses',
     icon: 'strategy',
     summary: 'Exécuter une stratégie enregistrée sur une fenêtre historique et inspecter chaque trade simulé.',
     capabilities: [
@@ -217,10 +217,10 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   ai: {
     slug: 'ai',
-    title: 'Insights IA',
-    group: 'Recherche et IA',
+    title: 'Prévisions de marché',
+    group: 'Analyses',
     icon: 'ai',
-    summary: 'Observations générées par un modèle sur des portefeuilles et marchés simulés, toujours avec niveau de confiance et limites.',
+    summary: 'Prévisions et observations sur des portefeuilles et marchés simulés, toujours avec niveau de confiance et limites.',
     capabilities: [
       'Observations de portefeuille telles que concentration ou dérive',
       'Synthèses de scénarios en langage clair',
@@ -245,10 +245,10 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   explainability: {
     slug: 'explainability',
-    title: 'IA explicable',
-    group: 'Recherche et IA',
+    title: 'Comprendre les prévisions',
+    group: 'Analyses',
     icon: 'xai',
-    summary: 'Voir quels entrants ont conduit une sortie de modèle et quelle est sa sensibilité aux changements.',
+    summary: 'Voir quels facteurs ont conduit une prédiction et quelle est sa sensibilité aux changements.',
     capabilities: [
       'Attribution des variables pour une sortie individuelle',
       'Importance globale des variables pour un modèle',
@@ -272,8 +272,8 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   'stress-testing': {
     slug: 'stress-testing',
-    title: 'Tests de résistance bancaires',
-    group: 'Recherche et IA',
+    title: 'Simuler une crise bancaire',
+    group: 'Analyses',
     icon: 'bank',
     summary: 'Appliquer des chocs macroéconomiques à un bilan bancaire d\'exemple et suivre l\'effet sur les fonds propres.',
     capabilities: [
@@ -300,7 +300,7 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   actuarial: {
     slug: 'actuarial',
-    title: 'Laboratoire actuariel',
+    title: 'Assurance et actuariat',
     group: 'Assurance',
     icon: 'actuarial',
     summary: 'Modéliser le risque d\'assurance non-vie : fréquence et coût des sinistres, perte agrégée et primes à partir d\'hypothèses transparentes et modifiables.',
@@ -355,4 +355,4 @@ export const MODULES: Record<string, ModuleDefinition> = {
 };
 
 /** Routes of apps/web that render ModulePreviewPage (apps/web/src/app/<slug>/page.tsx). */
-export const PREVIEW_MODULE_ROUTES = ['ai', 'challenges', 'explainability', 'strategies'] as const;
+export const PREVIEW_MODULE_ROUTES = [] as const;

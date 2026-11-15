@@ -18,7 +18,6 @@ import {
 } from '../core/api/stress-api';
 import { FR } from '../core/i18n/fr';
 import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
-import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { mdt, num, pp, prob, pts, ratio } from './stress-format';
 
@@ -54,7 +53,7 @@ interface Gauge {
 @Component({
   selector: 'mtr-stress-testing-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeadingComponent, ...WORKSPACE_PRIMITIVES, LineChartComponent],
+  imports: [...WORKSPACE_PRIMITIVES, LineChartComponent],
   host: { style: 'display: contents' },
   templateUrl: './stress-testing.page.html',
   styleUrl: './stress-testing.page.css',

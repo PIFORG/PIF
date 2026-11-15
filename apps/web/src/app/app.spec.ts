@@ -94,10 +94,12 @@ describe('application routes', () => {
     await settle(harness);
     const root = harness.routeNativeElement as HTMLElement;
     expect(TestBed.inject(Router).url).toBe('/settings/profile');
-    expect(Array.from(root.querySelectorAll('.breadcrumb li')).map((li) => li.textContent)).toEqual(['Compte', 'Profil']);
     expect(root.querySelector('#profile-heading')?.textContent).toBe('Profil et préférences');
     expect((root.querySelector('#firstName') as HTMLInputElement).value).toBe('Ada');
     expect(root.querySelector('[aria-current="page"].nav-link')?.textContent?.trim()).toBe('Profil');
+    const shell = harness.fixture.nativeElement as HTMLElement;
+    expect(shell.querySelector('.inv-nav') || shell.querySelector('nav[aria-label="Navigation principale"]')).toBeTruthy();
+    expect(shell.querySelector('aside.adm-side')).toBeFalsy();
   });
 
   it('states plainly, in French, that an unregistered workspace screen is not part of the active application', async () => {
@@ -213,19 +215,21 @@ describe('application routes', () => {
     });
 
     it.each([
-      ['/admin', 'Plateforme', "Vue d'ensemble de la plateforme"],
+      ['/admin', 'Vue générale', "Vue d'ensemble de la plateforme"],
       ['/admin/users', 'Utilisateurs', 'Comptes utilisateurs'],
       ['/admin/users/u1', 'Utilisateurs', 'Ada Lovelace'],
       ['/admin/audit', "Journal d'audit", "Journal d'audit"],
-    ])('renders %s for an administrator', async (path, tab, heading) => {
+    ])('renders %s for an administrator with sidebar (no investor navbar)', async (path, sideLabel, heading) => {
       status.set('authenticated');
       user.set(admin);
       const harness = await RouterTestingHarness.create(path);
       await settle(harness);
-      const root = harness.routeNativeElement as HTMLElement;
+      const root = harness.fixture.nativeElement as HTMLElement;
       expect(TestBed.inject(Router).url).toBe(path);
-      expect(root.querySelector('h1')?.textContent).toBe('Administration de la plateforme');
-      expect(root.querySelector('nav.subnav [aria-current="page"]')?.textContent?.trim()).toBe(tab);
+      expect(root.querySelector('aside.adm-side')).toBeTruthy();
+      expect(root.querySelector('.inv-nav')).toBeFalsy();
+      expect(root.querySelector('mtr-market-pulse')).toBeFalsy();
+      expect(root.querySelector('.adm-sideNav [aria-current="page"]')?.textContent?.replace(/\s+/g, ' ').trim()).toContain(sideLabel);
       expect(root.querySelector('h2')?.textContent?.trim()).toBe(heading);
       expect(root.textContent).toContain('Administration');
     });

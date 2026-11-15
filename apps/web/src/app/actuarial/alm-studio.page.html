@@ -1,0 +1,62 @@
+<div class="page-shell">
+  <nav mtr-actuarial-tabs></nav>
+  <mtr-page-heading
+    eyebrow="Actuariat"
+    title="Laboratoire ALM"
+    description="Gestion actif-passif pédagogique : actualisation, durations, surplus et choc de taux parallèle."
+  />
+  <p mtr-estimate-note></p>
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+
+  <section mtr-panel heading="Scénario notionnel" description="Exemple préchargé (obligation vs prestations). Taux unique ; pas une courbe réglementaire.">
+    <button type="button" class="btn btn-secondary" [disabled]="busy()" (click)="loadDemo()">
+      {{ busy() ? 'Chargement…' : 'Recharger l’exemple' }}
+    </button>
+  </section>
+
+  @if (result(); as r) {
+    <section mtr-panel heading="Synthèse" [description]="text('convention')">
+      <div class="grid-stats">
+        <div mtr-kpi label="Surplus">{{ tnd(num(r, 'surplus')) }}</div>
+        <div mtr-kpi label="Écart de duration (ans)">{{ num(r, 'durationGapYears') }}</div>
+        <div mtr-kpi label="Surplus après choc">{{ tnd(num(r, 'surplusAfterRateShock')) }}</div>
+        <div mtr-kpi label="Écart liquidité an 1">{{ tnd(num(r, 'liquidityGapYear1')) }}</div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <caption class="sr-only">Actifs et passifs</caption>
+          <thead>
+            <tr>
+              <th scope="col">Côté</th>
+              <th scope="col" class="num">Valeur actuelle</th>
+              <th scope="col" class="num">Duration Macaulay</th>
+              <th scope="col" class="num">Duration modifiée</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (side('assets'); as a) {
+              <tr>
+                <td>Actifs</td>
+                <td class="num">{{ tnd(num(a, 'presentValue')) }}</td>
+                <td class="num">{{ num(a, 'macaulayDuration') }}</td>
+                <td class="num">{{ num(a, 'modifiedDuration') }}</td>
+              </tr>
+            }
+            @if (side('liabilities'); as l) {
+              <tr>
+                <td>Passifs</td>
+                <td class="num">{{ tnd(num(l, 'presentValue')) }}</td>
+                <td class="num">{{ num(l, 'macaulayDuration') }}</td>
+                <td class="num">{{ num(l, 'modifiedDuration') }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="field-hint">{{ text('disclaimer') }}</p>
+    </section>
+  }
+</div>

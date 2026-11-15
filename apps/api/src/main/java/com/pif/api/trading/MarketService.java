@@ -77,12 +77,12 @@ public class MarketService {
             "Valorisation au mid, spread bid/ask, barème de frais actions."),
         Map.of("assetClass", "FUND", "status", "LIVE", "note",
             "Proxy de fonds obligataire (GOV) : volatilité et bêta plus faibles ; pas de prix sale/net ni d'intérêts courus."),
-        Map.of("assetClass", "BOND", "status", "PENDING_DB_APPROVAL", "note",
-            "Extension enum/seed préparée ; la base PIF principale reste inchangée jusqu'à validation."),
-        Map.of("assetClass", "COMMODITY", "status", "PENDING_DB_APPROVAL", "note",
-            "Rendement continu de type future synthétique prévu."),
-        Map.of("assetClass", "FX", "status", "PENDING_DB_APPROVAL", "note",
-            "Paires cotées en TND prévues ; pas d'intérêt overnight.")));
+        Map.of("assetClass", "BOND", "status", "LIVE_ON_TEST_DB", "note",
+            "TNDB seedé sur PIF_spring_test (obligation notionnelle). Base PIF principale non migrée."),
+        Map.of("assetClass", "COMMODITY", "status", "LIVE_ON_TEST_DB", "note",
+            "OILX seedé sur PIF_spring_test (indice pétrole fictif)."),
+        Map.of("assetClass", "FX", "status", "LIVE_ON_TEST_DB", "note",
+            "EURT seedé sur PIF_spring_test (EUR/TND synthétique) ; pas d'intérêt overnight.")));
     return m;
   }
 
@@ -231,6 +231,31 @@ public class MarketService {
     m.put("previousClose", previousClose == null ? null : dt(previousClose));
     m.put("changePct", quote != null && previousClose != null && previousClose != 0
         ? JsSemantics.round((quote.mid() / previousClose - 1) * 10_000) / 100 : null);
+    if ("BOND".equals(instrument.assetClass()) && "TNDB".equals(instrument.symbol())) {
+      var terms = com.pif.api.finance.BondValuation.tndbDefault();
+      var bond = com.pif.api.finance.BondValuation.value(terms, 0);
+      Map<String, Object> bondView = new LinkedHashMap<>();
+      bondView.put("faceValue", terms.faceValue());
+      bondView.put("annualCouponRate", terms.annualCouponRate());
+      bondView.put("couponsPerYear", terms.couponsPerYear());
+      bondView.put("yearsToMaturity", terms.yearsToMaturity());
+      bondView.put("yieldToMaturity", terms.yieldToMaturity());
+      bondView.put("cleanPrice", bond.cleanPrice());
+      bondView.put("accruedInterest", bond.accruedInterest());
+      bondView.put("dirtyPrice", bond.dirtyPrice());
+      bondView.put("macaulayDurationYears", bond.macaulayDurationYears());
+      bondView.put("modifiedDuration", bond.modifiedDuration());
+      bondView.put("nextCoupon", bond.nextCoupon());
+      bondView.put("note", "Valorisation notionnelle pédagogique (flux actualisés), hors courbe de taux complète.");
+      m.put("bond", bondView);
+    }
+    if ("FX".equals(instrument.assetClass()) && "EURT".equals(instrument.symbol())) {
+      m.put("fx", Map.of(
+          "base", "EUR",
+          "quote", "TND",
+          "pair", "EUR/TND",
+          "note", "Paire synthétique ; conversion = quantité × mid, précision monétaire Money.toAmount."));
+    }
     return m;
   }
 

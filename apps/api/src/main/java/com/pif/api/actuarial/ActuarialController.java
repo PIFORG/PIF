@@ -81,6 +81,26 @@ public class ActuarialController {
     return service.price(body(r));
   }
 
+  @PostMapping("/capital/calculate")
+  @Throttle(limit = 60, ttlSeconds = 60)
+  @Operation(summary = "Capital économique", description = "VaR(α) − E[S] sur la distribution agrégée (pédagogique, non réglementaire).")
+  public Object economicCapital(HttpServletRequest r) {
+    return service.economicCapital(body(r));
+  }
+
+  @GetMapping("/alm/demo")
+  @Operation(summary = "Exemple ALM", description = "Scénario notionnel actif-passif avec duration et choc de taux.")
+  public Object almDemo() {
+    return service.almDemo();
+  }
+
+  @PostMapping("/alm/calculate")
+  @Throttle(limit = 60, ttlSeconds = 60)
+  @Operation(summary = "Calcul ALM", description = "Actualisation, durations, surplus, écart de liquidité année 1 et choc de taux.")
+  public Object alm(HttpServletRequest r) {
+    return service.alm(body(r));
+  }
+
   @GetMapping("/scenarios")
   @Operation(summary = "List your saved scenarios")
   public Object scenarios(HttpServletRequest r) {

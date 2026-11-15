@@ -1,0 +1,93 @@
+@if (error()) {
+  <div class="form-error-banner" role="alert">{{ error() }}</div>
+}
+@if (supervision(); as s) {
+  <section mtr-panel panelId="supervision" heading="Supervision" [description]="s.note">
+    <ul class="db-modules">
+      @for (m of s.modules; track m.id) {
+        <li class="db-module">
+          <span class="db-moduleText"><strong>{{ m.label }}</strong><span>{{ m.status }}</span></span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (markets(); as mk) {
+  <section mtr-panel panelId="admin-markets" heading="Instruments" [description]="mk.description">
+    <table class="data-table">
+      <thead><tr><th>Symbole</th><th>Nom</th><th>Secteur</th><th class="num">Prix ref.</th></tr></thead>
+      <tbody>
+        @for (i of mk.instruments; track $any(i)['symbol']) {
+          <tr>
+            <td class="mono">{{ $any(i)['symbol'] }}</td>
+            <td>{{ $any(i)['name'] }}</td>
+            <td>{{ $any(i)['sector'] }}</td>
+            <td class="num">{{ $any(i)['initialPrice'] }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}
+@if (learning(); as l) {
+  <section mtr-panel panelId="admin-learning" heading="Missions de formation" description="Catalogue pédagogique et disponibilité.">
+    <p class="field-hint">{{ l.stats['implemented'] }} implémentées · {{ l.stats['configured'] }} configurées · {{ l.stats['total'] }} au total</p>
+    <table class="data-table">
+      <thead><tr><th>Slug</th><th>Titre</th><th>Niveau</th><th>Disponibilité</th></tr></thead>
+      <tbody>
+        @for (m of l.missions; track m.slug) {
+          <tr>
+            <td class="mono">{{ m.slug }}</td>
+            <td>{{ m.title }}</td>
+            <td>{{ m.level }}</td>
+            <td>{{ m.availability }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}
+@if (ai(); as a) {
+  <section mtr-panel panelId="admin-ai" heading="Modèles IA" [description]="a.disclaimer || 'Catalogue des modèles du laboratoire IA.'">
+    <ul class="db-sessionList">
+      @for (m of a.models || []; track m.id) {
+        <li>
+          <span class="db-sessionText">
+            <strong>{{ m.title }}</strong>
+            <span class="mono">{{ m.id }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (stress()) {
+  <section mtr-panel panelId="admin-stress" heading="Stress bancaire" description="Scénarios et profils disponibles pour la supervision.">
+    <p class="field-hint">Catalogue de stress chargé. Exécutions détaillées via « Simuler une crise bancaire ».</p>
+  </section>
+}
+@if (actuarial(); as act) {
+  <section mtr-panel panelId="admin-actuarial" heading="Actuariat" [description]="act.note">
+    <ul class="db-modules">
+      @for (m of act.modules; track m.id) {
+        <li class="db-module">
+          <span class="db-moduleText"><strong>{{ m.label }}</strong><span>{{ m.status }}</span></span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (news(); as n) {
+  <section mtr-panel panelId="admin-news" heading="Actualités pédagogiques" [description]="n.source.description">
+    <ul class="db-sessionList">
+      @for (item of n.items; track item.title) {
+        <li>
+          <span class="db-sessionText">
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.publishedAt }} · {{ item.symbol || 'Macro' }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+}

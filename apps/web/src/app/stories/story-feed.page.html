@@ -1,12 +1,12 @@
 <div class="page-shell st-cinemaShell" [attr.inert]="openIndex() !== null ? '' : null">
-  <mtr-page-heading
-    [eyebrow]="copy.eyebrow"
-    [title]="copy.storiesTitle"
-    status="LIVE_INTEGRATED"
-    [description]="copy.storiesDescription"
-  >
-    <a mtrHeadingActions routerLink="/learn" class="btn btn-secondary">{{ copy.backToHub }}</a>
-  </mtr-page-heading>
+  <header class="st-pageTop">
+    <div>
+      <p class="st-pageEyebrow">FinStories</p>
+      <h1 class="st-pageTitle">{{ copy.storiesTitle }}</h1>
+      <p class="st-pageLede">Une décision · deux issues · une leçon — narration française intégrée.</p>
+    </div>
+    <a routerLink="/learn" class="btn btn-ghost btn-sm">{{ copy.backToHub }}</a>
+  </header>
 
   @if (error()) {
     <div mtr-empty-state tone="error" heading="Histoires financières indisponibles" [description]="error()">
@@ -156,6 +156,12 @@
               (finished)="onFinished()"
               (progressSaved)="onProgress($event)"
             ></div>
+          }
+          @if (speechAvailable() && muted()) {
+            <div class="st-narrationGate" role="status">
+              <p>La narration française est coupée. Activez-la pour entendre chaque scène.</p>
+              <button type="button" class="btn btn-primary btn-sm" (click)="enableNarration()">Activer la narration</button>
+            </div>
           }
         </div>
 

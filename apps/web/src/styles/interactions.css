@@ -1,0 +1,193 @@
+/* Interactions pointeur — typées, 120–200 ms, sans halo / spotlight. */
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled),
+  .nav-link,
+  a.ac-tab,
+  .tr-watchToggle,
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href] {
+    transition:
+      background-color var(--mtr-motion, 160ms) ease,
+      border-color var(--mtr-motion, 160ms) ease,
+      color var(--mtr-motion, 160ms) ease,
+      opacity var(--mtr-motion, 160ms) ease;
+  }
+
+  /* Boutons */
+  .btn-primary:not(:disabled):hover {
+    background: var(--mtr-brand);
+    border-color: var(--mtr-brand);
+  }
+
+  .btn-secondary:not(:disabled):hover,
+  .btn-ghost:not(:disabled):hover {
+    background: var(--mtr-hover);
+    border-color: var(--mtr-border-strong);
+  }
+
+  .btn:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  /* Navigation / onglets */
+  .nav-link:hover,
+  a.ac-tab:hover {
+    background: var(--mtr-hover);
+    color: var(--mtr-text);
+  }
+
+  .nav-link[aria-current='page'] {
+    color: var(--mtr-brand-text);
+    box-shadow: inset 3px 0 0 var(--mtr-brand-strong);
+  }
+
+  a.ac-tab[aria-current='page'] {
+    color: var(--mtr-brand-text);
+  }
+
+  /* Tableaux financiers */
+  table.data-table tbody tr {
+    transition: background-color var(--mtr-motion, 160ms) ease;
+  }
+
+  table.data-table tbody tr:hover td {
+    background: var(--mtr-hover);
+  }
+
+  /* Listes d’actions (missions, sessions, modules) — uniquement si lien/bouton */
+  .db-sessionList > li:has(a):hover,
+  .db-sessionList > li:has(button):hover,
+  .lq-missionCard:has(a):hover,
+  .lq-missionCard:has(button):hover {
+    background: var(--mtr-hover);
+    border-color: var(--mtr-border-strong);
+  }
+
+  /* Pilliers landing : pas de faux clic */
+  .mk-pillar {
+    cursor: default;
+  }
+
+  .mk-topActions a:hover {
+    background: var(--mtr-hover);
+  }
+
+  /* Watchlist / ticket trading */
+  .tr-watchToggle:hover {
+    background: var(--mtr-hover);
+    color: var(--mtr-brand-text);
+  }
+
+  .tr-rows tbody tr[data-status]:hover td {
+    background: var(--mtr-hover);
+  }
+
+  /* Graphiques */
+  .ch-plotSurface {
+    cursor: crosshair;
+  }
+
+  .ch-legendItem:hover .ch-swatch {
+    opacity: 1;
+  }
+
+  .ch-allocLegend li:hover .ch-allocName {
+    color: var(--mtr-text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  .btn:not(:disabled):active {
+    transform: none;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: 2px;
+}
+
+/* Infobulle graphique */
+.ch-tip {
+  position: absolute;
+  z-index: 4;
+  min-width: 9rem;
+  max-width: 16rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--mtr-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+  color: var(--mtr-text);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.ch-tip strong {
+  display: block;
+  color: var(--mtr-text);
+  font-weight: 600;
+}
+
+.ch-tip span {
+  color: var(--mtr-text-2);
+}
+
+.ch-crosshair {
+  stroke: var(--mtr-border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.ch-activeDot {
+  fill: var(--mtr-surface);
+  stroke: var(--mtr-brand-strong);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+/* Passif : pas de pointer trompeur */
+p:not([role='button']),
+h1,
+h2,
+h3,
+h4,
+.ws-kpiLabel,
+.field-hint,
+.ws-panelDescription {
+  cursor: default;
+}
+
+html[data-theme='light'] .ws-panel {
+  box-shadow: none;
+}
+
+html[data-theme='light'] .ws-panelTitle {
+  color: #102448;
+  font-weight: 650;
+}
+
+/* Densité trading : tableaux plus compacts */
+.tr-blotterTable td,
+.tr-blotterTable th {
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+}
+
+/* Actuariat : onglets nettoyage light */
+html[data-theme='light'] a.ac-tab[aria-current='page'] {
+  background: var(--mtr-hover);
+  border-color: var(--mtr-brand-strong);
+}

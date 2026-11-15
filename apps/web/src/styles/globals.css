@@ -1,10 +1,53 @@
 /* =============================================================================
-   Market Trading Room — command center tokens.
-   Dark is the default (Midnight Navy). Light is a full Cool White field with
-   the same royal structure. Semantic --mtr-* tokens; --color-* aliases retained.
+   Market Trading Room — FinTech tokens.
+   Light is the reference experience and the default. Dark is a distinct navy
+   theme (not a mechanical invert). Semantic --mtr-* ; --color-* aliases retained.
    ============================================================================= */
 
 :root,
+html[data-theme='light'] {
+  color-scheme: light;
+
+  /* Institutional light FinTech — cool neutral, not beige template. */
+  --mtr-canvas: #f3f5f9;
+  --mtr-surface: #ffffff;
+  --mtr-elevated: #e9eef6;
+  --mtr-hover: #e2e8f2;
+  --mtr-sunken: #eef2f7;
+  --mtr-border: #d0d7e2;
+  --mtr-border-strong: #a4b0c2;
+
+  --mtr-text: #14181e;
+  --mtr-text-2: #3f4752;
+  --mtr-text-3: #66707c;
+
+  --mtr-brand: #163a7a;
+  --mtr-brand-strong: #0f2d62;
+  --mtr-brand-text: #0c2450;
+  --mtr-brand-soft: rgba(22, 58, 122, 0.07);
+  --mtr-on-brand: #ffffff;
+  --mtr-cyan: #255fcc;
+  --mtr-cyan-soft: rgba(37, 95, 204, 0.08);
+  --mtr-pos: #0b6b48;
+  --mtr-pos-soft: rgba(11, 107, 72, 0.09);
+  --mtr-neg: #a61e32;
+  --mtr-neg-soft: rgba(166, 30, 50, 0.08);
+  --mtr-amber: #7a5208;
+  --mtr-amber-soft: rgba(122, 82, 8, 0.09);
+
+  --mtr-grid: rgba(20, 24, 30, 0.05);
+  --mtr-grid-strong: rgba(20, 24, 30, 0.09);
+  --mtr-skeleton: rgba(20, 24, 30, 0.055);
+  --mtr-focus: #255fcc;
+  --mtr-overlay: rgba(12, 28, 56, 0.42);
+  --mtr-tooltip: #0c2450;
+  --mtr-shadow-sm: 0 1px 2px rgba(12, 28, 56, 0.035);
+  --mtr-shadow-md: 0 3px 12px rgba(12, 28, 56, 0.055);
+  --mtr-topbar: rgba(251, 250, 247, 0.94);
+  --mtr-glow: none;
+  --mtr-motion: 160ms;
+}
+
 html[data-theme='dark'] {
   color-scheme: dark;
 
@@ -43,54 +86,14 @@ html[data-theme='dark'] {
   --mtr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --mtr-shadow-md: 0 16px 40px rgba(0, 0, 0, 0.46);
   --mtr-topbar: rgba(6, 17, 38, 0.86);
-  --mtr-glow: 0 0 8px rgba(57, 125, 255, 0.85);
-}
-
-html[data-theme='light'] {
-  color-scheme: light;
-
-  --mtr-canvas: #f5f8ff;
-  --mtr-surface: #ffffff;
-  --mtr-elevated: #e7eeff;
-  --mtr-hover: #d5e1f8;
-  --mtr-sunken: #e6edf8;
-  --mtr-border: #d3ddf0;
-  --mtr-border-strong: #8fa4c6;
-
-  --mtr-text: #061126;
-  --mtr-text-2: #243652;
-  --mtr-text-3: #3e5170;
-
-  --mtr-brand: #2556f4;
-  --mtr-brand-strong: #1a44d4;
-  --mtr-brand-text: #1a44d4;
-  --mtr-brand-soft: rgba(37, 86, 244, 0.12);
-  --mtr-on-brand: #f5f8ff;
-  --mtr-cyan: #397dff;
-  --mtr-cyan-soft: rgba(57, 125, 255, 0.12);
-  --mtr-pos: #087f58;
-  --mtr-pos-soft: rgba(8, 127, 88, 0.1);
-  --mtr-neg: #b42338;
-  --mtr-neg-soft: rgba(180, 35, 56, 0.08);
-  --mtr-amber: #8a5a04;
-  --mtr-amber-soft: rgba(138, 90, 4, 0.1);
-
-  --mtr-grid: rgba(6, 17, 38, 0.06);
-  --mtr-grid-strong: rgba(6, 17, 38, 0.12);
-  --mtr-skeleton: rgba(6, 17, 38, 0.07);
-  --mtr-focus: #2556f4;
-  --mtr-overlay: rgba(6, 17, 38, 0.46);
-  --mtr-tooltip: #061126;
-  --mtr-shadow-sm: 0 1px 0 rgba(6, 17, 38, 0.06);
-  --mtr-shadow-md: 0 18px 40px rgba(6, 17, 38, 0.12);
-  --mtr-topbar: rgba(245, 248, 255, 0.9);
-  --mtr-glow: 0 0 8px rgba(37, 86, 244, 0.45);
+  --mtr-glow: none;
+  --mtr-motion: 160ms;
 }
 
 :root {
-  --font-display: 'Syne', 'Segoe UI', system-ui, sans-serif;
-  --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Poppins', 'Segoe UI', system-ui, sans-serif;
 
   /* Legacy aliases used across existing screens. */
   --color-bg: var(--mtr-canvas);
@@ -164,6 +167,7 @@ body {
   color: var(--mtr-text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1;
 }
 
 a {
@@ -225,15 +229,16 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.12;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin: 0 0 var(--space-3);
   color: var(--mtr-text);
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 650;
 }
 
 h2 {
@@ -262,10 +267,10 @@ kbd,
 }
 
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
 }
@@ -424,32 +429,54 @@ kbd,
 
 .password-wrap {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: stretch;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: var(--mtr-surface);
+  overflow: hidden;
+}
+
+.password-wrap:focus-within {
+  border-color: var(--mtr-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mtr-focus) 22%, transparent);
 }
 
 .password-wrap .input {
-  padding-right: 5.5rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.password-wrap .input:hover,
+.password-wrap .input:focus {
+  border: 0;
+  box-shadow: none;
+  outline: none;
 }
 
 .password-toggle {
-  position: absolute;
-  right: 0.35rem;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--mtr-border);
+  background: var(--mtr-elevated);
   color: var(--mtr-text-2);
   cursor: pointer;
-  padding: 0.35rem 0.55rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  font-weight: 560;
+  padding: 0 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .password-toggle:hover {
   color: var(--mtr-text);
   background: var(--mtr-hover);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: -2px;
 }
 
 .form-error-banner,

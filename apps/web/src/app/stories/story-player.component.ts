@@ -5,6 +5,7 @@ import { StoriesApi, type Story, type StoryProgress, type StorySummary } from '.
 import { IconComponent } from '../shared/icon/icon.component';
 import { formatClock, holdForSpeech, reelOf, resumePosition, sceneAt, sceneStart, totalDuration } from './story-timeline';
 import { CHARACTER_NAME, StoryVisualComponent } from './story-visual.component';
+import { StoryNarrationService } from './story-narration.service';
 import { spokenText, voiceLabel } from './story-voice';
 
 const SAVE_EVERY_MS = 5000;
@@ -121,30 +122,47 @@ export interface StoryProgressEvent {
       </div>
     }
 
-    <div class="st-controls">
-      <button type="button" (click)="jump(-1)" [disabled]="!story()" aria-label="Scène précédente">
-        <svg mtrIcon name="chevron-left" [size]="18" />
-      </button>
-      <button type="button" (click)="toggle()" [disabled]="!story()" [attr.aria-label]="playing() ? 'Pause' : ended() ? 'Rejouer' : 'Lecture'">
-        <svg mtrIcon [name]="playing() ? 'pause' : 'play'" [size]="18" />
-      </button>
-      <button type="button" (click)="jump(1)" [disabled]="!story()" aria-label="Scène suivante">
-        <svg mtrIcon name="chevron-right" [size]="18" />
-      </button>
-      <span class="st-time" aria-hidden="true">{{ clock(position()) }}<span class="st-timeTotal"> / {{ clock(duration()) }}</span>{{ saveFailed() ? ' · non enregistré' : '' }}</span>
-      <button type="button" (click)="toggleCaptions.emit()" [attr.aria-pressed]="captions()" aria-label="Sous-titres">
-        <svg mtrIcon name="captions" [size]="18" />
-      </button>
-      <button
-        type="button"
-        (click)="toggleMute.emit()"
-        [disabled]="!speechAvailable()"
-        [attr.aria-pressed]="!muted()"
-        [attr.aria-label]="narrationAriaLabel()"
-        [attr.title]="narrationTitle()"
+    <div class="st-controls st-transport" role="toolbar" aria-label="Lecture de l'histoire">
+      <div class="st-transportPrimary">
+        <button type="button" class="st-transportBtn" (click)="jump(-1)" [disabled]="!story()" aria-label="Scène précédente">
+          <svg mtrIcon name="chevron-left" [size]="18" />
+        </button>
+        <button
+          type="button"
+          class="st-transportBtn st-transportPlay"
+          (click)="toggle()"
+          [disabled]="!story()"
+          [attr.aria-label]="playing() ? 'Pause' : ended() ? 'Rejouer' : 'Lecture'"
+        >
+          <svg mtrIcon [name]="playing() ? 'pause' : 'play'" [size]="18" />
+          <span class="st-transportLabel">{{ playing() ? 'Pause' : ended() ? 'Rejouer' : 'Lire' }}</span>
+        </button>
+        <button type="button" class="st-transportBtn" (click)="jump(1)" [disabled]="!story()" aria-label="Scène suivante">
+          <svg mtrIcon name="chevron-right" [size]="18" />
+        </button>
+      </div>
+      <span class="st-time" aria-hidden="true"
+        >{{ clock(position()) }}<span class="st-timeTotal"> / {{ clock(duration()) }}</span
+        >{{ saveFailed() ? ' · non enregistré' : '' }}</span
       >
-        <svg mtrIcon [name]="muted() ? 'volume-off' : 'volume'" [size]="18" />
-      </button>
+      <div class="st-transportSecondary">
+        <button type="button" class="st-transportBtn" (click)="toggleCaptions.emit()" [attr.aria-pressed]="captions()" aria-label="Sous-titres">
+          <svg mtrIcon name="captions" [size]="18" />
+          <span class="st-transportLabel">Sous-titres</span>
+        </button>
+        <button
+          type="button"
+          class="st-transportBtn"
+          (click)="toggleMute.emit()"
+          [disabled]="!speechAvailable()"
+          [attr.aria-pressed]="!muted()"
+          [attr.aria-label]="narrationAriaLabel()"
+          [attr.title]="narrationTitle()"
+        >
+          <svg mtrIcon [name]="muted() ? 'volume-off' : 'volume'" [size]="18" />
+          <span class="st-transportLabel">{{ muted() ? 'Activer le son' : 'Couper le son' }}</span>
+        </button>
+      </div>
     </div>
   `,
 })
@@ -173,6 +191,7 @@ export class StoryPlayerComponent {
   readonly progressSaved = output<StoryProgressEvent>();
 
   private readonly api = inject(StoriesApi);
+  private readonly narration = inject(StoryNarrationService);
 
   protected readonly story = signal<Story | null>(null);
   protected readonly loadError = signal<string | null>(null);
@@ -190,10 +209,11 @@ export class StoryPlayerComponent {
   private started = false;
   private loading = false;
   private destroyed = false;
-  /** True while the current scene's sentence is still being spoken: the scene then waits instead of cutting it. */
-  private speaking = false;
+  /** Token returned by StoryNarrationService for the active scene utterance. */
+  private utteranceToken = -1;
+  /** Scene id that owns utteranceToken (prevents resume after a jump while paused). */
+  private spokenSceneId: string | null = null;
   private holdSince: number | null = null;
-  private utteranceSeq = 0;
 
   protected readonly clock = formatClock;
 
@@ -255,6 +275,7 @@ export class StoryPlayerComponent {
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
       if (this.holdTimer) clearTimeout(this.holdTimer);
+      this.narration.stop();
     });
 
     effect(() => {
@@ -293,12 +314,12 @@ export class StoryPlayerComponent {
         last = now;
         // Let the narrator finish the sentence: hold on the last frame of the scene until the speech ends.
         const story = this.story();
-        if (story && this.speaking) {
+        if (story && this.narration.isHoldingScene(this.utteranceToken)) {
           const held = holdForSpeech(story.scenes, this.positionMs, next);
           if (held < next) {
             this.holdSince ??= now;
             if (now - this.holdSince < MAX_SPEECH_HOLD_MS) next = held;
-            else this.speaking = false;
+            else this.utteranceToken = -1;
           }
         }
         this.positionMs = next;
@@ -316,40 +337,46 @@ export class StoryPlayerComponent {
       onCleanup(() => cancelAnimationFrame(frame));
     });
 
-    // French narration via the browser's speech synthesis, one utterance per scene; re-spoken only when the scene,
-    // the voice or the playback, mute or active state changes. Only a French voice is ever used.
+    // French narration via StoryNarrationService (one utterance per scene).
+    // Pause freezes speech; mute / inactive / scene change cancel it.
     effect((onCleanup) => {
       const voice = this.voice();
-      if (!this.speechAvailable() || !voice) return;
-      const synth = window.speechSynthesis;
       const scene = this.scene();
-      const seq = ++this.utteranceSeq;
-      this.speaking = false;
+      const playing = this.playing();
       this.holdSince = null;
-      if (!scene || !this.playing() || this.muted() || !this.active()) {
-        synth.cancel();
+      if (!this.speechAvailable() || !voice || !scene || this.muted() || !this.active()) {
+        this.utteranceToken = -1;
+        this.spokenSceneId = null;
+        this.narration.stop();
         return;
       }
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(spokenText(scene.caption));
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-      utterance.rate = SPEECH_RATE;
-      utterance.pitch = 1;
-      // Only the latest utterance may release the scene: cancelling an old one also fires its end event.
-      const done = () => {
-        if (seq === this.utteranceSeq) {
-          this.speaking = false;
-          this.holdSince = null;
-        }
-      };
-      utterance.onend = done;
-      utterance.onerror = done;
-      this.speaking = true;
-      synth.speak(utterance);
+      if (!playing) {
+        this.narration.pause();
+        return;
+      }
+      if (
+        this.spokenSceneId === scene.id &&
+        this.narration.isHoldingScene(this.utteranceToken) &&
+        this.narration.status() === 'paused'
+      ) {
+        this.narration.resume();
+        return;
+      }
+      const token = this.narration.speak(spokenText(scene.caption), voice, SPEECH_RATE);
+      this.utteranceToken = token;
+      this.spokenSceneId = scene.id;
       onCleanup(() => {
-        this.speaking = false;
-        synth.cancel();
+        if (!this.narration.isHoldingScene(token)) return;
+        // Pause when the clock stops on the same scene; cancel on scene/voice/mute exit.
+        if (!this.playing() && this.active() && !this.muted() && this.spokenSceneId === scene.id) {
+          this.narration.pause();
+          return;
+        }
+        this.narration.stop();
+        if (this.utteranceToken === token) {
+          this.utteranceToken = -1;
+          this.spokenSceneId = null;
+        }
       });
     });
   }

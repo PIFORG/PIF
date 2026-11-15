@@ -1,0 +1,242 @@
+.adm-shell {
+  --adm-side-w: 232px;
+  --adm-side-collapsed: 64px;
+  display: grid;
+  grid-template-columns: var(--adm-side-w) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--mtr-canvas);
+}
+
+.adm-shell[data-collapsed='true'] {
+  grid-template-columns: var(--adm-side-collapsed) minmax(0, 1fr);
+}
+
+.adm-side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--mtr-sunken);
+  border-right: 1px solid var(--mtr-border);
+  padding: 0.65rem 0.5rem;
+}
+
+.adm-sideTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.25rem 0.35rem 0.65rem;
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.adm-brand {
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.adm-collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: var(--mtr-surface);
+  color: var(--mtr-text-2);
+  cursor: pointer;
+}
+
+.adm-sideLabel {
+  margin: 0.75rem 0.5rem 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.adm-sideNav {
+  flex: 1;
+  overflow: auto;
+  padding-top: 0.25rem;
+}
+
+.adm-sideNav ul,
+.adm-drawerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.adm-sideLink {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  margin-bottom: 0.15rem;
+  border-radius: var(--radius-sm);
+  color: var(--mtr-text-2);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 550;
+}
+
+.adm-sideLink:hover {
+  background: var(--mtr-hover);
+  color: var(--mtr-text);
+}
+
+.adm-sideLink[aria-current='page'] {
+  background: var(--mtr-hover);
+  color: var(--mtr-brand-text);
+  box-shadow: inset 3px 0 0 var(--mtr-brand-strong);
+}
+
+.adm-sideIcon {
+  flex-shrink: 0;
+}
+
+.adm-sideFoot {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--mtr-border);
+}
+
+.adm-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: var(--radius-sm);
+  color: var(--mtr-brand-text);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.adm-switch:hover {
+  background: var(--mtr-hover);
+}
+
+.adm-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.adm-top {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.1rem;
+  background: var(--mtr-surface);
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.adm-topTitle {
+  min-width: 0;
+  flex: 1;
+}
+
+.adm-eyebrow {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.adm-topTitle h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.adm-topActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.adm-main {
+  flex: 1;
+  padding: 1rem 1.15rem 2rem;
+  max-width: 1280px;
+}
+
+.adm-mobileToggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: var(--mtr-surface);
+  cursor: pointer;
+}
+
+.adm-drawerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+}
+
+.adm-backdrop {
+  flex: 1;
+  border: 0;
+  background: var(--mtr-overlay);
+}
+
+.adm-drawer {
+  width: min(18rem, 88vw);
+  background: var(--mtr-surface);
+  padding: 0.85rem;
+  border-left: 1px solid var(--mtr-border);
+}
+
+.adm-drawerHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.adm-drawerList a {
+  display: block;
+  padding: 0.55rem 0.4rem;
+  color: var(--mtr-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.adm-drawerList a[aria-current='page'],
+.adm-drawerList a:hover {
+  background: var(--mtr-hover);
+}
+
+.adm-shell[data-collapsed='true'] .adm-sideTop {
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .adm-shell,
+  .adm-shell[data-collapsed='true'] {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-side {
+    display: none;
+  }
+
+  .adm-mobileToggle {
+    display: inline-flex;
+  }
+}

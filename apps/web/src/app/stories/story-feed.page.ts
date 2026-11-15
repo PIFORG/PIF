@@ -7,11 +7,11 @@ import { COMPETENCY_LABEL, LEVEL_LABEL } from '../core/api/learning-api';
 import { StoriesApi, type Competency, type StorySummary } from '../core/api/stories-api';
 import { FR } from '../core/i18n/fr';
 import { IconComponent } from '../shared/icon/icon.component';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { StoryPlayerComponent, type StoryProgressEvent } from './story-player.component';
 import { formatClock, resumePosition } from './story-timeline';
 import { CHARACTER_NAME } from './story-visual.component';
+import { StoryNarrationService } from './story-narration.service';
 import { VOICE_STORAGE_KEY, frenchVoices, isNaturalVoice, voiceLabel } from './story-voice';
 
 /** Pause before the next story starts on its own once one has finished. */
@@ -41,13 +41,14 @@ function readStoredVoice(): string | null {
 @Component({
   selector: 'mtr-story-feed-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PageHeadingComponent, HeadingActionsSlot, ...WORKSPACE_PRIMITIVES, StoryPlayerComponent, IconComponent],
+  imports: [RouterLink, ...WORKSPACE_PRIMITIVES, StoryPlayerComponent, IconComponent],
   host: { style: 'display: contents' },
   templateUrl: './story-feed.page.html',
 })
 export class StoryFeedPage {
   private readonly api = inject(StoriesApi);
   private readonly injector = inject(Injector);
+  private readonly narration = inject(StoryNarrationService);
   private readonly requested = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.get('story'))), {
     initialValue: null,
   });
@@ -118,7 +119,7 @@ export class StoryFeedPage {
       this.destroyed = true;
       this.clearAdvance();
       document.body.style.removeProperty('overflow');
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      this.narration.stop();
     });
 
     // A story requested by link opens full screen once the feed is loaded.
@@ -179,13 +180,18 @@ export class StoryFeedPage {
     if (opener instanceof HTMLElement) this.openerEl = opener;
     this.clearAdvance();
     this.direction.set('open');
+    // Unlock narration only after a real click/tap (opener present). Deep links stay muted until the CTA.
+    if (opener instanceof HTMLElement && this.speechAvailable()) {
+      this.narration.unlock();
+      this.muted.set(false);
+    }
     this.openIndex.set(index);
   }
 
   protected close(): void {
     this.clearAdvance();
     this.openIndex.set(null);
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    this.narration.stop();
     const opener = this.openerEl;
     this.openerEl = null;
     // After the render that lifts `inert` from the gallery, or the focus would be refused.
@@ -257,7 +263,20 @@ export class StoryFeedPage {
   }
 
   protected toggleMute(): void {
-    this.muted.update((m) => !m);
+    const next = !this.muted();
+    this.muted.set(next);
+    if (next) this.narration.stop();
+    else {
+      this.narration.unlock();
+      this.narration.resume();
+    }
+  }
+
+  /** Explicit CTA after deep-link open (no prior gesture) or when muted mid-story. */
+  protected enableNarration(): void {
+    if (!this.speechAvailable()) return;
+    this.narration.unlock();
+    this.muted.set(false);
   }
 
   protected toggleCaptions(): void {

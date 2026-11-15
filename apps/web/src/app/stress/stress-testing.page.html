@@ -1,13 +1,27 @@
 <div class="page-shell bs-shell">
-  <mtr-page-heading
-    [eyebrow]="nav.groupResearch"
-    title="Tests de résistance bancaire"
-    [status]="'LIVE_INTEGRATED'"
-    description="Appliquez un même scénario macroéconomique défavorable à une banque conventionnelle et à une banque participative fictives, puis comparez l'effet sur leurs pertes, leur capital et leur liquidité à un an."
-  />
+  <header class="bs-labTop">
+    <div>
+      <p class="eyebrow">{{ nav.groupResearch }}</p>
+      <h1 class="bs-labTitle">Simuler une crise bancaire</h1>
+      <p class="bs-labLede">Choisissez un scénario, réglez les chocs, puis observez pertes, capital et liquidité sur deux bilans fictifs.</p>
+    </div>
+  </header>
+
+  <ol class="bs-pipeline" aria-label="Parcours du laboratoire">
+    <li>Banque</li>
+    <li>Situation</li>
+    <li>Hypothèses</li>
+    <li>Chocs</li>
+    <li>Exécution</li>
+    <li>Pertes</li>
+    <li>Capital</li>
+    <li>Liquidité</li>
+    <li>Résilience</li>
+    <li>Comparaison</li>
+  </ol>
 
   <p class="bs-notice" role="note">
-    <strong>Moteur déterministe, banques fictives.</strong>
+    <strong>Moteur déterministe, banques fictives — simulation pédagogique, pas une évaluation réglementaire.</strong>
     Les résultats découlent des hypothèses affichées ; ils illustrent des mécanismes et ne décrivent aucune banque réelle.
     Le volet IA est un émulateur appris sur des scénarios calculés par ce moteur : le résultat du moteur reste la référence.
   </p>

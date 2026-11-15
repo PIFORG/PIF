@@ -1,15 +1,10 @@
 @if (user(); as user) {
   <div class="page-shell db-cockpit">
-    <mtr-page-heading [eyebrow]="greeting" [title]="'Bon retour, ' + user.firstName">
+    <mtr-page-heading [eyebrow]="greeting + ' · ' + user.firstName" [title]="'Vue d\'ensemble'">
       <span mtrHeadingDescription class="db-identity">
         <mtr-account-status-badge [status]="user.status" />
         <span class="badge badge-muted">{{ user.role === 'ADMIN' ? 'Administrateur' : 'Investisseur' }}</span>
         <span class="badge badge-muted">{{ experienceLabel[user.experienceLevel] }}</span>
-        @if (context()?.experienceLevelNotice) {
-          <span class="db-identityNote"
-            >Le niveau d'expérience adapte uniquement le contenu pédagogique — pas une certification de trading.</span
-          >
-        }
       </span>
       <button
         mtrHeadingActions
@@ -42,19 +37,16 @@
       </div>
     }
 
-    <!-- Hero: financial intelligence overview -->
+    <!-- Cockpit: valeur, performance, risque — pas d'argumentaire marketing -->
     <header class="db-hero" aria-labelledby="db-hero-title">
       <div class="db-heroHead">
         <div class="db-heroBrand">
-          <span class="db-heroEyebrow">Poste de pilotage</span>
-          <h2 id="db-hero-title" class="db-heroTitle">Intelligence financière</h2>
-          <p class="db-heroSubtitle">Vue synthétique du portefeuille simulé, de la performance et du risque.</p>
+          <h2 id="db-hero-title" class="db-heroTitle">Portefeuille</h2>
         </div>
         <nav class="db-heroActions" aria-label="Actions rapides">
-          <a routerLink="/markets" class="btn btn-ghost btn-sm"><svg mtrIcon name="markets" [size]="14" /> Marchés</a>
-          <a routerLink="/trading" class="btn btn-ghost btn-sm"><svg mtrIcon name="trading" [size]="14" /> Trading</a>
-          <a routerLink="/portfolios" class="btn btn-ghost btn-sm"><svg mtrIcon name="portfolio" [size]="14" /> Portefeuilles</a>
-          <a routerLink="/learn" class="btn btn-ghost btn-sm"><svg mtrIcon name="academy" [size]="14" /> Parcours d'apprentissage</a>
+          <a routerLink="/markets" class="btn btn-ghost btn-sm">Marchés</a>
+          <a routerLink="/trading" class="btn btn-ghost btn-sm">Négocier</a>
+          <a routerLink="/portfolios" class="btn btn-ghost btn-sm">Détail</a>
         </nav>
       </div>
 
@@ -63,23 +55,31 @@
           <div class="db-heroPrimary">
             <span class="db-heroLabel">Capitaux propres simulés</span>
             <p class="db-heroEquity num">
-              @if (sample()) {
-                {{ equity }}
+              @if (sample() || showLive()) {
+                {{ equity() }}
+              } @else if (liveLoading()) {
+                <span class="skeleton" [style.height.px]="28" [style.width.px]="120"></span>
               } @else {
                 <span mtr-pending-value></span>
               }
             </p>
             @if (sample()) {
               <span class="db-heroReturn" mtr-change [value]="summary.totalReturnPct"></span>
+            } @else if (liveReturnPct(); as ret) {
+              <span class="db-heroReturn" mtr-change [value]="ret"></span>
             }
-            <div mtr-kpi class="db-heroKpi db-srKpi" label="Valeur du portefeuille simulé" icon="portfolio" [hint]="sample() ? 'depuis le début · exemple' : 'Moteur portefeuille non connecté'">
-              @if (sample()) {
-                {{ equity }}
+            <div mtr-kpi class="db-heroKpi db-srKpi" label="Valeur du portefeuille simulé" icon="portfolio" [hint]="sample() ? 'depuis le début · exemple' : showLive() ? 'portefeuille simulé connecté' : 'Créez un portefeuille pour afficher la valeur'">
+              @if (sample() || showLive()) {
+                {{ equity() }}
+              } @else if (liveLoading()) {
+                <span class="skeleton" [style.height.px]="24" [style.width.px]="80"></span>
               } @else {
                 <span mtr-pending-value></span>
               }
               @if (sample()) {
                 <span mtrKpiChange mtr-change [value]="summary.totalReturnPct"></span>
+              } @else if (liveReturnPct(); as ret) {
+                <span mtrKpiChange mtr-change [value]="ret"></span>
               }
             </div>
           </div>
@@ -90,10 +90,12 @@
               label="Variation du jour"
               icon="markets"
               [tone]="sample() ? (summary.dayChange >= 0 ? 'positive' : 'negative') : 'default'"
-              [hint]='sample() ? "exemple" : "Aucune position simulée pour le moment"'
+              [hint]='sample() ? "exemple" : showLive() ? "voir le rendement temps pondéré ci-dessus" : "Aucune position simulée pour le moment"'
             >
               @if (sample()) {
                 <span mtr-change [value]="summary.dayChange" kind="money" [currency]="currency"></span>
+              } @else if (showLive()) {
+                <span class="num">{{ livePortfolio()?.name }}</span>
               } @else {
                 <span mtr-pending-value></span>
               }
@@ -112,7 +114,7 @@
                   <span class="skeleton" [style.height.px]="24" [style.width.px]="40"></span>
                 }
                 <span mtrKpiHint class="ws-kpiHint"
-                  >Opérationnel ·
+                  >Connecté ·
                   @if (user.mfaEnabled) {
                     vérification en deux étapes activée
                   } @else {
@@ -136,25 +138,25 @@
             @if (sample()) {
               <span mtrPanelBadge mtr-demo-label></span>
             } @else {
-              <span mtrPanelBadge mtr-status-badge status="DESIGNED_PENDING_BACKEND"></span>
             }
-            @if (sample()) {
+            @if (sample() || performanceSeries().length >= 1) {
               <figure
                 mtr-line-chart
                 class="db-heroLineChart"
                 [height]="280"
-                [summary]="performanceSummary"
+                [summary]="performanceSummary()"
                 [formatY]="performanceAxis"
-                [xLabels]="sessionLabels"
-                [series]="performanceSeries"
+                [xLabels]="sessionLabels()"
+                [series]="performanceSeries()"
               ></figure>
             } @else {
               <div
                 mtr-empty-state
                 icon="markets"
                 heading="Pas encore de portefeuille simulé"
-                description="Votre courbe de capitaux propres apparaîtra ici une fois le moteur portefeuille connecté. Explorez l'espace d'exemple pour voir le fonctionnement de cet écran."
+                description="Créez un portefeuille virtuel pour afficher votre courbe de capitaux propres. Explorez l'espace d'exemple pour voir le fonctionnement de cet écran."
               >
+                <a mtrEmptyAction routerLink="/portfolios" class="btn btn-primary btn-sm">Ouvrir les portefeuilles</a>
                 <button mtrEmptyAction type="button" class="btn btn-secondary btn-sm" (click)="sample.set(true)">
                   <svg mtrIcon name="flask" [size]="14" /> Afficher l'espace d'exemple
                 </button>
@@ -172,9 +174,9 @@
                 <span mtr-demo-label class="db-riskDemo"></span>
               }
             </div>
-            <div mtr-kpi class="db-heroKpi db-heroKpiRisk" label="VaR 1 jour (95 %)" icon="risk" [tone]="sample() ? 'warning' : 'default'" [hint]="sample() ? varHint : 'Moteur de risque non connecté'">
-              @if (sample()) {
-                {{ varValue }}
+            <div mtr-kpi class="db-heroKpi db-heroKpiRisk" label="VaR 1 jour (95 %)" icon="risk" [tone]="sample() || showLive() ? 'warning' : 'default'" [hint]="varHint()">
+              @if (varValue(); as varText) {
+                {{ varText }}
               } @else {
                 <span mtr-pending-value></span>
               }
@@ -183,7 +185,7 @@
               <dl class="db-riskStats">
                 <div>
                   <dt>Volatilité annuelle</dt>
-                  <dd class="num">{{ varVolatility }}</dd>
+                  <dd class="num">{{ varVolatility() }}</dd>
                 </div>
                 <div>
                   <dt>Bêta</dt>
@@ -195,11 +197,30 @@
                 </div>
                 <div>
                   <dt>Drawdown max.</dt>
-                  <dd class="num">{{ varDrawdown }}</dd>
+                  <dd class="num">{{ varDrawdown() }}</dd>
+                </div>
+              </dl>
+            } @else if (showLive()) {
+              <dl class="db-riskStats">
+                <div>
+                  <dt>Volatilité annuelle</dt>
+                  <dd class="num">{{ varVolatility() ?? '—' }}</dd>
+                </div>
+                <div>
+                  <dt>ES 95 %</dt>
+                  <dd class="num">{{ liveAnalytics()?.risk.expectedShortfall95.value !== undefined && liveAnalytics()?.risk.expectedShortfall95.value !== null ? formatPercent(liveAnalytics()!.risk.expectedShortfall95.value!) : '—' }}</dd>
+                </div>
+                <div>
+                  <dt>Exposition</dt>
+                  <dd class="num">{{ liveAnalytics()?.concentration.exposure.value !== undefined && liveAnalytics()?.concentration.exposure.value !== null ? formatPercent(liveAnalytics()!.concentration.exposure.value!) : '—' }}</dd>
+                </div>
+                <div>
+                  <dt>Drawdown max.</dt>
+                  <dd class="num">{{ varDrawdown() ?? '—' }}</dd>
                 </div>
               </dl>
             } @else {
-              <p class="db-riskPending">Les indicateurs de risque s'afficheront lorsque le moteur portefeuille sera connecté.</p>
+              <p class="db-riskPending">Les indicateurs de risque s'affichent dès qu'un portefeuille simulé est disponible.</p>
             }
             <div class="db-readinessRing" [attr.data-level]="readinessPct() >= 100 ? 'complete' : 'progress'" title="Complétude du compte">
               <span class="db-readinessPct num">{{ readinessPct() }}%</span>
@@ -228,8 +249,21 @@
             </li>
           }
         </ul>
+      } @else if (liveWatchRows().length) {
+        <ul class="db-ticker">
+          @for (q of liveWatchRows(); track q.symbol) {
+            <li>
+              <span class="mono db-tickerSym">{{ q.symbol }}</span>
+              <span class="db-tickerName">{{ q.name }}</span>
+              <span class="num db-tickerLast">{{ q.last !== undefined && q.last !== null ? formatNumber(q.last) : '—' }}</span>
+              @if (q.change !== undefined && q.change !== null) {
+                <span mtr-change [value]="q.change / 100"></span>
+              }
+            </li>
+          }
+        </ul>
       } @else {
-        <p class="db-marketStripEmpty">Les cotations en direct apparaîtront ici lorsque le service de données de marché sera connecté.</p>
+        <p class="db-marketStripEmpty">Ajoutez des instruments à votre liste de suivi sur Marchés pour les voir ici.</p>
       }
     </section>
 
@@ -262,8 +296,34 @@
               }
             </tbody>
           </table>
+        } @else if (liveWatchRows().length) {
+          <table class="data-table db-compactTable">
+            <caption class="sr-only">Liste de suivi — cotations simulées</caption>
+            <thead>
+              <tr>
+                <th scope="col">Symbole</th>
+                <th scope="col" class="num">Dernier</th>
+                <th scope="col" class="num">Variation</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (q of liveWatchRows(); track q.symbol) {
+                <tr>
+                  <td><span class="mono">{{ q.symbol }}</span></td>
+                  <td class="num">{{ q.last !== undefined && q.last !== null ? formatNumber(q.last) : '—' }}</td>
+                  <td class="num">
+                    @if (q.change !== undefined && q.change !== null) {
+                      <span mtr-change [value]="q.change / 100"></span>
+                    } @else {
+                      —
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         } @else {
-          <div mtr-empty-state icon="markets" heading="Données de marché non connectées" description="Les cotations apparaissent lorsque le service de données de marché est disponible."></div>
+          <div mtr-empty-state icon="markets" heading="Liste de suivi vide" description="Ajoutez des instruments depuis Marchés pour les retrouver ici."></div>
         }
       </section>
 
@@ -273,19 +333,20 @@
         }
         @if (sample()) {
           <div mtr-allocation-bar [items]="allocation" label="Allocation d'exemple par classe d'actifs"></div>
+        } @else if (liveAllocation().length) {
+          <div mtr-allocation-bar [items]="liveAllocation()" label="Allocation simulée par classe d'actifs"></div>
         } @else {
           <div mtr-empty-state icon="portfolio" heading="Pas d'allocation pour l'instant" description="Les pondérations par classe d'actifs apparaissent dès que vous détenez des positions simulées."></div>
         }
       </section>
 
       <section mtr-panel class="db-canvasCell db-canvasInsights" panelId="insights" heading="Signaux contextuels" description="Recommandations issues de votre profil et de la plateforme.">
-        <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
         @if (error()) {
           <div mtr-empty-state tone="error" heading="Contexte indisponible" [description]="error()"></div>
         } @else if (!context()) {
           <div mtr-panel-skeleton [rows]="3"></div>
         } @else if (contextualInsights().length === 0) {
-          <div mtr-empty-state icon="overview" heading="Aucun signal particulier" description="Votre espace est configuré. Explorez les modules de la station de travail ci-dessous."></div>
+          <div mtr-empty-state icon="overview" heading="Aucun signal particulier" description="Votre espace est configuré. Utilisez les accès rapides ci-dessous."></div>
         } @else {
           <ul class="db-insights">
             @for (item of contextualInsights(); track item.title) {

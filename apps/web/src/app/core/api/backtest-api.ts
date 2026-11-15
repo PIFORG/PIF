@@ -95,6 +95,13 @@ export const BACKTEST_STRATEGIES: { id: BacktestStrategyId; label: string; hint:
 export class BacktestApi {
   private readonly api = inject(ApiClient);
 
+  strategies(): Promise<{
+    strategies: { id: string; title: string; description: string }[];
+    note: string;
+  }> {
+    return this.api.request('/backtests/strategies', { method: 'GET' });
+  }
+
   run(body: BacktestRunRequest): Promise<BacktestResult> {
     return this.api.request<BacktestResult>('/backtests/run', { method: 'POST', body });
   }

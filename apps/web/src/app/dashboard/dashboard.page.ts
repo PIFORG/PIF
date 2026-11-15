@@ -5,6 +5,15 @@ import { AuthApi } from '../core/api/auth-api';
 import { describeApiError } from '../core/api/errors';
 import { LEVEL_LABEL, LearningApi, type LearningProfile } from '../core/api/learning-api';
 import { SessionsApi } from '../core/api/sessions-api';
+import {
+  MarketApi,
+  PortfolioApi,
+  rememberedPortfolio,
+  type EquityHistory,
+  type PortfolioAnalytics,
+  type PortfolioSummary,
+  type WatchlistResponse,
+} from '../core/api/trading-api';
 import type { AuthSession, DashboardContext, User } from '../core/api/types';
 import { AuthService } from '../core/auth/auth.service';
 import {
@@ -40,8 +49,8 @@ const MODULE_ROUTES: Record<string, { href: string; icon: IconName; blurb: strin
   portfolio: { href: '/portfolios', icon: 'portfolio', label: 'Portefeuille virtuel', blurb: 'Portefeuilles virtuels, positions et performance.' },
   orders: { href: '/trading', icon: 'trading', label: 'Salle des ordres', blurb: 'Saisie d\'ordres simulés et historique d\'exécution.' },
   learning: { href: '/learn', icon: 'academy', label: 'Parcours d\'apprentissage', blurb: 'Missions du parcours, profil de compétences et histoires financières.' },
-  ai: { href: '/ai', icon: 'ai', label: 'Analyses IA', blurb: 'Analyses des modèles avec confiance et limites.' },
-  stress: { href: '/stress-testing', icon: 'bank', label: 'Tests de résistance bancaire', blurb: 'Scénarios de choc sur un bilan bancaire type.' },
+  ai: { href: '/ai', icon: 'ai', label: 'Prévisions de marché', blurb: 'Prévisions synthétiques avec performances et limites affichées.' },
+  stress: { href: '/stress-testing', icon: 'bank', label: 'Simuler une crise bancaire', blurb: 'Chocs macro sur un bilan bancaire type — capital et liquidité.' },
   actuarial: { href: '/actuarial', icon: 'actuarial', label: 'Outils actuariels', blurb: 'Fréquence et sévérité des sinistres, perte agrégée et tarification.' },
   admin: { href: '/admin', icon: 'platform', label: 'Administration', blurb: 'Utilisateurs, rôles et journal d\'audit de sécurité.' },
 };
@@ -67,7 +76,6 @@ export class PendingValueComponent {}
   host: { style: 'display: contents' },
   template: `
     <section mtr-panel panelId="readiness" heading="État du compte" description="Données en direct depuis votre compte.">
-      <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
       <div class="db-progress">
         <div class="db-progressTrack"><span [style.width.%]="(completed() / items().length) * 100"></span></div>
         <span class="num">{{ completed() }} sur {{ items().length }} terminé(s)</span>
@@ -127,7 +135,6 @@ export class ReadinessPanelComponent {
   host: { style: 'display: contents' },
   template: `
     <section mtr-panel panelId="devices" heading="Appareils connectés">
-      <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
       <a mtrPanelActions routerLink="/settings/sessions" class="btn btn-ghost btn-sm">Gérer</a>
       @if (error()) {
         <div mtr-empty-state tone="error" heading="Sessions indisponibles" [description]="error()"></div>
@@ -178,8 +185,7 @@ export class SessionsPanelComponent {
   imports: [RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section mtr-panel panelId="learning" heading="Parcours d'apprentissage" description="Intelligence d'apprentissage — missions, compétences et recommandations.">
-      <span mtrPanelBadge mtr-status-badge status="LIVE_INTEGRATED"></span>
+    <section mtr-panel panelId="learning" heading="Apprentissage" description="Prochaine mission et compétences.">
       <a mtrPanelActions routerLink="/learn" class="btn btn-ghost btn-sm">Ouvrir</a>
       @if (error()) {
         <div mtr-empty-state tone="error" heading="Progression indisponible" [description]="error()"></div>
@@ -243,12 +249,7 @@ export class LearningPanelComponent {
   imports: [NgTemplateOutlet, RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES],
   host: { style: 'display: contents' },
   template: `
-    <section
-      mtr-panel
-      panelId="modules"
-      heading="Modules de la station de travail"
-      description="La disponibilité vient de la plateforme. Les modules en aperçu ouvrent leur écran conçu et expliquent ce qui est en attente."
-    >
+    <section mtr-panel panelId="modules" heading="Accès rapide" description="Raccourcis vers les espaces de travail de votre compte.">
       @if (error()) {
         <div mtr-empty-state tone="error" heading="Modules indisponibles" [description]="error()"></div>
       } @else if (!context()) {
@@ -273,10 +274,10 @@ export class LearningPanelComponent {
         <strong>{{ mod.label }}</strong>
         <span>{{ mod.route?.blurb ?? 'Détails du module bientôt disponibles.' }}</span>
       </span>
-      @if (mod.permitted) {
-        <span mtr-status-badge [status]="mod.available ? 'LIVE_INTEGRATED' : 'DESIGNED_PENDING_BACKEND'"></span>
-      } @else {
+      @if (!mod.permitted) {
         <span class="badge badge-muted"><svg mtrIcon name="lock" [size]="12" /> Non autorisé</span>
+      } @else if (!mod.available) {
+        <span class="badge badge-muted">Aperçu</span>
       }
     </ng-template>
   `,
@@ -325,6 +326,8 @@ export class DashboardPage {
   private readonly auth = inject(AuthService);
   private readonly authApi = inject(AuthApi);
   private readonly sessionsApi = inject(SessionsApi);
+  private readonly portfolioApi = inject(PortfolioApi);
+  private readonly marketApi = inject(MarketApi);
 
   protected readonly user = this.auth.user;
   protected readonly context = signal<DashboardContext | null>(null);
@@ -332,33 +335,114 @@ export class DashboardPage {
   protected readonly sessions = signal<AuthSession[] | null>(null);
   protected readonly sessionsError = signal<string | null>(null);
   protected readonly sample = signal(false);
+  protected readonly livePortfolio = signal<PortfolioSummary | null>(null);
+  protected readonly liveAnalytics = signal<PortfolioAnalytics | null>(null);
+  protected readonly liveHistory = signal<EquityHistory | null>(null);
+  protected readonly liveWatchlist = signal<WatchlistResponse | null>(null);
+  protected readonly liveError = signal<string | null>(null);
+  protected readonly liveLoading = signal(true);
 
   protected readonly greeting = greetingForHour();
   protected readonly experienceLabel = EXPERIENCE_LABEL;
-  protected readonly summary = sampleSummary();
-  protected readonly risk = sampleRisk;
-  protected readonly watchlist = sampleWatchlist;
-  protected readonly allocation = sampleAllocation;
-  protected readonly positions = samplePositions.map((p) => ({
+  protected readonly sampleSummaryData = sampleSummary();
+  protected readonly sampleRiskData = sampleRisk;
+  protected readonly sampleWatchlistData = sampleWatchlist;
+  protected readonly sampleAllocationData = sampleAllocation;
+  protected readonly samplePositionsData = samplePositions.map((p) => ({
     ...p,
     marketValue: formatMoney(sampleMarketValue(p), SAMPLE_CURRENCY),
     unrealised: sampleUnrealised(p),
   }));
+  /** Template aliases: sample mode uses demo constants; live mode uses portfolio analytics when present. */
+  protected readonly summary = this.sampleSummaryData;
+  protected readonly risk = this.sampleRiskData;
+  protected readonly watchlist = this.sampleWatchlistData;
+  protected readonly allocation = this.sampleAllocationData;
+  protected readonly positions = this.samplePositionsData;
   protected readonly currency = SAMPLE_CURRENCY;
   protected readonly formatNumber = formatNumber;
+  protected readonly formatPercent = formatPercent;
   protected readonly sectorLabel = sectorLabel;
-  protected readonly equity = formatMoney(this.summary.equity, SAMPLE_CURRENCY);
-  protected readonly varValue = formatPercent(sampleRisk.var95);
-  protected readonly varHint = `Volatilité ${formatPercent(sampleRisk.annualVolatility, { digits: 1 })} · exemple`;
-  protected readonly varVolatility = formatPercent(sampleRisk.annualVolatility, { digits: 1 });
-  protected readonly varDrawdown = formatPercent(sampleRisk.maxDrawdown, { digits: 1 });
-  protected readonly performanceSeries: ChartSeries[] = [
-    { label: 'Portefeuille d\'exemple', values: sampleEquityCurve.map((p) => p.value), tone: 'brand', area: true },
-    { label: 'Indice de référence', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'muted', dashed: true },
-  ];
-  protected readonly performanceSummary = `Données d'exemple. Le portefeuille fictif passe de ${formatMoney(sampleEquityCurve[0].value, SAMPLE_CURRENCY)} à ${formatMoney(this.summary.equity, SAMPLE_CURRENCY)} sur 64 séances, devant un indice de référence fictif.`;
-  protected readonly performanceAxis = (v: number) => formatMoney(v, SAMPLE_CURRENCY, { compact: true });
-  protected readonly sessionLabels: [string, string] = ['Séance 1', 'Séance 64'];
+  protected readonly hasLivePortfolio = computed(() => !!this.livePortfolio() && !!this.liveAnalytics());
+  protected readonly showLive = computed(() => !this.sample() && this.hasLivePortfolio());
+  protected readonly equity = computed(() => {
+    if (this.sample()) return formatMoney(this.sampleSummaryData.equity, SAMPLE_CURRENCY);
+    const a = this.liveAnalytics();
+    return a ? formatMoney(a.valuation.equity, a.currency === 'TND' ? 'TND' : a.currency) : null;
+  });
+  protected readonly liveReturnPct = computed(() => {
+    const a = this.liveAnalytics();
+    const v = a?.performance.timeWeightedReturn.value;
+    return v == null ? null : v;
+  });
+  protected readonly varValue = computed(() => {
+    if (this.sample()) return formatPercent(sampleRisk.var95);
+    const v = this.liveAnalytics()?.risk.valueAtRisk95.value;
+    return v == null ? null : formatPercent(v);
+  });
+  protected readonly varHint = computed(() => {
+    if (this.sample()) return `Volatilité ${formatPercent(sampleRisk.annualVolatility, { digits: 1 })} · exemple`;
+    const vol = this.liveAnalytics()?.risk.realizedVolatilityAnnualized.value;
+    return vol == null ? 'VaR historique du portefeuille simulé' : `Volatilité ${formatPercent(vol, { digits: 1 })} · portefeuille`;
+  });
+  protected readonly varVolatility = computed(() => {
+    if (this.sample()) return formatPercent(sampleRisk.annualVolatility, { digits: 1 });
+    const vol = this.liveAnalytics()?.risk.realizedVolatilityAnnualized.value;
+    return vol == null ? null : formatPercent(vol, { digits: 1 });
+  });
+  protected readonly varDrawdown = computed(() => {
+    if (this.sample()) return formatPercent(sampleRisk.maxDrawdown, { digits: 1 });
+    const d = this.liveAnalytics()?.risk.maxDrawdown.value;
+    return d == null ? null : formatPercent(d, { digits: 1 });
+  });
+  protected readonly liveAllocation = computed(() => {
+    const a = this.liveAnalytics();
+    if (!a) return [];
+    return a.allocation.byAssetClass.map((line) => ({
+      label: line.label ?? line.name,
+      weight: line.weight ?? 0,
+    }));
+  });
+  protected readonly liveWatchRows = computed(() => {
+    const w = this.liveWatchlist();
+    if (!w) return [];
+    return w.items.map((item) => ({
+      symbol: item.instrument.symbol,
+      name: item.instrument.name,
+      last: item.instrument.quote?.mid ?? null,
+      change: item.instrument.changePct,
+    }));
+  });
+  protected readonly performanceSeries = computed<ChartSeries[]>(() => {
+    if (this.sample()) {
+      return [
+        { label: "Portefeuille d'exemple", values: sampleEquityCurve.map((p) => p.value), tone: 'brand', area: true },
+        { label: 'Indice de référence', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'muted', dashed: true },
+      ];
+    }
+    const points = this.liveHistory()?.points ?? [];
+    if (points.length < 2) return [];
+    return [{ label: 'Capitaux propres simulés', values: points.map((p) => p.equity), tone: 'brand', area: true }];
+  });
+  protected readonly performanceSummary = computed(() => {
+    if (this.sample()) {
+      return `Données d'exemple. Le portefeuille fictif passe de ${formatMoney(sampleEquityCurve[0].value, SAMPLE_CURRENCY)} à ${formatMoney(this.sampleSummaryData.equity, SAMPLE_CURRENCY)} sur 64 séances, devant un indice de référence fictif.`;
+    }
+    const points = this.liveHistory()?.points ?? [];
+    if (points.length < 2) return 'Courbe absente : créez un portefeuille ou placez des ordres simulés.';
+    const cur = this.liveAnalytics()?.currency === 'TND' ? 'TND' : this.liveAnalytics()?.currency ?? 'TND';
+    return `Portefeuille simulé de ${formatMoney(points[0].equity, cur)} à ${formatMoney(points[points.length - 1].equity, cur)}.`;
+  });
+  protected readonly performanceAxis = (v: number) => {
+    const cur = this.sample() ? SAMPLE_CURRENCY : this.liveAnalytics()?.currency === 'TND' ? 'TND' : this.liveAnalytics()?.currency ?? 'TND';
+    return formatMoney(v, cur, { compact: true });
+  };
+  protected readonly sessionLabels = computed<[string, string]>(() => {
+    if (this.sample()) return ['Séance 1', 'Séance 64'];
+    const points = this.liveHistory()?.points ?? [];
+    if (points.length < 2) return ['Début', 'Fin'];
+    return [points[0].at.slice(0, 10), points[points.length - 1].at.slice(0, 10)];
+  });
 
   protected readonly contextualInsights = computed(() => {
     const ctx = this.context();
@@ -434,5 +518,33 @@ export class DashboardPage {
       .listSessions()
       .then((list) => !destroyed && this.sessions.set(list))
       .catch((err) => !destroyed && this.sessionsError.set(describeApiError(err, 'Impossible de charger vos sessions.')));
+
+    void this.loadLiveWorkspace().finally(() => {
+      if (!destroyed) this.liveLoading.set(false);
+    });
+  }
+
+  private async loadLiveWorkspace(): Promise<void> {
+    try {
+      const [{ portfolios }, watchlist] = await Promise.all([this.portfolioApi.list(), this.marketApi.watchlist()]);
+      this.liveWatchlist.set(watchlist);
+      if (!portfolios.length) {
+        this.livePortfolio.set(null);
+        this.liveAnalytics.set(null);
+        this.liveHistory.set(null);
+        return;
+      }
+      const remembered = rememberedPortfolio();
+      const selected = portfolios.find((p) => p.id === remembered) ?? portfolios[0];
+      const [analytics, history] = await Promise.all([
+        this.portfolioApi.analytics(selected.id),
+        this.portfolioApi.history(selected.id),
+      ]);
+      this.livePortfolio.set(selected);
+      this.liveAnalytics.set(analytics);
+      this.liveHistory.set(history);
+    } catch (err) {
+      this.liveError.set(describeApiError(err, 'Impossible de charger le portefeuille simulé.'));
+    }
   }
 }

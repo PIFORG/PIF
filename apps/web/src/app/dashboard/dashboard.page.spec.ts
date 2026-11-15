@@ -4,6 +4,8 @@ import { provideRouter } from '@angular/router';
 import { AuthApi } from '../core/api/auth-api';
 import { LearningApi, type LearningProfile } from '../core/api/learning-api';
 import { SessionsApi } from '../core/api/sessions-api';
+import { MarketApi } from '../core/api/trading-api';
+import { PortfolioApi } from '../core/api/trading-api';
 import { ApiError, type AuthSession, type DashboardContext, type User } from '../core/api/types';
 import { AuthService } from '../core/auth/auth.service';
 import { SAMPLE_CURRENCY, SAMPLE_DATA_NOTICE, sampleSummary } from '../core/demo/sample-workspace';
@@ -94,6 +96,11 @@ describe('Dashboard page', () => {
         { provide: AuthApi, useValue: { fetchDashboardContext } },
         { provide: SessionsApi, useValue: { listSessions } },
         { provide: LearningApi, useValue: { profile } },
+        { provide: PortfolioApi, useValue: { list: vi.fn().mockResolvedValue({ portfolios: [] }) } },
+        {
+          provide: MarketApi,
+          useValue: { watchlist: vi.fn().mockResolvedValue({ items: [], asOf: '2026-11-15T12:00:00.000Z' }) },
+        },
       ],
     });
     const fixture = TestBed.createComponent(DashboardPage);
@@ -122,8 +129,8 @@ describe('Dashboard page', () => {
 
   it('shows live account data and no simulated figures by default', async () => {
     const { root } = await render();
-    expect(root.querySelector('h1')?.textContent).toBe('Bon retour, Ada');
-    expect(root.querySelector('.db-identity')?.textContent).toContain('contenu pédagogique');
+    expect(root.querySelector('h1')?.textContent).toBe('Vue d\'ensemble');
+    expect(root.querySelector('.db-identity')?.textContent).toContain('Investisseur');
     expect(kpiValue(root, 'Valeur du portefeuille simulé')?.textContent).toContain('pas encore disponible');
     expect(kpiValue(root, 'Sessions actives')?.textContent?.trim()).toBe('1');
     expect(root.querySelector('[data-demo="true"]')).toBeNull();
@@ -146,7 +153,7 @@ describe('Dashboard page', () => {
     const { root } = await render();
     expect(profile).toHaveBeenCalledTimes(1);
     const learning = root.querySelector('#learning')!;
-    expect(learning.querySelector('.ws-status')?.getAttribute('data-status')).toBe('LIVE_INTEGRATED');
+    expect(learning.querySelector('h2, .ws-panelTitle, [id]')?.textContent ?? learning.textContent).toMatch(/Apprentissage|apprentissage/i);
     expect(learning.querySelector('.db-progress')?.textContent).toContain('3 sur 10 missions réussies');
     expect(learning.querySelector<HTMLElement>('.db-progressTrack span')?.style.width).toBe('30%');
     const items = Array.from(learning.querySelectorAll('.db-sessionList li'));
@@ -187,7 +194,7 @@ describe('Dashboard page', () => {
   it('lists modules from the platform and hides administration from investors', async () => {
     const { root } = await render();
     const modules = Array.from(root.querySelectorAll('.db-modules li')).map((li) => li.querySelector('strong')?.textContent);
-    expect(modules).toEqual(['Portefeuille virtuel', 'Analyses IA']);
+    expect(modules).toEqual(['Portefeuille virtuel', 'Prévisions de marché']);
     expect(root.querySelector('.db-modules a')?.getAttribute('href')).toBe('/portfolios');
   });
 

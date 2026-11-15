@@ -485,6 +485,18 @@ export class ActuarialApi {
     return this.api.request(`/actuarial/simulations/${id}`, { method: 'DELETE' });
   }
 
+  economicCapital(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.api.request('/actuarial/capital/calculate', { method: 'POST', body });
+  }
+
+  almDemo(): Promise<Record<string, unknown>> {
+    return this.api.request('/actuarial/alm/demo', { method: 'GET' });
+  }
+
+  alm(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.api.request('/actuarial/alm/calculate', { method: 'POST', body });
+  }
+
   reservingExamples(): Promise<ReservingCatalogue> {
     return this.api.request('/actuarial/reserving/examples', { method: 'GET' });
   }

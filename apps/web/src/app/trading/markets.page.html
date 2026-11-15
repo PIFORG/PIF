@@ -1,139 +1,239 @@
-<div class="page-shell tr-room tr-markets">
-  <mtr-page-heading
-    [eyebrow]="'Données de marché'"
-    [title]="'Marchés'"
-    [status]="'LIVE_INTEGRATED'"
-    [description]="'Cotations de l\'univers d\'instruments fictifs négociés par chaque portefeuille et chaque mission. Les prix sont simulés ; aucun n\'est un prix de marché réel.'"
-  >
-    <button mtrHeadingActions type="button" class="btn btn-secondary" (click)="load()"><svg mtrIcon name="refresh" [size]="16" /> Actualiser</button>
-  </mtr-page-heading>
-
-  @if (market(); as data) {
-    <p mtr-provenance-note [provenance]="data.provenance" [asOf]="data.asOf"></p>
-  }
+<div class="page-shell tr-room tr-markets tr-marketsBoard">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <h1 class="tr-pageTitle">Marchés</h1>
+      <p class="tr-pageLede">Univers fictif · prix simulés · cotation pédagogique</p>
+    </div>
+    <div class="tr-pageTopActions">
+      @if (market(); as snap) {
+        <p class="tr-sourceLine tr-sourceInline" aria-label="Provenance des cotations">
+          <span class="tr-sourceTag">{{ snap.provenance.kind === 'FICTIONAL' ? 'Prix fictifs' : snap.provenance.kind }}</span>
+          <span>{{ snap.provenance.currency }}</span>
+          <span class="tr-sourceSep" aria-hidden="true">·</span>
+          <span>{{ dateTime(snap.asOf) }}</span>
+        </p>
+      }
+      <button type="button" class="btn btn-secondary btn-sm" (click)="load()">
+        <svg mtrIcon name="refresh" [size]="14" /> Actualiser
+      </button>
+    </div>
+  </header>
 
   @if (error()) {
     <p class="form-error-banner" role="alert">{{ error() }}</p>
   }
 
-  <div class="tr-kpis tr-tape">
-    <div mtr-kpi label="Instruments" icon="markets" hint="Actions et fonds, cotés en DT">{{ instrumentCount() }}</div>
-    <div mtr-kpi label="Période de cotation" icon="clock" [hint]="periodHint()">{{ quotePeriod() }}</div>
-    <div
-      mtr-kpi
-      label="Meilleure perf. depuis la clôture"
-      icon="arrow-up"
-      [hint]="best()?.hint"
-      [tone]="best() && best()!.change > 0 ? 'positive' : best() && best()!.change < 0 ? 'negative' : 'default'"
-    >
-      @if (best(); as b) {
-        <span mtr-signed-amount [value]="b.change" kind="pct"></span>
-      } @else {
-        {{ dash }}
-      }
+  <div class="tr-tapeStrip" role="group" aria-label="Synthèse de séance">
+    <div class="tr-tapeCell">
+      <span class="tr-tapeLabel">Instruments</span>
+      <span class="tr-tapeValue num">{{ instrumentCount() }}</span>
     </div>
-    <div
-      mtr-kpi
-      label="Pire perf. depuis la clôture"
-      icon="arrow-down"
-      [hint]="worst()?.hint"
-      [tone]="worst() && worst()!.change < 0 ? 'negative' : worst() && worst()!.change > 0 ? 'positive' : 'default'"
-    >
-      @if (worst(); as w) {
-        <span mtr-signed-amount [value]="w.change" kind="pct"></span>
-      } @else {
-        {{ dash }}
-      }
+    <div class="tr-tapeCell">
+      <span class="tr-tapeLabel">Période</span>
+      <span class="tr-tapeValue" [attr.title]="periodHint()">{{ quotePeriod() }}</span>
+    </div>
+    <div class="tr-tapeCell">
+      <span class="tr-tapeLabel">Meilleure perf.</span>
+      <span class="tr-tapeValue" [attr.title]="best()?.hint">
+        @if (best(); as b) {
+          <span mtr-signed-amount [value]="b.change" kind="pct"></span>
+          <span class="tr-tapeHint">{{ b.hint }}</span>
+        } @else {
+          {{ dash }}
+        }
+      </span>
+    </div>
+    <div class="tr-tapeCell">
+      <span class="tr-tapeLabel">Pire perf.</span>
+      <span class="tr-tapeValue" [attr.title]="worst()?.hint">
+        @if (worst(); as w) {
+          <span mtr-signed-amount [value]="w.change" kind="pct"></span>
+          <span class="tr-tapeHint">{{ w.hint }}</span>
+        } @else {
+          {{ dash }}
+        }
+      </span>
     </div>
   </div>
 
-  <div class="tr-stack tr-marketStack">
-    <div class="tr-watchStrip">
-      <section mtr-panel heading="Liste de suivi" description="Instruments que vous suivez. L'étoile les active ici et sur la salle des marchés.">
+  <div class="tr-marketsLayout">
+    <section class="tr-marketsMain" aria-labelledby="markets-universe-title">
+      <div class="tr-marketsMainHead">
+        <div>
+          <h2 id="markets-universe-title" class="tr-sectionTitle">Univers négociable</h2>
+          <p class="tr-sectionMeta">
+            @if (market(); as snap) {
+              {{ visible().length }} affiché{{ visible().length > 1 ? 's' : '' }} sur {{ snap.instruments.length }}
+            } @else {
+              Chargement des instruments…
+            }
+          </p>
+        </div>
+      </div>
+
+      <div class="tr-search tr-command" role="search">
+        <label class="sr-only" for="markets-search">Rechercher des instruments</label>
+        <input
+          id="markets-search"
+          class="input"
+          type="search"
+          placeholder="Symbole, nom ou secteur"
+          [value]="query()"
+          (input)="query.set(value($event))"
+        />
+        <label class="sr-only" for="markets-class">Classe d'actifs</label>
+        <select id="markets-class" class="select" (change)="setAssetClass($event)">
+          <option value="ALL" [selected]="assetClass() === 'ALL'">Toutes les classes</option>
+          <option value="EQUITY" [selected]="assetClass() === 'EQUITY'">Actions</option>
+          <option value="FUND" [selected]="assetClass() === 'FUND'">Fonds</option>
+        </select>
+        <label class="sr-only" for="markets-sector">Secteur</label>
+        <select id="markets-sector" class="select" (change)="setSector($event)">
+          <option value="ALL" [selected]="sector() === 'ALL'">Tous les secteurs</option>
+          @for (name of sectors(); track name) {
+            <option [value]="name" [selected]="sector() === name">{{ sectorLabel(name) }}</option>
+          }
+        </select>
+      </div>
+
+      @if (!market()) {
+        @if (error()) {
+          <div mtr-empty-state tone="error" heading="Données de marché indisponibles" [description]="error()"></div>
+        } @else {
+          <div mtr-panel-skeleton [rows]="8"></div>
+        }
+      } @else if (visible().length === 0) {
+        <div mtr-empty-state icon="markets" heading="Aucun résultat" description="Essayez une autre recherche ou une autre classe d'actifs."></div>
+      } @else {
+        <mtr-instrument-table
+          [instruments]="visible()"
+          [watched]="watched()"
+          caption="Univers négociable"
+          (toggleWatch)="toggleWatch($event)"
+        />
+      }
+    </section>
+
+    <aside class="tr-marketsRail" aria-label="Suivi, actualités et fondamentaux">
+      <section class="tr-railBlock" aria-labelledby="markets-watch-title">
+        <div class="tr-railHead">
+          <h2 id="markets-watch-title" class="tr-sectionTitle">Liste de suivi</h2>
+          <span class="tr-sectionMeta num">{{ watchlist().length }}</span>
+        </div>
         @if (!market()) {
           <div mtr-panel-skeleton [rows]="2"></div>
         } @else if (watchlist().length === 0) {
-          <div mtr-empty-state icon="markets" heading="Votre liste de suivi est vide" description="Utilisez l'étoile à côté d'un instrument ci-dessous pour le suivre."></div>
+          <p class="tr-railEmpty">Étoilez un instrument dans le tableau pour le suivre ici et en salle des marchés.</p>
         } @else {
-          <mtr-instrument-table [instruments]="watchlist()" [watched]="watched()" caption="Liste de suivi" (toggleWatch)="toggleWatch($event)" />
-        }
-      </section>
-    </div>
-
-    <div class="tr-universe">
-      <section mtr-panel heading="Tous les instruments" [description]="market() ? visible().length + ' affiché' + (visible().length > 1 ? 's' : '') + ' sur ' + market()!.instruments.length : undefined">
-        @if (market(); as snap) {
-          <p class="tr-sourceLine">
-            <span class="tr-sourceTag">{{ snap.provenance.kind === 'FICTIONAL' ? 'Prix fictifs' : snap.provenance.kind }}</span>
-            <span>{{ snap.provenance.providerId }}</span>
-            <span class="tr-sourceSep" aria-hidden="true">·</span>
-            <span>Devise {{ snap.provenance.currency }}</span>
-            <span class="tr-sourceSep" aria-hidden="true">·</span>
-            <span>Cotation {{ dateTime(snap.asOf) }}</span>
-          </p>
-        }
-        <div class="tr-search tr-command">
-          <label class="sr-only" for="markets-search">Rechercher des instruments</label>
-          <input id="markets-search" class="input" type="search" placeholder="Rechercher symbole, nom, secteur" [value]="query()" (input)="query.set(value($event))" />
-          <label class="sr-only" for="markets-class">Classe d'actifs</label>
-          <select id="markets-class" class="select" (change)="setAssetClass($event)">
-            <option value="ALL" [selected]="assetClass() === 'ALL'">Toutes les classes</option>
-            <option value="EQUITY" [selected]="assetClass() === 'EQUITY'">Actions</option>
-            <option value="FUND" [selected]="assetClass() === 'FUND'">Fonds</option>
-          </select>
-          <label class="sr-only" for="markets-sector">Secteur</label>
-          <select id="markets-sector" class="select" (change)="setSector($event)">
-            <option value="ALL" [selected]="sector() === 'ALL'">Tous les secteurs</option>
-            @for (name of sectors(); track name) {
-              <option [value]="name" [selected]="sector() === name">{{ sectorLabel(name) }}</option>
+          <ul class="tr-watchChips">
+            @for (i of watchlist(); track i.symbol) {
+              <li>
+                <a routerLink="/trading" [queryParams]="{ symbol: i.symbol }" class="tr-watchChip">
+                  <strong class="mono">{{ i.symbol }}</strong>
+                  <span class="num">{{ price(i.quote?.mid) }}</span>
+                  @if (i.changePct !== null) {
+                    <span mtr-signed-amount [value]="i.changePct / 100" kind="pct"></span>
+                  }
+                </a>
+                <button
+                  type="button"
+                  class="tr-watchChipRemove"
+                  [attr.aria-label]="'Retirer ' + i.symbol + ' de la liste de suivi'"
+                  (click)="toggleWatch(i.symbol)"
+                >
+                  ×
+                </button>
+              </li>
             }
-          </select>
-        </div>
-        @if (!market()) {
-          @if (error()) {
-            <div mtr-empty-state tone="error" heading="Données de marché indisponibles" [description]="error()"></div>
-          } @else {
-            <div mtr-panel-skeleton [rows]="6"></div>
-          }
-        } @else if (visible().length === 0) {
-          <div mtr-empty-state icon="markets" heading="Aucun résultat" description="Essayez une autre recherche ou une autre classe d'actifs."></div>
-        } @else {
-          <mtr-instrument-table [instruments]="visible()" [watched]="watched()" caption="Tous les instruments" (toggleWatch)="toggleWatch($event)" />
+          </ul>
         }
       </section>
-    </div>
 
-    @if (status(); as s) {
-      <div class="tr-reference">
-        <section mtr-panel heading="Comment ces prix sont produits" [description]="s.provenance.description">
-          <dl class="tr-metricGrid">
+      @if (news(); as feed) {
+        <section class="tr-railBlock" aria-labelledby="markets-news-title">
+          <div class="tr-railHead">
+            <h2 id="markets-news-title" class="tr-sectionTitle">Actualités</h2>
+            <span class="tr-sectionMeta">Pédagogiques</span>
+          </div>
+          <ul class="tr-newsList">
+            @for (item of feed.items.slice(0, 5); track item.id) {
+              <li>
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.symbol || item.sector }} · {{ item.provenance }}</span>
+              </li>
+            }
+          </ul>
+          @if (feed.limitations[0]; as lim) {
+            <p class="field-hint">{{ lim }}</p>
+          }
+        </section>
+      }
+
+      <section class="tr-railBlock" aria-labelledby="markets-fund-title">
+        <div class="tr-railHead">
+          <h2 id="markets-fund-title" class="tr-sectionTitle">Fondamentaux</h2>
+          <span class="tr-sectionMeta">Synthétiques</span>
+        </div>
+        <div class="tr-segmented" role="group" aria-label="Instrument fondamental">
+          @for (sym of ['CTB', 'TEK', 'OLV', 'SFX']; track sym) {
+            <button type="button" [attr.aria-pressed]="fundamentalsSymbol() === sym" (click)="loadFundamentals(sym)">
+              {{ sym }}
+            </button>
+          }
+        </div>
+        @if (fundamentals(); as f) {
+          <dl class="tr-fundGrid">
+            <div><dt>Société</dt><dd>{{ f.company }}</dd></div>
+            <div><dt>CA</dt><dd class="num">{{ dt(f.statements['revenue']) }}</dd></div>
+            <div><dt>Bénéfice</dt><dd class="num">{{ dt(f.statements['earnings']) }}</dd></div>
             <div>
-              <dt>Source</dt>
-              <dd>{{ s.provenance.providerId }}</dd>
+              <dt>ROE</dt>
+              <dd class="num">
+                {{
+                  f.ratios['returnOnEquity'] !== undefined && f.ratios['returnOnEquity'] !== null
+                    ? (f.ratios['returnOnEquity']! * 100).toFixed(1) + ' %'
+                    : dash
+                }}
+              </dd>
             </div>
             <div>
-              <dt>Nature des données</dt>
-              <dd>{{ s.provenance.kind === 'FICTIONAL' ? 'Fictives (simulées)' : s.provenance.kind }}</dd>
+              <dt>D/E</dt>
+              <dd class="num">
+                {{
+                  f.ratios['debtToEquity'] !== undefined && f.ratios['debtToEquity'] !== null
+                    ? f.ratios['debtToEquity']!.toFixed(2)
+                    : dash
+                }}
+              </dd>
             </div>
             <div>
-              <dt>Début de l'historique</dt>
-              <dd>{{ dateTime(s.dataStart) }}</dd>
-            </div>
-            <div>
-              <dt>Heure serveur</dt>
-              <dd>{{ dateTime(s.serverTime) }}</dd>
-            </div>
-            <div>
-              <dt>Horaires de négociation</dt>
-              <dd>{{ s.tradingHours }}</dd>
-            </div>
-            <div>
-              <dt>Frais</dt>
-              <dd>{{ feeSummary() || dash }}</dd>
+              <dt>P/E</dt>
+              <dd class="num">
+                {{
+                  f.ratios['priceToEarnings'] !== undefined && f.ratios['priceToEarnings'] !== null
+                    ? f.ratios['priceToEarnings']!.toFixed(1)
+                    : dash
+                }}
+              </dd>
             </div>
           </dl>
+          <p class="field-hint">{{ f.provenance.description }}</p>
+        } @else {
+          <p class="tr-railEmpty">Aucun fondamental pour ce symbole.</p>
+        }
+      </section>
+
+      @if (status(); as s) {
+        <section class="tr-railBlock tr-railMuted" aria-labelledby="markets-meta-title">
+          <h2 id="markets-meta-title" class="tr-sectionTitle">Production des prix</h2>
+          <dl class="tr-fundGrid">
+            <div><dt>Source</dt><dd>{{ s.provenance.providerId }}</dd></div>
+            <div><dt>Nature</dt><dd>{{ s.provenance.kind === 'FICTIONAL' ? 'Fictives' : s.provenance.kind }}</dd></div>
+            <div><dt>Horaires</dt><dd>{{ s.tradingHours }}</dd></div>
+            <div><dt>Frais</dt><dd>{{ feeSummary() || dash }}</dd></div>
+          </dl>
         </section>
-      </div>
-    }
+      }
+    </aside>
   </div>
 </div>

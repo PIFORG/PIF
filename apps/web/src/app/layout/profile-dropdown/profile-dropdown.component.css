@@ -20,15 +20,15 @@
 }
 
 .avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 6px;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
   display: grid;
   place-items: center;
-  background: var(--color-accent-muted);
-  color: var(--color-accent-hover);
-  font-size: 0.75rem;
-  font-weight: 700;
+  background: color-mix(in srgb, var(--mtr-brand-strong, var(--color-accent)) 18%, transparent);
+  color: var(--mtr-brand-text, var(--color-accent-hover));
+  font-size: 0.6875rem;
+  font-weight: 650;
 }
 
 .meta {

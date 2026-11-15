@@ -1,0 +1,205 @@
+<div class="page-shell ai-lab ai-terminal">
+  <header class="ai-termHead">
+    <div>
+      <h1>Prévisions de marché</h1>
+      <p class="ai-termContext">Prévisions sur données synthétiques · performances · limites clairement affichées</p>
+    </div>
+    <p class="ai-synthChip" title="Séries synthétiques reproductibles — pas des marchés réels">Données synthétiques</p>
+  </header>
+
+  @if (error()) {
+    <div class="form-error-banner" role="alert">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div mtr-panel-skeleton [rows]="8"></div>
+  } @else if (overview(); as ov) {
+    <div class="ai-workbench">
+      <aside class="ai-rail" aria-label="Contrôle du modèle">
+        <h2>Modèle</h2>
+        <label class="ai-field">
+          <span>Choix</span>
+          <select class="select" [value]="selectedModelId()" (change)="onModelChange($event)">
+            @for (m of ov.models; track m.id) {
+              <option [value]="m.id" [selected]="m.id === selectedModelId()">{{ m.title }}</option>
+            }
+          </select>
+        </label>
+        @if (model(); as m) {
+          <dl class="ai-railMeta">
+            <div><dt>Méthode</dt><dd>{{ m.method }}</dd></div>
+            <div><dt>Découpage</dt><dd class="num">{{ m.split.train }} / {{ m.split.validation }} / {{ m.split.test }}</dd></div>
+            <div><dt>Protocole</dt><dd>{{ m.split.protocol }}</dd></div>
+          </dl>
+          <p class="ai-railNote">{{ m.dataProvenance }}</p>
+        }
+        <h2>État</h2>
+        <ul class="ai-statusList">
+          <li>
+            <span>Technique</span>
+            <strong class="ai-ok">Exécutable</strong>
+          </li>
+          <li>
+            <span>Qualité prédictive</span>
+            <strong [attr.data-quality]="predictiveQuality()">{{ predictiveQualityLabel() }}</strong>
+          </li>
+          <li>
+            <span>Décision agent</span>
+            <strong [attr.data-quality]="decisionQuality()">{{ decisionQualityLabel() }}</strong>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="ai-main" aria-labelledby="ai-metrics-title">
+        <div class="ai-sectionHead">
+          <h2 id="ai-metrics-title">Évaluation hors échantillon</h2>
+          @if (model(); as m) {
+            <span class="ai-muted">Réf. moyenne test R² = {{ formatNumber(m.metrics.baselineMeanTest.r2, 3) }}</span>
+          }
+        </div>
+        @if (model(); as m) {
+          <table class="data-table ai-metricsTable">
+            <thead>
+              <tr>
+                <th scope="col">Jeu</th>
+                <th class="num" scope="col">n</th>
+                <th class="num" scope="col">RMSE</th>
+                <th class="num" scope="col">MAE</th>
+                <th class="num" scope="col">R²</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Entraînement</th>
+                <td class="num">{{ m.metrics.train.n }}</td>
+                <td class="num">{{ formatNumber(m.metrics.train.rmse, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.train.mae, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.train.r2, 3) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Validation</th>
+                <td class="num">{{ m.metrics.validation.n }}</td>
+                <td class="num">{{ formatNumber(m.metrics.validation.rmse, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.validation.mae, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.validation.r2, 3) }}</td>
+              </tr>
+              <tr data-emphasis="true">
+                <th scope="row">Test</th>
+                <td class="num">{{ m.metrics.test.n }}</td>
+                <td class="num">{{ formatNumber(m.metrics.test.rmse, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.test.mae, 5) }}</td>
+                <td class="num" [attr.data-dir]="m.metrics.test.r2 >= 0 ? 'up' : 'down'">{{ formatNumber(m.metrics.test.r2, 3) }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Réf. moyenne</th>
+                <td class="num">{{ m.metrics.baselineMeanTest.n }}</td>
+                <td class="num">{{ formatNumber(m.metrics.baselineMeanTest.rmse, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.baselineMeanTest.mae, 5) }}</td>
+                <td class="num">{{ formatNumber(m.metrics.baselineMeanTest.r2, 3) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="ai-interpret" role="note">{{ r2Interpretation() }}</p>
+
+          <h3 class="ai-sub">Importance globale (permutation)</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Variable</th><th class="num">Δ RMSE</th><th aria-hidden="true"></th></tr>
+            </thead>
+            <tbody>
+              @for (f of importanceBars(); track f.feature) {
+                <tr>
+                  <td>{{ f.feature }}</td>
+                  <td class="num">{{ formatNumber(f.importanceMean, 5) }}</td>
+                  <td class="ai-barCell" aria-hidden="true">
+                    <span class="ai-bar" [style.width.%]="f.widthPct"></span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <ul class="ai-limits">
+            @for (l of m.limitations; track l) {
+              <li>{{ l }}</li>
+            }
+          </ul>
+        }
+      </section>
+
+      <aside class="ai-decision" aria-label="Décision et explications">
+        @if (insights(); as data) {
+          @if (data.agent; as agent) {
+            <section class="ai-agentBlock">
+              <h2>Agent à règles</h2>
+              <p class="ai-agentAction">Action simulée · <strong>{{ agent.action }}</strong></p>
+              <p>{{ agent.rationale }}</p>
+              <p class="ai-muted">
+                Confiance {{ formatNumber(agent.confidence, 2) }} · humain dans la boucle
+                · {{ decisionQualityLabel() }}
+              </p>
+            </section>
+          }
+
+          <section>
+            <h2>Insights</h2>
+            <ul class="ai-insights">
+              @for (item of data.insights; track item.id) {
+                <li [attr.data-active]="selectedInsight() === item.id ? 'true' : null">
+                  <div>
+                    <strong>{{ item.title }}</strong>
+                    <p>{{ item.detail }}</p>
+                    <span class="ai-kind">{{ item.kind }} · conf. {{ formatNumber(item.confidence, 2) }}</span>
+                  </div>
+                  @if (item.hasExplanation) {
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="showExplanation(item.id)">Expliquer</button>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section>
+            <div class="ai-sectionHead">
+              <h2>XAI locale</h2>
+              <a routerLink="/explainability" class="btn btn-ghost btn-sm">Vue dédiée</a>
+            </div>
+            @if (explanation(); as ex) {
+              <p>{{ ex.summary }}</p>
+              <p class="ai-muted">Identité Shapley : {{ ex.identityCheck ? 'respectée' : 'écart détecté' }}.</p>
+              <table class="data-table">
+                <thead>
+                  <tr><th>Variable</th><th class="num">Valeur</th><th class="num">φ</th></tr>
+                </thead>
+                <tbody>
+                  @for (c of ex.contributions; track c.feature) {
+                    <tr>
+                      <td>{{ c.feature }}</td>
+                      <td class="num">{{ formatNumber(c.value, 4) }}</td>
+                      <td class="num" [attr.data-dir]="c.contribution >= 0 ? 'up' : 'down'">{{ formatNumber(c.contribution, 5) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="ai-muted">Sélectionnez un insight pour afficher les contributions.</p>
+            }
+          </section>
+
+          <section>
+            <h2>Sentiment lexique</h2>
+            <ul class="ai-sentiment">
+              @for (s of data.sentimentFeed; track s.headline) {
+                <li>
+                  <span class="ai-sentLabel" [attr.data-tone]="s.label === 'POSITIF' ? 'pos' : s.label === 'NEGATIF' ? 'neg' : 'muted'">{{ s.label }}</span>
+                  <span>{{ s.headline }}</span>
+                  <span class="num">{{ formatNumber(s.score, 2) }}</span>
+                </li>
+              }
+            </ul>
+            <p class="ai-muted">{{ data.sentimentFeed[0]?.note }}</p>
+          </section>
+        }
+      </aside>
+    </div>
+  }
+</div>

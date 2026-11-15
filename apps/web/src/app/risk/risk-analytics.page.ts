@@ -17,7 +17,6 @@ import { formatNumber } from '../core/format/finance';
 import { sectorLabel } from '../trading/trading-format';
 import { FR } from '../core/i18n/fr';
 import { AllocationBarComponent, LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { dateTime, describeTradingError, dt, pct } from '../trading/trading-format';
 import { MetricValueComponent, PortfolioPickerComponent, ProvenanceNoteComponent, SignedAmountComponent } from '../trading/trading-parts.components';
@@ -52,8 +51,6 @@ export class RiskMetricRowComponent {
   imports: [
     FormsModule,
     RouterLink,
-    PageHeadingComponent,
-    HeadingActionsSlot,
     ...WORKSPACE_PRIMITIVES,
     LineChartComponent,
     AllocationBarComponent,

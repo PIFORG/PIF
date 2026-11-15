@@ -1,17 +1,28 @@
 <div class="page-shell lr-playerShell">
   @if (session(); as s) {
     @if (draft(); as d) {
-      <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)">
-        <a routerLink="/learn">Parcours d'apprentissage</a> / <a [routerLink]="'/learn/missions/' + s.missionSlug">{{ s.mission.title }}</a>
+      <nav aria-label="Breadcrumb" class="lr-crumb">
+        <a routerLink="/learn">Parcours d'apprentissage</a> /
+        <a [routerLink]="'/learn/missions/' + s.missionSlug">{{ s.mission.title }}</a>
       </nav>
-      <mtr-page-heading
-        [eyebrow]="s.kind === 'REPLAY' ? 'Rejeu · entraînement uniquement' : levelLabel[s.mission.level]"
-        [title]="s.mission.title"
-        [description]="s.kind === 'REPLAY' ? 'Même trajectoire de marché que votre tentative initiale. Les rejeux ne modifient jamais votre profil de compétences.' : s.mission.summary"
-      />
+
+      <header class="lr-sessionHead">
+        <div class="lr-sessionHeadText">
+          <p class="eyebrow">
+            {{ s.kind === 'REPLAY' ? 'Rejeu · entraînement uniquement' : levelLabel[s.mission.level] }}
+          </p>
+          <h1 class="lr-sessionTitle">{{ s.mission.title }}</h1>
+          <p class="lr-sessionLede">
+            {{
+              s.kind === 'REPLAY'
+                ? 'Même trajectoire de marché que votre tentative initiale. Les rejeux ne modifient jamais votre profil de compétences.'
+                : s.mission.summary
+            }}
+          </p>
+        </div>
+      </header>
 
       <div class="lr-toolbar lr-cockpitBar" role="region" aria-label="Commandes de la mission">
-        <span class="lr-cockpitGlow" aria-hidden="true"></span>
         <div class="lr-clock">
           <strong class="num">{{ stepWord() }} {{ s.state.step }} sur {{ s.state.steps }}</strong>
           <div class="lr-clockTrack" aria-hidden="true"><span [style.width.%]="(s.state.step / s.state.steps) * 100"></span></div>

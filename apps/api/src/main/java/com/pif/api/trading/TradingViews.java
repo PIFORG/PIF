@@ -12,6 +12,7 @@ import com.pif.api.trading.Engine.Evaluation;
 import com.pif.api.trading.TradingRepository.ExecutionRow;
 import com.pif.api.trading.TradingRepository.InstrumentRow;
 import com.pif.api.trading.TradingRepository.OrderRow;
+import com.pif.api.web.Messages;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -128,8 +129,9 @@ final class TradingViews {
     Map<String, Object> rejection = null;
     if (evaluation.rejection() != null) {
       rejection = new LinkedHashMap<>();
-      rejection.put("code", evaluation.rejection().code());
-      rejection.put("message", evaluation.rejection().message());
+      String code = evaluation.rejection().code();
+      rejection.put("code", code);
+      rejection.put("message", frRejection(code, evaluation.rejection().message()));
     }
     Map<String, Object> estimate = new LinkedHashMap<>();
     estimate.put("notional", dt(evaluation.estimate().notional()));
@@ -145,7 +147,30 @@ final class TradingViews {
     m.put("availableCash", dt(evaluation.availableCash()));
     m.put("held", evaluation.held());
     m.put("equity", dt(evaluation.equity()));
-    m.put("warnings", evaluation.warnings());
+    m.put("warnings", evaluation.warnings().stream().map(TradingViews::frWarning).toList());
     return m;
+  }
+
+  /** API française ; le moteur garde l'anglais pour la parité golden TypeScript. */
+  private static String frRejection(String code, String fallback) {
+    String key = "trading.reject." + code;
+    String localized = Messages.get(key);
+    return key.equals(localized) ? fallback : localized;
+  }
+
+  private static String frWarning(String english) {
+    if (english.startsWith("Only ") && english.contains("units are offered")) {
+      return Messages.get("trading.warn.partial_depth");
+    }
+    if (english.startsWith("This limit price is marketable")) {
+      return Messages.get("trading.warn.limit_marketable");
+    }
+    if (english.startsWith("Only ") && english.contains("units can fill now")) {
+      return Messages.get("trading.warn.partial_limit_fill");
+    }
+    if (english.startsWith("Open sell orders already cover")) {
+      return Messages.get("trading.warn.open_sells");
+    }
+    return english;
   }
 }

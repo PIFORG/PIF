@@ -132,6 +132,8 @@ describe('StoryPlayer', () => {
       await settle(fixture);
       buttonNamed(root, 'Lecture').click();
       await settle(fixture);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await settle(fixture);
       expect(synth.speak).toHaveBeenCalled();
       const last = spoken.at(-1);
       expect(last?.lang).toBe('fr-FR');

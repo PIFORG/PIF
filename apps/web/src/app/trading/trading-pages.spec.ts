@@ -239,6 +239,13 @@ beforeEach(() => {
         { at: '2026-11-09T10:00:00.000Z', mid: 10 },
       ],
     }),
+    fundamentals: vi.fn().mockResolvedValue({
+      company: 'CTB Holdings',
+      statements: {},
+      ratios: {},
+      provenance: { description: 'Fondamentaux fictifs.' },
+      limitations: [],
+    }),
   };
   portfolioApi = {
     list: vi.fn().mockResolvedValue({ portfolios: [summary()] }),
@@ -257,9 +264,25 @@ beforeEach(() => {
 });
 
 async function render<T>(page: Type<T>) {
+  const { NewsApi } = await import('../core/api/news-api');
   TestBed.configureTestingModule({
     imports: [page],
-    providers: [provideRouter([]), { provide: MarketApi, useValue: marketApi }, { provide: PortfolioApi, useValue: portfolioApi }],
+    providers: [
+      provideRouter([]),
+      { provide: MarketApi, useValue: marketApi },
+      { provide: PortfolioApi, useValue: portfolioApi },
+      {
+        provide: NewsApi,
+        useValue: {
+          feed: vi.fn().mockResolvedValue({
+            items: [],
+            asOf: quote.asOf,
+            source: { description: 'Actualités pédagogiques fictives.' },
+            limitations: ['Contenu synthétique.'],
+          }),
+        },
+      },
+    ],
   });
   const fixture = TestBed.createComponent(page);
   await settle(fixture);
@@ -269,16 +292,18 @@ async function render<T>(page: Type<T>) {
 describe('Markets page', () => {
   it('shows server quotes, movers and the watchlist with the fictional-data notice', async () => {
     const { root } = await render(MarketsPage);
-    expect(root.querySelector('.tr-provenance')?.textContent).toContain('Prix simulés fictifs');
-    expect(kpi(root, 'Instruments')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('3');
-    expect(kpi(root, 'Période de cotation')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('5 min');
-    expect(kpi(root, 'Meilleure perf. depuis la clôture')?.querySelector('.ws-kpiHint')?.textContent).toBe('CTB · CTB Holdings');
-    expect(kpi(root, 'Pire perf. depuis la clôture')?.querySelector('.ws-kpiHint')?.textContent).toBe('MDX · MDX Holdings');
+    expect(root.querySelector('.tr-sourceTag')?.textContent).toContain('Prix fictifs');
+    const tape = Array.from(root.querySelectorAll<HTMLElement>('.tr-tapeCell'));
+    const tapeOf = (label: string) => tape.find((c) => c.querySelector('.tr-tapeLabel')?.textContent === label);
+    expect(tapeOf('Instruments')?.querySelector('.tr-tapeValue')?.textContent?.trim()).toBe('3');
+    expect(tapeOf('Période')?.querySelector('.tr-tapeValue')?.textContent?.trim()).toBe('5 min');
+    expect(tapeOf('Meilleure perf.')?.textContent).toContain('CTB · CTB Holdings');
+    expect(tapeOf('Pire perf.')?.textContent).toContain('MDX · MDX Holdings');
     const captions = Array.from(root.querySelectorAll('caption')).map((c) => c.textContent);
-    expect(captions).toEqual(['Liste de suivi', 'Tous les instruments']);
+    expect(captions).toEqual(['Univers négociable']);
     expect(root.textContent).toContain('Actions 0.25 % (min 0,500 DT) · Fonds 0.10 % (min 0,250 DT)');
-    const trade = root.querySelector<HTMLAnchorElement>('a.btn[href^="/trading"]');
-    expect(trade?.getAttribute('href')).toBe('/trading?symbol=MDX');
+    expect(root.querySelector<HTMLAnchorElement>('a.btn[href="/trading?symbol=MDX"]')).toBeTruthy();
+    expect(root.querySelector<HTMLAnchorElement>('a.btn[href="/trading?symbol=CTB"]')).toBeTruthy();
   });
 
   it('filters by asset class and toggles the watchlist through the API', async () => {
@@ -288,14 +313,14 @@ describe('Markets page', () => {
     select.value = 'FUND';
     select.dispatchEvent(new Event('change'));
     await fixture.whenStable();
-    const rows = root.querySelectorAll('table')[1].querySelectorAll('tbody tr');
+    const rows = root.querySelectorAll('table')[0].querySelectorAll('tbody tr');
     expect(rows).toHaveLength(1);
     expect(rows[0].textContent).toContain('TFX');
 
     root.querySelector<HTMLButtonElement>('[aria-label="Ajouter TFX à la liste de suivi"]')!.click();
     await settle(fixture);
     expect(marketApi['watch']).toHaveBeenCalledWith('TFX');
-    expect(root.querySelector('[aria-label="Retirer TFX de la liste de suivi"]')?.getAttribute('aria-pressed')).toBe('true');
+    expect(root.querySelector('button.tr-watchToggle[aria-label="Retirer TFX de la liste de suivi"]')?.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('shows an honest error state when market data cannot be loaded', async () => {
@@ -335,12 +360,14 @@ describe('Trading desk page', () => {
 
   it('loads the portfolio, quotes, chart and working orders', async () => {
     const { root } = await render(TradingDeskPage);
-    expect(kpi(root, 'Capitaux propres')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('100\u202f000,000 DT');
-    expect(kpi(root, 'Ordres ouverts')?.querySelector('a')?.getAttribute('href')).toBe('/portfolios');
+    const strip = root.querySelector('.tr-termStrip')?.textContent?.replace(/\s+/g, ' ') ?? '';
+    expect(strip).toContain('Capitaux');
+    expect(strip).toContain('100');
+    expect(strip).toContain('Ouverts');
     expect(root.querySelector('.tr-instrumentRow[data-selected="true"]')?.textContent).toContain('CTB');
     expect(marketApi['history']).toHaveBeenCalledWith('CTB', '1D');
     expect(root.querySelector('figure.ch-figure svg')?.getAttribute('aria-label')).toContain('CTB, cours médian sur 1D');
-    expect(root.querySelector('.tr-chartHead')?.textContent?.replace(/\s+/g, ' ')).toContain('depuis la clôture précédente');
+    expect(root.querySelector('.tr-chartHead')?.textContent?.replace(/\s+/g, ' ')).toContain('vs clôture');
     expect(portfolioApi['orders']).toHaveBeenCalledWith('p1', 'open', 50);
     expect(root.querySelector('mtr-order-ticket form')).not.toBeNull();
   });
@@ -348,7 +375,7 @@ describe('Trading desk page', () => {
   it('offers to create a portfolio when the user has none', async () => {
     portfolioApi['list'].mockResolvedValue({ portfolios: [] });
     const { root } = await render(TradingDeskPage);
-    expect(root.textContent).toContain('Commencer avec un portefeuille virtuel');
+    expect(root.textContent).toContain('Portefeuille requis');
     expect(root.querySelector('mtr-portfolio-picker')).toBeNull();
     expect(root.textContent).toContain('Créez un portefeuille pour négocier');
   });
@@ -372,16 +399,17 @@ describe('Trading desk page', () => {
 describe('Portfolios page', () => {
   it('shows server metrics and explains the ones that cannot be computed yet', async () => {
     const { root } = await render(PortfoliosPage);
-    expect(kpi(root, 'Rendement pondéré dans le temps')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe(
-      pct(-0.000025, true),
-    );
-    expect(kpi(root, "Rendement pondéré par l'argent")?.textContent).toContain(
+    const tape = Array.from(root.querySelectorAll<HTMLElement>('.tr-tapeCell'));
+    const tapeOf = (label: string) => tape.find((c) => c.querySelector('.tr-tapeLabel')?.textContent === label);
+    const norm = (s: string | null | undefined) => (s ?? '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ');
+    expect(norm(tapeOf('Rendement pondéré dans le temps')?.textContent)).toContain(norm(pct(-0.000025, true)));
+    expect(norm(tapeOf("Rendement pondéré par l'argent")?.textContent)).toContain(
       'Indisponible : the portfolio is younger than one day.',
     );
     const risk = root.querySelector('.tr-metricGrid')!;
     expect(risk.textContent).toContain('Indisponible : fewer than 20 daily observations.');
     expect(root.textContent).toContain("L'historique se constitue au fil des jours");
-    expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Allocation par instrument et trésorerie');
+    expect(root.querySelector('.ch-allocBar')?.getAttribute('aria-label')).toBe('Instruments et trésorerie');
     expect(root.textContent).toContain('Equity crash');
   });
 

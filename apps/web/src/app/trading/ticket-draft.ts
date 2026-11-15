@@ -45,13 +45,21 @@ export function ticketErrors(draft: TicketDraft, lotSize = 1): TicketErrors {
     const error = priceError(draft.stopPrice, 'cours stop');
     if (error) errors.stopPrice = error;
   }
+  if (draft.type === 'TAKE_PROFIT') {
+    if (draft.side === 'BUY') {
+      errors.type =
+        'Les prises de bénéfices sont des ventes de protection. Choisissez Vendre, ou un ordre à cours limité pour acheter.';
+    }
+    const error = priceError(draft.stopPrice, 'cours de prise de bénéfices');
+    if (error) errors.stopPrice = error;
+  }
   return errors;
 }
 
 export function toOrderTerms(draft: TicketDraft): OrderTerms {
   const terms: OrderTerms = { symbol: draft.symbol, side: draft.side, type: draft.type, quantity: Number(draft.quantity.trim()) };
   if (draft.type === 'LIMIT') terms.limitPrice = Number(draft.limitPrice.trim());
-  if (draft.type === 'STOP') terms.stopPrice = Number(draft.stopPrice.trim());
+  if (draft.type === 'STOP' || draft.type === 'TAKE_PROFIT') terms.stopPrice = Number(draft.stopPrice.trim());
   return terms;
 }
 

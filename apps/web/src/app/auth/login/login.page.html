@@ -1,12 +1,12 @@
 @if (status() === 'authenticated' && !mfaToken()) {
-  <mtr-auth-layout title="Se connecter" lead="Vous êtes déjà connecté. Redirection…" />
+  <mtr-auth-layout title="Connexion" lead="Session active — redirection en cours…" />
 } @else {
   <mtr-auth-layout
-    [title]="mfaToken() ? 'Vérification en deux étapes' : 'Se connecter'"
+    [title]="mfaToken() ? 'Vérification' : 'Connexion'"
     [lead]="
       mfaToken()
-        ? 'Saisissez le code de votre application d\'authentification ou un code de récupération.'
-        : 'Bon retour. Connectez-vous à votre espace de marché simulé.'
+        ? 'Saisissez le code de votre application ou un code de récupération.'
+        : 'Accédez à votre espace Market Trading Room.'
     "
     [showFooter]="true"
   >
@@ -14,7 +14,7 @@
     <mtr-form-success [message]="info()" />
 
     @if (unverifiedEmail(); as unverified) {
-      <p>
+      <p class="auth-inline-link">
         <a [href]="resendHref(unverified)">Renvoyer le courriel de vérification</a>
       </p>
     }
@@ -29,6 +29,9 @@
             class="input"
             type="email"
             autocomplete="email"
+            inputmode="email"
+            autocapitalize="none"
+            spellcheck="false"
             [attr.aria-invalid]="loginErrors().email ? true : null"
             [attr.aria-describedby]="loginErrors().email ? 'email-error' : null"
             [value]="email()"
@@ -39,7 +42,10 @@
           }
         </div>
         <div class="field">
-          <label for="password">Mot de passe</label>
+          <div class="field-label-row">
+            <label for="password">Mot de passe</label>
+            <a routerLink="/forgot-password" class="field-aux-link">Oublié ?</a>
+          </div>
           <div class="password-wrap">
             <input
               #passwordInput
@@ -80,6 +86,7 @@
             name="code"
             class="input"
             autocomplete="one-time-code"
+            inputmode="numeric"
             [attr.aria-invalid]="codeError() ? true : null"
             [attr.aria-describedby]="codeError() ? 'code-hint code-error' : 'code-hint'"
             [value]="code()"
@@ -98,10 +105,9 @@
 
     <ng-container ngProjectAs="[authFooter]">
       @if (mfaToken()) {
-        <button type="button" class="btn btn-ghost" (click)="backToPassword()">Retour à la connexion par mot de passe</button>
+        <button type="button" class="btn btn-ghost" (click)="backToPassword()">Retour à la connexion</button>
       } @else {
-        <span>Pas encore de compte ? <a routerLink="/register">S'inscrire</a></span>
-        <span><a routerLink="/forgot-password">Mot de passe oublié ?</a></span>
+        <span>Pas encore de compte ? <a routerLink="/register">Créer un compte</a></span>
       }
     </ng-container>
   </mtr-auth-layout>

@@ -41,8 +41,8 @@ describe('ModulePreviewPage', () => {
     const fixture = TestBed.createComponent(ModulePreviewPage);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelector('h1')?.textContent).toBe('Tests de résistance bancaires');
-    expect(root.querySelector('.eyebrow')?.textContent).toBe('Recherche et IA');
+    expect(root.querySelector('h1')?.textContent).toBe('Simuler une crise bancaire');
+    expect(root.querySelector('.eyebrow')?.textContent).toBe('Analyses');
     expect(root.querySelector('a.btn-secondary')?.getAttribute('href')).toBe('/dashboard');
   });
   it('has a catalog entry for every preview route', () => {

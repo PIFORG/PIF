@@ -31,9 +31,9 @@ public final class FictionalUniverse {
     add(m, new FictionalInstrument("ATL", "Atlas Utilities", "Utilities", 14.6, 0.0002, 0.008, 0.35, 25, 1000));
     add(m, new FictionalInstrument("GOV", "Treasury Bond Fund", "Fixed income", 100, 0.0001, 0.002, 0.05, 10, 2000));
     // Additional asset-class proxies (seeded only after enum migration on PIF_test / approved PIF).
-    add(m, new FictionalInstrument("TNDB", "Tunisia Notional Bond 10Y", "Fixed income", 98.5, 0.00005, 0.003, 0.08, 12, 1500));
-    add(m, new FictionalInstrument("OILX", "Fictional Crude Index", "Energy", 72.4, 0.0001, 0.022, 0.45, 40, 400));
-    add(m, new FictionalInstrument("EURT", "EUR/TND Synthetic", "Currencies", 3.35, 0.00002, 0.006, 0.2, 8, 5000));
+    add(m, new FictionalInstrument("TNDB", "Obligation notionnelle Tunisie 10Y", "Fixed income", 98.5, 0.00005, 0.003, 0.08, 12, 1500));
+    add(m, new FictionalInstrument("OILX", "Indice pétrole fictif", "Energy", 72.4, 0.0001, 0.022, 0.45, 40, 400));
+    add(m, new FictionalInstrument("EURT", "EUR/TND synthétique", "Currencies", 3.35, 0.00002, 0.006, 0.2, 8, 5000));
     INSTRUMENTS = java.util.Collections.unmodifiableMap(m);
   }
 

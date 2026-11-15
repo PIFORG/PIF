@@ -1,0 +1,102 @@
+<div class="page-shell ch-arena">
+  <header class="ch-top">
+    <div>
+      <p class="eyebrow">Apprentissage</p>
+      <h1 class="ch-title">Défis</h1>
+      <p class="ch-lede">Parcours compétitif : rejoindre, simuler un résultat, consulter le classement. Capital virtuel initial équitable.</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="form-error-banner" role="alert">{{ error() }}</div>
+  }
+  @if (note()) {
+    <p class="field-hint" role="status">{{ note() }}</p>
+  }
+
+  <div class="ch-board">
+    <section mtr-panel panelId="list" heading="Défis ouverts" description="Choisissez un défi pour lire les règles et participer.">
+      <ul class="ch-list">
+        @for (c of list(); track c.id) {
+          <li class="ch-listItem" [attr.data-selected]="selected()?.id === c.id ? 'true' : null">
+            <button type="button" class="ch-listBtn" (click)="open(c.id)">
+              <span class="ch-listMain">
+                <strong>{{ c.title }}</strong>
+                <span>{{ formatMoney(c.startingCapital, 'TND') }} de capital initial</span>
+              </span>
+              <span class="ch-listAction">Ouvrir</span>
+            </button>
+          </li>
+        }
+      </ul>
+      @if (isAdmin()) {
+        <form class="ch-adminCreate" (submit)="$event.preventDefault(); create()">
+          <label class="field-label" for="ch-title">Nouveau défi (ADMIN)</label>
+          <div class="ch-adminRow">
+            <input id="ch-title" class="input" [value]="title()" (input)="title.set($any($event.target).value)" />
+            <button type="submit" class="btn btn-primary btn-sm">Créer</button>
+          </div>
+        </form>
+      }
+    </section>
+
+    <section mtr-panel panelId="detail" heading="Parcours du défi" description="Règles → participation → soumission → classement.">
+      @if (selected(); as d) {
+        <div class="ch-steps" aria-label="Étapes du défi">
+          <span>1. Lire</span>
+          <span>2. Rejoindre</span>
+          <span>3. Soumettre</span>
+          <span>4. Classement</span>
+        </div>
+
+        <div class="ch-brief">
+          <p class="ch-briefBody">{{ d.description }}</p>
+          <p class="ch-briefMeta">Participants : {{ d.participants }}</p>
+        </div>
+
+        <div class="ch-actions">
+          <button type="button" class="btn btn-primary" (click)="join()">Rejoindre</button>
+          <div class="ch-submit">
+            <label class="field-label" for="eq">Fonds propres finaux (DT)</label>
+            <div class="ch-submitRow">
+              <input id="eq" class="input num" [value]="equity()" (input)="equity.set($any($event.target).value)" />
+              <button type="button" class="btn btn-secondary" (click)="submit()">Soumettre le résultat</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ch-ranking">
+          <h3 class="ch-rankingTitle">Classement</h3>
+          @if (d.ranking.length === 0) {
+            <div mtr-empty-state heading="Aucun score" description="Rejoignez puis soumettez un résultat simulé."></div>
+          } @else {
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Participant</th>
+                    <th scope="col" class="num">Score</th>
+                    <th scope="col" class="num">Fonds propres</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of d.ranking; track r.displayName; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ r.displayName }}</td>
+                      <td class="num">{{ formatNumber(r.scorePct, 2) }} %</td>
+                      <td class="num">{{ formatMoney(r.finalEquity, 'TND') }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      } @else {
+        <div mtr-empty-state heading="Aucun défi sélectionné" description="Ouvrez un défi dans la liste pour voir les règles et le classement."></div>
+      }
+    </section>
+  </div>
+</div>

@@ -25,6 +25,11 @@ public final class ExecutionRules {
     return quote.bid() <= stopPrice;
   }
 
+  /** A sell take-profit triggers once the bid rises to or above the take-profit price, then sells at the bid. */
+  public static boolean sellTakeProfitTriggered(double takeProfitPrice, Quote quote) {
+    return quote.bid() >= takeProfitPrice;
+  }
+
   /** Units still available at the best price after earlier fills in the same period. */
   public static double remainingDepth(Quote quote, double alreadyUsed) {
     return quote.depth() - alreadyUsed;

@@ -1,198 +1,188 @@
-.shell {
+/* Layout shell styles. Projected page content is styled via .mtr-auth-shell
+   descendants so encapsulation does not block form/button rules. */
+
+.mtr-auth-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  background: var(--mtr-canvas);
-}
-
-/* ---------- Brand pane ---------- */
-
-.brandPane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-7);
-  padding: clamp(2rem, 4vw, 3.5rem);
-  border-right: 1px solid var(--mtr-border);
-  overflow: hidden;
+  grid-template-rows: auto 1fr auto;
   background:
-    radial-gradient(640px 360px at 100% 0%, color-mix(in srgb, var(--mtr-brand) 20%, transparent), transparent 70%),
-    linear-gradient(var(--mtr-grid) 1px, transparent 1px) 0 0 / 40px 40px,
-    linear-gradient(90deg, var(--mtr-grid) 1px, transparent 1px) 0 0 / 40px 40px,
-    var(--mtr-surface);
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--mtr-brand) 7%, transparent), transparent 55%),
+    var(--mtr-canvas);
 }
 
-.brandLink {
-  align-self: flex-start;
+.mtr-auth-shell .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+}
+
+.mtr-auth-shell .brand {
+  display: inline-flex;
+  align-items: center;
   color: inherit;
   text-decoration: none;
 }
 
-.brandLink:hover {
+.mtr-auth-shell .brand:hover {
   text-decoration: none;
 }
 
-.statement {
-  max-width: 34rem;
+.mtr-auth-shell .stage {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem 1rem 2rem;
 }
 
-.headline {
+.mtr-auth-shell .card {
+  width: min(100%, 22.5rem);
+  padding: 1.75rem 1.5rem 1.5rem;
+  border: 1px solid var(--mtr-border);
+  border-top: 2px solid var(--mtr-brand);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+  box-shadow: none;
+}
+
+.mtr-auth-shell .title {
   margin: 0;
-  font-size: clamp(1.9rem, 1.2rem + 1.8vw, 2.75rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
-  font-weight: 660;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--mtr-text);
 }
 
-.headline span {
-  color: var(--mtr-brand-text);
-}
-
-.tagline {
-  margin: var(--space-4) 0 0;
-  max-width: 44ch;
-  font-size: 0.9375rem;
+.mtr-auth-shell .lead {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: var(--mtr-text-2);
 }
 
-.illustration {
-  display: block;
+.mtr-auth-shell .body {
+  margin-top: 1.35rem;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.mtr-auth-shell .body form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.mtr-auth-shell .body form .field {
+  margin-bottom: 0;
+}
+
+.mtr-auth-shell .auth-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 420px) {
+  .mtr-auth-shell .auth-name-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mtr-auth-shell .field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   width: 100%;
-  max-width: 420px;
-  margin-top: var(--space-7);
 }
 
-.illustration line {
-  stroke: var(--mtr-text-3);
-  stroke-width: 1.4;
-}
-
-.illustration g[data-up='true'] rect {
-  fill: var(--mtr-pos);
-  opacity: 0.75;
-}
-
-.illustration g[data-up='false'] rect {
-  fill: var(--mtr-neg);
-  opacity: 0.7;
-}
-
-.trend {
-  fill: none;
-  stroke: var(--mtr-cyan);
-  stroke-width: 2;
-  stroke-dasharray: 4 5;
-  stroke-linecap: round;
-}
-
-.assurances {
-  list-style: none;
+.mtr-auth-shell .field-label-row label {
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-4);
-  max-width: 34rem;
+  flex: 1 1 auto;
 }
 
-.assurances li {
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  gap: var(--space-3);
+.mtr-auth-shell .field-aux-link {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 550;
+  color: var(--mtr-brand-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mtr-auth-shell .field-aux-link:hover {
+  text-decoration: underline;
+}
+
+.mtr-auth-shell .auth-inline-link {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.mtr-auth-shell .body .btn-primary,
+.mtr-auth-shell .body .btn-secondary {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.15rem;
+  min-height: 2.65rem;
+}
+
+.mtr-auth-shell .footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--mtr-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
   font-size: 0.8125rem;
   color: var(--mtr-text-2);
 }
 
-.assurances strong {
-  display: block;
-  color: var(--mtr-text);
-  font-weight: 600;
-}
-
-.assuranceIcon {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+.mtr-auth-shell .footer a {
   color: var(--mtr-brand-text);
-  background: var(--mtr-brand-soft);
+  font-weight: 550;
 }
 
-/* ---------- Form pane ---------- */
-
-.formPane {
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-5) clamp(1.25rem, 4vw, 3rem);
-  min-width: 0;
-}
-
-.formTop {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.mobileBrand {
-  display: none;
-  margin-right: auto;
-  color: inherit;
-  text-decoration: none;
-}
-
-.formInner {
-  width: min(100%, var(--auth-max));
-  margin: auto;
-  padding: var(--space-7) 0;
-}
-
-.formTitle {
-  margin: 0 0 var(--space-2);
-  font-size: clamp(1.625rem, 1.3rem + 0.8vw, 1.875rem);
-  letter-spacing: -0.025em;
-  font-weight: 650;
-}
-
-.formLead {
-  margin: 0 0 var(--space-6);
-  color: var(--mtr-text-2);
-}
-
-.footerLinks {
-  margin-top: var(--space-6);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--mtr-border);
-  font-size: 0.875rem;
-  color: var(--mtr-text-2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.legal {
-  margin: 0;
+.mtr-auth-shell .legal {
+  padding: 0.85rem 1.25rem 1.1rem;
   text-align: center;
-  font-size: 0.75rem;
+}
+
+.mtr-auth-shell .legal p {
+  margin: 0;
+  font-size: 0.6875rem;
   color: var(--mtr-text-3);
 }
 
-@media (max-width: 960px) {
-  .shell {
-    grid-template-columns: 1fr;
+@media (min-width: 720px) {
+  .mtr-auth-shell .top {
+    padding: 1rem 1.75rem;
   }
 
-  .brandPane {
-    display: none;
+  .mtr-auth-shell .card {
+    width: min(100%, 24rem);
+    padding: 2rem 1.75rem 1.65rem;
   }
 
-  .mobileBrand {
-    display: inline-flex;
+  .mtr-auth-shell .stage {
+    padding: 2.5rem 1.5rem 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mtr-auth-shell .card {
+    border: 0;
+    border-top: 0;
+    border-radius: 0;
+    padding: 1.25rem 0.15rem 1rem;
+    background: transparent;
   }
 
-  .formInner {
-    padding: var(--space-6) 0;
+  .mtr-auth-shell .top {
+    padding: 0.85rem 1rem;
   }
 }

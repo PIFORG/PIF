@@ -7,7 +7,12 @@ import { OrderStatusBadgeComponent, SignedAmountComponent } from './trading-part
 /** apps/web/src/components/trading/tables.tsx */
 
 const SIDE_LABEL = { BUY: 'Achat', SELL: 'Vente' } as const;
-const TYPE_LABEL = { MARKET: 'Au marché', LIMIT: 'À cours limité', STOP: 'Stop-loss' } as const;
+const TYPE_LABEL = {
+  MARKET: 'Au marché',
+  LIMIT: 'À cours limité',
+  STOP: 'Stop-loss',
+  TAKE_PROFIT: 'Prise de bénéfices',
+} as const;
 
 @Component({
   selector: 'mtr-positions-table',
@@ -160,6 +165,9 @@ export class OrdersTableComponent {
     if (order.type === 'MARKET') return 'Meilleur prix';
     if (order.type === 'LIMIT') return `Limite ${price(order.limitPrice)}`;
     if (order.type === 'STOP') return `Stop ${price(order.stopPrice)}${order.triggered ? ' · déclenché' : ''}`;
+    if (order.type === 'TAKE_PROFIT') {
+      return `Prise de bénéfices ${price(order.stopPrice)}${order.triggered ? ' · déclenché' : ''}`;
+    }
     return 'Meilleur prix';
   }
 }

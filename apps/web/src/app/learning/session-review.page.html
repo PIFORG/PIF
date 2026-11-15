@@ -205,13 +205,12 @@
         heading="Machine à remonter le temps"
         description="Choisissez une décision et rejouez la mission à partir de ce point, sur exactement le même chemin de marché. Les rejeux sont un entraînement avec le recul et ne modifient jamais votre profil."
       >
-        <div class="lr-timeMachineStage" aria-hidden="true">
-          <span class="lr-timeMachineRing"></span>
-          <span class="lr-timeMachineBeam"></span>
-        </div>
         <p class="lr-timeMachineTag"><svg mtrIcon name="rewind" [size]="14" /> Market Trading Room · rejeu d'entraînement</p>
-        <div class="lr-layout lr-timeMachineLayout" style="margin-bottom: 0">
-          <div class="lr-col">
+
+        <div class="lr-forkBoard lr-timeMachineLayout">
+          <section class="lr-forkPane" aria-labelledby="fork-original-title">
+            <h3 id="fork-original-title" class="lr-forkPaneTitle">Décision originale</h3>
+            <p class="lr-forkPaneMeta">Trajectoire déjà jouée — marché figé, reproductible.</p>
             @if (timelineChart(); as chart) {
               <figure
                 mtr-line-chart
@@ -232,11 +231,14 @@
                 }
               </ul>
             }
-          </div>
+          </section>
 
-          <div class="lr-col">
+          <section class="lr-forkPane" aria-labelledby="fork-alt-title">
+            <h3 id="fork-alt-title" class="lr-forkPaneTitle">Point de divergence</h3>
+            <p class="lr-forkPaneMeta">Sélectionnez la décision à partir de laquelle vous changez de route.</p>
+
             @if (decisions().length) {
-              <fieldset style="border: 0; padding: 0; margin: 0" [disabled]="!t.canBranch || busy() !== null">
+              <fieldset class="lr-forkFieldset" [disabled]="!t.canBranch || busy() !== null">
                 <legend class="eyebrow" style="margin-bottom: var(--space-2)">Vos décisions</legend>
                 <ol class="lr-timeline">
                   @for (d of decisions(); track d.seq) {
@@ -260,7 +262,7 @@
             }
 
             @if (t.canBranch && decisions().length) {
-              <div class="lr-stack">
+              <div class="lr-stack lr-forkActions">
                 <div class="field" style="margin-bottom: 0">
                   <label for="branch-strategy">À partir de la décision sélectionnée…</label>
                   <select id="branch-strategy" class="select" (change)="setStrategy($any($event.target).value)">
@@ -295,13 +297,13 @@
                 </ul>
               </div>
             }
-          </div>
+          </section>
         </div>
       </section>
 
       @if (comparison(); as c) {
-        <div style="margin-top: var(--space-4)">
-          <section mtr-panel panelId="comparison" heading="Côte à côte" description="Même marché, décisions différentes.">
+        <div class="lr-compareBoard">
+          <section mtr-panel panelId="comparison" heading="Côte à côte" description="Même marché, décisions différentes — risque et performance comparés.">
             <div mtr-comparison-view [comparison]="c" [steps]="s.state.steps"></div>
           </section>
         </div>

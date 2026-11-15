@@ -42,7 +42,7 @@ function currentTheme(): Theme {
 export class ThemeToggleComponent {
   protected readonly theme = signal<Theme>(currentTheme());
   protected readonly label = computed(() =>
-    this.theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme',
+    this.theme() === 'light' ? 'Passer au thème sombre' : 'Passer au thème clair',
   );
 
   constructor() {

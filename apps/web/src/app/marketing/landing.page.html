@@ -30,7 +30,7 @@
             <p class="mk-heroName">Market<br />Trading Room</p>
             <p class="mk-heroDescriptor">Simulateur</p>
             <h1 id="hero-title" class="mk-heroTitle">Les marchés financiers, <span class="mk-heroAccent">sans le risque du monde réel.</span></h1>
-            <p class="mk-lead">Une plateforme de simulation financière interactive conçue pour comprendre les marchés, vous entraîner au trading virtuel, gérer des portefeuilles et prendre des décisions d'investissement éclairées.</p>
+            <p class="mk-lead">Trading virtuel, portefeuilles, risques et analyses — pour apprendre les marchés sans capital réel.</p>
             <div class="mk-cta">
               <a routerLink="/register" class="btn btn-primary btn-lg">Créez votre compte gratuit<svg mtrIcon name="arrow-right" [size]="16" /></a>
               <a routerLink="/login" class="btn btn-secondary btn-lg">Se connecter</a>
@@ -47,7 +47,7 @@
         <div class="mk-sectionHead">
           <p class="eyebrow">Fonctionnalités</p>
           <h2 id="capabilities-title" class="mk-sectionTitle">Une salle de marché pour le trading, le risque et le raisonnement financier</h2>
-          <p class="mk-sectionLead">Chaque espace de travail correspond à une tâche professionnelle réelle. Les modules marqués en aperçu sont conçus et attendent leurs moteurs de simulation.</p>
+          <p class="mk-sectionLead">Chaque espace de travail correspond à une tâche professionnelle réelle. Les modules ci-dessous sont branchés sur des moteurs de simulation fictifs (pas de marché réel).</p>
         </div>
         <ul class="mk-pillars">
           @for (pillar of pillars; track pillar.title) {
@@ -55,7 +55,6 @@
               <span class="mk-pillarIcon"><svg mtrIcon [name]="pillar.icon" [size]="20" /></span>
               <h3>{{ pillar.title }}</h3>
               <p>{{ pillar.body }}</p>
-              <span mtr-status-badge status="DESIGNED_PENDING_BACKEND"></span>
             </li>
           }
         </ul>
@@ -82,12 +81,11 @@
           <div class="mk-sectionHead">
             <p class="eyebrow">Disponibilité</p>
             <h2 id="status-title" class="mk-sectionTitle">Transparence sur ce qui fonctionne aujourd'hui</h2>
-            <p class="mk-sectionLead">La plateforme de compte sécurisé et le module d'apprentissage sont opérationnels. Les autres modules de simulation de marché se connectent moteur par moteur, et chaque écran indique lequel est actif.</p>
+            <p class="mk-sectionLead">Identité, trading simulé, apprentissage, actuariat, stress et IA sont opérationnels sur la base de test. La migration des nouvelles classes d'actifs sur la base PIF de production reste volontairement en attente d'approbation.</p>
           </div>
           <div class="mk-statusCard">
             <div class="mk-statusHead">
               <h3>Disponible maintenant</h3>
-              <span mtr-status-badge status="LIVE_INTEGRATED"></span>
             </div>
             <ul class="mk-checks">
               @for (item of liveNow; track item) {
@@ -98,7 +96,6 @@
           <div class="mk-statusCard">
             <div class="mk-statusHead">
               <h3>En développement</h3>
-              <span mtr-status-badge status="DESIGNED_PENDING_BACKEND"></span>
             </div>
             <ul class="mk-checks" data-pending="true">
               @for (item of inDevelopment; track item) {

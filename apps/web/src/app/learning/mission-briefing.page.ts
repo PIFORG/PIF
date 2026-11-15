@@ -13,7 +13,6 @@ import {
   type SessionMentorMode,
 } from '../core/api/learning-api';
 import { IconComponent } from '../shared/icon/icon.component';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { sectorLabel } from '../trading/trading-format';
 import { AvailabilityBadgeComponent, MeterComponent } from './learning-parts.components';
@@ -32,7 +31,7 @@ const WEIGHT_KEYS = Object.keys(WEIGHT_LABEL) as (keyof typeof WEIGHT_LABEL)[];
 @Component({
   selector: 'mtr-mission-briefing-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, IconComponent, PageHeadingComponent, HeadingActionsSlot, ...WORKSPACE_PRIMITIVES, AvailabilityBadgeComponent, MeterComponent],
+  imports: [RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES, AvailabilityBadgeComponent, MeterComponent],
   host: { style: 'display: contents' },
   templateUrl: './mission-briefing.page.html',
 })

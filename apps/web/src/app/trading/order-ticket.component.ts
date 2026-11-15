@@ -13,7 +13,12 @@ import { EmptyStateComponent } from '../shared/workspace/workspace.components';
 import { emptyTicket, termsKey, ticketErrors, toOrderTerms, type TicketDraft } from './ticket-draft';
 import { describeTradingError, dt, price, shortTime, units } from './trading-format';
 
-const TYPE_LABEL: Record<TradeOrderType, string> = { MARKET: 'Marché', LIMIT: 'Limite', STOP: 'Stop' };
+const TYPE_LABEL: Record<TradeOrderType, string> = {
+  MARKET: 'Marché',
+  LIMIT: 'Limite',
+  STOP: 'Stop',
+  TAKE_PROFIT: 'Prise de bénéfices',
+};
 
 function newClientOrderId(): string {
   const source: Crypto = globalThis.crypto;
@@ -52,7 +57,7 @@ export class OrderTicketComponent {
 
   protected readonly typeLabel = TYPE_LABEL;
   protected readonly sides: TradeSide[] = ['BUY', 'SELL'];
-  protected readonly types: TradeOrderType[] = ['MARKET', 'LIMIT', 'STOP'];
+  protected readonly types: TradeOrderType[] = ['MARKET', 'LIMIT', 'STOP', 'TAKE_PROFIT'];
   protected readonly dt = dt;
   protected readonly price = price;
   protected readonly units = units;

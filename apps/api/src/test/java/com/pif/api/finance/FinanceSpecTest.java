@@ -62,6 +62,8 @@ class FinanceSpecTest {
       assertThat(ExecutionRules.limitCrosses(OrderSide.SELL, 10_000, QUOTE)).isFalse();
       assertThat(ExecutionRules.sellStopTriggered(9_990, QUOTE)).isTrue();
       assertThat(ExecutionRules.sellStopTriggered(9_989, QUOTE)).isFalse();
+      assertThat(ExecutionRules.sellTakeProfitTriggered(9_990, QUOTE)).isTrue();
+      assertThat(ExecutionRules.sellTakeProfitTriggered(9_991, QUOTE)).isFalse();
       assertThat(ExecutionRules.remainingDepth(QUOTE, 30)).isEqualTo(70);
     }
   }
@@ -238,6 +240,19 @@ class FinanceSpecTest {
       assertThat(OrderRules.restingOrderAction(stop, new Quote(10_000, 9_980, 10_010, 100))).isEqualTo(new OrderRules.RestingOrderAction(true, true));
       OrderRules.RestingOrder triggered = new OrderRules.RestingOrder(OrderType.STOP, OrderSide.SELL, null, 9_980.0, true);
       assertThat(OrderRules.restingOrderAction(triggered, QUOTE)).isEqualTo(new OrderRules.RestingOrderAction(true, true));
+    }
+
+    @Test
+    void triggersASellTakeProfitWhenTheBidRisesToItAndKeepsItTriggered() {
+      OrderRules.RestingOrder tp = new OrderRules.RestingOrder(OrderType.TAKE_PROFIT, OrderSide.SELL, null, 10_020.0, false);
+      assertThat(OrderRules.restingOrderAction(tp, QUOTE)).isEqualTo(new OrderRules.RestingOrderAction(false, false));
+      assertThat(OrderRules.restingOrderAction(tp, new Quote(10_000, 10_020, 10_030, 100)))
+          .isEqualTo(new OrderRules.RestingOrderAction(true, true));
+      OrderRules.RestingOrder triggered =
+          new OrderRules.RestingOrder(OrderType.TAKE_PROFIT, OrderSide.SELL, null, 10_020.0, true);
+      assertThat(OrderRules.restingOrderAction(triggered, QUOTE)).isEqualTo(new OrderRules.RestingOrderAction(true, true));
+      assertThat(OrderRules.takeProfitAboveBid(10_020, QUOTE)).isTrue();
+      assertThat(OrderRules.takeProfitAboveBid(9_990, QUOTE)).isFalse();
     }
 
     @Test

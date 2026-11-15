@@ -70,11 +70,16 @@ describe('routes ported from the landing page, FinStories and the module preview
     expect(root.textContent).not.toContain('has not been migrated');
   });
 
-  it('renders FinStories inside the workspace shell', async () => {
-    const root = await open('/stories?story=x');
+  it('renders FinStories inside the investor navbar shell (no admin sidebar)', async () => {
+    const harness = await RouterTestingHarness.create('/stories?story=x');
+    for (let i = 0; i < 3; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await harness.fixture.whenStable();
+    }
+    const root = harness.fixture.nativeElement as HTMLElement;
     expect(root.querySelector('h1')?.textContent).toBe('Histoires financières');
     expect(root.querySelector('.ws-emptyTitle')?.textContent).toBe('Aucune histoire pour le moment');
-    expect(Array.from(root.querySelectorAll('.breadcrumb li')).map((li) => li.textContent)).toEqual(['Apprentissage', 'Histoires financières']);
-    expect(root.querySelector('a.link[aria-current="page"] .linkLabel')?.textContent).toBe('Histoires financières');
+    expect(root.querySelector('.inv-nav') || root.querySelector('nav[aria-label="Navigation principale"]')).toBeTruthy();
+    expect(root.querySelector('aside.adm-side')).toBeFalsy();
   });
 });

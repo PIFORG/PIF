@@ -1,8 +1,8 @@
 @if (user(); as user) {
-  <div style="display: grid; gap: 1.25rem">
+  <div class="set-sections">
     <section class="card-panel" aria-labelledby="account-heading">
-      <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem">
-        <h2 id="account-heading" style="margin: 0">Compte</h2>
+      <div class="set-sectionHead">
+        <h2 id="account-heading">Compte</h2>
         <mtr-account-status-badge [status]="user.status" />
       </div>
       <dl class="definition-list">

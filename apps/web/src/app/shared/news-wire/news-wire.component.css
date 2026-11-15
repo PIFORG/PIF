@@ -1,0 +1,255 @@
+/* MarketPulse + FinancialNewsWire — bandeaux boursiers compacts. */
+
+.mp-root,
+.nw-root {
+  display: block;
+  border-bottom: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.mp-bar,
+.nw-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 1.85rem;
+  padding: 0 0.75rem;
+  max-width: 100%;
+}
+
+.mp-source,
+.nw-source,
+.nw-label {
+  flex-shrink: 0;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-brand-text);
+  font-size: 0.625rem;
+}
+
+.mp-asOf,
+.mp-na {
+  color: var(--mtr-text-3);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.mp-viewport,
+.nw-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.mp-viewport:focus-visible,
+.nw-viewport:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--mtr-focus);
+}
+
+.mp-track,
+.nw-track {
+  display: flex;
+  width: max-content;
+  gap: 0;
+  animation: mtr-tape-scroll 55s linear infinite;
+}
+
+.nw-track {
+  animation-duration: 70s;
+}
+
+.mp-track.mp-paused,
+.nw-track.nw-paused {
+  animation-play-state: paused;
+}
+
+.mp-seq,
+.nw-seq {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding-right: 2rem;
+}
+
+.mp-item,
+.nw-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.2rem 0.7rem;
+  border: 0;
+  border-right: 1px solid var(--mtr-border);
+  background: transparent;
+  color: var(--mtr-text);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+}
+
+a.mp-item:hover,
+button.nw-item:hover {
+  background: var(--mtr-hover);
+}
+
+.mp-sym {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--mtr-brand-text);
+}
+
+.mp-name {
+  color: var(--mtr-text-2);
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-px {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.nw-sector {
+  font-weight: 650;
+  color: var(--mtr-brand-text);
+  text-transform: uppercase;
+  font-size: 0.625rem;
+  letter-spacing: 0.03em;
+}
+
+.nw-title {
+  color: var(--mtr-text);
+}
+
+.nw-tag {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--mtr-amber);
+  border: 1px solid color-mix(in srgb, var(--mtr-amber) 35%, var(--mtr-border));
+  padding: 0.05rem 0.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.mp-link {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--mtr-brand-text);
+  text-decoration: none;
+  font-size: 0.6875rem;
+}
+
+.mp-link:hover {
+  text-decoration: underline;
+}
+
+.mp-error,
+.nw-error,
+.mp-loading,
+.nw-loading,
+.mp-empty,
+.nw-empty {
+  margin: 0;
+  flex: 1;
+  color: var(--mtr-text-2);
+  font-size: 0.75rem;
+}
+
+.mp-srOnly,
+.nw-srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nw-detail {
+  border-top: 1px solid var(--mtr-border);
+  background: var(--mtr-elevated);
+}
+
+.nw-detailInner {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.55rem 0.85rem 0.65rem;
+  max-width: 72rem;
+}
+
+.nw-detailMeta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  color: var(--mtr-text-2);
+  font-size: 0.6875rem;
+}
+
+.nw-detailTitle {
+  margin: 0;
+  font-weight: 650;
+  color: var(--mtr-text);
+  font-size: 0.875rem;
+}
+
+.nw-detailSummary {
+  margin: 0;
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+  max-width: 70ch;
+}
+
+@keyframes mtr-tape-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-track,
+  .nw-track {
+    animation: none;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .mp-seq + .mp-seq,
+  .nw-seq + .nw-seq {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .mp-name {
+    display: none;
+  }
+
+  .mp-bar,
+  .nw-bar {
+    min-height: 1.65rem;
+    padding: 0 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .mp-link {
+    display: none;
+  }
+}
+
+html[data-theme='dark'] .mp-root,
+html[data-theme='dark'] .nw-root {
+  background: color-mix(in srgb, var(--mtr-elevated) 70%, var(--mtr-sunken));
+}

@@ -4,7 +4,6 @@ import { AuthService } from '../core/auth/auth.service';
 import { BrandLockupComponent } from '../shared/brand/brand.component';
 import { IconComponent, type IconName } from '../shared/icon/icon.component';
 import { ThemeToggleComponent } from '../shared/theme-toggle/theme-toggle.component';
-import { StatusBadgeComponent } from '../shared/workspace/workspace.components';
 import { ProductPreviewComponent } from './product-preview.component';
 
 const PILLARS: { icon: IconName; title: string; body: string }[] = [
@@ -25,17 +24,17 @@ const PILLARS: { icon: IconName; title: string; body: string }[] = [
   },
   {
     icon: 'xai',
-    title: 'Analyses IA que vous pouvez questionner',
+    title: 'Prévisions que vous pouvez comprendre',
     body: 'Les sorties des modèles sont accompagnées de confiance, de facteurs explicatifs et de limites — conçues pour être explicables, jamais comme un conseil.',
   },
   {
     icon: 'bank',
-    title: 'Tests de résistance bancaire',
+    title: 'Simuler une crise bancaire',
     body: 'Appliquez des chocs de taux, de crédit et de liquidité à un bilan type et lisez l\'impact sur les fonds propres étape par étape.',
   },
   {
     icon: 'actuarial',
-    title: 'Laboratoire actuariel',
+    title: 'Assurance et actuariat',
     body: 'Explorez tables de mortalité, réserves et tarification des primes avec des hypothèses transparentes et reproductibles.',
   },
 ];
@@ -60,22 +59,22 @@ const LIVE_NOW = [
   'MFA via application d\'authentification et codes de récupération',
   'Gestion des appareils et des sessions',
   'Administration par rôles et journal d\'audit',
-  'Parcours d\'apprentissage dans un marché simulé, avec évaluation et relecture',
-  'Histoires financières : histoires de décision en une minute',
+  'Salle de trading, portefeuilles, marchés fictifs et risques',
+  'Stratégies et backtests déterministes',
+  'Parcours de formation, histoires financières, actuariat et crises bancaires',
+  'Laboratoire IA / explicabilité (évaluation documentée)',
 ];
 
 const IN_DEVELOPMENT = [
-  'Données de marché en direct et salle de trading principale',
-  'Moteurs de portefeuille, de risque et de tests historiques',
-  'Analyses IA et explicabilité',
-  'Tests de résistance et laboratoire actuariel',
+  'Migration production des classes BOND / COMMODITY / FX (base PIF)',
+  'Couverture navigateur exhaustive multi-rôles en CI',
 ];
 
 /** `/`: apps/web/src/app/page.tsx. Signed-in visitors go straight to the dashboard. */
 @Component({
   selector: 'mtr-landing-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, BrandLockupComponent, IconComponent, ThemeToggleComponent, StatusBadgeComponent, ProductPreviewComponent],
+  imports: [RouterLink, BrandLockupComponent, IconComponent, ThemeToggleComponent, ProductPreviewComponent],
   host: { style: 'display: contents', '(click)': 'onSectionLink($event)' },
   templateUrl: './landing.page.html',
 })

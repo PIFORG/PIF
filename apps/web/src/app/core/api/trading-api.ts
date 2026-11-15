@@ -5,7 +5,7 @@ import { ApiClient } from './api-client';
 
 export type AssetClass = 'EQUITY' | 'FUND' | 'BOND' | 'COMMODITY' | 'FX';
 export type TradeSide = 'BUY' | 'SELL';
-export type TradeOrderType = 'MARKET' | 'LIMIT' | 'STOP';
+export type TradeOrderType = 'MARKET' | 'LIMIT' | 'STOP' | 'TAKE_PROFIT';
 export type TradeOrderStatus = 'OPEN' | 'PARTIALLY_FILLED' | 'FILLED' | 'CANCELLED' | 'REJECTED' | 'EXPIRED';
 export type HistoryRange = '1D' | '5D' | '1M' | '3M' | '6M' | 'ALL';
 
@@ -392,6 +392,20 @@ export class MarketApi {
     return this.api.request<PriceHistory>(`/market/instruments/${encodeURIComponent(symbol)}/history?range=${range}`, {
       method: 'GET',
     });
+  }
+
+  fundamentals(symbol: string): Promise<{
+    symbol: string;
+    company: string;
+    currency: string;
+    fiscalYear: number;
+    statements: Record<string, number>;
+    ratios: Record<string, number | null>;
+    history: { fiscalYear: number; revenue: number; earnings: number }[];
+    provenance: { kind: string; description: string };
+    limitations: string[];
+  }> {
+    return this.api.request(`/market/instruments/${encodeURIComponent(symbol)}/fundamentals`, { method: 'GET' });
   }
 
   watchlist(): Promise<WatchlistResponse> {

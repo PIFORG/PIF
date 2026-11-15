@@ -17,13 +17,17 @@ const SYSTEMS: [RegExp, string][] = [
 
 const UA_LIKE = /Mozilla\/|AppleWebKit|Gecko/;
 
-/** "Edge on Windows" from a raw user agent when available, otherwise the stored device label. */
+/**
+ * Libellé d'appareil pour l'UI (sessions, tableau de bord).
+ * Les agents utilisateurs bruts restent disponibles séparément pour l'audit.
+ * Exemple : « Chrome sous Windows ».
+ */
 export function describeDevice(label: string | null | undefined, userAgent?: string | null): string {
   const source = userAgent && UA_LIKE.test(userAgent) ? userAgent : label || userAgent || '';
-  if (!source) return 'Unknown device';
+  if (!source) return 'Appareil inconnu';
   if (!UA_LIKE.test(source)) return source;
   const browser = BROWSERS.find(([re]) => re.test(source))?.[1];
   const system = SYSTEMS.find(([re]) => re.test(source))?.[1];
-  if (browser && system) return `${browser} on ${system}`;
-  return browser ?? system ?? 'Unknown browser';
+  if (browser && system) return `${browser} sous ${system}`;
+  return browser ?? system ?? 'Navigateur inconnu';
 }
