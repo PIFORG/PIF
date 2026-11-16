@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 
 /**
- * apps/web/src/components/charts/Charts.tsx: pure SVG drawn from inputs. No timers, subscriptions or listeners, so
- * nothing outlives the component.
+ * apps/web/src/components/charts/Charts.tsx: pure SVG drawn from inputs. Hover overlay is local
+ * pointer state only — no timers or subscriptions that outlive the component.
  */
 
 export interface ChartSeries {
@@ -48,25 +48,45 @@ export function toPath(values: number[], min: number, max: number, h: number, co
           <span class="num" [style.top.%]="tick.t * 100">{{ tick.label }}</span>
         }
       </div>
-      <svg class="ch-svg" [attr.viewBox]="'0 0 1000 ' + height()" preserveAspectRatio="none" role="img" [attr.aria-label]="summary()">
-        <defs>
-          <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="var(--mtr-brand)" stop-opacity="0.28" />
-            <stop offset="1" stop-color="var(--mtr-brand)" stop-opacity="0" />
-          </linearGradient>
-        </defs>
-        @for (t of ticks; track t) {
-          <line x1="0" x2="1000" [attr.y1]="t * height()" [attr.y2]="t * height()" class="ch-gridLine" vector-effect="non-scaling-stroke" />
-        }
-        @for (s of paths(); track s.label) {
-          <g>
-            @if (s.area) {
-              <path [attr.d]="s.area" [attr.fill]="'url(#' + gradientId + ')'" />
+      <div
+        class="ch-plotSurface"
+        (pointermove)="onMove($event)"
+        (pointerleave)="clearTip()"
+      >
+        <svg class="ch-svg" [attr.viewBox]="'0 0 1000 ' + height()" preserveAspectRatio="none" role="img" [attr.aria-label]="summary()">
+          <defs>
+            <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--mtr-brand)" stop-opacity="0.22" />
+              <stop offset="1" stop-color="var(--mtr-brand)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          @for (t of ticks; track t) {
+            <line x1="0" x2="1000" [attr.y1]="t * height()" [attr.y2]="t * height()" class="ch-gridLine" vector-effect="non-scaling-stroke" />
+          }
+          @for (s of paths(); track s.label) {
+            <g>
+              @if (s.area) {
+                <path [attr.d]="s.area" [attr.fill]="'url(#' + gradientId + ')'" />
+              }
+              <path [attr.d]="s.d" class="ch-line" [attr.data-tone]="s.tone" [attr.stroke-dasharray]="s.dashed ? '6 5' : null" vector-effect="non-scaling-stroke" />
+            </g>
+          }
+          @if (tip(); as t) {
+            <line class="ch-crosshair" [attr.x1]="t.x" [attr.x2]="t.x" y1="0" [attr.y2]="height()" vector-effect="non-scaling-stroke" />
+            @for (dot of t.dots; track dot.label) {
+              <circle class="ch-activeDot" [attr.cx]="t.x" [attr.cy]="dot.y" r="4" vector-effect="non-scaling-stroke" />
             }
-            <path [attr.d]="s.d" class="ch-line" [attr.data-tone]="s.tone" [attr.stroke-dasharray]="s.dashed ? '6 5' : null" vector-effect="non-scaling-stroke" />
-          </g>
+          }
+        </svg>
+        @if (tip(); as t) {
+          <div class="ch-tip" [style.left.%]="t.leftPct" role="status">
+            <strong>{{ t.title }}</strong>
+            @for (row of t.rows; track row.label) {
+              <span>{{ row.label }} · {{ row.value }}</span>
+            }
+          </div>
         }
-      </svg>
+      </div>
     </div>
     <figcaption class="ch-caption">
       <span class="ch-legend">
@@ -87,6 +107,8 @@ export class LineChartComponent {
   readonly height = input(220);
   readonly formatY = input<(value: number) => string>((v) => v.toFixed(0));
   readonly xLabels = input<[string, string] | undefined>(undefined);
+  /** Optional per-index labels for the hover tooltip (dates, periods…). */
+  readonly pointLabels = input<string[] | undefined>(undefined);
   /** Number of x positions on the axis; defaults to the longest series. Shorter series stop early instead of stretching. */
   readonly xCount = input<number | undefined>(undefined);
   /** Smallest y range to show, centred on the data, so tiny moves are not stretched into dramatic swings. */
@@ -96,6 +118,13 @@ export class LineChartComponent {
 
   protected readonly ticks = TICKS;
   protected readonly gradientId = `ch-gradient-${++gradientSeq}`;
+  protected readonly tip = signal<{
+    x: number;
+    leftPct: number;
+    title: string;
+    rows: { label: string; value: string }[];
+    dots: { label: string; y: number }[];
+  } | null>(null);
 
   private readonly bounds = computed(() => {
     const all = this.series().flatMap((s) => s.values);
@@ -127,6 +156,42 @@ export class LineChartComponent {
       };
     });
   });
+
+  protected onMove(event: PointerEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const { min, max, count } = this.bounds();
+    if (count < 1) return;
+    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const index = count === 1 ? 0 : Math.round(ratio * (count - 1));
+    const step = count > 1 ? W / (count - 1) : 0;
+    const x = index * step;
+    const h = this.height();
+    const format = this.formatY();
+    const labels = this.pointLabels();
+    const title = labels?.[index] ?? (this.xLabels() ? `Point ${index + 1}` : `Index ${index + 1}`);
+    const rows: { label: string; value: string }[] = [];
+    const dots: { label: string; y: number }[] = [];
+    for (const s of this.series()) {
+      if (index >= s.values.length) continue;
+      const v = s.values[index];
+      rows.push({ label: s.label, value: format(v) });
+      const y = h - ((v - min) / (max - min || 1)) * h;
+      dots.push({ label: s.label, y });
+    }
+    this.tip.set({
+      x,
+      leftPct: (x / W) * 100,
+      title,
+      rows,
+      dots,
+    });
+  }
+
+  protected clearTip(): void {
+    this.tip.set(null);
+  }
 }
 
 @Component({

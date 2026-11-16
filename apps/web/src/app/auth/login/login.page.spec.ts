@@ -109,7 +109,7 @@ describe('Login page', () => {
     await submitPassword(fixture);
 
     const root = fixture.nativeElement as HTMLElement;
-    expect(el(root, 'h1').textContent).toBe('Vérification en deux étapes');
+    expect(el(root, 'h1').textContent).toBe('Vérification');
     expect(navigate).not.toHaveBeenCalled();
 
     type(el(root, '#code'), '123456');
@@ -132,7 +132,7 @@ describe('Login page', () => {
     await fixture.whenStable();
 
     expect(el(root, '.form-error-banner').textContent).toContain('n\'a pas été accepté');
-    expect(el(root, 'h1').textContent).toBe('Se connecter');
+    expect(el(root, 'h1').textContent).toBe('Connexion');
     expect(el(root, '#code')).toBeNull();
     expect(navigate).not.toHaveBeenCalled();
   });

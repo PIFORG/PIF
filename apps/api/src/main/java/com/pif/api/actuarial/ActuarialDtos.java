@@ -261,6 +261,56 @@ public final class ActuarialDtos {
     return errors.size()==mark?s:null;
   }
 
+  static EconomicCapital.Input economicCapital(Map<String, Object> body) {
+    List<String> errors = new ArrayList<>();
+    whitelist(body.keySet(), "", errors, "label", "frequency", "severity", "confidenceLevel", "horizonYears");
+    Frequency.Assumptions f = null;
+    Severity.Assumptions s = null;
+    if (!body.containsKey("frequency")) errors.add("frequency doit etre un objet");
+    else f = frequencyValue(body.get("frequency"), "", errors);
+    if (!body.containsKey("severity")) errors.add("severity doit etre un objet");
+    else s = severityValue(body.get("severity"), "", errors);
+    double confidence = check(body.get("confidenceLevel"), "confidenceLevel", "", 0.5, 0.999, 6, true, errors);
+    double horizon = check(body.get("horizonYears"), "horizonYears", "", 0.25, 10, 3, true, errors);
+    String lab = body.containsKey("label") && body.get("label") != null ? collectLabel(body.get("label"), errors) : null;
+    if (!errors.isEmpty()) throw ApiException.validation(errors);
+    return new EconomicCapital.Input(f, s, confidence, horizon, lab);
+  }
+
+  static Alm.Input alm(Map<String, Object> body) {
+    List<String> errors = new ArrayList<>();
+    whitelist(body.keySet(), "", errors, "label", "discountRate", "rateShock", "assets", "liabilities");
+    double rate = check(body.get("discountRate"), "discountRate", "", -0.049, 0.499, 6, true, errors);
+    double shock = check(body.getOrDefault("rateShock", 0.01), "rateShock", "", -0.2, 0.2, 6, true, errors);
+    List<Alm.CashFlow> assets = cashFlows(body.get("assets"), "assets", errors);
+    List<Alm.CashFlow> liabilities = cashFlows(body.get("liabilities"), "liabilities", errors);
+    String lab = body.containsKey("label") && body.get("label") != null ? collectLabel(body.get("label"), errors) : null;
+    if (!errors.isEmpty()) throw ApiException.validation(errors);
+    return new Alm.Input(lab, rate, shock, assets, liabilities);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<Alm.CashFlow> cashFlows(Object raw, String key, List<String> errors) {
+    if (!(raw instanceof List<?> list) || list.isEmpty()) {
+      errors.add(key + " doit etre un tableau non vide");
+      return List.of();
+    }
+    List<Alm.CashFlow> out = new ArrayList<>();
+    for (int i = 0; i < list.size(); i++) {
+      Object row = list.get(i);
+      if (!(row instanceof Map<?, ?> m)) {
+        errors.add(key + "[" + i + "] doit etre un objet");
+        continue;
+      }
+      Map<String, Object> map = copy(m);
+      double year = check(map.get("year"), "year", key + "[" + i + "].", 0, 100, 0, true, errors);
+      double amount = check(map.get("amount"), "amount", key + "[" + i + "].", -1e12, 1e12, 3, true, errors);
+      String label = map.get("label") instanceof String s ? Validation.jsTrim(s) : ("Flux " + (i + 1));
+      out.add(new Alm.CashFlow((int) year, amount, label));
+    }
+    return out;
+  }
+
   /** NestJS DTO names; nested objects stay opaque so schemaShape matches legacy-NestJS-DTO-parity $ref collapse. */
   public static Map<String, io.swagger.v3.oas.models.media.Schema<?>> openApiSchemas() {
     Map<String, io.swagger.v3.oas.models.media.Schema<?>> s = new LinkedHashMap<>();

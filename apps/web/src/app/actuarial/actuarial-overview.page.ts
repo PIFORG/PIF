@@ -41,7 +41,7 @@ export class ActuarialOverviewPage {
   protected readonly ratio1 = (v: number) => ratio(v, 1);
   protected readonly workspaceText = (id: string) => WORKSPACE_TEXT[id] ?? '';
   protected readonly workspaceHref = (id: string) => ACTUARIAL_WORKSPACES.find((x) => x.id === id)?.href ?? null;
-  protected readonly savedDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB');
+  protected readonly savedDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
   protected readonly markers = computed<ChartMarker[]>(() => {
     const r = this.data()?.reference.pricing;

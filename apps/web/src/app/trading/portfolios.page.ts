@@ -15,7 +15,6 @@ import {
 } from '../core/api/trading-api';
 import { formatNumber } from '../core/format/finance';
 import { AllocationBarComponent, LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { dateTime, describeTradingError, dt, pct, sectorLabel } from './trading-format';
 import {
@@ -151,8 +150,6 @@ export class CashFlowFormComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    PageHeadingComponent,
-    HeadingActionsSlot,
     ...WORKSPACE_PRIMITIVES,
     LineChartComponent,
     AllocationBarComponent,

@@ -732,13 +732,14 @@ public class PortfoliosService {
     if (!"LIMIT".equals(dto.type()) && dto.limitPrice() != null) {
       throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", Messages.get("portfolio.limit_price_only"));
     }
-    if (!"STOP".equals(dto.type()) && dto.stopPrice() != null) {
+    if (!"STOP".equals(dto.type()) && !"TAKE_PROFIT".equals(dto.type()) && dto.stopPrice() != null) {
       throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", Messages.get("portfolio.stop_price_only"));
     }
+    boolean triggerOrder = "STOP".equals(dto.type()) || "TAKE_PROFIT".equals(dto.type());
     return new OrderRequest(dto.symbol(), OrderSide.valueOf(dto.side()), OrderType.valueOf(dto.type()),
         dto.quantity(),
         "LIMIT".equals(dto.type()) && dto.limitPrice() != null ? Money.toAmount(dto.limitPrice()) : null,
-        "STOP".equals(dto.type()) && dto.stopPrice() != null ? Money.toAmount(dto.stopPrice()) : null);
+        triggerOrder && dto.stopPrice() != null ? Money.toAmount(dto.stopPrice()) : null);
   }
 
   /** sha256 of JSON.stringify([symbol, side, type, quantity, limitPrice, stopPrice]). */

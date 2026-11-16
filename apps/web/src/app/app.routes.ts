@@ -52,6 +52,10 @@ export const routes: Routes = [
     canActivateChild: [adminGuard],
     children: [
       { path: '', pathMatch: 'full', component: AdminOverviewPage },
+      {
+        path: 'platform',
+        loadComponent: () => import('./admin/platform/admin-platform.page').then((m) => m.AdminPlatformPage),
+      },
       { path: 'users', component: AdminUsersPage },
       { path: 'users/:id', component: AdminUserDetailPage },
       { path: 'audit', component: AdminAuditPage },
@@ -67,6 +71,10 @@ export const routes: Routes = [
       { path: 'portfolios', loadComponent: () => import('./trading/portfolios.page').then((m) => m.PortfoliosPage) },
       { path: 'risk', loadComponent: () => import('./risk/risk-analytics.page').then((m) => m.RiskAnalyticsPage) },
       { path: 'backtesting', loadComponent: () => import('./backtesting/backtesting.page').then((m) => m.BacktestingPage) },
+      {
+        path: 'strategies',
+        loadComponent: () => import('./backtesting/strategies.page').then((m) => m.StrategiesPage),
+      },
       { path: 'learn', loadComponent: () => import('./learning/learning-hub.page').then((m) => m.LearningHubPage) },
       { path: 'learn/missions/:slug', loadComponent: () => import('./learning/mission-briefing.page').then((m) => m.MissionBriefingPage) },
       { path: 'learn/sessions/:id', loadComponent: () => import('./learning/mission-player.page').then((m) => m.MissionPlayerPage) },
@@ -76,7 +84,12 @@ export const routes: Routes = [
       { path: 'actuarial/pricing', loadComponent: () => import('./actuarial/pricing-studio.page').then((m) => m.PricingStudioPage) },
       { path: 'actuarial/monte-carlo', loadComponent: () => import('./actuarial/monte-carlo-lab.page').then((m) => m.MonteCarloLabPage) },
       { path: 'actuarial/reserving', loadComponent: () => import('./actuarial/reserving-studio.page').then((m) => m.ReservingStudioPage) },
+      { path: 'actuarial/capital', loadComponent: () => import('./actuarial/capital-studio.page').then((m) => m.CapitalStudioPage) },
+      { path: 'actuarial/alm', loadComponent: () => import('./actuarial/alm-studio.page').then((m) => m.AlmStudioPage) },
       { path: 'stress-testing', loadComponent: () => import('./stress/stress-testing.page').then((m) => m.StressTestingPage) },
+      { path: 'ai', loadComponent: () => import('./ai/ai-lab.page').then((m) => m.AiLabPage) },
+      { path: 'explainability', loadComponent: () => import('./ai/explainability.page').then((m) => m.ExplainabilityPage) },
+      { path: 'challenges', loadComponent: () => import('./challenges/challenges.page').then((m) => m.ChallengesPage) },
       ...PREVIEW_MODULE_ROUTES.map((slug) => ({
         path: slug,
         data: { module: slug },

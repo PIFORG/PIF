@@ -26,11 +26,11 @@ export interface ActuarialMessage {
 /** Workspaces of the lab. Only built ones are links; the others are announced as planned. */
 export const ACTUARIAL_WORKSPACES = [
   { id: 'overview', title: "Vue d'ensemble", href: '/actuarial', available: true },
-  { id: 'pricing', title: 'Studio sinistres et tarification', href: '/actuarial/pricing', available: true },
-  { id: 'monte-carlo', title: 'Laboratoire Monte Carlo', href: '/actuarial/monte-carlo', available: true },
-  { id: 'reserving', title: 'Studio de provisionnement', href: '/actuarial/reserving', available: true },
-  { id: 'capital', title: 'Capital économique', href: null, available: false },
-  { id: 'alm', title: 'Laboratoire ALM', href: null, available: false },
+  { id: 'pricing', title: 'Calculer une prime', href: '/actuarial/pricing', available: true },
+  { id: 'monte-carlo', title: 'Simuler les pertes', href: '/actuarial/monte-carlo', available: true },
+  { id: 'reserving', title: 'Estimer les provisions', href: '/actuarial/reserving', available: true },
+  { id: 'capital', title: 'Capital économique', href: '/actuarial/capital', available: true },
+  { id: 'alm', title: 'Gestion actif-passif', href: '/actuarial/alm', available: true },
 ] as const;
 
 @Component({
@@ -42,7 +42,7 @@ export const ACTUARIAL_WORKSPACES = [
     <ul class="ac-tabs">
       @for (w of workspaces; track w.id) {
         <li>
-          @if (w.href) {
+          @if (w.available && w.href) {
             <a [routerLink]="w.href" class="ac-tab" routerLinkActive="" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">{{ w.title }}</a>
           } @else {
             <span class="ac-tab" aria-disabled="true">{{ w.title }} <span class="ac-tabNote">Prévu</span></span>

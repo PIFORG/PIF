@@ -43,9 +43,10 @@ let nextMenuId = 0;
         </button>
         @if (open()) {
           <div class="menu" role="menu" [id]="menuId" #menu tabindex="-1" (keydown)="onMenuKeyDown($event)">
-            <a routerLink="/settings/profile" role="menuitem" tabindex="-1" class="item" (click)="close(false)">{{ labels.profile }}</a>
+            <a routerLink="/settings/profile" role="menuitem" tabindex="-1" class="item" (click)="close(false)">Mon profil</a>
+            <a routerLink="/settings/profile" role="menuitem" tabindex="-1" class="item" (click)="close(false)">Préférences</a>
             <a routerLink="/settings/security" role="menuitem" tabindex="-1" class="item" (click)="close(false)">{{ labels.security }}</a>
-            <a routerLink="/settings/sessions" role="menuitem" tabindex="-1" class="item" (click)="close(false)">{{ labels.sessions }}</a>
+            <a routerLink="/settings/sessions" role="menuitem" tabindex="-1" class="item" (click)="close(false)">Mes sessions</a>
             @if (user.role === 'ADMIN') {
               <a routerLink="/admin" role="menuitem" tabindex="-1" class="item" (click)="close(false)">{{ labels.admin }}</a>
             }

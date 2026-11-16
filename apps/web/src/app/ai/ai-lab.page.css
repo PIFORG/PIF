@@ -1,0 +1,355 @@
+.ai-terminal {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ai-termHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.ai-termHead h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.ai-termContext {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.ai-synthChip {
+  margin: 0;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--mtr-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 650;
+  color: var(--mtr-amber);
+  background: var(--mtr-amber-soft);
+}
+
+.ai-workbench {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1.4fr) minmax(260px, 320px);
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.ai-rail,
+.ai-main,
+.ai-decision,
+.ai-agentBlock {
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.75rem;
+  min-width: 0;
+}
+
+.ai-rail h2,
+.ai-main h2,
+.ai-decision h2,
+.ai-agentBlock h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.ai-rail h2 + h2,
+.ai-decision section + section {
+  margin-top: 1rem;
+}
+
+.ai-field {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.ai-railMeta {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 0.65rem;
+}
+
+.ai-railMeta dt {
+  margin: 0;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mtr-text-3);
+}
+
+.ai-railMeta dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text);
+}
+
+.ai-railNote,
+.ai-muted,
+.ai-interpret {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+  line-height: 1.45;
+}
+
+.ai-interpret {
+  margin: 0.65rem 0 1rem;
+  padding: 0.45rem 0.55rem;
+  border-left: 3px solid var(--mtr-border-strong);
+  background: var(--mtr-elevated);
+}
+
+.ai-statusList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ai-statusList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.ai-statusList strong {
+  font-size: 0.75rem;
+  color: var(--mtr-text);
+}
+
+.ai-ok {
+  color: var(--mtr-pos) !important;
+}
+
+.ai-statusList strong[data-quality='weak'],
+.ai-statusList strong[data-quality='unsuitable'] {
+  color: var(--mtr-neg) !important;
+}
+
+.ai-statusList strong[data-quality='modest'] {
+  color: var(--mtr-amber) !important;
+}
+
+.ai-sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-metricsTable tr[data-emphasis='true'] th,
+.ai-metricsTable tr[data-emphasis='true'] td {
+  background: var(--mtr-hover);
+  font-weight: 650;
+}
+
+.ai-sub {
+  margin: 1rem 0 0.45rem;
+  font-size: 0.8125rem;
+  color: var(--mtr-brand-text);
+}
+
+.ai-barCell {
+  width: 40%;
+  min-width: 4rem;
+}
+
+.ai-bar {
+  display: block;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--mtr-brand);
+  max-width: 100%;
+}
+
+.ai-limits {
+  margin: 0.75rem 0 0;
+  padding-left: 1rem;
+  color: var(--mtr-text-2);
+  font-size: 0.75rem;
+}
+
+.ai-insights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ai-insights li {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+}
+
+.ai-insights li[data-active='true'] {
+  border-color: var(--mtr-brand-strong);
+  background: var(--mtr-hover);
+}
+
+.ai-insights p,
+.ai-agentBlock p {
+  margin: 0.25rem 0;
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+}
+
+.ai-kind {
+  font-size: 0.6875rem;
+  color: var(--mtr-text-3);
+}
+
+.ai-agentAction {
+  font-size: 0.875rem;
+}
+
+.ai-sentiment {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ai-sentiment li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.4rem;
+  align-items: start;
+  font-size: 0.75rem;
+}
+
+.ai-sentLabel {
+  font-weight: 650;
+  font-size: 0.625rem;
+  letter-spacing: 0.03em;
+}
+
+.ai-sentLabel[data-tone='pos'] {
+  color: var(--mtr-pos);
+}
+
+.ai-sentLabel[data-tone='neg'] {
+  color: var(--mtr-neg);
+}
+
+.ai-sentLabel[data-tone='muted'] {
+  color: var(--mtr-text-3);
+}
+
+[data-dir='up'] {
+  color: var(--mtr-pos);
+}
+
+[data-dir='down'] {
+  color: var(--mtr-neg);
+}
+
+@media (max-width: 1280px) {
+  .ai-workbench {
+    grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  }
+
+  .ai-decision {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.55rem;
+  }
+
+  .ai-decision > section,
+  .ai-decision > .ai-agentBlock {
+    border: 1px solid var(--mtr-border);
+    background: var(--mtr-surface);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 0.75rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .ai-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-decision {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-xaiTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.ai-xaiTitle {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.ai-xaiLede {
+  margin: 0.35rem 0 0;
+  max-width: 58ch;
+  color: var(--mtr-text-2);
+  font-size: 0.9375rem;
+}
+
+.ai-xaiBoard {
+  display: grid;
+  gap: 1rem;
+}
+
+.ai-xaiMeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+}
+
+.ai-xaiMeta dt {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.ai-xaiMeta dd {
+  margin: 0.2rem 0 0;
+}
+
+.ai-xaiSummary {
+  margin: 0 0 0.75rem;
+  line-height: 1.55;
+}

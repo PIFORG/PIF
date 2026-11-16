@@ -1,16 +1,18 @@
 <div class="page-shell tr-labShell tr-backtestShell">
-  <mtr-page-heading
-    [eyebrow]="nav.groupResearch"
-    [title]="copy.title"
-    [status]="'LIVE_INTEGRATED'"
-    [description]="copy.pageDescription"
-  />
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <p class="tr-pageEyebrow">{{ nav.groupResearch }}</p>
+      <h1 class="tr-pageTitle">{{ copy.title }}</h1>
+      <p class="tr-pageLede">{{ copy.pageDescription }}</p>
+    </div>
+  </header>
 
   @if (loadError()) {
     <p class="form-error-banner" role="alert">{{ loadError() }}</p>
   }
 
-  <section mtr-panel heading="Configuration de la stratégie" description="Les signaux après chaque clôture s'exécutent à l'ouverture de la barre suivante (convention documentée « next-open »).">
+  <div class="tr-btLab">
+  <section class="tr-btConfig" mtr-panel heading="Configuration" description="Signaux en clôture → exécution à l'ouverture suivante (next-open).">
     <form class="tr-formStack" (ngSubmit)="run()">
       <label>
         Stratégie
@@ -90,14 +92,27 @@
     }
   </section>
 
+  <div class="tr-btResults">
   @if (result(); as r) {
     <p mtr-provenance-note [provenance]="r.provenance" [asOf]="r.end"></p>
 
-    <div class="tr-kpis">
-      <div mtr-kpi label="Rendement total" icon="strategy">{{ pct(r.metrics.totalReturn, true) }}</div>
-      <div mtr-kpi label="Drawdown max." icon="risk">{{ pct(r.metrics.maxDrawdown) }}</div>
-      <div mtr-kpi label="Sharpe" icon="risk">{{ r.metrics.sharpe === null ? '—' : twoDecimals(r.metrics.sharpe) }}</div>
-      <div mtr-kpi label="Transactions" icon="trading">{{ r.metrics.tradeCount }}</div>
+    <div class="tr-tapeStrip" role="group" aria-label="Résultats du backtest">
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Rendement total</span>
+        <span class="tr-tapeValue">{{ pct(r.metrics.totalReturn, true) }}</span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Drawdown max.</span>
+        <span class="tr-tapeValue">{{ pct(r.metrics.maxDrawdown) }}</span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Sharpe</span>
+        <span class="tr-tapeValue num">{{ r.metrics.sharpe === null ? '—' : twoDecimals(r.metrics.sharpe) }}</span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Transactions</span>
+        <span class="tr-tapeValue num">{{ r.metrics.tradeCount }}</span>
+      </div>
     </div>
 
     <div class="tr-twoUp">
@@ -174,5 +189,12 @@
         }
       </ul>
     </section>
+  } @else {
+    <section class="tr-btIdle" aria-label="Résultats">
+      <h2 class="tr-sectionTitle">Résultats</h2>
+      <p class="tr-railEmpty">Configurez la stratégie à gauche, puis lancez le test. Les métriques, courbes et transactions apparaîtront ici.</p>
+    </section>
   }
+  </div>
+  </div>
 </div>

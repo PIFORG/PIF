@@ -21,10 +21,19 @@ public final class OrderRules {
     return stopPrice < quote.bid();
   }
 
+  /** A take-profit sell must sit above the current bid; at or below it, it would trigger at once. */
+  public static boolean takeProfitAboveBid(double takeProfitPrice, Quote quote) {
+    return takeProfitPrice > quote.bid();
+  }
+
   /** What a resting order does against a new quote: a stop triggers and then sells; a limit executes when it crosses. */
   public static RestingOrderAction restingOrderAction(RestingOrder order, Quote quote) {
     if (order.type() == OrderType.STOP && order.stopPrice() != null) {
       boolean triggered = order.triggered() || ExecutionRules.sellStopTriggered(order.stopPrice(), quote);
+      return new RestingOrderAction(triggered, triggered);
+    }
+    if (order.type() == OrderType.TAKE_PROFIT && order.stopPrice() != null) {
+      boolean triggered = order.triggered() || ExecutionRules.sellTakeProfitTriggered(order.stopPrice(), quote);
       return new RestingOrderAction(triggered, triggered);
     }
     if (order.type() == OrderType.LIMIT && order.limitPrice() != null) {

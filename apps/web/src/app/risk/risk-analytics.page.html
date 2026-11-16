@@ -1,17 +1,17 @@
-<div class="page-shell tr-labShell tr-riskShell">
-  <mtr-page-heading
-    [eyebrow]="nav.groupWorkspace"
-    [title]="copy.title"
-    [status]="'LIVE_INTEGRATED'"
-    [description]="copy.pageDescription"
-  >
-    <div mtrHeadingActions class="tr-picker">
+<div class="page-shell tr-labShell tr-riskShell tr-riskLab">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <p class="tr-pageEyebrow">Laboratoire</p>
+      <h1 class="tr-pageTitle">Risques</h1>
+      <p class="tr-pageLede">Exposition · VaR · ES · concentration · scénarios — calculs serveur</p>
+    </div>
+    <div class="tr-picker">
       @if (hasPortfolios()) {
         <mtr-portfolio-picker [portfolios]="portfolios() ?? []" [activeId]="activeId()" (changed)="activeId.set($event)" />
-        <a routerLink="/portfolios" class="btn btn-secondary">Portefeuilles</a>
+        <a routerLink="/portfolios" class="btn btn-ghost btn-sm">Portefeuilles</a>
       }
     </div>
-  </mtr-page-heading>
+  </header>
 
   @if (error()) {
     <p class="form-error-banner" role="alert">{{ error() }}</p>
@@ -32,28 +32,40 @@
       <p mtr-provenance-note [provenance]="a.provenance" [asOf]="a.asOf"></p>
     }
 
-    <div class="tr-kpis">
-      <div mtr-kpi label="Capitaux propres" icon="risk" [hint]="'Trésorerie ' + dt(p.cash) + ' · investi ' + pct(p.positionsValue / p.equity)">{{ dt(p.equity) }}</div>
-      <div mtr-kpi label="VaR 1 jour (95 %)" icon="risk" [hint]="analytics()?.risk.valueAtRisk95.requirement">
-        @if (analytics(); as a) {
-          <mtr-metric-value [metric]="a.risk.valueAtRisk95" [format]="dt" />
-        } @else {
-          …
-        }
+    <div class="tr-tapeStrip" role="group" aria-label="Indicateurs de risque">
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Capitaux propres</span>
+        <span class="tr-tapeValue num" [attr.title]="'Trésorerie ' + dt(p.cash) + ' · investi ' + pct(p.positionsValue / p.equity)">{{ dt(p.equity) }}</span>
       </div>
-      <div mtr-kpi label="Perte attendue (95 %)" icon="risk" [hint]="analytics()?.risk.expectedShortfall95.requirement">
-        @if (analytics(); as a) {
-          <mtr-metric-value [metric]="a.risk.expectedShortfall95" [format]="dt" />
-        } @else {
-          …
-        }
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">VaR 1 jour (95 %)</span>
+        <span class="tr-tapeValue" [attr.title]="analytics()?.risk.valueAtRisk95.requirement">
+          @if (analytics(); as a) {
+            <mtr-metric-value [metric]="a.risk.valueAtRisk95" [format]="dt" />
+          } @else {
+            …
+          }
+        </span>
       </div>
-      <div mtr-kpi label="Drawdown maximal" icon="risk" [hint]="analytics()?.risk.maxDrawdown.requirement">
-        @if (analytics(); as a) {
-          <mtr-metric-value [metric]="a.risk.maxDrawdown" [format]="plainPct" />
-        } @else {
-          …
-        }
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Perte attendue (95 %)</span>
+        <span class="tr-tapeValue" [attr.title]="analytics()?.risk.expectedShortfall95.requirement">
+          @if (analytics(); as a) {
+            <mtr-metric-value [metric]="a.risk.expectedShortfall95" [format]="dt" />
+          } @else {
+            …
+          }
+        </span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Drawdown maximal</span>
+        <span class="tr-tapeValue" [attr.title]="analytics()?.risk.maxDrawdown.requirement">
+          @if (analytics(); as a) {
+            <mtr-metric-value [metric]="a.risk.maxDrawdown" [format]="plainPct" />
+          } @else {
+            …
+          }
+        </span>
       </div>
     </div>
 

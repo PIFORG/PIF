@@ -16,7 +16,6 @@ import {
 } from '../core/api/trading-api';
 import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { IconComponent } from '../shared/icon/icon.component';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { OrderTicketComponent } from './order-ticket.component';
 import { emptyTicket, type TicketDraft } from './ticket-draft';
@@ -24,12 +23,19 @@ import { dateTime, describeTradingError, dt, pct, price, sectorLabel, shortTime,
 import {
   CreatePortfolioFormComponent,
   PortfolioPickerComponent,
-  ProvenanceNoteComponent,
   SignedAmountComponent,
 } from './trading-parts.components';
 import { OrdersTableComponent, PositionsTableComponent, TradesTableComponent } from './trading-tables.components';
 
 const RANGES: HistoryRange[] = ['1D', '5D', '1M', '3M', '6M', 'ALL'];
+const RANGE_LABELS: Record<HistoryRange, string> = {
+  '1D': '1 j',
+  '5D': '5 j',
+  '1M': '1 mois',
+  '3M': '3 mois',
+  '6M': '6 mois',
+  ALL: 'Tout',
+};
 const REFRESH_MS = 30_000;
 
 type Filter = 'ALL' | 'WATCHLIST' | AssetClass;
@@ -62,6 +68,8 @@ export function resultMessage(result: SubmitOrderResult): Toast {
       const what =
         order.type === 'STOP'
           ? `Stop-loss placé : ${units(order.quantity)} ${order.symbol} seront vendus au bid s'il descend à ${price(order.stopPrice)} DT.`
+          : order.type === 'TAKE_PROFIT'
+            ? `Prise de bénéfices placée : ${units(order.quantity)} ${order.symbol} seront vendus au bid s'il monte à ${price(order.stopPrice)} DT.`
           : `Votre ordre ${order.side === 'BUY' ? 'd\'achat' : 'de vente'} à cours limité de ${units(order.quantity)} ${order.symbol} à ${price(order.limitPrice)} DT est en cours.`;
       return { tone: 'pos', text: `${prefix}${what}${order.expiresAt ? ` Il expire le ${dateTime(order.expiresAt)} s'il n'est pas exécuté.` : ''}` };
     }
@@ -75,14 +83,11 @@ export function resultMessage(result: SubmitOrderResult): Toast {
   imports: [
     RouterLink,
     IconComponent,
-    PageHeadingComponent,
-    HeadingActionsSlot,
     ...WORKSPACE_PRIMITIVES,
     LineChartComponent,
     OrderTicketComponent,
     CreatePortfolioFormComponent,
     PortfolioPickerComponent,
-    ProvenanceNoteComponent,
     SignedAmountComponent,
     OrdersTableComponent,
     PositionsTableComponent,
@@ -117,6 +122,7 @@ export class TradingDeskPage {
   protected readonly toast = signal<Toast | null>(null);
 
   protected readonly ranges = RANGES;
+  protected readonly rangeLabel = RANGE_LABELS;
   protected readonly dash = '\u2014';
   protected readonly dt = dt;
   protected readonly price = price;
@@ -284,7 +290,11 @@ export class TradingDeskPage {
     this.draft.update((d) =>
       d.symbol === next && !side
         ? d
-        : { ...emptyTicket(next), side: side ?? d.side, type: d.type === 'STOP' && side !== 'SELL' ? 'MARKET' : d.type },
+        : {
+            ...emptyTicket(next),
+            side: side ?? d.side,
+            type: (d.type === 'STOP' || d.type === 'TAKE_PROFIT') && side !== 'SELL' ? 'MARKET' : d.type,
+          },
     );
   }
 

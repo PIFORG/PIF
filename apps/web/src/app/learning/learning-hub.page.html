@@ -1,17 +1,14 @@
-<div class="page-shell lr-hubShell">
-  <mtr-page-heading
-    [eyebrow]="copy.eyebrow"
-    [title]="copy.hubTitle"
-    [status]="'LIVE_INTEGRATED'"
-    [description]="copy.hubDescription"
-  >
-    <ng-container mtrHeadingActions>
-      <a routerLink="/stories" class="btn btn-secondary"><svg mtrIcon name="stories" [size]="16" /> Histoires financières</a>
-      @if (showcase()?.playable) {
-        <a [routerLink]="'/learn/missions/' + showcase()!.slug" class="btn btn-primary">{{ showcase()!.title }} <svg mtrIcon name="arrow-right" [size]="16" /></a>
-      }
-    </ng-container>
-  </mtr-page-heading>
+<div class="page-shell lr-hub">
+  <header class="lr-top">
+    <div class="lr-topText">
+      <h1 class="lr-title">Mon parcours</h1>
+      <p class="lr-lede">Simulez, décidez, mesurez — le profit seul ne note jamais une mission.</p>
+    </div>
+    <nav class="lr-topNav" aria-label="Accès rapide apprentissage">
+      <a routerLink="/stories" class="btn btn-ghost btn-sm"><svg mtrIcon name="stories" [size]="14" /> Histoires</a>
+      <a routerLink="/challenges" class="btn btn-ghost btn-sm"><svg mtrIcon name="challenge" [size]="14" /> Défis</a>
+    </nav>
+  </header>
 
   @if (error()) {
     <div mtr-empty-state tone="error" heading="Données d'apprentissage indisponibles" [description]="error()">
@@ -19,23 +16,133 @@
     </div>
   }
 
-  <div class="lr-kpis">
-    <div mtr-kpi label="Niveau recommandé" icon="academy" hint="Les paliers s'ouvrent lorsque vous réussissez les missions essentielles ci-dessous.">
-      {{ profile() ? levelLabel[profile()!.unlockedLevel] : '—' }}
+  <div class="lr-progress" role="group" aria-label="Progression">
+    <div class="lr-progressItem">
+      <span class="lr-progressLabel">Niveau</span>
+      <span class="lr-progressValue">{{ profile() ? levelLabel[profile()!.unlockedLevel] : '—' }}</span>
     </div>
-    <div mtr-kpi label="Missions réussies" icon="challenge" hint="Missions jouables">
-      {{ profile() ? profile()!.stats.missionsPassed + ' / ' + profile()!.stats.playableMissions : '—' }}
+    <div class="lr-progressItem">
+      <span class="lr-progressLabel">Missions réussies</span>
+      <span class="lr-progressValue num">{{ profile() ? profile()!.stats.missionsPassed + ' / ' + profile()!.stats.playableMissions : '—' }}</span>
     </div>
-    <div mtr-kpi label="Tentatives évaluées" icon="xai" hint="Les rejeux d'entraînement ne comptent jamais.">
-      {{ profile() ? profile()!.stats.assessedSessions : '—' }}
+    <div class="lr-progressItem">
+      <span class="lr-progressLabel">Tentatives évaluées</span>
+      <span class="lr-progressValue num">{{ profile() ? profile()!.stats.assessedSessions : '—' }}</span>
     </div>
-    <div mtr-kpi label="Calibration de la confiance" icon="risk" [hint]="calibrationHint()">{{ calibrationValue() }}</div>
+    <div class="lr-progressItem">
+      <span class="lr-progressLabel">Calibration</span>
+      <span class="lr-progressValue num" [attr.title]="calibrationHint()">{{ calibrationValue() }}</span>
+    </div>
+    @if (lastActivity(); as last) {
+      <div class="lr-progressItem lr-progressWide">
+        <span class="lr-progressLabel">Dernière activité</span>
+        <span class="lr-progressValue">{{ last }}</span>
+      </div>
+    }
   </div>
 
-  <div class="lr-layout">
-    <div class="lr-col">
+  <section class="lr-continue" aria-labelledby="lr-continue-title">
+    <div class="lr-continueHead">
+      <h2 id="lr-continue-title">Continuer mon apprentissage</h2>
+      @if (continueFocus(); as focus) {
+        <span class="lr-continueLevel">{{ levelLabel[focus.mission.level] }}</span>
+      }
+    </div>
+
+    @if (!data() && !error()) {
+      <div mtr-panel-skeleton [rows]="3"></div>
+    } @else if (continueFocus(); as focus) {
+      <div class="lr-continueBody">
+        <div class="lr-continueCopy">
+          <p class="lr-continueMission">{{ focus.mission.title }}</p>
+          <p class="lr-continueSummary">{{ focus.mission.summary }}</p>
+          @if (focus.reason) {
+            <p class="lr-continueReason">{{ focus.reason }}</p>
+          }
+          <ul class="lr-continueMeta">
+            <li>{{ focus.mission.estimatedMinutes }} min</li>
+            @if (focus.kind === 'resume') {
+              <li>Étape {{ focus.step }}</li>
+            }
+            @if (focus.mission.progress.attempts > 0 && focus.mission.progress.bestScore !== null) {
+              <li>Meilleur score {{ focus.mission.progress.bestScore }}</li>
+            }
+          </ul>
+        </div>
+        <div class="lr-continueActions">
+          @if (focus.kind === 'resume' && focus.sessionId) {
+            <a [routerLink]="'/learn/sessions/' + focus.sessionId" class="btn btn-primary">Reprendre <svg mtrIcon name="arrow-right" [size]="16" /></a>
+          } @else if (focus.mission.playable) {
+            <a [routerLink]="'/learn/missions/' + focus.mission.slug" class="btn btn-primary">
+              {{ focus.mission.progress.attempts > 0 ? 'Rejouer' : 'Commencer' }}
+              <svg mtrIcon name="arrow-right" [size]="16" />
+            </a>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="lr-muted">Toutes les missions jouables sont réussies. Explorez un rejeu ou une histoire financière.</p>
+    }
+  </section>
+
+  <div class="lr-workspace">
+    <section class="lr-missions" aria-labelledby="lr-missions-title">
+      <header class="lr-sectionHead">
+        <h2 id="lr-missions-title">Carte des missions</h2>
+        <p>Dix scénarios · trois paliers. Les missions verrouillées restent visibles sans être jouables.</p>
+      </header>
+
+      @if (!data()) {
+        <div mtr-panel-skeleton [rows]="6"></div>
+      } @else {
+        <div class="lr-questMap" role="img" aria-label="Progression du parcours — trois paliers, dix missions">
+          @for (group of levels(); track group.level) {
+            <section
+              class="lr-levelLane"
+              [attr.aria-label]="levelLabel[group.level]"
+              [attr.data-level]="group.level"
+              [attr.data-lane]="group.index + 1"
+            >
+              <header class="lr-levelGate">
+                <span class="lr-levelOrb" aria-hidden="true">{{ group.index + 1 }}</span>
+                <div>
+                  <h3>{{ levelLabel[group.level] }}</h3>
+                  <span class="lr-muted">{{ group.missions.length }} missions</span>
+                </div>
+              </header>
+              <ol class="lr-questPath">
+                @for (m of group.missions; track m.slug) {
+                  <li
+                    class="lr-questStep"
+                    [attr.data-state]="m.progress.passed ? 'cleared' : m.progress.activeSessionId ? 'active' : m.progress.attempts ? 'tried' : null"
+                  >
+                    @if (!$last) {
+                      <span class="lr-questConnector" aria-hidden="true"></span>
+                    }
+                    <span class="lr-questPin" aria-hidden="true">{{ m.order }}</span>
+                    @if (!m.playable) {
+                      <div class="lr-mission lr-questNode" [attr.data-availability]="m.availability" aria-disabled="true">
+                        <ng-container [ngTemplateOutlet]="missionBody" [ngTemplateOutletContext]="{ $implicit: m }" />
+                        <p class="lr-muted">Conçue et listée au catalogue ; le scénario n'est pas encore jouable.</p>
+                      </div>
+                    } @else {
+                      <a [routerLink]="'/learn/missions/' + m.slug" class="lr-mission lr-questNode" [attr.data-availability]="m.availability">
+                        <ng-container [ngTemplateOutlet]="missionBody" [ngTemplateOutletContext]="{ $implicit: m }" />
+                      </a>
+                    }
+                  </li>
+                }
+              </ol>
+            </section>
+          }
+        </div>
+      }
+    </section>
+
+    <aside class="lr-rail" aria-label="Compléments du parcours">
       @if (profile()?.activeSessions?.length) {
-        <section mtr-panel panelId="continue" heading="Reprendre la mission">
+        <section class="lr-railBlock" aria-labelledby="lr-sessions-title">
+          <h2 id="lr-sessions-title">Sessions en cours</h2>
           <ul class="lr-list">
             @for (s of profile()!.activeSessions; track s.id) {
               <li class="lr-spread">
@@ -49,87 +156,19 @@
         </section>
       }
 
-      <section
-        mtr-panel
-        panelId="missions"
-        heading="Carte des missions"
-        description="Dix scénarios sur trois paliers. Les missions implémentées sont notées ; les missions « jouables » en revue utilisent le même moteur."
-      >
-        @if (!data()) {
-          <div mtr-panel-skeleton [rows]="6"></div>
-        } @else {
-          <div class="lr-questMap" role="img" aria-label="Progression du parcours — trois paliers, dix missions">
-            <div class="lr-questAtmosphere" aria-hidden="true"></div>
-            <svg class="lr-questGrid" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs>
-                <pattern id="lr-grid" width="8" height="8" patternUnits="userSpaceOnUse">
-                  <path d="M 8 0 L 0 0 0 8" fill="none" stroke="currentColor" stroke-width="0.15" opacity="0.35" />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#lr-grid)" />
-            </svg>
-            @for (group of levels(); track group.level) {
-              <section
-                class="lr-levelLane"
-                [attr.aria-label]="levelLabel[group.level]"
-                [attr.data-level]="group.level"
-                [attr.data-lane]="group.index + 1"
-              >
-                <header class="lr-levelGate">
-                  <span class="lr-levelOrb" aria-hidden="true">{{ group.index + 1 }}</span>
-                  <div>
-                    <h3>{{ levelLabel[group.level] }}</h3>
-                    <span class="lr-muted">Paliers {{ group.index + 1 }} · {{ group.missions.length }} missions</span>
-                  </div>
-                </header>
-                <ol class="lr-questPath">
-                  @for (m of group.missions; track m.slug; let idx = $index) {
-                    <li
-                      class="lr-questStep"
-                      [attr.data-state]="m.progress.passed ? 'cleared' : m.progress.activeSessionId ? 'active' : m.progress.attempts ? 'tried' : null"
-                    >
-                      @if (!$last) {
-                        <span class="lr-questConnector" aria-hidden="true"></span>
-                      }
-                      <span class="lr-questPin" aria-hidden="true">{{ m.order }}</span>
-                      @if (!m.playable) {
-                        <div class="lr-mission lr-questNode" [attr.data-availability]="m.availability" aria-disabled="true">
-                          <ng-container [ngTemplateOutlet]="missionBody" [ngTemplateOutletContext]="{ $implicit: m }" />
-                          <p class="lr-muted">Conçue et listée au catalogue ; le scénario n'est pas encore jouable.</p>
-                        </div>
-                      } @else {
-                        <a [routerLink]="'/learn/missions/' + m.slug" class="lr-mission lr-questNode" [attr.data-availability]="m.availability">
-                          <ng-container [ngTemplateOutlet]="missionBody" [ngTemplateOutletContext]="{ $implicit: m }" />
-                        </a>
-                      }
-                    </li>
-                  }
-                </ol>
-              </section>
-            }
-          </div>
-        }
-      </section>
-    </div>
-
-    <div class="lr-col">
-      <section
-        mtr-panel
-        panelId="competencies"
-        heading="Profil de compétences"
-        description="Construit uniquement à partir des missions évaluées. Les tentatives où vous avez interrogé le mentor comptent moins et sont affichées à part."
-      >
+      <section class="lr-railBlock" aria-labelledby="lr-comp-title">
+        <h2 id="lr-comp-title">Compétences</h2>
+        <p class="lr-muted">Preuve issue des missions évaluées uniquement.</p>
         @if (profile(); as p) {
           <div mtr-competency-list [competencies]="p.competencies"></div>
         } @else {
-          <div mtr-panel-skeleton [rows]="5"></div>
+          <div mtr-panel-skeleton [rows]="4"></div>
         }
       </section>
 
-      <section mtr-panel panelId="recommendations" heading="Prochaine mission suggérée">
-        @if (!profile()) {
-          <div mtr-panel-skeleton [rows]="3"></div>
-        } @else if (profile()!.recommendations.length) {
+      @if (profile()?.recommendations?.length) {
+        <section class="lr-railBlock" aria-labelledby="lr-rec-title">
+          <h2 id="lr-rec-title">Suggestions</h2>
           <ul class="lr-list">
             @for (r of profile()!.recommendations; track r.slug) {
               <li>
@@ -143,21 +182,20 @@
               </li>
             }
           </ul>
-        } @else {
-          <p class="lr-muted">Vous avez réussi toutes les missions jouables. Essayez un rejeu pour explorer d'autres choix.</p>
-        }
-      </section>
+        </section>
+      }
 
       @if (nextStory(); as story) {
-        <section mtr-panel panelId="finstories" heading="Histoires financières" description="Histoires d'une minute : une décision, deux issues, une leçon.">
-          <a routerLink="/stories" [queryParams]="{ story: story.slug }" class="lr-mission">
+        <section class="lr-railBlock lr-storyPreview" aria-labelledby="lr-story-title">
+          <h2 id="lr-story-title">Histoires financières</h2>
+          <a routerLink="/stories" [queryParams]="{ story: story.slug }" class="lr-storyCard">
             <div class="lr-spread">
               <span class="eyebrow">{{ characterName[story.character] }}</span>
               @if (story.recommended) {
-                <span class="badge badge-info">Pour votre compétence la plus faible</span>
+                <span class="badge badge-info">Compétence faible</span>
               }
             </div>
-            <h4>{{ story.title }}</h4>
+            <h3>{{ story.title }}</h3>
             <p>{{ story.summary }}</p>
             <span class="lr-missionMeta"
               ><svg mtrIcon name="play" [size]="12" /> {{ round(story.durationMs / 1000) }} s · {{ competencyLabel[story.competency] }}</span
@@ -166,8 +204,15 @@
         </section>
       }
 
+      <section class="lr-railBlock" aria-labelledby="lr-challenges-title">
+        <h2 id="lr-challenges-title">Défis</h2>
+        <p class="lr-muted">Mettez en pratique vos compétences hors parcours guidé.</p>
+        <a routerLink="/challenges" class="btn btn-secondary btn-sm">Voir les défis</a>
+      </section>
+
       @if (profile()?.recentAssessments?.length) {
-        <section mtr-panel panelId="history" heading="Résultats récents">
+        <section class="lr-railBlock" aria-labelledby="lr-history-title">
+          <h2 id="lr-history-title">Résultats récents</h2>
           <ul class="lr-list">
             @for (a of profile()!.recentAssessments; track a.sessionId) {
               <li class="lr-spread">
@@ -183,7 +228,7 @@
           </ul>
         </section>
       }
-    </div>
+    </aside>
   </div>
 </div>
 

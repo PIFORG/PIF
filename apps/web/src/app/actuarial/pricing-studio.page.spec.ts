@@ -114,7 +114,8 @@ describe('PricingStudio', () => {
     const link = (name: string) => Array.from(root.querySelectorAll('a')).find((a) => a.textContent?.trim() === name);
     expect(link('Laboratoire Monte Carlo')?.getAttribute('href')).toBe('/actuarial/monte-carlo');
     expect(link('Studio de provisionnement')?.getAttribute('href')).toBe('/actuarial/reserving');
-    expect(getText(root, 'Laboratoire ALM').closest('[aria-disabled="true"]')).not.toBeNull();
+    expect(link('Capital économique')?.getAttribute('href')).toBe('/actuarial/capital');
+    expect(link('Laboratoire ALM')?.getAttribute('href')).toBe('/actuarial/alm');
   });
 
   it('validates locally and does not call the API with invalid input', async () => {

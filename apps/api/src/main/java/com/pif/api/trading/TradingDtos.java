@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
 public final class TradingDtos {
 
   static final List<String> ORDER_SIDES = List.of("BUY", "SELL");
-  static final List<String> ORDER_TYPES = List.of("MARKET", "LIMIT", "STOP");
+  static final List<String> ORDER_TYPES = List.of("MARKET", "LIMIT", "STOP", "TAKE_PROFIT");
   static final List<String> ASSET_CLASSES = List.of("EQUITY", "FUND", "BOND", "COMMODITY", "FX");
   static final List<String> HISTORY_RANGES = List.of("1D", "5D", "1M", "3M", "6M", "ALL");
   static final List<String> ORDER_STATUS_FILTERS = List.of("open", "closed", "all");
@@ -105,12 +105,13 @@ public final class TradingDtos {
   private static Schema<?> orderSchema(boolean submit) {
     var symbol = prop("symbol", pattern("^[A-Z]{2,16}$"));
     var side = prop("side", ApiDocs.oneOf(ORDER_SIDES));
-    var type = prop("type", describe(ApiDocs.oneOf(ORDER_TYPES), "STOP orders are protective sells."));
+    var type = prop("type", describe(ApiDocs.oneOf(ORDER_TYPES),
+        "STOP and TAKE_PROFIT are protective sells (trigger price in stopPrice)."));
     var quantity = prop("quantity", number("1", "1000000"));
     var limitPrice = prop("limitPrice", describe(number("0.001", "1000000"),
         "DT, at most 3 decimals. Required for LIMIT orders, not allowed otherwise."));
     var stopPrice = prop("stopPrice", describe(number("0.001", "1000000"),
-        "DT, at most 3 decimals. Required for STOP orders, not allowed otherwise."));
+        "DT, at most 3 decimals. Required for STOP and TAKE_PROFIT orders, not allowed otherwise."));
     if (!submit) {
       return object(List.of("symbol", "side", "type", "quantity"), symbol, side, type, quantity, limitPrice, stopPrice);
     }
@@ -269,7 +270,7 @@ public final class TradingDtos {
       numberRules(c, "limitPrice", limitPrice, 0.001, 1_000_000);
     }
     Object stopPrice = toNumber(body.get("stopPrice"));
-    if ("STOP".equals(type) || body.containsKey("stopPrice")) {
+    if ("STOP".equals(type) || "TAKE_PROFIT".equals(type) || body.containsKey("stopPrice")) {
       numberRules(c, "stopPrice", stopPrice, 0.001, 1_000_000);
     }
     return new OrderTerms(symbol instanceof String s ? s : null, side instanceof String s ? s : null,

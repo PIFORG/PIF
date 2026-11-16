@@ -1,38 +1,77 @@
 <div class="page-shell lr-briefingShell">
-  <nav aria-label="Breadcrumb" class="lr-muted" style="margin-bottom: var(--space-3)"><a routerLink="/learn">Parcours d'apprentissage</a> / Briefing de mission</nav>
-  <mtr-page-heading
-    [eyebrow]="mission() ? levelLabel[mission()!.level] : 'Mission'"
-    [title]="mission()?.title ?? 'Briefing de mission'"
-    [description]="mission()?.summary"
-  >
-    @if (mission(); as m) {
-      <ng-container mtrHeadingActions>
-        <span mtr-availability-badge [availability]="m.availability"></span>
-        @if (activeId()) {
-          <a [routerLink]="'/learn/sessions/' + activeId()" class="btn btn-primary">Reprendre la mission <svg mtrIcon name="arrow-right" [size]="16" /></a>
-        } @else {
-          <button type="button" class="btn btn-primary" (click)="start()" [disabled]="starting() || !playable()">{{ starting() ? 'Démarrage…' : playable() ? 'Commencer la mission' : 'Pas encore jouable' }}@if (playable() && !starting()) {<svg mtrIcon name="arrow-right" [size]="16" />}</button>
-        }
-      </ng-container>
-    }
-  </mtr-page-heading>
+  <nav aria-label="Breadcrumb" class="lr-crumb"><a routerLink="/learn">Parcours d'apprentissage</a> / Briefing de mission</nav>
 
   @if (error()) {
     <div class="notice form-error-banner" role="alert">{{ error() }}</div>
   }
 
   @if (mission(); as m) {
-    <div class="lr-briefingHero" role="presentation">
-      <div class="lr-briefingHeroGlow" aria-hidden="true"></div>
-      <p class="lr-briefingHook">{{ m.summary }}</p>
-    </div>
-    <div class="lr-layout lr-briefingGrid">
-      <div class="lr-col">
-        <section mtr-panel panelId="context" heading="Contexte opérationnel">
-          <p style="margin: 0; line-height: 1.6">{{ m.briefing.context }}</p>
+    <header class="lr-briefTop">
+      <div class="lr-briefTopText">
+        <p class="eyebrow">{{ levelLabel[m.level] }}</p>
+        <h1 class="lr-briefTitle">{{ m.title }}</h1>
+        <p class="lr-briefLede">{{ m.summary }}</p>
+        <div class="lr-briefMeta">
+          <span mtr-availability-badge [availability]="m.availability"></span>
+          <span>{{ m.estimatedMinutes }} min</span>
+          <span>{{ durationLabel() }}</span>
+          <span>{{ formatDT(m.initialCash, 0) }} de départ</span>
+        </div>
+      </div>
+      <div class="lr-briefCta">
+        @if (activeId()) {
+          <a [routerLink]="'/learn/sessions/' + activeId()" class="btn btn-primary">
+            Reprendre la mission <svg mtrIcon name="arrow-right" [size]="16" />
+          </a>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="start()"
+            [disabled]="starting() || !playable()"
+          >
+            {{ starting() ? 'Démarrage…' : playable() ? 'Commencer la mission' : 'Pas encore jouable' }}
+            @if (playable() && !starting()) {
+              <svg mtrIcon name="arrow-right" [size]="16" />
+            }
+          </button>
+        }
+        @if (m.relatedStorySlug) {
+          <a routerLink="/stories" [queryParams]="{ story: m.relatedStorySlug }" class="btn btn-ghost btn-sm">
+            <svg mtrIcon name="play" [size]="14" /> Ouvrir l'histoire
+          </a>
+        }
+      </div>
+    </header>
+
+    <div class="lr-briefBoard">
+      <div class="lr-briefMain">
+        <section
+          mtr-panel
+          panelId="objectives"
+          heading="Objectifs"
+          description="Les objectifs obligatoires doivent être atteints pour réussir. Les facultatifs améliorent le score."
+        >
+          <ul class="lr-list">
+            @for (o of m.objectives; track o.id) {
+              <li class="lr-objective" [attr.data-required]="o.required ? 'true' : 'false'">
+                <span class="lr-objectiveIcon" aria-hidden="true">
+                  <svg mtrIcon [name]="o.required ? 'check' : 'info'" [size]="12" />
+                </span>
+                <div>
+                  <strong>{{ o.label }}</strong>
+                  <span>{{ o.required ? 'Obligatoire' : 'Facultatif' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
         </section>
 
-        <div class="lr-twoUp">
+        <section mtr-panel panelId="context" heading="Contexte de marché">
+          <p class="lr-briefProse">{{ m.briefing.context }}</p>
+        </section>
+
+        <div class="lr-briefSplit">
           <section mtr-panel panelId="start" heading="Portefeuille de départ">
             <dl class="lr-metricGrid">
               <div>
@@ -72,20 +111,6 @@
           </section>
         </div>
 
-        <section mtr-panel panelId="objectives" heading="Objectifs" description="Les objectifs obligatoires doivent être atteints pour réussir. Les facultatifs améliorent le score.">
-          <ul class="lr-list">
-            @for (o of m.objectives; track o.id) {
-              <li class="lr-objective">
-                <span class="lr-objectiveIcon" aria-hidden="true"><svg mtrIcon [name]="o.required ? 'check' : 'info'" [size]="12" /></span>
-                <div>
-                  <strong>{{ o.label }}</strong>
-                  <span>{{ o.required ? 'Obligatoire' : 'Facultatif' }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-        </section>
-
         <section mtr-panel panelId="outcomes" heading="Ce que vous allez pratiquer">
           <ul class="lr-bullets">
             @for (o of m.learningOutcomes; track o) {
@@ -103,7 +128,7 @@
         </section>
       </div>
 
-      <div class="lr-col">
+      <aside class="lr-briefRail" aria-label="Évaluation et mentor">
         <section mtr-panel panelId="scoring" heading="Comment vous êtes évalué" [description]="scoringDescription()">
           <div class="lr-stack">
             @for (key of weightKeys; track key) {
@@ -125,11 +150,11 @@
           heading="Style du mentor"
           description="Le mentor repose sur des règles fixes (aucun fournisseur d'IA n'est configuré). Lui demander de l'aide marque la tentative comme assistée, ce qui compte moins dans votre profil."
         >
-          <fieldset style="border: 0; padding: 0; margin: 0" [disabled]="!!activeId()">
+          <fieldset class="lr-mentorFieldset" [disabled]="!!activeId()">
             <legend class="sr-only">Style du mentor</legend>
             <div class="lr-stack">
               @for (mm of mentorModes; track mm.value) {
-                <div class="lr-objective">
+                <label class="lr-mentorOption" [for]="'mentor-mode-' + mm.value">
                   <input
                     [id]="'mentor-mode-' + mm.value"
                     type="radio"
@@ -138,11 +163,11 @@
                     [checked]="selectedMode() === mm.value"
                     (change)="mode.set(mm.value)"
                   />
-                  <label [for]="'mentor-mode-' + mm.value" style="cursor: pointer">
+                  <span>
                     <strong>{{ mm.label }}{{ mm.value === m.mentorMode ? ' (par défaut pour cette mission)' : '' }}</strong>
                     <span>{{ mm.detail }}</span>
-                  </label>
-                </div>
+                  </span>
+                </label>
               }
             </div>
           </fieldset>
@@ -151,14 +176,8 @@
           }
         </section>
 
-        @if (m.relatedStorySlug) {
-          <section mtr-panel panelId="story" heading="À regarder d'abord" description="Une histoire financière d'une minute sur la même idée.">
-            <a routerLink="/stories" [queryParams]="{ story: m.relatedStorySlug }" class="btn btn-secondary"><svg mtrIcon name="play" [size]="14" /> Ouvrir l'histoire</a>
-          </section>
-        }
-
-        <p class="lr-muted">{{ m.provenance }}</p>
-      </div>
+        <p class="lr-muted lr-briefProvenance">{{ m.provenance }}</p>
+      </aside>
     </div>
   } @else if (error()) {
     <div mtr-empty-state tone="error" heading="Mission indisponible" description="Vérifiez le lien ou retournez à la liste des missions.">

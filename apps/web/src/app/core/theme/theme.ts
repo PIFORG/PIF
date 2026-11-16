@@ -7,12 +7,12 @@ export function isTheme(value: unknown): value is Theme {
 }
 
 /**
- * Explicit choice if the user made one.
- * With nothing stored, Market Trading Room stays on the dark command center.
- * The operating-system light preference does not override that default.
+ * Choix explicite si l'utilisateur en a enregistré un.
+ * Sans préférence stockée : mode clair (expérience de référence),
+ * indépendamment de la préférence système.
  */
 export function resolveTheme(stored: string | null, prefersLight: boolean): Theme {
   if (isTheme(stored)) return stored;
   void prefersLight;
-  return 'dark';
+  return 'light';
 }

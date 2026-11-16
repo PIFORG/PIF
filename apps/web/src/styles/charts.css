@@ -10,6 +10,12 @@
   padding-left: 64px;
 }
 
+.ch-plotSurface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .ch-svg {
   display: block;
   width: 100%;

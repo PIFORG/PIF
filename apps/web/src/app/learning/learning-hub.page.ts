@@ -13,9 +13,7 @@ import {
   type StorySummary,
 } from '../core/api/learning-api';
 import { formatDateTime } from '../core/format/finance';
-import { FR } from '../core/i18n/fr';
 import { IconComponent } from '../shared/icon/icon.component';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { AvailabilityBadgeComponent, CompetencyListComponent } from './learning-parts.components';
 
@@ -29,20 +27,19 @@ interface HubData {
   stories: StorySummary[];
 }
 
-/** /learn: apps/web/src/components/learning/LearningHub.tsx */
+interface ContinueFocus {
+  mission: MissionSummary;
+  kind: 'resume' | 'recommend' | 'next';
+  reason: string | null;
+  sessionId: string | null;
+  step: number | null;
+}
+
+/** /learn — parcours pédagogique : progression + prochaine action + carte des missions. */
 @Component({
   selector: 'mtr-learning-hub-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    NgTemplateOutlet,
-    RouterLink,
-    IconComponent,
-    PageHeadingComponent,
-    HeadingActionsSlot,
-    ...WORKSPACE_PRIMITIVES,
-    AvailabilityBadgeComponent,
-    CompetencyListComponent,
-  ],
+  imports: [NgTemplateOutlet, RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES, AvailabilityBadgeComponent, CompetencyListComponent],
   host: { style: 'display: contents' },
   templateUrl: './learning-hub.page.html',
 })
@@ -51,7 +48,6 @@ export class LearningHubPage {
   private readonly storiesApi = inject(StoriesFeedApi);
   private destroyed = false;
 
-  protected readonly copy = FR.learn;
   protected readonly data = signal<HubData | null>(null);
   protected readonly error = signal<string | null>(null);
 
@@ -62,7 +58,6 @@ export class LearningHubPage {
   protected readonly round = Math.round;
 
   protected readonly profile = computed(() => this.data()?.profile);
-  protected readonly showcase = computed(() => this.data()?.missions.find((m) => m.slug === 'survive-the-market-crash'));
   protected readonly nextStory = computed(() => {
     const stories = this.data()?.stories;
     return stories?.find((s) => !s.progress.completed) ?? stories?.[0];
@@ -70,6 +65,40 @@ export class LearningHubPage {
   protected readonly levels = computed(() => {
     const missions = this.data()?.missions ?? [];
     return LEVELS.map((level, index) => ({ level, index, missions: missions.filter((m) => m.level === level) }));
+  });
+
+  /** Priorité : session active → recommandation API → première mission jouable non verrouillée / non réussie. */
+  protected readonly continueFocus = computed((): ContinueFocus | null => {
+    const data = this.data();
+    if (!data) return null;
+    const { profile, missions } = data;
+    const active = profile.activeSessions[0];
+    if (active) {
+      const mission = missions.find((m) => m.slug === active.missionSlug);
+      if (mission) {
+        return { mission, kind: 'resume', reason: null, sessionId: active.id, step: active.currentStep };
+      }
+    }
+    const rec = profile.recommendations[0];
+    if (rec) {
+      const mission = missions.find((m) => m.slug === rec.slug);
+      if (mission?.playable) {
+        return { mission, kind: 'recommend', reason: rec.reason, sessionId: mission.progress.activeSessionId, step: null };
+      }
+    }
+    const next = missions.find((m) => m.playable && !m.levelLocked && !m.progress.passed);
+    if (next) return { mission: next, kind: 'next', reason: null, sessionId: next.progress.activeSessionId, step: null };
+    return null;
+  });
+
+  protected readonly lastActivity = computed(() => {
+    const profile = this.profile();
+    if (!profile) return null;
+    const active = profile.activeSessions[0];
+    if (active) return `${active.missionTitle} · étape ${active.currentStep}`;
+    const recent = profile.recentAssessments[0];
+    if (recent) return `${recent.missionTitle} · ${formatDateTime(recent.createdAt)}`;
+    return null;
   });
 
   protected readonly calibrationValue = computed(() => {

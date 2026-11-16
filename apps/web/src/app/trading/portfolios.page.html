@@ -1,17 +1,17 @@
-<div class="page-shell tr-room tr-books">
-  <mtr-page-heading
-    [eyebrow]="'Portefeuilles virtuels'"
-    [title]="'Portefeuilles'"
-    [status]="'LIVE_INTEGRATED'"
-    [description]="'Valorisation, performance, risque et l\'historique complet de chaque ordre, transaction et mouvement de trésorerie. Tous les chiffres sont calculés par le serveur.'"
-  >
-    <div mtrHeadingActions class="tr-picker">
+<div class="page-shell tr-room tr-books tr-booksBoard">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <h1 class="tr-pageTitle">Portefeuilles</h1>
+      <p class="tr-pageLede">Valorisation · allocation · risque · historique serveur</p>
+    </div>
+    <div class="tr-picker">
       @if (hasPortfolios()) {
         <mtr-portfolio-picker [portfolios]="portfolios() ?? []" [activeId]="activeId()" (changed)="activeId.set($event)" />
-        <button type="button" class="btn btn-secondary" [attr.aria-expanded]="creating()" (click)="creating.set(!creating())">{{ creating() ? 'Fermer' : 'Nouveau portefeuille' }}</button>
+        <a routerLink="/trading" class="btn btn-primary btn-sm">Négocier</a>
+        <button type="button" class="btn btn-secondary btn-sm" [attr.aria-expanded]="creating()" (click)="creating.set(!creating())">{{ creating() ? 'Fermer' : 'Nouveau' }}</button>
       }
     </div>
-  </mtr-page-heading>
+  </header>
 
   @if (error()) {
     <p class="form-error-banner" role="alert">{{ error() }}</p>
@@ -49,146 +49,132 @@
       </div>
     }
 
-    <div class="tr-narrative">
-      <div class="tr-narrativeCurve">
-        <section mtr-panel heading="Historique des capitaux propres" [description]="detail()?.history?.convention">
+    <div class="tr-tapeStrip tr-booksStrip" role="group" aria-label="Synthèse du portefeuille">
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Capitaux propres</span>
+        <span class="tr-tapeValue num" [attr.title]="'Trésorerie ' + dt(p.cash) + ' · positions ' + dt(p.positionsValue)">{{ dt(p.equity) }}</span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Profit</span>
+        <span class="tr-tapeValue" [attr.title]="'Capitaux propres moins ' + dt(p.netContributions) + ' apportés'"><span mtr-signed-amount [value]="p.profit"></span></span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Rendement pondéré dans le temps</span>
+        <span class="tr-tapeValue">
+          @if (analytics(); as a) {
+            <mtr-metric-value [metric]="a.performance.timeWeightedReturn" [format]="signedPct" />
+          } @else {
+            …
+          }
+        </span>
+      </div>
+      <div class="tr-tapeCell">
+        <span class="tr-tapeLabel">Rendement pondéré par l'argent</span>
+        <span class="tr-tapeValue">
+          @if (analytics(); as a) {
+            <mtr-metric-value [metric]="a.performance.moneyWeightedReturn" [format]="signedPct" />
+          } @else {
+            …
+          }
+        </span>
+      </div>
+    </div>
+
+    <div class="tr-booksLayout">
+      <div class="tr-booksMain">
+        <section class="tr-booksPanel" aria-labelledby="books-equity-title">
+          <div class="tr-booksPanelHead">
+            <h2 id="books-equity-title" class="tr-sectionTitle">Historique des capitaux propres</h2>
+            @if (detail()?.history?.convention; as conv) {
+              <p class="tr-sectionMeta">{{ conv }}</p>
+            }
+          </div>
           @if (!detail()) {
             <div mtr-panel-skeleton [rows]="4"></div>
           } @else if (equityChart(); as c) {
             @if (c.enough) {
-              <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="wholeNumber" [xLabels]="c.xLabels" [minSpan]="c.minSpan" [height]="280"></figure>
-              <p class="tr-muted">Ligne continue : capitaux propres. Ligne pointillée : argent apporté. L'écart est le profit.</p>
+              <figure mtr-line-chart [series]="c.series" [summary]="c.summary" [formatY]="wholeNumber" [xLabels]="c.xLabels" [minSpan]="c.minSpan" [height]="260"></figure>
+              <p class="tr-muted">Ligne continue : capitaux propres. Pointillés : apports. L'écart est le profit.</p>
             } @else {
               <div mtr-empty-state icon="clock" heading="L'historique se constitue au fil des jours" [description]="c.description"></div>
             }
           }
           @if (analytics(); as days) {
-            <p class="tr-muted">Jours complets pris en compte pour les rendements : {{ days.performance.completeDays }}.</p>
+            <p class="tr-muted">Jours complets pour les rendements : {{ days.performance.completeDays }}.</p>
           }
+        </section>
+
+        <section class="tr-booksPanel" aria-labelledby="books-pos-title">
+          <div class="tr-booksPanelHead">
+            <div>
+              <h2 id="books-pos-title" class="tr-sectionTitle">Positions</h2>
+              <p class="tr-sectionMeta">{{ p.positions.length }} ligne{{ p.positions.length > 1 ? 's' : '' }} · mid {{ dateTime(p.asOf) }}</p>
+            </div>
+            <a routerLink="/trading" class="btn btn-ghost btn-sm">Ouvrir la salle</a>
+          </div>
+          <mtr-positions-table [positions]="p.positions" />
         </section>
       </div>
 
-      <div class="tr-narrativeRail">
-        <div class="tr-kpis">
-          <div mtr-kpi label="Capitaux propres" icon="portfolio" [hint]="'Trésorerie ' + dt(p.cash) + ' · positions ' + dt(p.positionsValue)">{{ dt(p.equity) }}</div>
-          <div
-            mtr-kpi
-            label="Profit"
-            icon="markets"
-            [tone]="p.profit > 0 ? 'positive' : p.profit < 0 ? 'negative' : 'default'"
-            [hint]="'Capitaux propres moins ' + dt(p.netContributions) + ' apportés'"
-          >
-            <span mtr-signed-amount [value]="p.profit"></span>
-          </div>
-          <div mtr-kpi label="Rendement pondéré dans le temps" icon="strategy" hint="Depuis la création · dépôts exclus">
-            @if (analytics(); as a) {
-              <mtr-metric-value [metric]="a.performance.timeWeightedReturn" [format]="signedPct" />
-            } @else {
-              …
-            }
-          </div>
-          <div mtr-kpi label="Rendement pondéré par l'argent" icon="strategy" hint="Dietz modifié · depuis la création">
-            @if (analytics(); as a) {
-              <mtr-metric-value [metric]="a.performance.moneyWeightedReturn" [format]="signedPct" />
-            } @else {
-              …
-            }
-          </div>
-        </div>
-
-        <dl class="tr-cashFacts">
-          <div>
-            <dt>Trésorerie au grand livre</dt>
-            <dd>{{ dt(p.cash) }}</dd>
-          </div>
-          <div>
-            <dt>Disponible</dt>
-            <dd>{{ dt(p.availableCash) }}</dd>
-          </div>
-          <div>
-            <dt>Réservée</dt>
-            <dd>{{ dt(p.reservedCash) }}</dd>
-          </div>
-          <div>
-            <dt>Valeur des positions</dt>
-            <dd>{{ dt(p.positionsValue) }}</dd>
-          </div>
-          <div>
-            <dt>Frais déjà payés</dt>
-            <dd>{{ dt(p.feesPaid) }}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-
-    <div class="tr-allocBoard">
-      <section mtr-panel heading="Allocation" description="Part des capitaux propres aux cours mid — instruments, classes, secteurs, puis trésorerie.">
-        @if (analytics(); as a) {
-          <div class="tr-allocSplit">
-            <div class="tr-allocVisual">
-              <div mtr-allocation-bar label="Allocation par instrument et trésorerie" [items]="allocationItems()"></div>
-              <p class="tr-contextLabel">Par classe d'actifs</p>
-              <ul class="tr-classList">
-                @for (line of a.allocation.byAssetClass; track line.name) {
-                  <li>
-                    <span>{{ line.label || (line.name === 'EQUITY' ? 'Actions' : line.name === 'FUND' ? 'Fonds' : line.name) }}</span>
-                    <span class="tr-weight">
-                      <span class="tr-weightTrack" aria-hidden="true"><span class="tr-weightBar" [style.width.%]="(line.weight ?? 0) * 100"></span></span>
-                      <span class="num">{{ pct(line.weight) }}</span>
-                    </span>
-                    <span class="num">{{ dt(line.value) }}</span>
-                  </li>
-                }
-              </ul>
+      <aside class="tr-booksRail" aria-label="Liquidités, allocation et risque">
+        <section class="tr-booksPanel" aria-labelledby="books-cash-title">
+          <h2 id="books-cash-title" class="tr-sectionTitle">Liquidités</h2>
+          <dl class="tr-cashFacts">
+            <div>
+              <dt>Grand livre</dt>
+              <dd>{{ dt(p.cash) }}</dd>
             </div>
-            <div class="table-wrap tr-rows">
-              <table class="data-table">
-                <caption class="sr-only">Allocation par secteur</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Secteur</th>
-                    <th scope="col" class="num">Valeur</th>
-                    <th scope="col" class="num">Poids</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (line of a.allocation.bySector; track line.name) {
-                    <tr>
-                      <th scope="row">{{ sectorLabel(line.name) }}</th>
-                      <td class="num">{{ dt(line.value) }}</td>
-                      <td class="num">
-                        <span class="tr-weight">
-                          <span class="tr-weightTrack" aria-hidden="true"><span class="tr-weightBar" [style.width.%]="(line.weight ?? 0) * 100"></span></span>
-                          {{ pct(line.weight) }}
-                        </span>
-                      </td>
-                    </tr>
-                  }
-                  <tr>
-                    <th scope="row">Trésorerie</th>
-                    <td class="num">{{ dt(a.allocation.cash.value) }}</td>
-                    <td class="num">
-                      <span class="tr-weight">
-                        <span class="tr-weightTrack" aria-hidden="true"><span class="tr-weightBar" [style.width.%]="(a.allocation.cash.weight ?? 0) * 100"></span></span>
-                        {{ pct(a.allocation.cash.weight) }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div>
+              <dt>Disponible</dt>
+              <dd>{{ dt(p.availableCash) }}</dd>
             </div>
-          </div>
-        } @else {
-          <div mtr-panel-skeleton [rows]="4"></div>
-        }
-      </section>
-    </div>
+            <div>
+              <dt>Réservée</dt>
+              <dd>{{ dt(p.reservedCash) }}</dd>
+            </div>
+            <div>
+              <dt>Positions</dt>
+              <dd>{{ dt(p.positionsValue) }}</dd>
+            </div>
+            <div>
+              <dt>Frais payés</dt>
+              <dd>{{ dt(p.feesPaid) }}</dd>
+            </div>
+          </dl>
+        </section>
 
-    <div class="tr-positions">
-      <section mtr-panel heading="Positions" [description]="p.positions.length + ' ligne' + (p.positions.length > 1 ? 's' : '') + ' · mid au ' + dateTime(p.asOf)">
-        <a mtrPanelActions routerLink="/trading" class="btn btn-primary btn-sm">Négocier</a>
-        <mtr-positions-table [positions]="p.positions" />
-      </section>
+        <section class="tr-booksPanel" aria-labelledby="books-alloc-title">
+          <h2 id="books-alloc-title" class="tr-sectionTitle">Allocation</h2>
+          @if (analytics(); as a) {
+            <div mtr-allocation-bar label="Instruments et trésorerie" [items]="allocationItems()"></div>
+            <ul class="tr-classList">
+              @for (line of a.allocation.byAssetClass; track line.name) {
+                <li>
+                  <span>{{ line.label || (line.name === 'EQUITY' ? 'Actions' : line.name === 'FUND' ? 'Fonds' : line.name) }}</span>
+                  <span class="num">{{ pct(line.weight) }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div mtr-panel-skeleton [rows]="3"></div>
+          }
+        </section>
+
+        <section class="tr-booksPanel" aria-labelledby="books-risk-title">
+          <h2 id="books-risk-title" class="tr-sectionTitle">Risque</h2>
+          @if (analytics(); as a) {
+            <dl class="tr-fundGrid">
+              <div mtr-metric-row label="VaR 95 %" [metric]="a.risk.valueAtRisk95" [format]="dt"></div>
+              <div mtr-metric-row label="ES 95 %" [metric]="a.risk.expectedShortfall95" [format]="dt"></div>
+              <div mtr-metric-row label="Drawdown max." [metric]="a.risk.maxDrawdown" [format]="plainPct"></div>
+              <div mtr-metric-row label="Exposition" [metric]="a.concentration.exposure" [format]="plainPct"></div>
+            </dl>
+            <a routerLink="/risk" class="btn btn-ghost btn-sm">Laboratoire risque</a>
+          } @else {
+            <div mtr-panel-skeleton [rows]="3"></div>
+          }
+        </section>
+      </aside>
     </div>
 
     <div class="tr-riskBoard">

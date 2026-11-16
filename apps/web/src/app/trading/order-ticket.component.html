@@ -60,7 +60,13 @@
       </div>
       @if (draft().type !== 'MARKET') {
         <div class="field">
-          <label class="field-label" for="ticket-price">{{ draft().type === 'LIMIT' ? 'Cours limite (DT)' : 'Cours stop (DT)' }}</label>
+          <label class="field-label" for="ticket-price">{{
+            draft().type === 'LIMIT'
+              ? 'Cours limite (DT)'
+              : draft().type === 'TAKE_PROFIT'
+                ? 'Cours de prise de bénéfices (DT)'
+                : 'Cours stop (DT)'
+          }}</label>
           <input
             id="ticket-price"
             class="input num"
@@ -86,6 +92,9 @@
 
     @if (draft().type === 'STOP' && draft().side === 'SELL') {
       <p class="tr-muted">Un stop attend que le cours acheteur descende jusqu'à votre cours stop, puis vend à ce cours. Il protège une position que vous détenez.</p>
+    }
+    @if (draft().type === 'TAKE_PROFIT' && draft().side === 'SELL') {
+      <p class="tr-muted">Une prise de bénéfices attend que le cours acheteur monte jusqu'à votre seuil, puis vend au cours acheteur. Elle verrouille un gain sur une position détenue.</p>
     }
     @if (draft().type === 'MARKET') {
       <p class="tr-muted">Un ordre au marché s'exécute maintenant au meilleur prix, dans la limite de la quantité disponible ; le solde est annulé et ne reste pas en carnet.</p>

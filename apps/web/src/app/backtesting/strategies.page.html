@@ -1,0 +1,30 @@
+<div class="page-shell">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <p class="tr-pageEyebrow">Recherche</p>
+      <h1 class="tr-pageTitle">Stratégies</h1>
+      <p class="tr-pageLede">Catalogue déterministe branché sur le moteur de backtest — sans prévisualisation trompeuse.</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+
+  <section mtr-panel heading="Catalogue" description="Chaque stratégie s'exécute via /backtests/run sur cours fictifs (NEXT_CLOSE).">
+    <ul class="db-sessionList">
+      @for (s of remote() ?? catalog; track $any(s).id) {
+        <li>
+          <span class="db-sessionText">
+            <strong>{{ $any(s).title || $any(s).label }}</strong>
+            <span>{{ $any(s).description || $any(s).hint }}</span>
+          </span>
+          <a class="btn btn-secondary btn-sm" [routerLink]="['/backtesting']" [queryParams]="{ strategy: $any(s).id }">Lancer un backtest</a>
+        </li>
+      }
+    </ul>
+    @if (note()) {
+      <p class="field-hint">{{ note() }}</p>
+    }
+  </section>
+</div>

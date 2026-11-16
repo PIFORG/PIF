@@ -1,5 +1,86 @@
 /* apps/web/src/components/trading/trading.module.css with a tr- prefix. Uses the workspace tokens only. */
 
+.tr-pageTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.tr-pageEyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.tr-pageTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.tr-pageLede {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-3);
+}
+
+.tr-tapeStrip {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: var(--mtr-surface);
+  overflow: hidden;
+}
+
+.tr-tapeCell {
+  flex: 1 1 8rem;
+  min-width: 7rem;
+  padding: 0.6rem 0.85rem;
+  border-right: 1px solid var(--mtr-border);
+}
+
+.tr-tapeCell:last-child {
+  border-right: 0;
+}
+
+.tr-tapeLabel {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.tr-tapeValue {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--mtr-text);
+}
+
+.tr-tapeHint {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--mtr-text-3);
+}
+
 .tr-kpis {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -903,6 +984,207 @@
   box-shadow: none;
 }
 
+/* ---------- Markets board (terminal layout) ---------- */
+
+.tr-marketsBoard .tr-pageTopActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.tr-marketsBoard .tr-sourceInline {
+  margin: 0;
+}
+
+.tr-marketsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16.5rem, 20rem);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.tr-marketsMain {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+}
+
+.tr-marketsMainHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tr-sectionTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--mtr-text);
+}
+
+.tr-sectionMeta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
+}
+
+.tr-marketsRail {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.tr-railBlock {
+  padding: var(--space-3);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+}
+
+.tr-railMuted {
+  background: var(--mtr-sunken);
+}
+
+.tr-railHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.tr-railEmpty {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--mtr-text-3);
+}
+
+.tr-watchChips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.tr-watchChips > li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem;
+  align-items: stretch;
+}
+
+.tr-watchChip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.45rem;
+  align-items: center;
+  min-height: 2.1rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: var(--mtr-canvas);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+
+.tr-watchChip:hover {
+  border-color: color-mix(in srgb, var(--mtr-brand) 40%, var(--mtr-border));
+  background: color-mix(in srgb, var(--mtr-brand) 8%, var(--mtr-surface));
+  text-decoration: none;
+}
+
+.tr-watchChipRemove {
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--mtr-text-3);
+  cursor: pointer;
+  min-width: 2.1rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.tr-watchChipRemove:hover {
+  color: var(--mtr-neg);
+  border-color: var(--mtr-neg);
+}
+
+.tr-newsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.tr-newsList li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.tr-newsList strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--mtr-text);
+}
+
+.tr-newsList span {
+  font-size: 0.72rem;
+  color: var(--mtr-text-3);
+}
+
+.tr-fundGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 0.75rem;
+  margin: var(--space-2) 0 0;
+}
+
+.tr-fundGrid dt {
+  margin: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mtr-text-3);
+}
+
+.tr-fundGrid dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text);
+}
+
+@media (max-width: 1100px) {
+  .tr-marketsLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .tr-marketsRail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .tr-marketsRail {
+    grid-template-columns: 1fr;
+  }
+
+  .tr-marketsBoard .tr-search.tr-command {
+    grid-template-columns: 1fr;
+  }
+}
+
 .tr-blotterTable tbody th strong {
   font-family: var(--font-mono);
   font-size: 0.84rem;
@@ -934,6 +1216,61 @@
 
 .tr-blotterTable tr[data-status='HALTED'] th {
   box-shadow: inset 3px 0 0 var(--mtr-neg);
+}
+
+/* ---------- Portfolio wealth board ---------- */
+
+.tr-booksLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  align-items: start;
+}
+
+.tr-booksMain,
+.tr-booksRail {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.tr-booksPanel {
+  padding: var(--space-3);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+}
+
+.tr-booksPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tr-booksBoard .tr-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+@media (max-width: 1100px) {
+  .tr-booksLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .tr-booksRail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .tr-booksRail {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Portfolio story ---------- */
@@ -1287,4 +1624,222 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* ---------- Terminal trading desk ---------- */
+
+.tr-terminal {
+  gap: 0.65rem;
+  padding-top: 0.35rem;
+}
+
+.tr-termHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--mtr-border);
+  margin-bottom: 0.35rem;
+}
+
+.tr-termTitle h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+  letter-spacing: -0.02em;
+}
+
+.tr-termMeta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--mtr-text-2);
+}
+
+.tr-termActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tr-termStrip {
+  display: flex;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.tr-termStrip div {
+  min-width: 4.5rem;
+}
+
+.tr-termStrip dt {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.tr-termStrip dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-termPanel {
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
+  padding: 0.65rem 0.7rem;
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.tr-termPanelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tr-termPanelHead h2 {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--mtr-brand-text);
+}
+
+.tr-termCount {
+  font-size: 0.6875rem;
+  color: var(--mtr-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-termOnboard h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.tr-termOnboard {
+  display: grid;
+  grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.tr-termOnboardCopy h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.tr-termOnboard p {
+  margin: 0;
+  color: var(--mtr-text-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .tr-termOnboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tr-deskPage.tr-terminal .tr-desk {
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) minmax(300px, 340px);
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+}
+
+/* ---------- Backtesting research lab ---------- */
+
+.tr-btLab {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.tr-btConfig {
+  position: sticky;
+  top: 0.75rem;
+}
+
+.tr-btResults {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.tr-btIdle {
+  padding: var(--space-4);
+  border: 1px dashed var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-sunken);
+}
+
+@media (max-width: 1100px) {
+  .tr-btLab {
+    grid-template-columns: 1fr;
+  }
+
+  .tr-btConfig {
+    position: static;
+  }
+}
+
+.tr-deskPage.tr-terminal .tr-areaChart .tr-termPanel {
+  border-left: 3px solid var(--mtr-brand-strong);
+}
+
+.tr-deskPage.tr-terminal .tr-areaChart .tr-termPanel,
+.tr-deskPage.tr-terminal .tr-areaTicket .tr-termPanel,
+.tr-deskPage.tr-terminal .tr-areaMarket .tr-termPanel {
+  background: var(--mtr-surface);
+  box-shadow: none;
+}
+
+.tr-chartName {
+  font-weight: 500;
+  color: var(--mtr-text-2);
+  font-size: 0.85em;
+}
+
+.tr-changeLine {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-2);
+}
+
+.tr-blotter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.tr-termSideBlock {
+  max-height: 280px;
+  overflow: auto;
+}
+
+@media (max-width: 1100px) {
+  .tr-blotter {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .tr-termStrip {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

@@ -2,6 +2,40 @@
 
 /* ---------- Page ---------- */
 
+.st-pageEyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.st-pageTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--mtr-border);
+}
+
+.st-pageTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.st-pageLede {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--mtr-text-3);
+}
+
 .st-cinemaShell {
   position: relative;
 }
@@ -141,20 +175,49 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 12, 22, 0.72);
+  backdrop-filter: blur(10px);
 }
 
-.st-controls button {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
+.st-transportPrimary,
+.st-transportSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.st-controls button,
+.st-transportBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 50%;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease);
+}
+
+.st-transportPlay {
+  padding-inline: 14px;
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+}
+
+.st-transportLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .st-controls button:hover {
@@ -173,6 +236,18 @@
 .st-controls button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .st-transportLabel {
+    display: none;
+  }
+
+  .st-controls button,
+  .st-transportBtn {
+    padding: 0;
+    width: 44px;
+  }
 }
 
 .st-time {
@@ -941,6 +1016,31 @@
 
 .st-viewerStage {
   position: relative;
+}
+
+.st-narrationGate {
+  position: absolute;
+  left: 50%;
+  bottom: 5.5rem;
+  z-index: 6;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+  width: min(18rem, calc(100% - 1.5rem));
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(8, 14, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.st-narrationGate p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(244, 248, 255, 0.92);
 }
 
 .st-viewer .st-stage {

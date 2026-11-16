@@ -40,20 +40,35 @@ export class WorkspaceNotMigratedPage {
   protected readonly notice = NOTICE;
 }
 
-/** Any other public route (landing page, unknown paths…). */
+/** Any other public route (unknown paths…). */
 @Component({
   selector: 'mtr-public-not-migrated',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, AuthLayoutComponent],
   host: { style: 'display: contents' },
   template: `
-    <mtr-auth-layout title="Pas encore disponible" [lead]="notice" [showFooter]="true">
+    <mtr-auth-layout
+      title="Page introuvable"
+      lead="Cette adresse ne correspond à aucun écran de Market Trading Room."
+      [showFooter]="true"
+    >
+      <div class="notfound-actions">
+        <a routerLink="/" class="btn btn-primary">Accueil</a>
+        <a routerLink="/login" class="btn btn-secondary">Connexion</a>
+      </div>
       <ng-container ngProjectAs="[authFooter]">
-        <span><a routerLink="/login">Retour à la connexion</a></span>
+        <span>Besoin d'aide ? Retournez à l'accueil ou connectez-vous à votre espace.</span>
       </ng-container>
     </mtr-auth-layout>
   `,
+  styles: `
+    .notfound-actions {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .notfound-actions .btn {
+      justify-content: center;
+    }
+  `,
 })
-export class PublicNotMigratedPage {
-  protected readonly notice = NOTICE;
-}
+export class PublicNotMigratedPage {}

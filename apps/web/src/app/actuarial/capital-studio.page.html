@@ -1,0 +1,57 @@
+<div class="page-shell">
+  <nav mtr-actuarial-tabs></nav>
+  <mtr-page-heading
+    eyebrow="Actuariat"
+    title="Capital économique"
+    description="Capital de risque pédagogique : VaR(α) − E[S], borné à zéro. Ce n’est pas une exigence réglementaire."
+  />
+  <p mtr-estimate-note></p>
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+
+  <section mtr-panel heading="Hypothèses" description="Portefeuille fictif Poisson × Gamma ; horizon et niveau de confiance saisissables.">
+    <form class="form-grid" (ngSubmit)="run()">
+      <label class="field">
+        <span>Intensité Poisson</span>
+        <input class="input" type="number" step="0.001" min="0.001" [(ngModel)]="intensity" name="intensity" />
+      </label>
+      <label class="field">
+        <span>Polices</span>
+        <input class="input" type="number" step="1" min="1" [(ngModel)]="policies" name="policies" />
+      </label>
+      <label class="field">
+        <span>Sévérité moyenne (DT)</span>
+        <input class="input" type="number" step="1" min="1" [(ngModel)]="severityMean" name="severityMean" />
+      </label>
+      <label class="field">
+        <span>CV sévérité</span>
+        <input class="input" type="number" step="0.01" min="0.01" [(ngModel)]="severityCv" name="severityCv" />
+      </label>
+      <label class="field">
+        <span>Niveau de confiance</span>
+        <input class="input" type="number" step="0.001" min="0.5" max="0.999" [(ngModel)]="confidence" name="confidence" />
+      </label>
+      <label class="field">
+        <span>Horizon (années)</span>
+        <input class="input" type="number" step="0.25" min="0.25" max="10" [(ngModel)]="horizon" name="horizon" />
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ busy() ? 'Calcul…' : 'Calculer le capital' }}</button>
+      </div>
+    </form>
+  </section>
+
+  @if (result(); as r) {
+    <section mtr-panel heading="Résultats" [description]="text('convention')">
+      <div class="grid-stats">
+        <div mtr-kpi label="Perte attendue">{{ tnd(num('expectedLoss')) }}</div>
+        <div mtr-kpi label="VaR">{{ tnd(num('valueAtRisk')) }}</div>
+        <div mtr-kpi label="TVaR">{{ tnd(num('tailValueAtRisk')) }}</div>
+        <div mtr-kpi label="Capital économique">{{ tnd(num('economicCapital')) }}</div>
+      </div>
+      <p class="field-hint">{{ text('disclaimer') }}</p>
+    </section>
+  }
+</div>

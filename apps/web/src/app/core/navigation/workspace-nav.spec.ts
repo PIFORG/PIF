@@ -20,7 +20,7 @@ describe('workspace navigation', () => {
     expect(WORKSPACE_NAV.find((g) => g.id === 'workspace')?.label).toBe(FR.nav.groupWorkspace);
     expect(allItems.find((i) => i.href === '/dashboard')?.label).toBe(FR.nav.overview);
     expect(allItems.find((i) => i.href === '/risk')?.label).toBe(FR.nav.riskAnalytics);
-    expect(STATUS_LABEL.LIVE_INTEGRATED).toBe('Opérationnel');
+    expect(STATUS_LABEL.LIVE_INTEGRATED).toBe('Disponible');
     expect(STATUS_LABEL.DESIGNED_PENDING_BACKEND).toBe('Aperçu');
   });
 

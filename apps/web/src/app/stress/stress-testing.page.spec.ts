@@ -273,7 +273,7 @@ describe('StressTestingPage', () => {
   it('runs the default preset on load and shows only server-computed results', async () => {
     const { root } = await render();
     expect(api.run).toHaveBeenCalledWith({ scenario: 'recession', intensity: 1 });
-    expect(root.querySelector('h1')?.textContent).toBe('Tests de résistance bancaire');
+    expect(root.querySelector('h1')?.textContent).toBe('Simuler une crise bancaire');
     const verdicts = Array.from(root.querySelectorAll('.bs-verdict'));
     expect(verdicts).toHaveLength(2);
     expect(verdicts[0].getAttribute('data-tone')).toBe('positive');

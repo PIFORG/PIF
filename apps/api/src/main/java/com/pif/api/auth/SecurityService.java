@@ -256,8 +256,8 @@ public class SecurityService {
         module("portfolio", "Portefeuille virtuel", true, true),
         module("orders", "Salle des ordres", true, true),
         module("learning", "Parcours pédagogique", true, true),
-        module("ai", "Analyse IA", true, false),
-        module("stress", "Tests de résistance bancaire", true, false),
+        module("ai", "Analyse IA", true, true),
+        module("stress", "Tests de résistance bancaire", true, true),
         module("actuarial", "Outils actuariels", true, true),
         module("admin", "Administration des comptes", isAdmin && !adminMfaEnrollmentRequired, true));
     Map<String, Object> capabilities = new LinkedHashMap<>();

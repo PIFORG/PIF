@@ -382,6 +382,7 @@ enum TradingOrderType {
   MARKET
   LIMIT
   STOP
+  TAKE_PROFIT
 }
 
 enum TradingOrderStatus {

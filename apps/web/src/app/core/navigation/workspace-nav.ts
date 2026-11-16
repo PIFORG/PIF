@@ -66,17 +66,17 @@ export const WORKSPACE_NAV: NavGroup[] = [
         label: FR.nav.backtesting,
         icon: 'strategy',
         status: 'LIVE_INTEGRATED',
-        match: ['/strategies'],
+        match: ['/strategies', '/backtesting'],
       },
       {
         href: '/strategies',
         label: FR.nav.strategies,
         icon: 'strategy',
-        status: 'DESIGNED_PENDING_BACKEND',
+        status: 'LIVE_INTEGRATED',
       },
-      { href: '/ai', label: FR.nav.aiInsights, icon: 'ai', status: 'DESIGNED_PENDING_BACKEND' },
+      { href: '/ai', label: FR.nav.aiInsights, icon: 'ai', status: 'LIVE_INTEGRATED' },
       { href: '/stress-testing', label: FR.nav.bankStress, icon: 'bank', status: 'LIVE_INTEGRATED' },
-      { href: '/explainability', label: FR.nav.explainableAi, icon: 'xai', status: 'DESIGNED_PENDING_BACKEND' },
+      { href: '/explainability', label: FR.nav.explainableAi, icon: 'xai', status: 'LIVE_INTEGRATED' },
     ],
   },
   {
@@ -85,7 +85,7 @@ export const WORKSPACE_NAV: NavGroup[] = [
     items: [
       { href: '/learn', label: FR.nav.marketQuest, icon: 'academy', status: 'LIVE_INTEGRATED' },
       { href: '/stories', label: FR.nav.finStories, icon: 'stories', status: 'LIVE_INTEGRATED' },
-      { href: '/challenges', label: FR.nav.challenges, icon: 'challenge', status: 'DESIGNED_PENDING_BACKEND' },
+      { href: '/challenges', label: FR.nav.challenges, icon: 'challenge', status: 'LIVE_INTEGRATED' },
     ],
   },
   {
@@ -108,6 +108,7 @@ export const WORKSPACE_NAV: NavGroup[] = [
     roles: ['ADMIN'],
     items: [
       { href: '/admin', label: FR.nav.platform, icon: 'platform', status: 'LIVE_INTEGRATED' },
+      { href: '/admin/platform', label: 'Supervision', icon: 'platform', status: 'LIVE_INTEGRATED', match: ['/admin/platform'] },
       { href: '/admin/users', label: FR.nav.users, icon: 'users', status: 'LIVE_INTEGRATED' },
       { href: '/admin/audit', label: FR.nav.audit, icon: 'audit', status: 'LIVE_INTEGRATED' },
     ],
@@ -162,6 +163,7 @@ export const MIGRATED_ROUTES: string[] = [
   '/settings/security',
   '/settings/sessions',
   '/admin',
+  '/admin/platform',
   '/admin/users',
   '/admin/audit',
 ];

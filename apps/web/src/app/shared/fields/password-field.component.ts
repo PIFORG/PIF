@@ -28,9 +28,9 @@ import { syncControlledValue } from './form-field.component';
           class="password-toggle"
           (click)="visible.set(!visible())"
           [attr.aria-pressed]="visible()"
-          [attr.aria-label]="visible() ? 'Hide password' : 'Show password'"
+          [attr.aria-label]="visible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
         >
-          {{ visible() ? 'Hide' : 'Show' }}
+          {{ visible() ? 'Masquer' : 'Afficher' }}
         </button>
       </div>
       @if (hint()) {

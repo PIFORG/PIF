@@ -62,6 +62,7 @@ const catalog = {
   unlockedLevel: 'ROOKIE' as const,
   missions: [
     mission('my-first-trade', 1, 'ROOKIE', 'IMPLEMENTED', { progress: { attempts: 1, passed: true, bestScore: 81, activeSessionId: null } }),
+    mission('protect-your-capital', 2, 'ROOKIE', 'IMPLEMENTED', { progress: { attempts: 1, passed: false, bestScore: 55, activeSessionId: 's-1' } }),
     mission('breaking-news', 4, 'STRATEGIST', 'CONFIGURED'),
     mission('interest-rate-shock', 8, 'COMMANDER', 'PLANNED'),
     mission('survive-the-market-crash', 10, 'COMMANDER', 'IMPLEMENTED', { levelLocked: true }),
@@ -95,8 +96,8 @@ async function render() {
 
 const region = (root: HTMLElement, name: string) => root.querySelector<HTMLElement>(`section[aria-label="${name}"]`)!;
 const links = (root: Element) => Array.from(root.querySelectorAll('a'));
-const kpi = (root: HTMLElement, label: string) =>
-  Array.from(root.querySelectorAll<HTMLElement>('.ws-kpi')).find((k) => k.querySelector('.ws-kpiLabel')?.textContent === label);
+const progressValue = (root: HTMLElement, label: string) =>
+  Array.from(root.querySelectorAll<HTMLElement>('.lr-progressItem')).find((k) => k.querySelector('.lr-progressLabel')?.textContent === label)?.querySelector('.lr-progressValue');
 
 describe('LearningHubPage', () => {
   it('groups missions by level and never presents planned missions as playable', async () => {
@@ -134,18 +135,22 @@ describe('LearningHubPage', () => {
     expect(root.textContent).toContain('your weakest competency');
     const storyLink = links(root).find((a) => a.textContent?.includes('Sarah and the Market Crash'));
     expect(storyLink?.getAttribute('href')).toBe('/stories?story=sarah-and-the-market-crash');
-    expect(storyLink?.textContent).toContain('Pour votre compétence la plus faible');
+    expect(storyLink?.textContent).toContain('Compétence faible');
     expect(storyLink?.textContent).toContain('59 s · Gestion du risque');
   });
 
-  it('shows the KPIs from the profile and links the playable showcase mission', async () => {
+  it('prioritises the active session in Continuer and shows compact progress', async () => {
     const { root } = await render();
-    expect(kpi(root, 'Niveau recommandé')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('Trader débutant');
-    expect(kpi(root, 'Missions réussies')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('1 / 6');
-    expect(kpi(root, 'Tentatives évaluées')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('3');
-    expect(kpi(root, 'Calibration de la confiance')?.querySelector('.ws-kpiHint')?.textContent).toBe('Notez votre confiance sur les ordres pour la voir.');
-    const actions = root.querySelector('.headingActions')!;
-    expect(links(actions).map((a) => a.getAttribute('href'))).toEqual(['/stories', '/learn/missions/survive-the-market-crash']);
+    expect(progressValue(root, 'Niveau')?.textContent?.trim()).toBe('Trader débutant');
+    expect(progressValue(root, 'Missions réussies')?.textContent?.trim()).toBe('1 / 6');
+    expect(progressValue(root, 'Tentatives évaluées')?.textContent?.trim()).toBe('3');
+    expect(progressValue(root, 'Calibration')?.getAttribute('title')).toBe('Notez votre confiance sur les ordres pour la voir.');
+    expect(root.querySelector('.lr-title')?.textContent).toBe('Mon parcours');
+    expect(root.querySelector('.lr-continueMission')?.textContent?.trim()).toBe('protect-your-capital');
+    const continueCta = root.querySelector('.lr-continueActions a');
+    expect(continueCta?.getAttribute('href')).toBe('/learn/sessions/s-1');
+    expect(continueCta?.textContent).toContain('Reprendre');
+    expect(links(root).find((a) => a.getAttribute('href') === '/learn/missions/survive-the-market-crash' && a.closest('.lr-continue'))).toBeUndefined();
   });
 
   it('shows an honest error state and retries', async () => {
@@ -154,7 +159,7 @@ describe('LearningHubPage', () => {
     const error = root.querySelector('.ws-empty[data-tone="error"]');
     expect(error?.textContent).toContain("Données d'apprentissage indisponibles");
     expect(error?.textContent).toContain('Learning is down.');
-    expect(kpi(root, 'Niveau recommandé')?.querySelector('.ws-kpiValue')?.textContent?.trim()).toBe('—');
+    expect(progressValue(root, 'Niveau')?.textContent?.trim()).toBe('—');
     Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Réessayer')!.click();
     await settle(fixture);
     expect(root.querySelector('.ws-empty[data-tone="error"]')).toBeNull();

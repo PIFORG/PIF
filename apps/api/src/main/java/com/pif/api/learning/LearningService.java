@@ -354,7 +354,12 @@ public class LearningService {
         "stats",map("missionsPassed",progress.values().stream().filter(Mastery.MissionProgress::passed).count(),"missionsAttempted",progress.size(),
             "assessedSessions",assessments.size(),"implementedMissions",MISSIONS.stream().filter(m->m.availability().equals("IMPLEMENTED")).count(),
             "playableMissions",MISSIONS.stream().filter(MissionCatalog::isPlayable).count()),"activeSessions",active,"recentAssessments",recent,
-        "recommendations",Mastery.recommend(MISSIONS,progress,mastery,user.user().experienceLevel()).stream().map(Mastery.Recommendation::toJson).toList(),
+        "recommendations",Mastery.recommend(MISSIONS,progress,mastery,user.user().experienceLevel()).stream().map(r->{
+          var row=new java.util.LinkedHashMap<>(r.toJson());
+          row.put("title",LearningFr.missionTitle(r.slug(),r.title()));
+          row.put("reason",LearningFr.recommendationReason(r.reason()));
+          return row;
+        }).toList(),
         "calibration",map("ratedOrders",rated,"observations",observed,"minimumOrders",Assessments.CALIBRATION_MIN_ORDERS,"interpretable",observed>=Assessments.CALIBRATION_MIN_ORDERS,
             "brierScore",observed>0?brier/observed:null,"meanConfidence",rated>0?confidence/rated:null,"hitRate",observed>0?hits/observed:null,"signals",signals,
             "note", LearningFr.profileCalibrationNote(Assessments.CALIBRATION_MIN_ORDERS)));

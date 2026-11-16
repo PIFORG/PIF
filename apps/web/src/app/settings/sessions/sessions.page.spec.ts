@@ -74,7 +74,7 @@ describe('Sessions page', () => {
     const root = fixture.nativeElement as HTMLElement;
     const cards = Array.from(root.querySelectorAll('article'));
 
-    expect(cards.map((c) => c.getAttribute('aria-label'))).toEqual(['Chrome on Windows', 'Safari on iOS']);
+    expect(cards.map((c) => c.getAttribute('aria-label'))).toEqual(['Chrome sous Windows', 'Safari sous iOS']);
     expect(cards[0].textContent).toContain('Cet appareil');
     expect(button(cards[0], 'Révoquer la session')).toBeUndefined();
     expect(cards[1].textContent).not.toContain('Cet appareil');

@@ -63,17 +63,13 @@
 /* ---------- Hero cockpit ---------- */
 
 .db-hero {
-  margin-bottom: var(--space-4);
-  padding: var(--space-5) var(--space-5) var(--space-4);
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
   border-radius: var(--db-hero-radius);
-  border: 1px solid color-mix(in srgb, var(--mtr-brand) 28%, var(--mtr-border));
-  background:
-    radial-gradient(ellipse 85% 55% at 8% -10%, color-mix(in srgb, var(--mtr-brand) 22%, transparent), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 95% 110%, color-mix(in srgb, var(--mtr-cyan) 14%, transparent), transparent 50%),
-    linear-gradient(165deg, color-mix(in srgb, var(--mtr-surface) 92%, var(--mtr-brand) 8%), var(--mtr-canvas));
-  box-shadow:
-    0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 12%, transparent) inset,
-    var(--shadow-md);
+  border: 1px solid var(--mtr-border);
+  border-left: 3px solid var(--mtr-brand-strong);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .db-heroHead {
@@ -81,10 +77,10 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-5);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--mtr-border);
 }
 
 .db-heroBrand {
@@ -103,8 +99,9 @@
 
 .db-heroTitle {
   margin: 0;
-  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 650;
+  font-family: var(--font-display);
   color: var(--mtr-text);
   letter-spacing: -0.02em;
 }
@@ -138,9 +135,10 @@
 
 .db-heroPrimary {
   position: relative;
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--mtr-elevated) 70%, transparent);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-elevated);
   border: 1px solid var(--mtr-border);
 }
 
@@ -233,7 +231,7 @@
   padding: var(--space-4);
   border-radius: var(--radius-md);
   border: 1px solid color-mix(in srgb, var(--mtr-amber) 25%, var(--mtr-border));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--mtr-elevated) 90%, var(--mtr-brand) 10%), var(--mtr-surface));
+  background: var(--mtr-surface);
 }
 
 .db-riskHead {
@@ -670,8 +668,9 @@ a.db-module:hover {
 
 /* MarketQuest learning panel emphasis */
 #learning.ws-panel {
-  border-color: color-mix(in srgb, var(--mtr-brand) 32%, var(--mtr-border));
-  background: linear-gradient(135deg, color-mix(in srgb, var(--mtr-brand-soft) 40%, var(--mtr-surface)), var(--mtr-surface));
+  border-color: var(--mtr-border);
+  border-left: 3px solid var(--mtr-brand-strong);
+  background: var(--mtr-surface);
 }
 
 /* ---------- Responsive ---------- */

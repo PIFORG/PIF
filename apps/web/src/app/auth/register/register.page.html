@@ -1,28 +1,30 @@
 <mtr-auth-layout
-  [title]="'Créez votre compte'"
-  lead="Commencez à vous entraîner avec du capital virtuel. Nous vérifions votre courriel avant l'accès à la salle de marché."
+  [title]="'Créer un compte'"
+  lead="Capital virtuel après vérification du courriel."
   [showFooter]="true"
 >
   <mtr-form-error [message]="error()" />
   <mtr-form-success [message]="success()" />
 
   <form (submit)="onSubmit($event)" novalidate>
-    <mtr-form-field
-      label="Prénom"
-      autocomplete="given-name"
-      name="firstName"
-      [error]="form.errors().firstName"
-      [value]="form.values().firstName"
-      (valueChange)="form.set('firstName', $event)"
-    />
-    <mtr-form-field
-      label="Nom"
-      autocomplete="family-name"
-      name="lastName"
-      [error]="form.errors().lastName"
-      [value]="form.values().lastName"
-      (valueChange)="form.set('lastName', $event)"
-    />
+    <div class="auth-name-row">
+      <mtr-form-field
+        label="Prénom"
+        autocomplete="given-name"
+        name="firstName"
+        [error]="form.errors().firstName"
+        [value]="form.values().firstName"
+        (valueChange)="form.set('firstName', $event)"
+      />
+      <mtr-form-field
+        label="Nom"
+        autocomplete="family-name"
+        name="lastName"
+        [error]="form.errors().lastName"
+        [value]="form.values().lastName"
+        (valueChange)="form.set('lastName', $event)"
+      />
+    </div>
     <mtr-form-field
       label="Courriel"
       type="email"

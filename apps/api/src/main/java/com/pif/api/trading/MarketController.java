@@ -2,6 +2,7 @@ package com.pif.api.trading;
 
 import com.pif.api.admin.AdminDtos;
 import com.pif.api.backtest.BacktestDtos;
+import com.pif.api.market.FundamentalsService;
 import com.pif.api.security.AuthUser;
 import com.pif.api.web.ApiDocs;
 import com.pif.api.web.RouteAnnotations.Throttle;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** MarketController of apps/api/src/trading/trading.controller.ts. */
@@ -24,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MarketController {
 
   private final MarketService market;
+  private final FundamentalsService fundamentals;
 
-  public MarketController(MarketService market) {
+  public MarketController(MarketService market, FundamentalsService fundamentals) {
     this.market = market;
+    this.fundamentals = fundamentals;
   }
 
   @GetMapping("/status")
@@ -64,6 +68,20 @@ public class MarketController {
   public Map<String, Object> indicators(HttpServletRequest req, @PathVariable("symbol") String symbol) {
     Map<String, String[]> query = req.getParameterMap();
     return market.indicators(symbol, BacktestDtos.historyRange(query), BacktestDtos.indicatorKinds(query));
+  }
+
+  @GetMapping("/instruments/{symbol}/fundamentals")
+  @Operation(summary = "Analyse fondamentale pedagogique",
+      description = "Etats financiers synthetiques et ratios pour un instrument fictif. Jamais des publications reelles.")
+  public Map<String, Object> instrumentFundamentals(@PathVariable("symbol") String symbol) {
+    return fundamentals.forSymbol(symbol);
+  }
+
+  @GetMapping("/fundamentals/compare")
+  @Operation(summary = "Comparer des fondamentaux pedagogiques",
+      description = "Jusqu'a cinq symboles fictifs. Donnees synthetiques clairement etiquetees.")
+  public Map<String, Object> compareFundamentals(@RequestParam("symbols") String symbols) {
+    return fundamentals.compare(symbols);
   }
 
   @GetMapping("/watchlist")

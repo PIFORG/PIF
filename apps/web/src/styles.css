@@ -1,10 +1,11 @@
 /*
  * Market Trading Room type system.
- * Syne (display), IBM Plex Sans (UI) and IBM Plex Mono (figures) load from the
- * Google Fonts stylesheet in index.html. Tokens and components live in styles/globals.css.
+ * Poppins is the platform-wide typeface (display, UI and figures).
+ * Loaded from the Google Fonts stylesheet in index.html.
+ * Tokens and components live in styles/globals.css.
  */
 :root {
-  --font-display: 'Syne', 'Segoe UI', system-ui, sans-serif;
-  --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Poppins', 'Segoe UI', system-ui, sans-serif;
 }

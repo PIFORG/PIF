@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NewsApi, type NewsFeed } from '../core/api/news-api';
 import { MarketApi, type AssetClass, type InstrumentView, type MarketSnapshot, type MarketStatus } from '../core/api/trading-api';
 import { IconComponent } from '../shared/icon/icon.component';
-import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { dateTime, describeTradingError, dt, price, sectorLabel, shortTime, units } from './trading-format';
-import { ProvenanceNoteComponent, SignedAmountComponent } from './trading-parts.components';
+import { SignedAmountComponent } from './trading-parts.components';
 
 const REFRESH_MS = 30_000;
 
@@ -101,25 +101,19 @@ export class InstrumentTableComponent {
 @Component({
   selector: 'mtr-markets-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    IconComponent,
-    PageHeadingComponent,
-    HeadingActionsSlot,
-    ...WORKSPACE_PRIMITIVES,
-    ProvenanceNoteComponent,
-    SignedAmountComponent,
-    InstrumentTableComponent,
-  ],
+  imports: [RouterLink, IconComponent, ...WORKSPACE_PRIMITIVES, SignedAmountComponent, InstrumentTableComponent],
   host: { style: 'display: contents' },
   templateUrl: './markets.page.html',
 })
 export class MarketsPage {
   private readonly api = inject(MarketApi);
+  private readonly newsApi = inject(NewsApi);
   private destroyed = false;
 
   protected readonly status = signal<MarketStatus | null>(null);
   protected readonly market = signal<MarketSnapshot | null>(null);
   protected readonly watched = signal<Set<string>>(new Set());
+  protected readonly news = signal<NewsFeed | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly query = signal('');
   protected readonly assetClass = signal<'ALL' | AssetClass>('ALL');
@@ -127,6 +121,8 @@ export class MarketsPage {
 
   protected readonly dash = '\u2014';
   protected readonly dateTime = dateTime;
+  protected readonly dt = dt;
+  protected readonly price = price;
   protected readonly sectorLabel = sectorLabel;
 
   protected readonly sectors = computed(() =>
@@ -170,9 +166,18 @@ export class MarketsPage {
       .map((i) => `${i.assetClass === 'FUND' ? 'Fonds' : 'Actions'} ${(i.fees.feeBps / 100).toFixed(2)} % (min ${dt(i.fees.minFee)})`)
       .join(' · '),
   );
+  protected readonly fundamentalsSymbol = signal('CTB');
+  protected readonly fundamentals = signal<{
+    company: string;
+    statements: Record<string, number>;
+    ratios: Record<string, number | null>;
+    provenance: { description: string };
+    limitations: string[];
+  } | null>(null);
 
   constructor() {
     void this.load();
+    void this.loadFundamentals('CTB');
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void this.load();
     }, REFRESH_MS);
@@ -184,11 +189,17 @@ export class MarketsPage {
 
   protected async load(): Promise<void> {
     try {
-      const [status, data, watchlist] = await Promise.all([this.api.status(), this.api.instruments(), this.api.watchlist()]);
+      const [status, data, watchlist, news] = await Promise.all([
+        this.api.status(),
+        this.api.instruments(),
+        this.api.watchlist(),
+        this.newsApi.feed().catch(() => null),
+      ]);
       if (this.destroyed) return;
       this.status.set(status);
       this.market.set(data);
       this.watched.set(new Set(watchlist.items.map((item) => item.instrument.symbol)));
+      if (news) this.news.set(news);
       this.error.set(null);
     } catch (err) {
       if (!this.destroyed) this.error.set(describeTradingError(err, 'Les données de marché n\'ont pas pu être chargées.'));
@@ -214,5 +225,15 @@ export class MarketsPage {
 
   protected setSector(event: Event): void {
     this.sector.set(this.value(event));
+  }
+
+  protected async loadFundamentals(symbol: string): Promise<void> {
+    this.fundamentalsSymbol.set(symbol);
+    try {
+      const data = await this.api.fundamentals(symbol);
+      if (!this.destroyed) this.fundamentals.set(data);
+    } catch {
+      if (!this.destroyed) this.fundamentals.set(null);
+    }
   }
 }

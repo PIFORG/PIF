@@ -1,5 +1,6 @@
 package com.pif.api.learning;
 
+import com.pif.api.learning.engine.Mastery;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -139,5 +140,38 @@ public final class LearningFr {
             + "depuis l'exécution jusqu'à la fin. En dessous de " + minimumOrders
             + " ordres, le signal est surtout du bruit ; un résultat défavorable seul n'est pas une preuve de surconfiance.",
         minimumOrders);
+  }
+
+  public static String competencyLabel(String competency, String fallback) {
+    return get("competency." + competency, fallback);
+  }
+
+  /** Overlay French reasons for API display without changing Mastery golden English strings. */
+  public static String recommendationReason(String englishReason) {
+    if (englishReason == null) return null;
+    java.util.regex.Matcher attempted =
+        java.util.regex.Pattern.compile("You have attempted this mission (\\d+) time\\(s\\) without passing yet\\.")
+            .matcher(englishReason);
+    if (attempted.matches()) {
+      return format("rec.attempted", "Vous avez tenté cette mission {0} fois sans la réussir encore.", attempted.group(1));
+    }
+    if (englishReason.startsWith("Next mission on your learning path.")) {
+      return get("rec.next", "Prochaine mission sur votre parcours d'apprentissage.");
+    }
+    java.util.regex.Matcher weakest = java.util.regex.Pattern
+        .compile("Targets your weakest competency: (.+) \\((.+)/100\\)\\.")
+        .matcher(englishReason);
+    if (weakest.matches()) {
+      String label = weakest.group(1);
+      for (String key : List.of(
+          "MARKET_UNDERSTANDING", "TRADING_EXECUTION", "RISK_MANAGEMENT", "DIVERSIFICATION", "STRATEGIC_REASONING")) {
+        if (Mastery.COMPETENCY_LABELS.get(key).equals(label)) {
+          label = competencyLabel(key, label);
+          break;
+        }
+      }
+      return format("rec.weakest", "Cible votre compétence la plus faible : {0} ({1}/100).", label, weakest.group(2));
+    }
+    return englishReason;
   }
 }

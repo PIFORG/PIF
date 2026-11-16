@@ -21,7 +21,6 @@ import {
 import { formatNumber } from '../core/format/finance';
 import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { IconComponent } from '../shared/icon/icon.component';
-import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { sectorLabel } from '../trading/trading-format';
 import { ObjectiveListComponent, pct } from './learning-parts.components';
@@ -95,7 +94,6 @@ export class MissionMetricsComponent {
   imports: [
     RouterLink,
     IconComponent,
-    PageHeadingComponent,
     ...WORKSPACE_PRIMITIVES,
     LineChartComponent,
     ObjectiveListComponent,

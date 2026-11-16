@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   BACKTEST_STRATEGIES,
   BacktestApi,
@@ -10,21 +12,18 @@ import { MarketApi, type InstrumentView } from '../core/api/trading-api';
 import { formatNumber } from '../core/format/finance';
 import { FR } from '../core/i18n/fr';
 import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
-import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { dateTime, describeTradingError, dt, pct } from '../trading/trading-format';
-import { ProvenanceNoteComponent, SignedAmountComponent } from '../trading/trading-parts.components';
+import { ProvenanceNoteComponent } from '../trading/trading-parts.components';
 
 @Component({
   selector: 'mtr-backtesting-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    PageHeadingComponent,
     ...WORKSPACE_PRIMITIVES,
     LineChartComponent,
     ProvenanceNoteComponent,
-    SignedAmountComponent,
   ],
   host: { style: 'display: contents' },
   templateUrl: './backtesting.page.html',
@@ -96,7 +95,17 @@ export class BacktestingPage {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => (this.destroyed = true));
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => (this.destroyed = true));
+    const ids = new Set(BACKTEST_STRATEGIES.map((s) => s.id));
+    inject(ActivatedRoute)
+      .queryParamMap.pipe(takeUntilDestroyed(destroyRef))
+      .subscribe((params) => {
+        const raw = params.get('strategy');
+        if (raw && ids.has(raw as BacktestStrategyId)) {
+          this.strategy.set(raw as BacktestStrategyId);
+        }
+      });
     void this.loadInstruments();
   }
 
