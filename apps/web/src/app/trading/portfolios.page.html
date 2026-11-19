@@ -2,7 +2,7 @@
   <header class="tr-pageTop">
     <div class="tr-pageTopText">
       <h1 class="tr-pageTitle">Portefeuilles</h1>
-      <p class="tr-pageLede">Valorisation · allocation · risque · historique serveur</p>
+      <p class="tr-pageLede">Valorisation · allocation · risque · historique</p>
     </div>
     <div class="tr-picker">
       @if (hasPortfolios()) {
@@ -150,7 +150,7 @@
             <ul class="tr-classList">
               @for (line of a.allocation.byAssetClass; track line.name) {
                 <li>
-                  <span>{{ line.label || (line.name === 'EQUITY' ? 'Actions' : line.name === 'FUND' ? 'Fonds' : line.name) }}</span>
+                  <span>{{ line.label || assetClassLabelPlural(line.name) }}</span>
                   <span class="num">{{ pct(line.weight) }}</span>
                 </li>
               }

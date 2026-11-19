@@ -123,10 +123,10 @@ public class AdminPlatformService {
         Map.of("id", "pricing", "label", "Tarification fréquence / sévérité", "status", "LIVE"),
         Map.of("id", "aggregate", "label", "Pertes agrégées Panjer / Monte-Carlo", "status", "LIVE"),
         Map.of("id", "reserving", "label", "Provisionnement Chain-Ladder / BF / IBNR", "status", "LIVE"),
-        Map.of("id", "capital-alm", "label", "Capital économique / ALM", "status", "PLANNED")));
+        Map.of("id", "capital-alm", "label", "Capital économique / ALM", "status", "LIVE")));
     body.put("note",
-        "Les moteurs de tarification et de provisionnement sont opérationnels. "
-            + "Capital économique et ALM restent hors livrable obligatoire tant que non validés.");
+        "Tarification, provisionnement, capital économique et ALM sont opérationnels sur ce serveur "
+            + "(périmètre pédagogique, non réglementaire).");
     return body;
   }
 }

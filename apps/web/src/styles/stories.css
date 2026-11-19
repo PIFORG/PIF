@@ -25,8 +25,8 @@
 .st-pageTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 
@@ -57,10 +57,7 @@
     radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--story-accent) 22%, transparent), transparent 65%),
     linear-gradient(180deg, #0b1733 0%, #091229 100%);
   color: #f4f8ff;
-  box-shadow:
-    0 24px 60px color-mix(in srgb, #000 45%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--story-accent) 20%, transparent),
-    var(--mtr-shadow-md);
+  box-shadow: var(--mtr-shadow-md);
   isolation: isolate;
 }
 
@@ -70,7 +67,7 @@
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  box-shadow: inset 0 0 80px color-mix(in srgb, #000 35%, transparent);
+  box-shadow: inset 0 0 40px color-mix(in srgb, #000 20%, transparent);
 }
 
 :is(.st-stage, .st-card, .st-ring, .st-viewer)[data-character='SARAH'] {
@@ -177,10 +174,9 @@
   justify-content: space-between;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(8, 12, 22, 0.72);
-  backdrop-filter: blur(10px);
+  background: rgba(8, 12, 22, 0.88);
 }
 
 .st-transportPrimary,
@@ -204,7 +200,7 @@
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease);
+  transition: background-color var(--mtr-dur-hover) var(--mtr-ease-standard);
 }
 
 .st-transportPlay {
@@ -679,22 +675,20 @@
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition:
-    transform 260ms var(--ease),
-    box-shadow 260ms var(--ease),
-    border-color 260ms var(--ease);
+    transform var(--mtr-dur-panel) var(--mtr-ease-standard),
+    box-shadow var(--mtr-dur-hover) var(--mtr-ease-standard),
+    border-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard);
 }
 
 .st-card:hover {
-  transform: translateY(-6px);
-  border-color: color-mix(in srgb, var(--story-accent) 55%, var(--mtr-border));
-  box-shadow:
-    0 22px 48px color-mix(in srgb, #000 28%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--story-accent) 30%, transparent),
-    0 18px 60px color-mix(in srgb, var(--story-accent) 22%, transparent);
+  transform: none;
+  border-color: var(--mtr-border-strong);
+  box-shadow: var(--mtr-shadow-sm);
 }
 
 .st-card:active {
-  transform: translateY(-2px) scale(0.985);
+  transform: none;
 }
 
 .st-card:focus-visible {
@@ -800,12 +794,12 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(6px);
+  /* glass reduced */
 }
 
 .st-posterChip[data-status='NEW'] {
   background: var(--mtr-brand);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--mtr-brand) 60%, transparent);
+  box-shadow: none;
 }
 
 .st-posterChip[data-status='IN_PROGRESS'] {
@@ -824,7 +818,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
+  /* glass reduced */
   transform: translate(-50%, -50%) scale(0.88);
   opacity: 0.85;
   transition:
@@ -945,7 +939,7 @@
   background:
     radial-gradient(55% 60% at 50% 42%, color-mix(in srgb, var(--story-accent) 32%, transparent), transparent 72%),
     rgba(3, 7, 18, 0.93);
-  backdrop-filter: blur(16px);
+  /* glass reduced */
   animation: st-fade 260ms ease both;
 }
 
@@ -982,7 +976,7 @@
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
-  backdrop-filter: blur(8px);
+  /* glass reduced */
   transition:
     background-color var(--dur-fast) var(--ease),
     transform var(--dur-fast) var(--ease);
@@ -1099,7 +1093,7 @@
   border-radius: var(--radius-xl);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
+  /* glass reduced */
   font-size: 0.875rem;
   animation: st-sideIn 520ms 140ms var(--ease) both;
 }
@@ -1196,7 +1190,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
+  /* glass reduced */
   font-size: 0.75rem;
   font-weight: 650;
   transform: translateX(-50%);

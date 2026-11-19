@@ -23,8 +23,8 @@
 .tr-pageTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 
@@ -199,6 +199,12 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
+  transition: background-color var(--mtr-dur-hover) var(--mtr-ease-standard);
+}
+
+.tr-instrumentButton:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: -2px;
 }
 
 .tr-instrumentButton:hover {
@@ -294,8 +300,8 @@
   gap: var(--space-2);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1.75rem;
-  font-weight: 650;
+  font-size: 1.5rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 
@@ -325,6 +331,15 @@
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    box-shadow var(--mtr-dur-select) var(--mtr-ease-standard);
+}
+
+.tr-ranges button:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: 1px;
 }
 
 .tr-ranges button:hover {
@@ -424,6 +439,15 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    box-shadow var(--mtr-dur-select) var(--mtr-ease-standard);
+}
+
+.tr-segmented button:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: 1px;
 }
 
 .tr-segmented button[aria-pressed='true'] {
@@ -749,21 +773,21 @@
 }
 
 .tr-deskPage .tr-instrumentRow[data-status='HALTED'] {
-  border-style: dashed;
+  border-style: solid;
   border-color: color-mix(in srgb, var(--mtr-neg) 45%, var(--mtr-border));
+  background: var(--mtr-neg-soft);
 }
 
 .tr-deskPage .tr-areaChart .ws-panel {
-  border-color: color-mix(in srgb, var(--mtr-brand) 36%, var(--mtr-border));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--mtr-brand) 8%, transparent), transparent 140px),
-    var(--mtr-surface);
-  box-shadow: var(--shadow-md);
+  border-color: var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .tr-deskPage .tr-bigPrice {
-  font-size: clamp(1.85rem, 2.2vw, 2.55rem);
-  letter-spacing: -0.03em;
+  font-size: clamp(1.5rem, 1.8vw, 2rem);
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 
 .tr-deskPage .tr-areaChart .ch-plot {
@@ -777,11 +801,12 @@
 }
 
 .tr-deskPage .tr-quoteGrid {
-  margin-top: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-md);
-  background: var(--mtr-canvas);
+  margin-top: var(--space-2);
+  padding: var(--space-2) 0 0;
+  border: 0;
+  border-top: 1px solid var(--mtr-border);
+  border-radius: 0;
+  background: transparent;
 }
 
 .tr-deskPage .tr-quoteGrid dt {
@@ -798,11 +823,11 @@
 }
 
 .tr-deskPage .tr-areaTicket > .ws-panel {
-  border-color: color-mix(in srgb, var(--mtr-brand) 50%, var(--mtr-border));
-  background:
-    radial-gradient(90% 42% at 100% 0%, color-mix(in srgb, var(--mtr-brand) 20%, transparent), transparent 62%),
-    var(--mtr-surface);
-  box-shadow: var(--mtr-shadow-md);
+  border-color: var(--mtr-border-strong);
+  background: var(--mtr-surface);
+  box-shadow: none;
+  /* Action zone marker — keeps the order ticket distinct without neon chrome. */
+  border-top: 2px solid var(--mtr-brand-strong);
 }
 
 .tr-deskPage .tr-areaTicket .tr-segmented button {
@@ -940,13 +965,13 @@
   font-family: var(--font-sans);
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--mtr-amber);
   background: var(--mtr-amber-soft);
   border: 1px solid color-mix(in srgb, var(--mtr-amber) 40%, transparent);
-  border-radius: 999px;
-  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
 }
 
 .tr-sourceSep {
@@ -973,10 +998,10 @@
 }
 
 .tr-universe .ws-panel {
-  padding: var(--space-4);
-  background: var(--mtr-canvas);
-  border-color: color-mix(in srgb, var(--mtr-brand) 32%, var(--mtr-border));
-  box-shadow: var(--shadow-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--mtr-surface);
+  border-color: var(--mtr-border);
+  box-shadow: none;
 }
 
 .tr-reference .ws-panel {
@@ -1285,11 +1310,9 @@
 
 .tr-narrativeCurve .ws-panel {
   height: 100%;
-  border-color: color-mix(in srgb, var(--mtr-brand) 34%, var(--mtr-border));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--mtr-brand) 10%, transparent), transparent 46%),
-    var(--mtr-surface);
-  box-shadow: var(--shadow-md);
+  border-color: var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .tr-narrativeCurve .ch-plot {
@@ -1320,10 +1343,9 @@
 }
 
 .tr-books .tr-narrativeRail .tr-kpis .ws-kpi:first-child {
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--mtr-brand) 18%, transparent), transparent 58%),
-    var(--mtr-sunken);
-  border-color: color-mix(in srgb, var(--mtr-brand) 28%, var(--mtr-border));
+  background: var(--mtr-sunken);
+  border-color: var(--mtr-border);
+  border-left-color: var(--mtr-brand);
 }
 
 .tr-books .tr-narrativeRail .tr-kpis .ws-kpi:first-child .ws-kpiValue {
@@ -1417,12 +1439,12 @@
   display: block;
   height: 100%;
   max-width: 100%;
-  background: linear-gradient(90deg, var(--mtr-brand-strong), var(--mtr-cyan));
+  background: var(--mtr-brand);
 }
 
 .tr-positions .ws-panel {
-  background: var(--mtr-canvas);
-  border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  background: var(--mtr-surface);
+  border-color: var(--mtr-border);
 }
 
 .tr-riskBoard,
@@ -1580,24 +1602,13 @@
 }
 
 .tr-labShell::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(780px 400px at 88% -4%, color-mix(in srgb, var(--mtr-cyan) 10%, transparent), transparent 68%),
-    radial-gradient(600px 340px at 2% 22%, color-mix(in srgb, var(--mtr-brand) 11%, transparent), transparent 70%);
+  content: none;
 }
 
 .tr-riskShell .tr-kpis .ws-kpi,
 .tr-backtestShell .tr-kpis .ws-kpi {
-  border-color: color-mix(in srgb, var(--mtr-cyan) 18%, var(--mtr-border));
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--mtr-cyan) 5%, var(--mtr-surface)),
-    var(--mtr-surface)
-  );
+  border-color: var(--mtr-border);
+  background: var(--mtr-surface);
 }
 
 .tr-riskShell .ws-panel,
@@ -1752,10 +1763,38 @@
   }
 }
 
+/* Terminal desk columns must respect the same breakpoints as .tr-deskPage .tr-desk.
+   An unconditional 3-col rule here outranked the responsive areas and pinned
+   chart/ticket/market into the first 270px track with an empty void on the right. */
 .tr-deskPage.tr-terminal .tr-desk {
-  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) minmax(300px, 340px);
   gap: 0.55rem;
   margin-bottom: 0.55rem;
+}
+
+@media (min-width: 1281px) {
+  .tr-deskPage.tr-terminal .tr-desk {
+    grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) minmax(300px, 340px);
+    grid-template-areas: 'market chart ticket';
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1025px) {
+  .tr-deskPage.tr-terminal .tr-desk {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    grid-template-areas:
+      'chart ticket'
+      'market ticket';
+  }
+}
+
+@media (max-width: 1024px) {
+  .tr-deskPage.tr-terminal .tr-desk {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'chart'
+      'ticket'
+      'market';
+  }
 }
 
 /* ---------- Backtesting research lab ---------- */

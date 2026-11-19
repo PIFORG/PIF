@@ -180,19 +180,31 @@ public final class Engine {
             estimate, cash, held, equity);
       }
     }
-    if (request.type() == OrderType.STOP) {
+    if (request.type() == OrderType.STOP || request.type() == OrderType.TAKE_PROFIT) {
       if (request.side() == OrderSide.BUY) {
-        return reject("Stop orders are protective sells; buy stops are not supported.", "STOP_BUY_UNSUPPORTED",
-            referencePrice, estimate, cash, held, equity);
+        return reject(
+            request.type() == OrderType.TAKE_PROFIT
+                ? "Take-profit orders are protective sells; buy take-profits are not supported."
+                : "Stop orders are protective sells; buy stops are not supported.",
+            "STOP_BUY_UNSUPPORTED", referencePrice, estimate, cash, held, equity);
       }
       if (request.stopPrice() == null) {
-        return reject("A stop order needs a stop price.", "PRICE_REQUIRED", referencePrice, estimate, cash, held,
-            equity);
+        return reject(
+            request.type() == OrderType.TAKE_PROFIT
+                ? "A take-profit order needs a trigger price."
+                : "A stop order needs a stop price.",
+            "PRICE_REQUIRED", referencePrice, estimate, cash, held, equity);
       }
-      if (!OrderRules.stopBelowBid(request.stopPrice(), quote.quote())) {
+      if (request.type() == OrderType.STOP && !OrderRules.stopBelowBid(request.stopPrice(), quote.quote())) {
         return reject("A stop must be below the current bid (" + dt(quote.bid())
             + " DT); at or above it, it would trigger at once.", "STOP_NOT_BELOW_BID", referencePrice, estimate,
             cash, held, equity);
+      }
+      if (request.type() == OrderType.TAKE_PROFIT
+          && !OrderRules.takeProfitAboveBid(request.stopPrice(), quote.quote())) {
+        return reject("A take-profit must be above the current bid (" + dt(quote.bid())
+            + " DT); at or below it, it would trigger at once.", "TAKE_PROFIT_NOT_ABOVE_BID", referencePrice,
+            estimate, cash, held, equity);
       }
     }
 

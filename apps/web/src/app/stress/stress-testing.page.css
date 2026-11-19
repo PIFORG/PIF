@@ -10,8 +10,8 @@
 .bs-labTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
-  font-weight: 650;
+  font-size: clamp(1.2rem, 2vw, 1.35rem);
+  font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--mtr-text);
 }
@@ -36,14 +36,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
+  padding: 0.3rem 0.55rem;
   border: 1px solid var(--mtr-border);
   border-radius: var(--radius-sm);
   background: var(--mtr-surface);
   font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--mtr-text-3);
 }
 
@@ -77,6 +77,10 @@
   font: inherit;
   font-size: 0.8125rem;
   cursor: pointer;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    border-color var(--mtr-dur-select) var(--mtr-ease-standard);
 }
 .bs-preset:hover { background: var(--mtr-hover); color: var(--mtr-text); }
 .bs-preset[aria-pressed='true'] { border-color: var(--mtr-brand); background: var(--mtr-brand-soft); color: var(--mtr-text); }
@@ -97,19 +101,14 @@
 .bs-intensity { display: grid; gap: 4px; flex: 1 1 260px; font-size: 0.8125rem; }
 .bs-scenarioName { color: var(--mtr-text-2); font-size: 0.8125rem; }
 
-.bs-results { display: grid; gap: 20px; transition: opacity 150ms; }
+.bs-results { display: grid; gap: 20px; transition: opacity var(--mtr-dur-content) var(--mtr-ease-standard); }
 .bs-results[data-busy='true'] { opacity: 0.6; }
 
 .bs-verdicts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
 .bs-verdict {
-  display: grid;
-  gap: 12px;
-  padding: 16px 18px;
-  border: 1px solid var(--mtr-border);
-  border-top: 3px solid var(--st-tone);
-  border-radius: 12px;
-  background: var(--mtr-surface);
-  --st-tone: var(--mtr-pos);
+  display: grid; gap: 10px; padding: 12px 14px;
+  border: 1px solid var(--mtr-border); border-top: 3px solid var(--st-tone);
+  border-radius: var(--radius-md); background: var(--mtr-surface); --st-tone: var(--mtr-pos);
 }
 .bs-verdict[data-tone='warning'] { --st-tone: var(--mtr-amber); }
 .bs-verdict[data-tone='negative'] { --st-tone: var(--mtr-neg); }
@@ -194,76 +193,7 @@
   .bs-importance .bs-bridgeBar { display: none; }
 }
 
-/* Live AI preview status */
-.bs-live { display: flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px; border-radius: 999px; width: fit-content; max-width: 100%; border: 1px solid var(--mtr-border); background: var(--mtr-sunken); color: var(--mtr-text-2); font-size: 0.8125rem; }
+.bs-live { display: flex; align-items: center; margin: 0; padding: 6px 10px; border-radius: var(--radius-sm); width: fit-content; max-width: 100%; border: 1px solid var(--mtr-border); background: var(--mtr-sunken); color: var(--mtr-text-2); font-size: 0.8125rem; }
 .bs-live[data-state='preview'] { border-color: var(--mtr-amber); background: var(--mtr-amber-soft); color: var(--mtr-text); }
-.bs-liveDot { width: 8px; height: 8px; border-radius: 50%; background: var(--mtr-amber); animation: bs-pulse 1.2s ease-in-out infinite; }
-@keyframes bs-pulse { 50% { opacity: 0.3; } }
 .bs-path div[data-preview='true'] strong { color: var(--mtr-amber); font-style: italic; }
 .bs-verdict[data-preview='true'] { border-top-style: dashed; }
-
-/* Capital gauge */
-.bs-gauge { display: grid; gap: 4px; }
-.bs-gaugeTrack { position: relative; height: 10px; border-radius: 5px; background: var(--mtr-sunken); overflow: visible; }
-.bs-gaugeZone { position: absolute; top: 0; bottom: 0; opacity: 0.35; }
-.bs-gaugeZone[data-zone='negative'] { left: 0; background: var(--mtr-neg); border-radius: 5px 0 0 5px; }
-.bs-gaugeZone[data-zone='warning'] { background: var(--mtr-amber); }
-.bs-gaugeZone[data-zone='positive'] { background: var(--mtr-pos); border-radius: 0 5px 5px 0; }
-.bs-gaugeMark { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; transition: left 300ms var(--ease, ease); }
-.bs-gaugeMark[data-mark='baseline'] { background: var(--mtr-text-3); }
-.bs-gaugeMark[data-mark='stressed'] { background: var(--bs-tone); box-shadow: 0 0 0 2px var(--mtr-surface); }
-.bs-gaugeMark[data-preview='true'] { background: var(--mtr-amber); }
-.bs-gaugeScale { position: relative; height: 14px; color: var(--mtr-text-3); font-size: 0.6875rem; }
-.bs-gaugeScale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
-.bs-gaugeScale span:first-child { transform: none; }
-.bs-gaugeScale span:last-child { transform: translateX(-100%); }
-
-/* Who bears the shock */
-.bs-mirrors { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 20px; }
-.bs-mirror { display: grid; gap: 12px; margin: 0; }
-.bs-mirror figcaption { display: flex; justify-content: space-between; gap: 8px; font-size: 0.875rem; }
-.bs-mirrorStage { display: grid; grid-template-columns: 1fr 28px 1fr; align-items: end; height: 240px; padding: 0 4px; border-bottom: 1px solid var(--mtr-border-strong); }
-.bs-mirrorCol { display: flex; flex-direction: column-reverse; min-height: 2px; transition: height 400ms var(--ease, ease); }
-.bs-mirrorArrow { align-self: center; text-align: center; color: var(--mtr-text-3); font-size: 1.25rem; }
-.bs-block { position: relative; display: flex; align-items: center; justify-content: center; min-height: 1px; border-top: 1px solid var(--mtr-surface); background: var(--bs-kind); transition: height 400ms var(--ease, ease); }
-.bs-block em { padding: 0 4px; color: #fff; font-style: normal; font-size: 0.6875rem; text-align: center; line-height: 1.2; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45); }
-.bs-block, .bs-dot { --bs-kind: var(--mtr-text-3); }
-[data-kind='CREDIT'] { --bs-kind: var(--mtr-neg); }
-[data-kind='SECURITIES'] { --bs-kind: #c2410c; }
-[data-kind='MARGIN'], [data-kind='FEES'] { --bs-kind: #7c3aed; }
-[data-kind='DCR'] { --bs-kind: #b45309; }
-[data-kind='CAPITAL'] { --bs-kind: var(--mtr-brand-strong); }
-[data-kind='PSIA'] { --bs-kind: var(--mtr-amber); }
-[data-kind='RESERVE'] { --bs-kind: #ca8a04; }
-[data-kind='TAX'] { --bs-kind: var(--mtr-text-3); }
-[data-role='absorber'][data-kind='MARGIN'], [data-role='absorber'][data-kind='FEES'], [data-role='absorber'][data-kind='CREDIT'], [data-role='absorber'][data-kind='SECURITIES'] { --bs-kind: var(--mtr-pos); }
-.bs-mirrorLegend { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.bs-mirrorLegend ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 0.75rem; align-content: start; }
-.bs-mirrorLegend li { display: flex; align-items: baseline; gap: 6px; }
-.bs-mirrorLegend .num { margin-left: auto; white-space: nowrap; }
-.bs-dot { flex: none; width: 9px; height: 9px; border-radius: 2px; background: var(--bs-kind); }
-
-/* SHAP-style waterfall */
-.bs-waterfall { display: grid; gap: 4px; margin: 0 0 16px; }
-.bs-wfRow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(120px, 2fr) 72px; gap: 10px; align-items: center; font-size: 0.8125rem; }
-.bs-wfRow[data-kind='total'] { font-weight: 600; }
-.bs-wfTrack { position: relative; height: 18px; }
-.bs-wfBar { position: absolute; top: 3px; bottom: 3px; border-radius: 3px; background: var(--mtr-pos); transition: left 300ms, width 300ms; }
-.bs-wfBar[data-sign='neg'] { background: var(--mtr-neg); }
-.bs-wfMarker { position: absolute; top: 0; bottom: 0; width: 4px; margin-left: -2px; border-radius: 2px; background: var(--mtr-brand); }
-.bs-wfMarker[data-end='true'] { background: var(--mtr-text); }
-.bs-wfThreshold { position: absolute; top: -2px; bottom: -2px; border-left: 1px dashed var(--mtr-neg); opacity: 0.7; }
-.bs-wfValue { text-align: right; }
-.bs-wfValue[data-sign='neg'] { color: var(--mtr-neg); }
-.bs-wfValue[data-sign='pos'] { color: var(--mtr-pos); }
-
-@media (prefers-reduced-motion: reduce) {
-  .bs-liveDot { animation: none; }
-  .bs-gaugeMark, .bs-mirrorCol, .bs-block, .bs-wfBar { transition: none; }
-}
-@media (max-width: 640px) {
-  .bs-wfRow { grid-template-columns: 1fr 64px; }
-  .bs-wfTrack { grid-column: 1 / -1; grid-row: 2; }
-  .bs-mirrorLegend { grid-template-columns: 1fr; }
-}
-.bs-previewCheck { margin: 0; padding-left: 10px; border-left: 2px solid var(--mtr-amber); color: var(--mtr-text-2); font-size: 0.75rem; }

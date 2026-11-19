@@ -1,8 +1,10 @@
 # ATLAS DES INTERFACES — Market Trading Room
 
-Date: 2026-11-15 (mandat définitif — clarification IA + readiness PG)
+Date: 2026-11-19 (recomptage routes + audit moteur)
 Source: `apps/web/src/app/app.routes.ts`
-**Total: 44 path entries** (agrégées)
+**Total: 44 path entries** (43 `path:` hors `**` + catch-all `**` ; ~37 écrans feuille hors wrappers `path: ''`)
+Moteur trading: quote-driven — voir `docs/project/AUDIT_MOTEUR_CARNET_ORDRES.md`
+Admin plateforme: **supervision lecture** (GET) ; écritures comptes via `/admin/users`
 
 États: `NON_ANALYSEE` | `ANALYSEE` | `EN_REFONTE` | `REFONDUE_NON_VERIFIEE` | `VERIFIEE` | `BLOQUEE`
 

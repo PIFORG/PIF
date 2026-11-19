@@ -1,41 +1,47 @@
-# EXECUTION CHECKPOINT — 2026-11-15 mandat définitif (session)
+# EXECUTION CHECKPOINT — mandat finalisation intégrale (2026-11-19)
 
 ## Réalisé cette session
 
-### Architecture d'information (Phase 1)
-Intitulés utilisateur (routes techniques inchangées) :
-- `/ai` → **Prévisions de marché**
-- `/explainability` → **Comprendre les prévisions**
-- `/stress-testing` → **Simuler une crise bancaire**
-- `/actuarial` → **Assurance et actuariat** (+ onglets : Calculer une prime, Simuler les pertes, Estimer les provisions, Capital économique, Gestion actif-passif)
-- `/learn` → **Mon parcours**
-- `/challenges` → **Défis boursiers**
-- `/risk` → **Analyser les risques**
-- `/backtesting` → **Tester une stratégie**
-- Admin : Tableau de bord / Supervision des services / Journal d'activité
-- Statut nav : « Opérationnel » → **Disponible**
-- Groupe « Recherche et IA » → **Analyses**
+### Phase A — source de vérité
+- Cahier officiel 2026–2027 relu (`_cahier_extract.txt` / PDF)
+- Cahier historique 2023–2024 : PDF **absent du dépôt** ; exigences traitées via mandat + docs
+- Livrables :
+  - `docs/project/CONFORMITE_DEUX_CAHIERS.md`
+  - `docs/project/AUDIT_MOTEUR_CARNET_ORDRES.md`
+- Matrice `MATRICE_EXHAUSTIVE_FINALISATION.md` mise à jour (TP + CLOB)
 
-### Design light
-- Canvas / surfaces / bordures refroidis (moins « template beige »)
-- Titres Poppins : poids 650, taille h1 1.5rem, letter-spacing réduit
-- Eyebrows moins artificiels
+### Phase B — moteur trading (audit + correctif)
+- **Modèle réel :** matching quote-driven vs profondeur de période simulée — **pas** de CLOB peer
+- **Décision :** conserver le moteur officiel ; CLOB = `FACULTATIF_NON_REALISE`
+- **Correctif :** validation submission `TAKE_PROFIT` alignée sur STOP (`Engine.evaluateOrder`)
+  - codes : `STOP_BUY_UNSUPPORTED`, `PRICE_REQUIRED`, `TAKE_PROFIT_NOT_ABOVE_BID`
+- Tests : `EngineTakeProfitValidationTest`
+- Doc trading README clarifié (TP + non-CLOB)
+
+### Multi-actifs UI (suite Phase C)
+- Filtres Marchés / Salle : BOND, COMMODITY, FX
+- Libellés français de classes d’actifs
+- Aide ticket : LIMIT + précision liquidité MARKET (pas de fill infini)
+- Catalogue module : wording « carnet » corrigé (profondeur simulée, pas CLOB peer)
+
+### Admin / atlas
+- Routes : **44** path entries (43 + `**`)
+- Platform : défis virtuels branchés (GET `/admin/platform/challenges`)
+- Supervision actuariat : capital/ALM marqués LIVE (aligné code)
+- Platform reste **lecture** ; écritures comptes via `/admin/users`
 
 ### PostgreSQL
-- Créé `docs/project/READINESS_POSTGRESQL_PIF.md`
-- **`PIF` non touchée**
-- TAKE_PROFIT / BOND-FX : plan + écarts documentés ; mise en service en attente d'autorisation
-
-## Déjà en place (sessions antérieures)
-Auth, markets board, trading, portfolios, backtesting lab, risk, MarketQuest structurel, FinStories transport, settings desk, preuves 14–28
+- `PIF` **non touchée**
+- Readiness inchangé : TAKE_PROFIT enum + BOND/FX en attente d’autorisation
 
 ## Non terminé (honnête)
-- 44 routes : pas toutes re-vérifiées light/dark/responsive exhaustivement cette session
-- Admin : libellés seulement, pas refonte structurelle profonde
-- Suites Angular/Spring/E2E complètes : partiellement rejouées
-- Actuariat : titres + onglets ; compositions déjà spécialisées non re-auditées navigateur exhaustif
+- Extension carnet d’ordres peer non implémentée
+- Re-vérification exhaustive des ~44 routes light/dark/responsive
+- Suites Angular / Spring / Playwright complètes à rejouer après cette passe
+- Admin écritures avancées / smoke navigateur restants
 - FinStories : audibilité acoustique non prouvée ici
+- Mise en service `PIF` bloquée sans autorisation migration
 
 ## Verdict
-**INCOMPLET — EXIGENCES, ROUTES, TESTS OU PRÉPARATIFS DE MIGRATION RESTANTS IDENTIFIÉS.**  
-**MISE EN SERVICE EN ATTENTE D'AUTORISATION DE MIGRATION.**
+**INCOMPLET — ÉCARTS PRÉCIS IDENTIFIÉS AVEC PREUVES ET ÉTAT DE CORRECTION.**  
+**MISE EN SERVICE EN ATTENTE D’AUTORISATION DE MIGRATION.**

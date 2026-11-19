@@ -94,7 +94,7 @@
     <div class="bs-results" [attr.data-busy]="running() && !livePreview()">
       <p class="bs-live" role="status" aria-live="polite" [attr.data-state]="livePreview() ? 'preview' : stale() ? 'pending' : 'exact'">
         @if (livePreview()) {
-          <span class="bs-liveDot" aria-hidden="true"></span> Aperçu IA en direct · calcul exact au relâchement du curseur
+          Aperçu IA en direct · calcul exact au relâchement du curseur
         } @else if (stale()) {
           Calcul exact en cours…
         } @else {

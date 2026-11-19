@@ -1,15 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 
 /**
- * apps/web/src/components/charts/Charts.tsx: pure SVG drawn from inputs. Hover overlay is local
- * pointer state only — no timers or subscriptions that outlive the component.
+ * Pure SVG charts from inputs. Hover overlay is local pointer state only.
+ * Series tones map to --mtr-chart-* tokens (visualization palette).
+ * Paths stay linear (M/L) so financial geometry is not cosmetically warped.
  */
+
+export type ChartTone = 'brand' | 'cyan' | 'sky' | 'mauve' | 'violet' | 'lavender' | 'muted';
 
 export interface ChartSeries {
   label: string;
   values: number[];
-  tone: 'brand' | 'cyan' | 'muted';
-  /** Draw a filled area under the first series. */
+  tone: ChartTone;
+  /** Draw a filled area under the series (per-tone gradient). */
   area?: boolean;
   dashed?: boolean;
 }
@@ -17,6 +20,20 @@ export interface ChartSeries {
 const W = 1000;
 const TICKS = [0, 0.25, 0.5, 0.75, 1];
 let gradientSeq = 0;
+
+const TONE_CSS: Record<ChartTone, string> = {
+  brand: '--mtr-chart-brand',
+  cyan: '--mtr-chart-sky',
+  sky: '--mtr-chart-sky',
+  mauve: '--mtr-chart-mauve',
+  violet: '--mtr-chart-violet',
+  lavender: '--mtr-chart-lavender',
+  muted: '--mtr-chart-muted',
+};
+
+export function chartToneVar(tone: ChartTone): string {
+  return TONE_CSS[tone] ?? TONE_CSS.brand;
+}
 
 export function niceBounds(values: number[], minSpan = 0): [number, number] {
   const min = Math.min(...values);
@@ -40,7 +57,11 @@ export function toPath(values: number[], min: number, max: number, h: number, co
 @Component({
   selector: 'figure[mtr-line-chart]',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'ch-figure' },
+  host: {
+    class: 'ch-figure',
+    '[attr.data-tip]': 'tip() ? "true" : null',
+    '[attr.data-focus]': 'focusLabel() || null',
+  },
   template: `
     <div class="ch-plot" [style.height.px]="height()">
       <div class="ch-yAxis" aria-hidden="true">
@@ -53,36 +74,90 @@ export function toPath(values: number[], min: number, max: number, h: number, co
         (pointermove)="onMove($event)"
         (pointerleave)="clearTip()"
       >
-        <svg class="ch-svg" [attr.viewBox]="'0 0 1000 ' + height()" preserveAspectRatio="none" role="img" [attr.aria-label]="summary()">
+        <svg
+          class="ch-svg"
+          [attr.viewBox]="'0 0 1000 ' + height()"
+          preserveAspectRatio="none"
+          role="img"
+          [attr.aria-label]="summary()"
+          [style.--ch-stroke-grad]="'url(#' + strokeGradId + ')'"
+        >
           <defs>
-            <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="var(--mtr-brand)" stop-opacity="0.22" />
-              <stop offset="1" stop-color="var(--mtr-brand)" stop-opacity="0" />
+            <pattern [attr.id]="gridId" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" class="ch-gridDot" />
+            </pattern>
+            <linearGradient [attr.id]="strokeGradId" x1="0" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="var(--mtr-chart-brand)" />
+              <stop offset="55%" stop-color="var(--mtr-chart-sky)" />
+              <stop offset="100%" stop-color="var(--mtr-chart-mauve)" />
             </linearGradient>
+            @for (s of paths(); track s.gradId) {
+              @if (s.area) {
+                <linearGradient [attr.id]="s.gradId" x1="0" y1="0" x2="0" y2="1">
+                  @if (s.signature) {
+                    <stop offset="0%" stop-color="var(--mtr-chart-brand)" stop-opacity="0.4" />
+                    <stop offset="42%" stop-color="var(--mtr-chart-mauve)" stop-opacity="0.16" />
+                    <stop offset="100%" stop-color="var(--mtr-chart-violet)" stop-opacity="0" />
+                  } @else {
+                    <stop offset="0%" [attr.stop-color]="'var(' + s.cssVar + ')'" stop-opacity="0.3" />
+                    <stop offset="55%" [attr.stop-color]="'var(' + s.cssVar + ')'" stop-opacity="0.1" />
+                    <stop offset="100%" [attr.stop-color]="'var(' + s.cssVar + ')'" stop-opacity="0" />
+                  }
+                </linearGradient>
+              }
+            }
           </defs>
+          <rect class="ch-plotBed" x="0" y="0" width="1000" [attr.height]="height()" [attr.fill]="'url(#' + gridId + ')'" />
           @for (t of ticks; track t) {
             <line x1="0" x2="1000" [attr.y1]="t * height()" [attr.y2]="t * height()" class="ch-gridLine" vector-effect="non-scaling-stroke" />
           }
           @for (s of paths(); track s.label) {
-            <g>
+            <g class="ch-series" [attr.data-tone]="s.tone" [attr.data-dim]="isDimmed(s.label) ? 'true' : null">
               @if (s.area) {
-                <path [attr.d]="s.area" [attr.fill]="'url(#' + gradientId + ')'" />
+                <path class="ch-area" [attr.d]="s.area" [attr.fill]="'url(#' + s.gradId + ')'" />
               }
-              <path [attr.d]="s.d" class="ch-line" [attr.data-tone]="s.tone" [attr.stroke-dasharray]="s.dashed ? '6 5' : null" vector-effect="non-scaling-stroke" />
+              <path
+                [attr.d]="s.d"
+                class="ch-line"
+                [attr.data-tone]="s.tone"
+                [attr.data-signature]="s.signature ? 'true' : null"
+                [attr.stroke-dasharray]="s.dashed ? '6 5' : null"
+                vector-effect="non-scaling-stroke"
+              />
             </g>
+          }
+          @if (endpoint(); as ep) {
+            <circle class="ch-endDot" [attr.data-tone]="ep.tone" [attr.cx]="ep.x" [attr.cy]="ep.y" r="3.5" vector-effect="non-scaling-stroke" />
           }
           @if (tip(); as t) {
             <line class="ch-crosshair" [attr.x1]="t.x" [attr.x2]="t.x" y1="0" [attr.y2]="height()" vector-effect="non-scaling-stroke" />
+            @if (t.guideY !== null) {
+              <line class="ch-crosshair ch-crosshairH" x1="0" x2="1000" [attr.y1]="t.guideY" [attr.y2]="t.guideY" vector-effect="non-scaling-stroke" />
+            }
             @for (dot of t.dots; track dot.label) {
-              <circle class="ch-activeDot" [attr.cx]="t.x" [attr.cy]="dot.y" r="4" vector-effect="non-scaling-stroke" />
+              <circle
+                class="ch-activeDot"
+                [attr.data-tone]="dot.tone"
+                [attr.cx]="t.x"
+                [attr.cy]="dot.y"
+                r="4.5"
+                vector-effect="non-scaling-stroke"
+              />
             }
           }
         </svg>
+        @if (endpoint(); as ep) {
+          <span class="ch-priceTag" [attr.data-tone]="ep.tone" [style.top.px]="ep.y" aria-hidden="true">{{ ep.label }}</span>
+        }
         @if (tip(); as t) {
           <div class="ch-tip" [style.left.%]="t.leftPct" role="status">
             <strong>{{ t.title }}</strong>
             @for (row of t.rows; track row.label) {
-              <span>{{ row.label }} · {{ row.value }}</span>
+              <span class="ch-tipRow">
+                <span class="ch-tipSwatch" [attr.data-tone]="row.tone" aria-hidden="true"></span>
+                <span class="ch-tipLabel">{{ row.label }}</span>
+                <span class="ch-tipValue num">{{ row.value }}</span>
+              </span>
             }
           </div>
         }
@@ -91,7 +166,19 @@ export function toPath(values: number[], min: number, max: number, h: number, co
     <figcaption class="ch-caption">
       <span class="ch-legend">
         @for (s of series(); track s.label) {
-          <span class="ch-legendItem"><span class="ch-swatch" [attr.data-tone]="s.tone" [attr.data-dashed]="s.dashed ? 'true' : null" aria-hidden="true"></span>{{ s.label }}</span>
+          <button
+            type="button"
+            class="ch-legendItem"
+            [attr.data-tone]="s.tone"
+            [attr.data-active]="focusLabel() === s.label ? 'true' : null"
+            (pointerenter)="focusLabel.set(s.label)"
+            (pointerleave)="focusLabel.set(null)"
+            (focus)="focusLabel.set(s.label)"
+            (blur)="focusLabel.set(null)"
+          >
+            <span class="ch-swatch" [attr.data-tone]="s.tone" [attr.data-dashed]="s.dashed ? 'true' : null" aria-hidden="true"></span>
+            {{ s.label }}
+          </button>
         }
       </span>
       @if (xLabels(); as labels) {
@@ -117,14 +204,18 @@ export class LineChartComponent {
   readonly yMin = input<number | undefined>(undefined);
 
   protected readonly ticks = TICKS;
-  protected readonly gradientId = `ch-gradient-${++gradientSeq}`;
+  private readonly uid = ++gradientSeq;
+  protected readonly gridId = `ch-grid-${this.uid}`;
+  protected readonly strokeGradId = `ch-stroke-${this.uid}`;
   protected readonly tip = signal<{
     x: number;
     leftPct: number;
     title: string;
-    rows: { label: string; value: string }[];
-    dots: { label: string; y: number }[];
+    guideY: number | null;
+    rows: { label: string; value: string; tone: ChartTone }[];
+    dots: { label: string; y: number; tone: ChartTone }[];
   } | null>(null);
+  protected readonly focusLabel = signal<string | null>(null);
 
   private readonly bounds = computed(() => {
     const all = this.series().flatMap((s) => s.values);
@@ -144,18 +235,45 @@ export class LineChartComponent {
   protected readonly paths = computed(() => {
     const { min, max, count } = this.bounds();
     const h = this.height();
-    return this.series().map((s) => {
+    const primary = this.series().find((s) => !s.dashed) ?? this.series()[0];
+    return this.series().map((s, i) => {
       const d = toPath(s.values, min, max, h, count);
       const end = count > 1 ? ((s.values.length - 1) * W) / (count - 1) : W;
+      const signature = s === primary && (s.tone === 'brand' || s.area === true) && !s.dashed;
       return {
         label: s.label,
         tone: s.tone,
         dashed: !!s.dashed,
+        signature,
+        cssVar: chartToneVar(s.tone),
+        gradId: `ch-grad-${this.uid}-${i}`,
         d,
         area: s.area ? `${d} L${end.toFixed(2)} ${h} L0 ${h} Z` : null,
       };
     });
   });
+
+  /** Last point of the primary (non-dashed) series — terminal-style price tag. */
+  protected readonly endpoint = computed(() => {
+    const { min, max, count } = this.bounds();
+    const primary = this.series().find((s) => !s.dashed) ?? this.series()[0];
+    if (!primary?.values.length) return null;
+    const last = primary.values[primary.values.length - 1];
+    const h = this.height();
+    const i = primary.values.length - 1;
+    const step = count > 1 ? W / (count - 1) : 0;
+    return {
+      x: i * step,
+      y: h - ((last - min) / (max - min || 1)) * h,
+      tone: primary.tone,
+      label: this.formatY()(last),
+    };
+  });
+
+  protected isDimmed(label: string): boolean {
+    const focus = this.focusLabel();
+    return !!focus && focus !== label;
+  }
 
   protected onMove(event: PointerEvent): void {
     const el = event.currentTarget as HTMLElement;
@@ -171,19 +289,20 @@ export class LineChartComponent {
     const format = this.formatY();
     const labels = this.pointLabels();
     const title = labels?.[index] ?? (this.xLabels() ? `Point ${index + 1}` : `Index ${index + 1}`);
-    const rows: { label: string; value: string }[] = [];
-    const dots: { label: string; y: number }[] = [];
+    const rows: { label: string; value: string; tone: ChartTone }[] = [];
+    const dots: { label: string; y: number; tone: ChartTone }[] = [];
     for (const s of this.series()) {
       if (index >= s.values.length) continue;
       const v = s.values[index];
-      rows.push({ label: s.label, value: format(v) });
+      rows.push({ label: s.label, value: format(v), tone: s.tone });
       const y = h - ((v - min) / (max - min || 1)) * h;
-      dots.push({ label: s.label, y });
+      dots.push({ label: s.label, y, tone: s.tone });
     }
     this.tip.set({
       x,
       leftPct: (x / W) * 100,
       title,
+      guideY: dots[0]?.y ?? null,
       rows,
       dots,
     });
@@ -228,7 +347,7 @@ export class SparklineComponent {
   });
 }
 
-const ALLOCATION_TONES = ['brand', 'cyan', 'amber', 'violet', 'muted'] as const;
+const ALLOCATION_TONES = ['brand', 'sky', 'mauve', 'violet', 'lavender', 'muted'] as const;
 
 @Component({
   selector: 'div[mtr-allocation-bar]',

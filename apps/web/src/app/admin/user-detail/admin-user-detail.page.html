@@ -37,6 +37,12 @@
           <label class="field">
             <span>Statut</span>
             <select [value]="status()" (change)="status.set($any($event.target).value)" required>
+              @if (status() === 'PENDING_VERIFICATION') {
+                <option value="PENDING_VERIFICATION" disabled>Vérification en attente (actuel)</option>
+              }
+              @if (status() === 'PENDING_DELETION') {
+                <option value="PENDING_DELETION" disabled>Suppression en attente (actuel)</option>
+              }
               <option value="ACTIVE">Actif</option>
               <option value="SUSPENDED">Suspendu</option>
               <option value="DEACTIVATED">Désactivé</option>
@@ -76,7 +82,7 @@
           <ul>
             @for (event of data()!.auditSummary; track event.id) {
               <li>
-                {{ event.eventType }} · {{ event.outcome }} · {{ formatDateTime(event.createdAt)
+                {{ formatEventLine(event.eventType, event.outcome, formatDateTime(event.createdAt))
                 }}{{ event.byAdministrator ? ' · par un administrateur' : '' }}
               </li>
             }

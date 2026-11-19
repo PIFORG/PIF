@@ -66,7 +66,7 @@ describe('routes ported from the landing page, FinStories and the module preview
     const root = await open(`/${slug}`);
     expect(TestBed.inject(Router).url).toBe(`/${slug}`);
     expect(root.querySelector('h1')?.textContent).toBe(MODULES[slug].title);
-    expect(root.querySelector('.mp-notice')?.textContent).toContain('Designed, not yet connected.');
+    expect(root.querySelector('.mp-notice')?.textContent).toContain('Conception validée, moteur non connecté.');
     expect(root.textContent).not.toContain('has not been migrated');
   });
 

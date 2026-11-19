@@ -73,14 +73,14 @@ export const MODULES: Record<string, ModuleDefinition> = {
     icon: 'trading',
     summary: 'Passer des ordres simulés au marché et à cours limité sur un capital virtuel, et consulter chaque exécution.',
     capabilities: [
-      'Ticket d\'ordre avec ordres au marché, à cours limité et stop',
+      'Ticket d\'ordre avec ordres au marché, à cours limité, stop et prise de bénéfices',
       'Contrôle pré-négociation du pouvoir d\'achat, du coût estimé et des frais',
-      'Carnet des ordres ouverts avec annulation et modification',
-      'Historique d\'exécution avec prix de fill et slippage',
+      'Liste des ordres ouverts avec annulation',
+      'Historique d\'exécution contre la profondeur de cotation simulée',
     ],
     blueprint: [
       { title: 'Ticket d\'ordre', kind: 'form', span: 1, note: 'Sens, type, quantité, cours limite' },
-      { title: 'Prix et profondeur', kind: 'chart', span: 2, note: 'Graphique intraday et carnet d\'ordres simulé' },
+      { title: 'Prix et profondeur', kind: 'chart', span: 2, note: 'Graphique mid et profondeur de période simulée' },
       { title: 'Ordres ouverts', kind: 'table', span: 2, note: 'Statut, quantité exécutée, annulation' },
       { title: 'Pouvoir d\'achat', kind: 'kpis', span: 1, note: 'Liquidités, réservé, disponible' },
     ],
@@ -91,11 +91,15 @@ export const MODULES: Record<string, ModuleDefinition> = {
       { method: 'GET', path: '/accounts/me/buying-power', purpose: 'Liquidités, capital réservé et disponible' },
     ],
     concepts: [
-      { term: 'Ordre au marché', definition: 'Exécuté immédiatement au meilleur prix disponible ; le prix n\'est pas garanti.' },
-      { term: 'Ordre à cours limité', definition: 'Exécuté uniquement au cours limite ou à un meilleur prix ; l\'exécution n\'est pas garantie.' },
+      { term: 'Ordre au marché', definition: 'Exécuté immédiatement au meilleur prix disponible, dans la limite de la profondeur de la période de cotation ; le reliquat est annulé.' },
+      { term: 'Ordre à cours limité', definition: 'Exécuté uniquement au cours limite ou à un meilleur prix ; sinon il reste ouvert jusqu\'au croisement, annulation ou expiration.' },
+      { term: 'Stop-loss', definition: 'Vente protectrice déclenchée lorsque le cours acheteur descend au seuil ou en dessous.' },
+      { term: 'Prise de bénéfices', definition: 'Vente protectrice déclenchée lorsque le cours acheteur monte au seuil ou au-dessus.' },
+      { term: 'Profondeur', definition: 'Quantité offerte au meilleur prix sur la période de cotation simulée (contrepartie du moteur, pas un carnet multi-participants).' },
+      { term: 'Spread', definition: 'Écart entre le cours vendeur (ask) et le cours acheteur (bid).' },
       { term: 'Slippage', definition: 'Écart entre le prix attendu et le prix d\'exécution réel.' },
     ],
-    safeguard: 'La soumission d\'ordres reste désactivée tant que le moteur d\'exécution simulé n\'est pas connecté. Aucun ordre n\'est jamais envoyé sur un marché réel.',
+    safeguard: 'Les prix sont simulés et étiquetés comme tels. Aucun ordre n\'est jamais envoyé sur un marché réel. La vente à découvert est refusée.',
   },
   portfolios: {
     slug: 'portfolios',
@@ -354,5 +358,5 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
 };
 
-/** Routes of apps/web that render ModulePreviewPage (apps/web/src/app/<slug>/page.tsx). */
-export const PREVIEW_MODULE_ROUTES = [] as const;
+/** Re-export for specs; route table imports the slim module-preview-routes file. */
+export { PREVIEW_MODULE_ROUTES } from './module-preview-routes';

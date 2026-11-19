@@ -162,8 +162,8 @@ export class StressTestingPage {
     if (!r || r.sensitivity.length < 2) return null;
     const min = r.thresholds.cet1Minimum * 100;
     const series: ChartSeries[] = [
-      { label: 'Banque conventionnelle', values: r.sensitivity.map((p) => p.CONVENTIONAL.cet1Ratio * 100), tone: 'brand' },
-      { label: 'Banque participative', values: r.sensitivity.map((p) => p.PARTICIPATIVE.cet1Ratio * 100), tone: 'cyan' },
+      { label: 'Banque conventionnelle', values: r.sensitivity.map((p) => p.CONVENTIONAL.cet1Ratio * 100), tone: 'brand', area: true },
+      { label: 'Banque participative', values: r.sensitivity.map((p) => p.PARTICIPATIVE.cet1Ratio * 100), tone: 'mauve' },
       { label: `Seuil CET1 ${num(min, 0)} %`, values: r.sensitivity.map(() => min), tone: 'muted', dashed: true },
     ];
     const first = r.sensitivity[0];

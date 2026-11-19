@@ -132,7 +132,7 @@ describe('Dashboard page', () => {
     expect(root.querySelector('h1')?.textContent).toBe('Vue d\'ensemble');
     expect(root.querySelector('.db-identity')?.textContent).toContain('Investisseur');
     expect(kpiValue(root, 'Valeur du portefeuille simulé')?.textContent).toContain('pas encore disponible');
-    expect(kpiValue(root, 'Sessions actives')?.textContent?.trim()).toBe('1');
+    expect(kpiValue(root, 'Trésorerie disponible')?.textContent).toContain('pas encore disponible');
     expect(root.querySelector('[data-demo="true"]')).toBeNull();
     expect(root.textContent).not.toContain(SAMPLE_DATA_NOTICE);
     expect(root.querySelector('#devices')?.textContent).toContain('Work laptop');
@@ -205,6 +205,6 @@ describe('Dashboard page', () => {
     const { root } = await render();
     expect(root.textContent).toContain('Les outils administrateur sont verrouillés');
     expect(root.querySelector('#devices .ws-empty[data-tone="error"]')?.textContent).toContain('Sessions indisponibles');
-    expect(kpiValue(root, 'Sessions actives')?.textContent).toContain('pas encore disponible');
+    expect(kpiValue(root, 'Trésorerie disponible')?.textContent).toContain('pas encore disponible');
   });
 });

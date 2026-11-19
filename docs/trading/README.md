@@ -45,8 +45,10 @@ Status (9 Nov 2026): implemented and tested against `PIF_test`. The migration is
 
 - **Market:** immediate-or-cancel. It fills at the ask (buy) or bid (sell) up to the depth still available in the current quote period. Any remainder is cancelled with a written reason. It is never left working.
 - **Limit:** a marketable limit fills now like a market order, capped at the limit. Otherwise it rests. A resting limit fills at the limit, or at a better quote, in the first period whose quote crosses it.
-- **Stop-loss (sell only):** it triggers when the bid falls to the stop or below, then sells at the bid. A buy stop is refused.
-- **Sells** are checked against units held. A stop-loss and a take-profit limit may coexist on the same position. When a position is closed, its other open sells are cancelled.
+- **Stop-loss (sell only):** it triggers when the bid falls to the stop or below, then sells at the bid. A buy stop is refused. At submission the stop must sit strictly below the current bid.
+- **Take-profit (sell only):** it triggers when the bid rises to the trigger or above, then sells at the bid. A buy take-profit is refused. At submission the trigger must sit strictly above the current bid (`TAKE_PROFIT_NOT_ABOVE_BID`).
+- **Sells** are checked against units held. A stop-loss and a take-profit may coexist on the same position. When a position is closed, its other open sells are cancelled.
+- **Not a peer order book:** fills consume simulated quote-period depth for this portfolio, not other investors’ resting orders. A historical multi-participant CLOB remains an optional extension (`docs/project/AUDIT_MOTEUR_CARNET_ORDRES.md`).
 - **Cash reservation:** working buy orders reserve cash at their limit price plus the commission. `availableCash = cash − reserved`.
 
 **Lifecycle:** `OPEN` → `PARTIALLY_FILLED` (still working) → `FILLED` | `CANCELLED` | `EXPIRED`, or `REJECTED` at submission. After a partial fill, a terminal state keeps `filledQuantity > 0`.
@@ -95,7 +97,7 @@ All endpoints require a bearer access token. Rate limit: 240 requests per minute
 | GET | `/api/portfolios/:id/analytics` | Valuation, reconciliation, allocation, concentration, performance, risk, stress |
 | GET | `/api/portfolios/:id/history` | End-of-day equity and net contributions, plus the current point |
 
-Errors use the platform's standard shape: `{ statusCode, message, errorCode, details? }`. Trading-specific codes: `PORTFOLIO_NOT_FOUND`, `PORTFOLIO_LIMIT`, `PORTFOLIO_NAME_TAKEN`, `PORTFOLIO_CHANGED`, `QUOTE_CHANGED`, `IDEMPOTENCY_KEY_REUSED`, `DUPLICATE_SUBMISSION`, `ORDER_NOT_FOUND`, `ORDER_NOT_OPEN`, `INSTRUMENT_NOT_FOUND`, `CONTRIBUTION_LIMIT`, `INSUFFICIENT_CASH`, `DATABASE_SCHEMA_OUTDATED`. Rejection codes inside an order: `INSTRUMENT_HALTED`, `INVALID_QUANTITY`, `PRICE_REQUIRED`, `LIMIT_OUT_OF_BAND`, `STOP_BUY_UNSUPPORTED`, `STOP_NOT_BELOW_BID`, `INSUFFICIENT_POSITION`, `INSUFFICIENT_CASH`, `POSITION_LIMIT`, `NO_LIQUIDITY`, `TOO_MANY_OPEN_ORDERS`.
+Errors use the platform's standard shape: `{ statusCode, message, errorCode, details? }`. Trading-specific codes: `PORTFOLIO_NOT_FOUND`, `PORTFOLIO_LIMIT`, `PORTFOLIO_NAME_TAKEN`, `PORTFOLIO_CHANGED`, `QUOTE_CHANGED`, `IDEMPOTENCY_KEY_REUSED`, `DUPLICATE_SUBMISSION`, `ORDER_NOT_FOUND`, `ORDER_NOT_OPEN`, `INSTRUMENT_NOT_FOUND`, `CONTRIBUTION_LIMIT`, `INSUFFICIENT_CASH`, `DATABASE_SCHEMA_OUTDATED`. Rejection codes inside an order: `INSTRUMENT_HALTED`, `INVALID_QUANTITY`, `PRICE_REQUIRED`, `LIMIT_OUT_OF_BAND`, `STOP_BUY_UNSUPPORTED`, `STOP_NOT_BELOW_BID`, `TAKE_PROFIT_NOT_ABOVE_BID`, `INSUFFICIENT_POSITION`, `INSUFFICIENT_CASH`, `POSITION_LIMIT`, `NO_LIQUIDITY`, `TOO_MANY_OPEN_ORDERS`.
 
 ## 6. Valuation, performance and risk: definitions and assumptions
 

@@ -86,6 +86,9 @@
           <option value="ALL" [selected]="assetClass() === 'ALL'">Toutes les classes</option>
           <option value="EQUITY" [selected]="assetClass() === 'EQUITY'">Actions</option>
           <option value="FUND" [selected]="assetClass() === 'FUND'">Fonds</option>
+          <option value="BOND" [selected]="assetClass() === 'BOND'">Obligations</option>
+          <option value="COMMODITY" [selected]="assetClass() === 'COMMODITY'">Matières premières</option>
+          <option value="FX" [selected]="assetClass() === 'FX'">Devises</option>
         </select>
         <label class="sr-only" for="markets-sector">Secteur</label>
         <select id="markets-sector" class="select" (change)="setSector($event)">

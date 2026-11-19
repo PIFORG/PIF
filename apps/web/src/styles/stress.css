@@ -1,0 +1,61 @@
+/* Stress testing visualizations (shared) */
+.bs-gauge { display: grid; gap: 4px; }
+.bs-gaugeTrack { position: relative; height: 8px; border-radius: 2px; background: var(--mtr-sunken); }
+.bs-gaugeZone { position: absolute; top: 0; bottom: 0; opacity: 0.35; }
+.bs-gaugeZone[data-zone='negative'] { left: 0; background: var(--mtr-neg); }
+.bs-gaugeZone[data-zone='warning'] { background: var(--mtr-amber); }
+.bs-gaugeZone[data-zone='positive'] { background: var(--mtr-pos); }
+.bs-gaugeMark { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--mtr-text-3); }
+.bs-gaugeMark[data-mark='stressed'] { background: var(--bs-tone); outline: 1px solid var(--mtr-surface); }
+.bs-gaugeMark[data-preview='true'] { background: var(--mtr-amber); }
+.bs-gaugeScale { position: relative; height: 14px; color: var(--mtr-text-3); font-size: 0.6875rem; }
+.bs-gaugeScale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.bs-gaugeScale span:first-child { transform: none; }
+.bs-gaugeScale span:last-child { transform: translateX(-100%); }
+
+.bs-mirrors { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
+.bs-mirror { display: grid; gap: 12px; margin: 0; }
+.bs-mirror figcaption { display: flex; justify-content: space-between; gap: 8px; font-size: 0.875rem; }
+.bs-mirrorStage { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: end; height: 200px; border-bottom: 1px solid var(--mtr-border-strong); }
+.bs-mirrorCol { display: flex; flex-direction: column-reverse; min-height: 2px; }
+.bs-mirrorArrow { align-self: center; text-align: center; color: var(--mtr-text-3); font-size: 1.1rem; }
+.bs-block { display: flex; align-items: center; justify-content: center; min-height: 1px; border-top: 1px solid var(--mtr-surface); background: var(--bs-kind); }
+.bs-block em { padding: 0 3px; color: #fff; font-style: normal; font-size: 0.65rem; text-align: center; line-height: 1.15; }
+.bs-block, .bs-dot { --bs-kind: var(--mtr-text-3); }
+[data-kind='CREDIT'] { --bs-kind: var(--mtr-neg); }
+[data-kind='SECURITIES'] { --bs-kind: var(--mtr-amber); }
+[data-kind='MARGIN'], [data-kind='FEES'] { --bs-kind: var(--mtr-brand); }
+[data-kind='DCR'] { --bs-kind: #b45309; }
+[data-kind='CAPITAL'] { --bs-kind: var(--mtr-brand-strong); }
+[data-kind='PSIA'] { --bs-kind: var(--mtr-amber); }
+[data-kind='RESERVE'] { --bs-kind: #ca8a04; }
+[data-kind='TAX'] { --bs-kind: var(--mtr-text-3); }
+[data-role='absorber'][data-kind='MARGIN'], [data-role='absorber'][data-kind='FEES'], [data-role='absorber'][data-kind='CREDIT'], [data-role='absorber'][data-kind='SECURITIES'] { --bs-kind: var(--mtr-pos); }
+.bs-mirrorLegend { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.bs-mirrorLegend ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 0.75rem; align-content: start; }
+.bs-mirrorLegend li { display: flex; align-items: baseline; gap: 6px; }
+.bs-mirrorLegend .num { margin-left: auto; white-space: nowrap; }
+.bs-dot { flex: none; width: 9px; height: 9px; border-radius: 2px; background: var(--bs-kind); }
+
+.bs-waterfall { display: grid; gap: 4px; margin: 0 0 12px; }
+.bs-wfRow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(120px, 2fr) 72px; gap: 8px; align-items: center; font-size: 0.8125rem; }
+.bs-wfRow[data-kind='total'] { font-weight: 600; }
+.bs-wfTrack { position: relative; height: 16px; }
+.bs-wfBar { position: absolute; top: 3px; bottom: 3px; border-radius: 2px; background: var(--mtr-pos); }
+.bs-wfBar[data-sign='neg'] { background: var(--mtr-neg); }
+.bs-wfMarker { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: var(--mtr-brand); }
+.bs-wfMarker[data-end='true'] { background: var(--mtr-text); }
+.bs-wfThreshold { position: absolute; top: -2px; bottom: -2px; border-left: 1px dashed var(--mtr-neg); opacity: 0.7; }
+.bs-wfValue { text-align: right; }
+.bs-wfValue[data-sign='neg'] { color: var(--mtr-neg); }
+.bs-wfValue[data-sign='pos'] { color: var(--mtr-pos); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-mirrorCol, .bs-block { transition: none; }
+}
+@media (max-width: 640px) {
+  .bs-wfRow { grid-template-columns: 1fr 64px; }
+  .bs-wfTrack { grid-column: 1 / -1; grid-row: 2; }
+  .bs-mirrorLegend { grid-template-columns: 1fr; }
+}
+.bs-previewCheck { margin: 0; padding-left: 10px; border-left: 2px solid var(--mtr-amber); color: var(--mtr-text-2); font-size: 0.75rem; }

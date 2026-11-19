@@ -97,7 +97,10 @@
       <p class="tr-muted">Une prise de bénéfices attend que le cours acheteur monte jusqu'à votre seuil, puis vend au cours acheteur. Elle verrouille un gain sur une position détenue.</p>
     }
     @if (draft().type === 'MARKET') {
-      <p class="tr-muted">Un ordre au marché s'exécute maintenant au meilleur prix, dans la limite de la quantité disponible ; le solde est annulé et ne reste pas en carnet.</p>
+      <p class="tr-muted">Un ordre au marché s'exécute maintenant au meilleur prix, dans la limite de la profondeur offerte sur cette période de cotation ; le solde est annulé (pas de liquidité fictive infinie).</p>
+    }
+    @if (draft().type === 'LIMIT') {
+      <p class="tr-muted">Un ordre à cours limité n'achète (ou ne vend) qu'au cours limite ou mieux. S'il n'est pas immédiatement exécutable, il reste ouvert jusqu'au croisement, à l'annulation ou à l'expiration.</p>
     }
 
     @if (notice()) {

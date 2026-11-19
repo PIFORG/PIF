@@ -357,8 +357,8 @@ export class ExceedancePanelComponent {
   protected readonly chart = computed(() => {
     const curve = this.run().results.exceedanceCurve;
     const hasExact = curve.every((pt) => pt.exact !== null);
-    const series: ChartSeries[] = [{ label: 'P(S > x) simulée', values: curve.map((pt) => pt.simulated), tone: 'brand' }];
-    if (hasExact) series.push({ label: 'P(S > x) exacte', values: curve.map((pt) => pt.exact ?? 0), tone: 'cyan', dashed: true });
+    const series: ChartSeries[] = [{ label: 'P(S > x) simulée', values: curve.map((pt) => pt.simulated), tone: 'brand', area: true }];
+    if (hasExact) series.push({ label: 'P(S > x) exacte', values: curve.map((pt) => pt.exact ?? 0), tone: 'violet', dashed: true });
     const first = curve[0].threshold;
     const last = curve[curve.length - 1].threshold;
     return {
@@ -390,10 +390,10 @@ export class ConvergencePanelComponent {
     const first = points[0];
     const last = points[points.length - 1];
     const series: ChartSeries[] = [
-      { label: 'Moyenne courante', values: points.map((pt) => pt.mean), tone: 'brand' },
-      { label: 'Borne sup. 95 %', values: points.map((pt) => pt.upper), tone: 'muted', dashed: true },
-      { label: 'Borne inf. 95 %', values: points.map((pt) => pt.lower), tone: 'muted', dashed: true },
-      { label: 'E[S] exact', values: points.map(() => exact), tone: 'cyan', dashed: true },
+      { label: 'Moyenne courante', values: points.map((pt) => pt.mean), tone: 'brand', area: true },
+      { label: 'Borne sup. 95 %', values: points.map((pt) => pt.upper), tone: 'lavender', dashed: true },
+      { label: 'Borne inf. 95 %', values: points.map((pt) => pt.lower), tone: 'lavender', dashed: true },
+      { label: 'E[S] exact', values: points.map(() => exact), tone: 'violet', dashed: true },
     ];
     return {
       series,

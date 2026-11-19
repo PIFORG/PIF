@@ -5,57 +5,45 @@
 }
 
 .adm-commandShell::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(900px 480px at 92% -6%, color-mix(in srgb, var(--mtr-brand) 14%, transparent), transparent 70%),
-    radial-gradient(640px 380px at 0% 28%, color-mix(in srgb, var(--mtr-brand-strong) 10%, transparent), transparent 72%),
-    linear-gradient(180deg, color-mix(in srgb, var(--mtr-sunken) 40%, transparent), transparent 32%);
+  content: none;
 }
 
 .adm-commandShell .subnav {
-  gap: 0;
-  padding: var(--space-1);
+  gap: var(--space-1);
+  padding: 0;
   margin-bottom: var(--space-5);
-  border: 1px solid color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--mtr-sunken) 55%, var(--mtr-surface));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 8%, transparent);
+  border: 0;
+  border-bottom: 1px solid var(--mtr-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .adm-commandShell .subnav .nav-link {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  margin-bottom: 0;
-  border-bottom: 0;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  border-radius: 0;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
 }
 
 .adm-commandShell .subnav .nav-link[aria-current='page'] {
   color: var(--mtr-brand-text);
-  background: color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-surface));
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--mtr-brand) 35%, transparent),
-    var(--mtr-glow, 0 0 12px color-mix(in srgb, var(--mtr-brand) 25%, transparent));
+  background: transparent;
+  box-shadow: none;
+  border-bottom-color: var(--mtr-brand);
 }
 
 /* ---------- Section chrome ---------- */
 
 .adm-section {
-  padding: var(--space-5);
-  border: 1px solid color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-border));
-  border-radius: var(--radius-lg);
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--mtr-brand) 5%, var(--mtr-surface)),
-    var(--mtr-surface)
-  );
-  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  border: 1px solid var(--mtr-border);
+  border-radius: var(--radius-md);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .adm-section + .adm-section {
@@ -108,13 +96,10 @@
 }
 
 .adm-commandShell .stat-tile {
-  border-color: color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--mtr-sunken) 30%, var(--mtr-surface)),
-    var(--mtr-surface)
-  );
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mtr-brand-text) 6%, transparent);
+  border-color: var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: none;
+  border-left: 2px solid var(--mtr-brand);
 }
 
 .adm-commandShell .stat-tile .value {
@@ -136,18 +121,25 @@
 }
 
 .adm-toolbar .field {
-  flex: 1 1 200px;
+  flex: 1 1 220px;
   min-width: 0;
 }
 
 .adm-toolbar label:not(.field) {
   display: grid;
   gap: var(--space-1);
+  flex: 0 1 11.5rem;
+  min-width: 9.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
+}
+
+.adm-toolbar select {
+  width: 100%;
+  min-width: 0;
 }
 
 /* ---------- Event feeds & lists ---------- */

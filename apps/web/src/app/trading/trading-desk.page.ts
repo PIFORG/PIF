@@ -19,7 +19,17 @@ import { IconComponent } from '../shared/icon/icon.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { OrderTicketComponent } from './order-ticket.component';
 import { emptyTicket, type TicketDraft } from './ticket-draft';
-import { dateTime, describeTradingError, dt, pct, price, sectorLabel, shortTime, units } from './trading-format';
+import {
+  assetClassLabel,
+  dateTime,
+  describeTradingError,
+  dt,
+  pct,
+  price,
+  sectorLabel,
+  shortTime,
+  units,
+} from './trading-format';
 import {
   CreatePortfolioFormComponent,
   PortfolioPickerComponent,
@@ -130,6 +140,7 @@ export class TradingDeskPage {
   protected readonly shortTime = shortTime;
   protected readonly dateTime = dateTime;
   protected readonly sectorLabel = sectorLabel;
+  protected readonly assetClassLabel = assetClassLabel;
 
   protected readonly portfolio = computed(() => this.portfolios()?.find((p) => p.id === this.activeId()) ?? null);
   protected readonly symbol = computed(() => this.draft().symbol);
@@ -148,7 +159,16 @@ export class TradingDeskPage {
     const watched = this.watched();
     return (this.market()?.instruments ?? []).filter((i) => {
       if (filter === 'WATCHLIST' && !watched.has(i.symbol)) return false;
-      if ((filter === 'EQUITY' || filter === 'FUND') && i.assetClass !== filter) return false;
+      if (
+        (filter === 'EQUITY' ||
+          filter === 'FUND' ||
+          filter === 'BOND' ||
+          filter === 'COMMODITY' ||
+          filter === 'FX') &&
+        i.assetClass !== filter
+      ) {
+        return false;
+      }
       return !text || i.symbol.toLowerCase().includes(text) || i.name.toLowerCase().includes(text) || i.sector.toLowerCase().includes(text);
     });
   });

@@ -1,26 +1,23 @@
-# EXECUTION_CHECKPOINT — refonte produit (suite)
+# EXECUTION_CHECKPOINT — refonte produit + mandat final
 
-Date: 2026-11-15 ~20:07 UTC+1
+## Session 2026-11-19 (mandat finalisation)
+- `docs/project/CONFORMITE_DEUX_CAHIERS.md`
+- `docs/project/AUDIT_MOTEUR_CARNET_ORDRES.md`
+- Moteur = quote-driven (pas CLOB peer) ; CLOB = facultatif non realise
+- Correctif validation TAKE_PROFIT a la soumission + `EngineTakeProfitValidationTest` OK
+- Detail operationnel : `docs/qa/EXECUTION_CHECKPOINT.md`
+- Base `PIF` non touchee
 
-## Fait cette session
-- Portefeuilles : header compact + strip valorisation (plus de badge Opérationnel / page-heading marketing)
-- Risques : même pattern (titre + tape strip VaR/ES/DD)
-- FinStories feed : header éditorial compact
-- Trading desk : titre « Négociation » aligné design system
-- Dashboard / Markets : badges LIVE_INTEGRATED décoratifs retirés
-- Bandeaux : pause plus discrète, hauteur unifiée
-- Angular : 323 tests OK
-
-## Déjà fait (session précédente)
-- Apprentissage recomposé
-- Marchés header + tape
-- Dashboard hero partiel
+## Session 2026-11-15 (refonte UI)
+- Portefeuilles / risques / FinStories / trading desk / dashboard / marches
+- Angular : 323 tests OK (session precedente)
 
 ## Restant
-- IA / XAI / Actuariat / Banque / Backtesting / Admin / Compte : pas encore recomposés structurellement
-- Responsive multi-breakpoints
-- Spring Boot suite
-- Dark mode audit profond
+- CLOB peer non livre
+- Re-verif exhaustive ~44 routes
+- Suites Spring/Playwright completes a rejouer
+- Admin / migration `PIF` en attente d autorisation
 
 ## Verdict
-**REFONTE INCOMPLÈTE — ÉCRANS ET CONTRÔLES RESTANTS IDENTIFIÉS.**
+**INCOMPLET — ECARTS PRECIS IDENTIFIES AVEC PREUVES ET ETAT DE CORRECTION.**
+**MISE EN SERVICE EN ATTENTE D AUTORISATION DE MIGRATION.**

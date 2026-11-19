@@ -78,7 +78,7 @@ describe('application routes', () => {
     const harness = await RouterTestingHarness.create('/settings/profile');
     await settle(harness);
     expect(TestBed.inject(Router).url).toBe('/login?returnTo=%2Fsettings%2Fprofile');
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Se connecter');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Connexion');
   });
 
   it('shows "Checking session…" while the session is being restored', async () => {
@@ -96,7 +96,7 @@ describe('application routes', () => {
     expect(TestBed.inject(Router).url).toBe('/settings/profile');
     expect(root.querySelector('#profile-heading')?.textContent).toBe('Profil et préférences');
     expect((root.querySelector('#firstName') as HTMLInputElement).value).toBe('Ada');
-    expect(root.querySelector('[aria-current="page"].nav-link')?.textContent?.trim()).toBe('Profil');
+    expect(root.querySelector('[aria-current="page"].set-navLink')?.textContent?.trim()).toBe('Profil');
     const shell = harness.fixture.nativeElement as HTMLElement;
     expect(shell.querySelector('.inv-nav') || shell.querySelector('nav[aria-label="Navigation principale"]')).toBeTruthy();
     expect(shell.querySelector('aside.adm-side')).toBeFalsy();
@@ -125,12 +125,12 @@ describe('application routes', () => {
   it('uses the public layout for unmigrated public pages', async () => {
     const harness = await RouterTestingHarness.create('/legal/terms');
     await settle(harness);
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Pas encore disponible');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Page introuvable');
   });
 
   describe('migrated identity screens', () => {
     const publicPages: [string, string][] = [
-      ['/register', 'Créez votre compte'],
+      ['/register', 'Créer un compte'],
       ['/verify-email', 'Vérifiez votre courriel'],
       ['/resend-verification', 'Renvoyer la vérification'],
       ['/forgot-password', 'Mot de passe oublié'],
@@ -159,7 +159,7 @@ describe('application routes', () => {
       const root = harness.routeNativeElement as HTMLElement;
       expect(Array.from(root.querySelectorAll('h2')).map((h) => h.textContent)).toContain(heading);
       expect(root.textContent).not.toContain('has not been migrated');
-      expect(root.querySelector('[aria-current="page"].nav-link')?.textContent?.trim()).toBe(tab);
+      expect(root.querySelector('[aria-current="page"].set-navLink')?.textContent?.trim()).toBe(tab);
     });
 
     it('does not create a protected page, or load its data, before access is confirmed', async () => {
@@ -215,10 +215,10 @@ describe('application routes', () => {
     });
 
     it.each([
-      ['/admin', 'Vue générale', "Vue d'ensemble de la plateforme"],
+      ['/admin', 'Tableau de bord', "Vue d'ensemble de la plateforme"],
       ['/admin/users', 'Utilisateurs', 'Comptes utilisateurs'],
       ['/admin/users/u1', 'Utilisateurs', 'Ada Lovelace'],
-      ['/admin/audit', "Journal d'audit", "Journal d'audit"],
+      ['/admin/audit', "Journal d'activité", "Journal d'audit"],
     ])('renders %s for an administrator with sidebar (no investor navbar)', async (path, sideLabel, heading) => {
       status.set('authenticated');
       user.set(admin);

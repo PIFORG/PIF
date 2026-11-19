@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { AdminPlatformApi } from '../../core/api/admin-platform-api';
 import { describeApiError } from '../../core/api/errors';
+import { displayApiModuleLabel, displayApiStatus } from '../../core/i18n/api-display-labels';
 import { WORKSPACE_PRIMITIVES } from '../../shared/workspace/workspace.components';
 
 @Component({
@@ -21,6 +22,10 @@ export class AdminPlatformPage {
   protected readonly ai = signal<{ title?: string; models?: { id: string; title: string }[]; disclaimer?: string } | null>(null);
   protected readonly stress = signal<Record<string, unknown> | null>(null);
   protected readonly actuarial = signal<{ title: string; modules: { id: string; label: string; status: string }[]; note: string } | null>(null);
+  protected readonly challenges = signal<{
+    challenges: { id: string; title: string; open?: boolean; startingCapital?: number }[];
+    note?: string;
+  } | null>(null);
 
   constructor() {
     inject(DestroyRef).onDestroy(() => (this.destroyed = true));
@@ -29,7 +34,7 @@ export class AdminPlatformPage {
 
   private async load(): Promise<void> {
     try {
-      const [supervision, markets, learning, news, ai, stress, actuarial] = await Promise.all([
+      const [supervision, markets, learning, news, ai, stress, actuarial, challenges] = await Promise.all([
         this.api.supervision(),
         this.api.markets(),
         this.api.learning(),
@@ -37,15 +42,31 @@ export class AdminPlatformPage {
         this.api.ai(),
         this.api.stress(),
         this.api.actuarial(),
+        this.api.challenges(),
       ]);
       if (this.destroyed) return;
-      this.supervision.set(supervision);
+      this.supervision.set({
+        ...supervision,
+        modules: supervision.modules.map((m) => ({
+          ...m,
+          label: displayApiModuleLabel(m.label),
+          status: displayApiStatus(m.status),
+        })),
+      });
       this.markets.set(markets);
       this.learning.set(learning);
       this.news.set(news);
       this.ai.set(ai as { title?: string; models?: { id: string; title: string }[]; disclaimer?: string });
       this.stress.set(stress);
-      this.actuarial.set(actuarial);
+      this.actuarial.set({
+        ...actuarial,
+        modules: actuarial.modules.map((m) => ({
+          ...m,
+          label: displayApiModuleLabel(m.label),
+          status: displayApiStatus(m.status),
+        })),
+      });
+      this.challenges.set(challenges);
     } catch (err) {
       if (!this.destroyed) this.error.set(describeApiError(err, 'Impossible de charger la supervision.'));
     }

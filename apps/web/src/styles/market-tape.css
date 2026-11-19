@@ -17,6 +17,7 @@
   min-height: 1.85rem;
   padding: 0 0.75rem;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .mp-source,
@@ -246,6 +247,16 @@ button.nw-item:hover {
 
   .mp-link {
     display: none;
+  }
+
+  /* Réduit le bruit horizontal : le libellé « Actualités » suffit en mobile. */
+  .nw-source {
+    display: none;
+  }
+
+  .nw-pause {
+    padding-inline: 0.35rem;
+    font-size: 0.625rem;
   }
 }
 

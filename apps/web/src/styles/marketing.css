@@ -13,7 +13,7 @@
 }
 
 html[data-theme='light'] .mk-page {
-  background: linear-gradient(180deg, #f8fafc 0%, var(--mtr-canvas) 28%, var(--mtr-canvas) 100%);
+  background: var(--mtr-canvas);
 }
 
 .mk-page main {
@@ -97,7 +97,7 @@ html[data-theme='light'] .mk-page {
 .mk-heroName {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2.15rem, 1rem + 4vw, 4.35rem);
   line-height: 0.88;
   letter-spacing: -0.05em;
@@ -242,10 +242,12 @@ html[data-theme='light'] .mk-page {
 
 .mk-step {
   position: relative;
-  padding: var(--space-6);
+  padding: var(--space-4);
   border-top: 2px solid var(--mtr-brand);
-  background: linear-gradient(180deg, var(--mtr-surface), transparent);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--mtr-surface);
+  border: 1px solid var(--mtr-border);
+  border-top: 2px solid var(--mtr-brand);
+  border-radius: var(--radius-md);
 }
 
 .mk-step h3 {
@@ -453,9 +455,7 @@ html[data-theme='light'] .mk-page {
   border: 1px solid var(--mtr-border);
   border-radius: var(--radius-xl);
   background: var(--mtr-surface);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--mtr-brand) 8%, transparent),
-    var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 

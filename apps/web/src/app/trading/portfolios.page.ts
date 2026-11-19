@@ -16,7 +16,7 @@ import {
 import { formatNumber } from '../core/format/finance';
 import { AllocationBarComponent, LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
-import { dateTime, describeTradingError, dt, pct, sectorLabel } from './trading-format';
+import { assetClassLabelPlural, dateTime, describeTradingError, dt, pct, sectorLabel } from './trading-format';
 import {
   CreatePortfolioFormComponent,
   MetricValueComponent,
@@ -183,6 +183,7 @@ export class PortfoliosPage {
 
   protected readonly dt = dt;
   protected readonly sectorLabel = sectorLabel;
+  protected readonly assetClassLabelPlural = assetClassLabelPlural;
   protected readonly pct = pct;
   protected readonly dateTime = dateTime;
   protected readonly signedPct = (v: number) => pct(v, true);
@@ -211,7 +212,7 @@ export class PortfoliosPage {
     const last = points[points.length - 1];
     const series: ChartSeries[] = [
       { label: 'Capitaux propres', values: points.map((p) => p.equity), tone: 'brand', area: true },
-      { label: 'Apports nets', values: points.map((p) => p.netContributions), tone: 'muted', dashed: true },
+      { label: 'Apports nets', values: points.map((p) => p.netContributions), tone: 'mauve', dashed: true },
     ];
     return {
       enough: true as const,

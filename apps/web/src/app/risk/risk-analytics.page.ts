@@ -105,7 +105,7 @@ export class RiskAnalyticsPage {
     const last = points[points.length - 1];
     const series: ChartSeries[] = [
       { label: 'Valeur', values: points.map((p) => p.equity), tone: 'brand', area: true },
-      { label: 'Apports nets', values: points.map((p) => p.netContributions), tone: 'muted', dashed: true },
+      { label: 'Apports nets', values: points.map((p) => p.netContributions), tone: 'mauve', dashed: true },
     ];
     return {
       enough: true as const,

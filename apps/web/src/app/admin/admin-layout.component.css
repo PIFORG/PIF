@@ -1,6 +1,6 @@
 .adm-shell {
-  --adm-side-w: 232px;
-  --adm-side-collapsed: 64px;
+  --adm-side-w: 220px;
+  --adm-side-collapsed: 56px;
   display: grid;
   grid-template-columns: var(--adm-side-w) minmax(0, 1fr);
   min-height: 100vh;
@@ -17,9 +17,9 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--mtr-sunken);
+  background: color-mix(in srgb, var(--mtr-sunken) 70%, var(--mtr-surface));
   border-right: 1px solid var(--mtr-border);
-  padding: 0.65rem 0.5rem;
+  padding: 0.5rem 0.4rem;
 }
 
 .adm-sideTop {
@@ -52,9 +52,9 @@
 
 .adm-sideLabel {
   margin: 0.75rem 0.5rem 0.35rem;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+  font-weight: 550;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
 }
@@ -75,14 +75,17 @@
 .adm-sideLink {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.5rem 0.55rem;
-  margin-bottom: 0.15rem;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.1rem;
   border-radius: var(--radius-sm);
   color: var(--mtr-text-2);
   text-decoration: none;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 550;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard);
 }
 
 .adm-sideLink:hover {

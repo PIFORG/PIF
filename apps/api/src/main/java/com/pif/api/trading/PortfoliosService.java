@@ -503,8 +503,8 @@ public class PortfoliosService {
       for (EquityPoint p : points) out.add(historyPoint(p.at(), p.equity(), p.netContributions(), false));
       out.add(historyPoint(ctx.now, equity, ctx.row.netContributions(), true));
       Map<String, Object> m = new LinkedHashMap<>();
-      m.put("convention", "End-of-day equity rebuilt from the cash ledger and executions, holdings marked at each daily "
-          + "close; the last point is the current valuation.");
+      m.put("convention", "Capitaux propres de fin de journée reconstruits depuis le journal de trésorerie et les exécutions ; "
+          + "positions valorisées à chaque clôture quotidienne ; le dernier point est la valorisation actuelle.");
       m.put("points", out);
       return m;
     });

@@ -80,6 +80,9 @@
             <option value="WATCHLIST" [selected]="filter() === 'WATCHLIST'">Suivi</option>
             <option value="EQUITY" [selected]="filter() === 'EQUITY'">Actions</option>
             <option value="FUND" [selected]="filter() === 'FUND'">Fonds</option>
+            <option value="BOND" [selected]="filter() === 'BOND'">Obligations</option>
+            <option value="COMMODITY" [selected]="filter() === 'COMMODITY'">Matières premières</option>
+            <option value="FX" [selected]="filter() === 'FX'">Devises</option>
           </select>
         </div>
         @if (marketError()) {
@@ -107,7 +110,7 @@
                     }
                   </span>
                   <span class="tr-instrumentName">{{ i.name }}</span>
-                  <span class="tr-instrumentMeta">{{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ sectorLabel(i.sector) }}</span>
+                  <span class="tr-instrumentMeta">{{ assetClassLabel(i.assetClass) }} · {{ sectorLabel(i.sector) }}</span>
                   <span class="tr-instrumentPrice">
                     <span class="num">{{ price(i.quote?.mid) }}</span>
                     @if (i.changePct !== null) {

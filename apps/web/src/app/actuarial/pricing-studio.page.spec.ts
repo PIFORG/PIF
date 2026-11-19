@@ -112,10 +112,10 @@ describe('PricingStudio', () => {
     expect(getText(root, 'Prime brute (commerciale)')).toBeTruthy();
     expect(getText(root, /Estimations du modèle à partir d'hypothèses fictives/)).toBeTruthy();
     const link = (name: string) => Array.from(root.querySelectorAll('a')).find((a) => a.textContent?.trim() === name);
-    expect(link('Laboratoire Monte Carlo')?.getAttribute('href')).toBe('/actuarial/monte-carlo');
-    expect(link('Studio de provisionnement')?.getAttribute('href')).toBe('/actuarial/reserving');
+    expect(link('Simuler les pertes')?.getAttribute('href')).toBe('/actuarial/monte-carlo');
+    expect(link('Estimer les provisions')?.getAttribute('href')).toBe('/actuarial/reserving');
     expect(link('Capital économique')?.getAttribute('href')).toBe('/actuarial/capital');
-    expect(link('Laboratoire ALM')?.getAttribute('href')).toBe('/actuarial/alm');
+    expect(link('Gestion actif-passif')?.getAttribute('href')).toBe('/actuarial/alm');
   });
 
   it('validates locally and does not call the API with invalid input', async () => {

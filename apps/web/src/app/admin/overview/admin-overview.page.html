@@ -2,7 +2,7 @@
   <div class="adm-sectionHead">
     <div>
       <h2 id="admin-overview-heading">Vue d'ensemble de la plateforme</h2>
-      <p>Indicateurs de comptes en direct issus de l'API d'identité.</p>
+      <p>Indicateurs de comptes en direct issus du registre d'identité.</p>
     </div>
     <a routerLink="/admin/users" class="btn btn-secondary">Gérer les utilisateurs</a>
   </div>
@@ -26,7 +26,7 @@
         <h3>Événements des {{ data.eventTotals.windowDays }} derniers jours</h3>
         <ul class="adm-feed">
           @for (item of data.eventTotals.items.slice(0, 12); track item.eventType + '-' + item.outcome) {
-            <li>{{ item.eventType }} · {{ item.outcome }} · {{ item.count }}</li>
+            <li>{{ formatEventLine(item.eventType, item.outcome, '' + item.count) }}</li>
           }
         </ul>
       </div>
@@ -38,7 +38,7 @@
       } @else {
         <ul class="adm-feed">
           @for (event of data.recentEvents; track event.id) {
-            <li>{{ event.eventType }} · {{ event.outcome }} · {{ formatDateTime(event.createdAt) }}</li>
+            <li>{{ formatEventLine(event.eventType, event.outcome, formatDateTime(event.createdAt)) }}</li>
           }
         </ul>
       }

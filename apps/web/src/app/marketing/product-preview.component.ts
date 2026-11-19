@@ -80,7 +80,7 @@ export class ProductPreviewComponent {
   protected readonly railItems = [0, 1, 2, 3, 4, 5];
   protected readonly series: ChartSeries[] = [
     { label: 'Portefeuille (exemple)', values: sampleEquityCurve.map((p) => p.value), tone: 'brand', area: true },
-    { label: 'Indice (exemple)', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'muted', dashed: true },
+    { label: 'Indice (exemple)', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'mauve', dashed: true },
   ];
   protected readonly formatAxis = (v: number) => formatMoney(v, SAMPLE_CURRENCY, { compact: true });
   protected readonly watchlist = sampleWatchlist.slice(0, 4);

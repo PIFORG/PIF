@@ -1,11 +1,11 @@
 /*
  * Market Trading Room type system.
- * Poppins is the platform-wide typeface (display, UI and figures).
+ * Poppins for UI/display; IBM Plex Mono for tabular financial figures.
  * Loaded from the Google Fonts stylesheet in index.html.
  * Tokens and components live in styles/globals.css.
  */
 :root {
   --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-sans: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Consolas', 'Segoe UI Mono', monospace;
 }

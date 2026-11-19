@@ -157,8 +157,8 @@ export class MissionPlayerPage {
     const position = state.portfolio.positions.find((p) => p.symbol === selected);
     const stop = state.orders.find((o) => o.symbol === selected && o.type === 'STOP' && o.status === 'OPEN');
     const series: ChartSeries[] = [{ label: `${selected} cours médian`, values, tone: 'brand', area: true }];
-    if (position) series.push({ label: 'Votre coût moyen', values: values.map(() => position.averageCost), tone: 'muted', dashed: true });
-    if (stop?.stopPrice) series.push({ label: 'Votre seuil', values: values.map(() => stop.stopPrice as number), tone: 'cyan', dashed: true });
+    if (position) series.push({ label: 'Votre coût moyen', values: values.map(() => position.averageCost), tone: 'mauve', dashed: true });
+    if (stop?.stopPrice) series.push({ label: 'Votre seuil', values: values.map(() => stop.stopPrice as number), tone: 'violet', dashed: true });
     const stepWord = this.stepWord();
     const before = -firstStep;
     return {
@@ -174,7 +174,7 @@ export class MissionPlayerPage {
     if (!state) return null;
     const stepWord = this.stepWord();
     return {
-      series: [{ label: 'Valeur du portefeuille', values: state.equityCurve.map((p) => p.equity), tone: 'cyan', area: true }] as ChartSeries[],
+      series: [{ label: 'Valeur du portefeuille', values: state.equityCurve.map((p) => p.equity), tone: 'sky', area: true }] as ChartSeries[],
       xCount: state.steps + 1,
       summary: `Valeur du portefeuille du début jusqu'au ${stepWord.toLowerCase()} ${state.step} : ${formatDT(state.portfolio.equity)}.`,
       minSpan: (state.equityCurve[0]?.equity ?? state.portfolio.equity) * 0.04,

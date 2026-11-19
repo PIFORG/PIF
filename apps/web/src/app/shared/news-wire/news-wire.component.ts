@@ -138,7 +138,7 @@ export class FinancialNewsWireComponent {
   }
 
   protected sourceTitle(): string {
-    return this.feed?.source.description ?? 'Fil d\'actualités issu de l\'API';
+    return this.feed?.source.description ?? 'Fil d\'actualités pédagogiques';
   }
 
   protected select(id: string): void {

@@ -4,7 +4,17 @@ import { NewsApi, type NewsFeed } from '../core/api/news-api';
 import { MarketApi, type AssetClass, type InstrumentView, type MarketSnapshot, type MarketStatus } from '../core/api/trading-api';
 import { IconComponent } from '../shared/icon/icon.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
-import { dateTime, describeTradingError, dt, price, sectorLabel, shortTime, units } from './trading-format';
+import {
+  assetClassLabel,
+  assetClassLabelPlural,
+  dateTime,
+  describeTradingError,
+  dt,
+  price,
+  sectorLabel,
+  shortTime,
+  units,
+} from './trading-format';
 import { SignedAmountComponent } from './trading-parts.components';
 
 const REFRESH_MS = 30_000;
@@ -60,7 +70,7 @@ function mover(instrument: InstrumentView | undefined): { change: number; hint: 
                     <span class="badge badge-danger">Suspendu</span>
                   }
                 </span>
-                <div class="field-hint">{{ i.name }} · {{ i.assetClass === 'FUND' ? 'Fonds' : 'Action' }} · {{ sectorLabel(i.sector) }}</div>
+                <div class="field-hint">{{ i.name }} · {{ assetClassLabel(i.assetClass) }} · {{ sectorLabel(i.sector) }}</div>
               </th>
               <td class="num">{{ price(i.quote?.bid) }}</td>
               <td class="num">{{ price(i.quote?.ask) }}</td>
@@ -93,6 +103,7 @@ export class InstrumentTableComponent {
   readonly toggleWatch = output<string>();
   protected readonly price = price;
   protected readonly sectorLabel = sectorLabel;
+  protected readonly assetClassLabel = assetClassLabel;
   protected readonly units = units;
   protected readonly dash = '\u2014';
 }
@@ -160,10 +171,10 @@ export class MarketsPage {
     return period ? `Période en cours ${shortTime(period.start)}–${shortTime(period.end)}` : undefined;
   });
   protected readonly feeSummary = computed(() =>
-    (['EQUITY', 'FUND'] as AssetClass[])
+    (['EQUITY', 'FUND', 'BOND', 'COMMODITY', 'FX'] as AssetClass[])
       .map((cls) => this.market()?.instruments.find((i) => i.assetClass === cls))
       .filter((i): i is InstrumentView => !!i)
-      .map((i) => `${i.assetClass === 'FUND' ? 'Fonds' : 'Actions'} ${(i.fees.feeBps / 100).toFixed(2)} % (min ${dt(i.fees.minFee)})`)
+      .map((i) => `${assetClassLabelPlural(i.assetClass)} ${(i.fees.feeBps / 100).toFixed(2)} % (min ${dt(i.fees.minFee)})`)
       .join(' · '),
   );
   protected readonly fundamentalsSymbol = signal('CTB');

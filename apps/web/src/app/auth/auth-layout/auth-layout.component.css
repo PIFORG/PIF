@@ -6,9 +6,7 @@
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background:
-    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--mtr-brand) 7%, transparent), transparent 55%),
-    var(--mtr-canvas);
+  background: var(--mtr-canvas);
 }
 
 .mtr-auth-shell .top {
@@ -40,9 +38,8 @@
 
 .mtr-auth-shell .card {
   width: min(100%, 22.5rem);
-  padding: 1.75rem 1.5rem 1.5rem;
+  padding: 1.6rem 1.4rem 1.4rem;
   border: 1px solid var(--mtr-border);
-  border-top: 2px solid var(--mtr-brand);
   border-radius: var(--radius-md);
   background: var(--mtr-surface);
   box-shadow: none;
@@ -51,10 +48,10 @@
 .mtr-auth-shell .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--mtr-text);
 }
 

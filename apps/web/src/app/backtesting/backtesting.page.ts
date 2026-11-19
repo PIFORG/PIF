@@ -81,7 +81,7 @@ export class BacktestingPage {
     const points = this.result()?.drawdown ?? [];
     if (points.length < 2) return { enough: false as const };
     const series: ChartSeries[] = [
-      { label: 'Repli', values: points.map((p) => -p.drawdown), tone: 'cyan', area: true },
+      { label: 'Repli', values: points.map((p) => -p.drawdown), tone: 'violet', area: true },
     ];
     const first = points[0];
     const last = points[points.length - 1];

@@ -122,8 +122,8 @@ describe('administration pages', () => {
       'Vérification en deux étapes activée=3',
     ]);
     expect(root(harness).textContent).toContain('Événements des 7 derniers jours');
-    expect(root(harness).textContent).toContain('LOGIN_FAILURE · FAILURE · 4');
-    expect(root(harness).textContent).toContain('LOGIN_SUCCESS · SUCCESS ·');
+    expect(root(harness).textContent).toContain('Échec de connexion · Échec · 4');
+    expect(root(harness).textContent).toContain('Connexion réussie · Succès ·');
   });
 
   it('explains when the overview is locked behind MFA enrolment', async () => {

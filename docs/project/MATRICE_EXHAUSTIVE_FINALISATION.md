@@ -31,9 +31,9 @@ Dernière mise à jour audit code : 15 nov. 2026 (statique + checkpoint précéd
 | MTR-04D-MKT-005 | §5.1 | — | Watchlist CRUD | obligatoire | TERMINE_VERIFIE | markets | MarketController | watchlist | — | tests | code |
 | MTR-04E-TRD-001 | §5.4 | §3.2 | Ordres MARKET/LIMIT | obligatoire | TERMINE_VERIFIE | trading | Engine | orders | — | finance+trading | code |
 | MTR-04E-TRD-002 | §5.4 | §3.2 | Ordres STOP | obligatoire | TERMINE_VERIFIE | trading | Engine | orders | — | FinanceSpecTest | code |
-| MTR-04E-TRD-003 | §5.4 | §3.2 | Take-profit | obligatoire | TERMINE_VERIFIE | order-ticket | OrderType+Engine | enum PG | appliquer ALTER TYPE sur base autorisée | FinanceSpecTest OK | code 15/11 ; DB pending |
+| MTR-04E-TRD-003 | §5.4 | §3.2 | Take-profit | obligatoire | TERMINE_VERIFIE | order-ticket | OrderType+Engine | enum PG | appliquer ALTER TYPE sur base autorisée | FinanceSpecTest + EngineTakeProfitValidationTest | validation submit TP 19/11 ; DB `PIF` pending |
 | MTR-04E-TRD-004 | §5.4 | §3.2 | Frais, cash, positions, idempotence | obligatoire | TERMINE_VERIFIE | trading | PortfoliosService | orders/exec | — | golden trading | code |
-| MTR-04E-TRD-005 | §5.5 | hist. | Carnet prix-temps complet | facultatif | FACULTATIF_NON_REALISE | — | depth scalaire | — | optionnel après obligations | — | documenté |
+| MTR-04E-TRD-005 | §5.5 | hist. | Carnet prix-temps complet (peer CLOB) | facultatif | FACULTATIF_NON_REALISE | — | quote-driven depth | — | extension isolée si autorisée | — | `AUDIT_MOTEUR_CARNET_ORDRES.md` 19/11 |
 | MTR-04F-RSK-001 | §6 | §3.2 | VaR / ES / drawdown / diversification | obligatoire | TERMINE_VERIFIE | risk | RiskStudio | — | — | risk tests | code |
 | MTR-04F-RSK-002 | §6 | §3.2 | Pré-trade risk | obligatoire | TERMINE_VERIFIE | risk/trading | pretrade | — | — | tests | code |
 | MTR-04G-ANA-001 | §7 | §3.2 | Indicateurs techniques API | obligatoire | TERMINE_VERIFIE | backtest-api | MarketController | — | UI chart TA | indicators | API OK UI partielle |

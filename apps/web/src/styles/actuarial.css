@@ -7,21 +7,14 @@
 }
 
 .ac-labShell::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(820px 420px at 85% -8%, color-mix(in srgb, var(--mtr-brand) 12%, transparent), transparent 68%),
-    radial-gradient(620px 360px at 4% 20%, color-mix(in srgb, var(--mtr-cyan) 8%, transparent), transparent 70%);
+  content: none;
 }
 
 .ac-researchHero {
-  height: 6px;
-  margin: 0 0 var(--space-4);
-  border-radius: 999px;
-  background: var(--color-surface);
+  height: 3px;
+  margin: 0 0 var(--space-3);
+  border-radius: 0;
+  background: var(--mtr-brand);
   opacity: 0.85;
 }
 
@@ -55,15 +48,13 @@
 }
 
 .ac-researchPods .ac-workspace {
-  border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  border-color: var(--mtr-border);
   background: var(--color-surface);
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+  box-shadow: none;
 }
 
 .ac-researchPods .ac-workspace[data-status='AVAILABLE'] {
-  border-left: 3px solid var(--mtr-brand);
+  border-left: 2px solid var(--mtr-brand);
 }
 
 .ac-pricingShell .ac-form fieldset legend,
@@ -261,6 +252,10 @@ a.ac-tab:hover {
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    box-shadow var(--mtr-dur-select) var(--mtr-ease-standard);
 }
 
 .ac-segmented button[aria-pressed='true'] {

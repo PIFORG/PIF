@@ -4,6 +4,7 @@ import { AdminApi } from '../../core/api/admin-api';
 import { describeApiError } from '../../core/api/errors';
 import type { AdminOverview } from '../../core/api/types';
 import { FormErrorComponent } from '../../shared/form-messages.component';
+import { formatSecurityEventLine } from '../admin-security-labels';
 
 @Component({
   selector: 'mtr-admin-overview-page',
@@ -51,5 +52,9 @@ export class AdminOverviewPage {
 
   protected formatDateTime(value: string): string {
     return new Date(value).toLocaleString('fr-FR');
+  }
+
+  protected formatEventLine(eventType: string, outcome: string, detail: string): string {
+    return formatSecurityEventLine(eventType, outcome, detail);
   }
 }

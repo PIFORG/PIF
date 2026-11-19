@@ -21,6 +21,7 @@ import {
   SAMPLE_DATA_NOTICE,
   sampleAllocation,
   sampleBenchmarkCurve,
+  sampleCash,
   sampleEquityCurve,
   sampleMarketValue,
   samplePositions,
@@ -370,6 +371,12 @@ export class DashboardPage {
     const a = this.liveAnalytics();
     return a ? formatMoney(a.valuation.equity, a.currency === 'TND' ? 'TND' : a.currency) : null;
   });
+  protected readonly cashSample = computed(() => formatMoney(sampleCash(), SAMPLE_CURRENCY));
+  protected readonly liveCash = computed(() => {
+    const a = this.liveAnalytics();
+    if (!a) return null;
+    return formatMoney(a.valuation.availableCash ?? a.valuation.cash, a.currency === 'TND' ? 'TND' : a.currency);
+  });
   protected readonly liveReturnPct = computed(() => {
     const a = this.liveAnalytics();
     const v = a?.performance.timeWeightedReturn.value;
@@ -417,7 +424,7 @@ export class DashboardPage {
     if (this.sample()) {
       return [
         { label: "Portefeuille d'exemple", values: sampleEquityCurve.map((p) => p.value), tone: 'brand', area: true },
-        { label: 'Indice de référence', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'muted', dashed: true },
+        { label: 'Indice de référence', values: sampleBenchmarkCurve.map((p) => p.value), tone: 'mauve', dashed: true },
       ];
     }
     const points = this.liveHistory()?.points ?? [];

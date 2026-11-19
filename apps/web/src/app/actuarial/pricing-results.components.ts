@@ -418,7 +418,7 @@ export class SeverityPanelComponent {
   protected readonly curve = computed(() => {
     const s = this.result().severity;
     if (!s.curve) return null;
-    const series: ChartSeries[] = [{ label: 'Densité (probabilité par 1 000 DT de coût)', values: s.curve.map((p) => p.density * 1000), tone: 'cyan', area: true }];
+    const series: ChartSeries[] = [{ label: 'Densité (probabilité par 1 000 DT de coût)', values: s.curve.map((p) => p.density * 1000), tone: 'violet', area: true }];
     return {
       series,
       xLabels: [tndShort(0), tndShort(s.curve[s.curve.length - 1].x)] as [string, string],

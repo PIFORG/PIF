@@ -756,8 +756,8 @@ export class CurvesPanelComponent {
   protected readonly chart = computed(() => {
     const results = this.results();
     const n = results.origins.length;
-    const series: ChartSeries[] = [{ label: 'Payés, part de l\'ultime', values: results.chainLadder.paid.percentDeveloped, tone: 'brand' }];
-    if (results.chainLadder.incurred) series.push({ label: 'Survenus, part de l\'ultime', values: results.chainLadder.incurred.percentDeveloped, tone: 'cyan', dashed: true });
+    const series: ChartSeries[] = [{ label: 'Payés, part de l\'ultime', values: results.chainLadder.paid.percentDeveloped, tone: 'brand', area: true }];
+    if (results.chainLadder.incurred) series.push({ label: 'Survenus, part de l\'ultime', values: results.chainLadder.incurred.percentDeveloped, tone: 'mauve', dashed: true });
     const last = results.chainLadder.paid.percentDeveloped;
     return {
       series,

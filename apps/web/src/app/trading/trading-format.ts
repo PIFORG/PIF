@@ -50,6 +50,32 @@ export function sectorLabel(sector: string): string {
   return SECTOR_LABEL[sector] ?? sector;
 }
 
+const ASSET_CLASS_LABEL: Record<string, string> = {
+  EQUITY: 'Action',
+  FUND: 'Fonds',
+  BOND: 'Obligation',
+  COMMODITY: 'Matière première',
+  FX: 'Devise',
+};
+
+const ASSET_CLASS_LABEL_PLURAL: Record<string, string> = {
+  EQUITY: 'Actions',
+  FUND: 'Fonds',
+  BOND: 'Obligations',
+  COMMODITY: 'Matières premières',
+  FX: 'Devises',
+};
+
+/** Libellé français d'une classe d'actif (singulier, pour une ligne instrument). */
+export function assetClassLabel(assetClass: string): string {
+  return ASSET_CLASS_LABEL[assetClass] ?? assetClass;
+}
+
+/** Libellé français pluriel (filtres, frais). */
+export function assetClassLabelPlural(assetClass: string): string {
+  return ASSET_CLASS_LABEL_PLURAL[assetClass] ?? assetClass;
+}
+
 /** Explains a failed request in plain language; maps the "migration pending" case explicitly. */
 export function describeTradingError(error: unknown, fallback: string): string {
   if (hasErrorCode(error, 'DATABASE_SCHEMA_OUTDATED')) {

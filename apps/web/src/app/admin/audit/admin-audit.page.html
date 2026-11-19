@@ -15,7 +15,7 @@
       <input
         [value]="draft().eventType"
         (input)="setDraft('eventType', $any($event.target).value)"
-        placeholder="ex. LOGIN_FAILURE"
+        placeholder="ex. échec de connexion (LOGIN_FAILURE)"
         maxlength="80"
       />
     </label>
@@ -75,8 +75,8 @@
               @for (event of data.items; track event.id) {
                 <tr>
                   <td>{{ formatDateTime(event.createdAt) }}</td>
-                  <td>{{ event.eventType }}</td>
-                  <td>{{ event.outcome }}</td>
+                  <td>{{ eventLabel(event.eventType) }}</td>
+                  <td>{{ outcomeLabel(event.outcome) }}</td>
                   <td><code>{{ event.subjectUserId ?? '—' }}</code></td>
                   <td><code>{{ event.actorUserId ?? '—' }}</code></td>
                   <td>{{ formatContext(event.context) }}</td>

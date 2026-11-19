@@ -62,7 +62,7 @@ const LIVE_NOW = [
   'Salle de trading, portefeuilles, marchés fictifs et risques',
   'Stratégies et backtests déterministes',
   'Parcours de formation, histoires financières, actuariat et crises bancaires',
-  'Laboratoire IA / explicabilité (évaluation documentée)',
+  'Prévisions et compréhension des modèles (évaluation documentée)',
 ];
 
 const IN_DEVELOPMENT = [

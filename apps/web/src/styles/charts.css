@@ -1,4 +1,4 @@
-/* apps/web/src/components/charts/Charts.module.css with a ch- prefix. */
+/* Chart design system — ch- prefix. Series colors use --mtr-chart-* only. */
 
 .ch-figure {
   margin: 0;
@@ -14,6 +14,9 @@
   position: relative;
   width: 100%;
   height: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--mtr-chart-plot, transparent);
+  overflow: visible;
 }
 
 .ch-svg {
@@ -21,6 +24,14 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.ch-gridDot {
+  fill: var(--mtr-chart-grid-dot, var(--mtr-chart-grid));
+}
+
+.ch-plotBed {
+  pointer-events: none;
 }
 
 .ch-yAxis {
@@ -39,27 +50,146 @@
 }
 
 .ch-gridLine {
-  stroke: var(--mtr-grid-strong);
+  stroke: var(--mtr-chart-grid, var(--mtr-grid-strong));
   stroke-width: 1;
+}
+
+.ch-series {
+  transition: opacity var(--mtr-dur-hover, 120ms) var(--mtr-ease-standard, ease);
+}
+
+.ch-series[data-dim='true'] {
+  opacity: 0.28;
+}
+
+.ch-area {
+  pointer-events: none;
+  transition: opacity var(--mtr-dur-hover, 120ms) var(--mtr-ease-standard, ease);
 }
 
 .ch-line {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 2.15;
   stroke-linejoin: round;
   stroke-linecap: round;
+  stroke: var(--mtr-chart-brand);
+  transition: stroke-width var(--mtr-dur-hover, 120ms) var(--mtr-ease-standard, ease), opacity var(--mtr-dur-hover, 120ms) var(--mtr-ease-standard, ease);
 }
 
 .ch-line[data-tone='brand'] {
-  stroke: var(--mtr-brand);
+  stroke: var(--mtr-chart-brand);
+  stroke-width: 2.25;
 }
 
-.ch-line[data-tone='cyan'] {
-  stroke: var(--mtr-cyan);
+/* Signature primary: blue → sky → mauve along the series (data geometry unchanged). */
+.ch-line[data-signature='true'] {
+  stroke: var(--ch-stroke-grad, var(--mtr-chart-brand));
+  stroke-width: 2.35;
+}
+
+.ch-line[data-tone='cyan'],
+.ch-line[data-tone='sky'] {
+  stroke: var(--mtr-chart-sky);
+  stroke-width: 2;
+}
+
+.ch-line[data-tone='mauve'] {
+  stroke: var(--mtr-chart-mauve);
+  stroke-width: 2.05;
+}
+
+.ch-line[data-tone='violet'] {
+  stroke: var(--mtr-chart-violet);
+  stroke-width: 2;
+}
+
+.ch-line[data-tone='lavender'] {
+  stroke: var(--mtr-chart-lavender);
+  stroke-width: 1.9;
 }
 
 .ch-line[data-tone='muted'] {
-  stroke: var(--mtr-text-3);
+  stroke: var(--mtr-chart-muted);
+  stroke-width: 1.55;
+}
+
+.ch-figure[data-tip='true'] .ch-line[data-signature='true'],
+.ch-figure[data-tip='true'] .ch-line[data-tone='brand'] {
+  stroke-width: 2.55;
+}
+
+.ch-endDot {
+  fill: var(--mtr-surface);
+  stroke: var(--mtr-chart-brand);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.ch-endDot[data-tone='sky'],
+.ch-endDot[data-tone='cyan'] {
+  stroke: var(--mtr-chart-sky);
+}
+
+.ch-endDot[data-tone='mauve'] {
+  stroke: var(--mtr-chart-mauve);
+}
+
+.ch-endDot[data-tone='violet'] {
+  stroke: var(--mtr-chart-violet);
+}
+
+.ch-endDot[data-tone='lavender'] {
+  stroke: var(--mtr-chart-lavender);
+}
+
+.ch-endDot[data-tone='muted'] {
+  stroke: var(--mtr-chart-muted);
+}
+
+.ch-priceTag {
+  position: absolute;
+  right: 0;
+  z-index: 3;
+  transform: translate(0, -50%);
+  margin-right: 0;
+  padding: 0.12rem 0.4rem;
+  border-radius: 2px;
+  background: var(--mtr-chart-brand);
+  color: var(--mtr-on-brand, #fff);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ch-priceTag[data-tone='sky'],
+.ch-priceTag[data-tone='cyan'] {
+  background: var(--mtr-chart-sky);
+}
+
+.ch-priceTag[data-tone='mauve'] {
+  background: var(--mtr-chart-mauve);
+}
+
+.ch-priceTag[data-tone='violet'] {
+  background: var(--mtr-chart-violet);
+}
+
+.ch-priceTag[data-tone='lavender'] {
+  background: var(--mtr-chart-lavender);
+  color: var(--mtr-text);
+}
+
+.ch-priceTag[data-tone='muted'] {
+  background: var(--mtr-chart-muted);
+}
+
+.ch-crosshairH {
+  stroke-dasharray: 2 4;
+  opacity: 0.75;
 }
 
 .ch-caption {
@@ -89,27 +219,62 @@
 .ch-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-2) var(--space-3);
 }
 
 .ch-legendItem {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin: 0;
+  padding: 0.15rem 0.35rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color var(--mtr-dur-hover, 120ms) var(--mtr-ease-standard, ease);
+}
+
+.ch-legendItem:hover,
+.ch-legendItem:focus-visible,
+.ch-legendItem[data-active='true'] {
+  background: var(--mtr-hover);
+  outline: none;
+}
+
+.ch-legendItem:focus-visible {
+  box-shadow: 0 0 0 2px var(--mtr-focus);
 }
 
 .ch-swatch {
   width: 16px;
   height: 0;
-  border-top: 2px solid var(--mtr-brand);
+  border-top: 2.25px solid var(--mtr-chart-brand);
+  flex-shrink: 0;
 }
 
-.ch-swatch[data-tone='cyan'] {
-  border-top-color: var(--mtr-cyan);
+.ch-swatch[data-tone='cyan'],
+.ch-swatch[data-tone='sky'] {
+  border-top-color: var(--mtr-chart-sky);
+}
+
+.ch-swatch[data-tone='mauve'] {
+  border-top-color: var(--mtr-chart-mauve);
+}
+
+.ch-swatch[data-tone='violet'] {
+  border-top-color: var(--mtr-chart-violet);
+}
+
+.ch-swatch[data-tone='lavender'] {
+  border-top-color: var(--mtr-chart-lavender);
 }
 
 .ch-swatch[data-tone='muted'] {
-  border-top-color: var(--mtr-text-3);
+  border-top-color: var(--mtr-chart-muted);
 }
 
 .ch-swatch[data-dashed='true'] {
@@ -128,6 +293,91 @@
   display: flex;
   gap: var(--space-4);
   color: var(--mtr-text-3);
+}
+
+.ch-tipRow {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ch-tipLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ch-tipValue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--mtr-text);
+  font-weight: 600;
+}
+
+.ch-tipSwatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--mtr-chart-brand);
+}
+
+.ch-tipSwatch[data-tone='cyan'],
+.ch-tipSwatch[data-tone='sky'] {
+  background: var(--mtr-chart-sky);
+}
+
+.ch-tipSwatch[data-tone='mauve'] {
+  background: var(--mtr-chart-mauve);
+}
+
+.ch-tipSwatch[data-tone='violet'] {
+  background: var(--mtr-chart-violet);
+}
+
+.ch-tipSwatch[data-tone='lavender'] {
+  background: var(--mtr-chart-lavender);
+}
+
+.ch-tipSwatch[data-tone='muted'] {
+  background: var(--mtr-chart-muted);
+}
+
+.ch-activeDot {
+  fill: var(--mtr-surface);
+  stroke: var(--mtr-chart-brand);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.ch-activeDot[data-tone='cyan'],
+.ch-activeDot[data-tone='sky'] {
+  stroke: var(--mtr-chart-sky);
+}
+
+.ch-activeDot[data-tone='mauve'] {
+  stroke: var(--mtr-chart-mauve);
+}
+
+.ch-activeDot[data-tone='violet'] {
+  stroke: var(--mtr-chart-violet);
+}
+
+.ch-activeDot[data-tone='lavender'] {
+  stroke: var(--mtr-chart-lavender);
+}
+
+.ch-activeDot[data-tone='muted'] {
+  stroke: var(--mtr-chart-muted);
+}
+
+.ch-crosshair {
+  stroke: var(--mtr-chart-cross, var(--mtr-border-strong));
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
 }
 
 .ch-spark {
@@ -167,12 +417,14 @@
 
 .ch-allocSegment,
 .ch-allocSwatch {
-  background: var(--mtr-brand);
+  background: var(--mtr-chart-brand);
 }
 
 [data-tone='cyan'].ch-allocSegment,
-[data-tone='cyan'].ch-allocSwatch {
-  background: var(--mtr-cyan);
+[data-tone='cyan'].ch-allocSwatch,
+[data-tone='sky'].ch-allocSegment,
+[data-tone='sky'].ch-allocSwatch {
+  background: var(--mtr-chart-sky);
 }
 
 [data-tone='amber'].ch-allocSegment,
@@ -180,15 +432,26 @@
   background: var(--mtr-amber);
 }
 
+[data-tone='mauve'].ch-allocSegment,
+[data-tone='mauve'].ch-allocSwatch,
 [data-tone='violet'].ch-allocSegment,
 [data-tone='violet'].ch-allocSwatch {
-  /* Map legacy violet slot to brand-soft navy mix — stay inside --mtr-* system */
-  background: color-mix(in srgb, var(--mtr-brand) 55%, var(--mtr-cyan));
+  background: var(--mtr-chart-mauve);
+}
+
+[data-tone='violet'].ch-allocSegment,
+[data-tone='violet'].ch-allocSwatch {
+  background: var(--mtr-chart-violet);
+}
+
+[data-tone='lavender'].ch-allocSegment,
+[data-tone='lavender'].ch-allocSwatch {
+  background: var(--mtr-chart-lavender);
 }
 
 [data-tone='muted'].ch-allocSegment,
 [data-tone='muted'].ch-allocSwatch {
-  background: var(--mtr-text-3);
+  background: var(--mtr-chart-muted);
 }
 
 .ch-allocLegend {
@@ -215,4 +478,13 @@
 
 .ch-allocName {
   color: var(--mtr-text-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-series,
+  .ch-area,
+  .ch-line,
+  .ch-legendItem {
+    transition: none;
+  }
 }

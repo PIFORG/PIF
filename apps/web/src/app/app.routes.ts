@@ -1,25 +1,10 @@
 import type { Route, Routes, UrlSegment } from '@angular/router';
 import { AdminLayoutComponent } from './admin/admin-layout.component';
-import { AdminAuditPage } from './admin/audit/admin-audit.page';
-import { AdminOverviewPage } from './admin/overview/admin-overview.page';
-import { AdminUserDetailPage } from './admin/user-detail/admin-user-detail.page';
-import { AdminUsersPage } from './admin/users/admin-users.page';
-import { ConfirmEmailChangePage } from './auth/confirm-email-change/confirm-email-change.page';
-import { ForgotPasswordPage } from './auth/forgot-password/forgot-password.page';
-import { LoginPage } from './auth/login/login.page';
-import { RegisterPage } from './auth/register/register.page';
-import { ResendVerificationPage } from './auth/resend-verification/resend-verification.page';
-import { ResetPasswordPage } from './auth/reset-password/reset-password.page';
-import { UnauthorizedPage } from './auth/unauthorized/unauthorized.page';
-import { VerifyEmailPage } from './auth/verify-email/verify-email.page';
 import { adminGuard } from './core/auth/guards';
 import { MIGRATED_ROUTES, WORKSPACE_NAV } from './core/navigation/workspace-nav';
 import { WorkspaceLayoutComponent } from './layout/workspace-layout.component';
 import { PublicNotMigratedPage, WorkspaceNotMigratedPage } from './migration/not-migrated.pages';
-import { PREVIEW_MODULE_ROUTES } from './modules/module-catalog';
-import { ProfilePage } from './settings/profile/profile.page';
-import { SecurityPage } from './settings/security/security.page';
-import { SessionsPage } from './settings/sessions/sessions.page';
+import { PREVIEW_MODULE_ROUTES } from './modules/module-preview-routes';
 import { SettingsLayoutComponent } from './settings/settings-layout.component';
 
 /** Navigation destinations (and their sub-paths) that are still served only by apps/web. */
@@ -36,14 +21,40 @@ function pendingWorkspaceMatcher(segments: UrlSegment[]) {
 const pendingWorkspace: Route = { matcher: pendingWorkspaceMatcher, component: WorkspaceNotMigratedPage };
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage },
-  { path: 'register', component: RegisterPage },
-  { path: 'verify-email', component: VerifyEmailPage },
-  { path: 'resend-verification', component: ResendVerificationPage },
-  { path: 'forgot-password', component: ForgotPasswordPage },
-  { path: 'reset-password', component: ResetPasswordPage },
-  { path: 'confirm-email-change', component: ConfirmEmailChangePage },
-  { path: 'unauthorized', component: UnauthorizedPage },
+  {
+    path: 'login',
+    loadComponent: () => import('./auth/login/login.page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./auth/register/register.page').then((m) => m.RegisterPage),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./auth/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+  },
+  {
+    path: 'resend-verification',
+    loadComponent: () =>
+      import('./auth/resend-verification/resend-verification.page').then((m) => m.ResendVerificationPage),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./auth/forgot-password/forgot-password.page').then((m) => m.ForgotPasswordPage),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./auth/reset-password/reset-password.page').then((m) => m.ResetPasswordPage),
+  },
+  {
+    path: 'confirm-email-change',
+    loadComponent: () =>
+      import('./auth/confirm-email-change/confirm-email-change.page').then((m) => m.ConfirmEmailChangePage),
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./auth/unauthorized/unauthorized.page').then((m) => m.UnauthorizedPage),
+  },
   { path: '', pathMatch: 'full', loadComponent: () => import('./marketing/landing.page').then((m) => m.LandingPage) },
   {
     path: 'admin',
@@ -51,14 +62,27 @@ export const routes: Routes = [
     canActivate: [adminGuard],
     canActivateChild: [adminGuard],
     children: [
-      { path: '', pathMatch: 'full', component: AdminOverviewPage },
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./admin/overview/admin-overview.page').then((m) => m.AdminOverviewPage),
+      },
       {
         path: 'platform',
         loadComponent: () => import('./admin/platform/admin-platform.page').then((m) => m.AdminPlatformPage),
       },
-      { path: 'users', component: AdminUsersPage },
-      { path: 'users/:id', component: AdminUserDetailPage },
-      { path: 'audit', component: AdminAuditPage },
+      {
+        path: 'users',
+        loadComponent: () => import('./admin/users/admin-users.page').then((m) => m.AdminUsersPage),
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () => import('./admin/user-detail/admin-user-detail.page').then((m) => m.AdminUserDetailPage),
+      },
+      {
+        path: 'audit',
+        loadComponent: () => import('./admin/audit/admin-audit.page').then((m) => m.AdminAuditPage),
+      },
     ],
   },
   {
@@ -76,21 +100,57 @@ export const routes: Routes = [
         loadComponent: () => import('./backtesting/strategies.page').then((m) => m.StrategiesPage),
       },
       { path: 'learn', loadComponent: () => import('./learning/learning-hub.page').then((m) => m.LearningHubPage) },
-      { path: 'learn/missions/:slug', loadComponent: () => import('./learning/mission-briefing.page').then((m) => m.MissionBriefingPage) },
-      { path: 'learn/sessions/:id', loadComponent: () => import('./learning/mission-player.page').then((m) => m.MissionPlayerPage) },
-      { path: 'learn/sessions/:id/review', loadComponent: () => import('./learning/session-review.page').then((m) => m.SessionReviewPage) },
+      {
+        path: 'learn/missions/:slug',
+        loadComponent: () => import('./learning/mission-briefing.page').then((m) => m.MissionBriefingPage),
+      },
+      {
+        path: 'learn/sessions/:id',
+        loadComponent: () => import('./learning/mission-player.page').then((m) => m.MissionPlayerPage),
+      },
+      {
+        path: 'learn/sessions/:id/review',
+        loadComponent: () => import('./learning/session-review.page').then((m) => m.SessionReviewPage),
+      },
       { path: 'stories', loadComponent: () => import('./stories/story-feed.page').then((m) => m.StoryFeedPage) },
-      { path: 'actuarial', loadComponent: () => import('./actuarial/actuarial-overview.page').then((m) => m.ActuarialOverviewPage) },
-      { path: 'actuarial/pricing', loadComponent: () => import('./actuarial/pricing-studio.page').then((m) => m.PricingStudioPage) },
-      { path: 'actuarial/monte-carlo', loadComponent: () => import('./actuarial/monte-carlo-lab.page').then((m) => m.MonteCarloLabPage) },
-      { path: 'actuarial/reserving', loadComponent: () => import('./actuarial/reserving-studio.page').then((m) => m.ReservingStudioPage) },
-      { path: 'actuarial/capital', loadComponent: () => import('./actuarial/capital-studio.page').then((m) => m.CapitalStudioPage) },
-      { path: 'actuarial/alm', loadComponent: () => import('./actuarial/alm-studio.page').then((m) => m.AlmStudioPage) },
-      { path: 'stress-testing', loadComponent: () => import('./stress/stress-testing.page').then((m) => m.StressTestingPage) },
+      {
+        path: 'actuarial',
+        loadComponent: () => import('./actuarial/actuarial-overview.page').then((m) => m.ActuarialOverviewPage),
+      },
+      {
+        path: 'actuarial/pricing',
+        loadComponent: () => import('./actuarial/pricing-studio.page').then((m) => m.PricingStudioPage),
+      },
+      {
+        path: 'actuarial/monte-carlo',
+        loadComponent: () => import('./actuarial/monte-carlo-lab.page').then((m) => m.MonteCarloLabPage),
+      },
+      {
+        path: 'actuarial/reserving',
+        loadComponent: () => import('./actuarial/reserving-studio.page').then((m) => m.ReservingStudioPage),
+      },
+      {
+        path: 'actuarial/capital',
+        loadComponent: () => import('./actuarial/capital-studio.page').then((m) => m.CapitalStudioPage),
+      },
+      {
+        path: 'actuarial/alm',
+        loadComponent: () => import('./actuarial/alm-studio.page').then((m) => m.AlmStudioPage),
+      },
+      {
+        path: 'stress-testing',
+        loadComponent: () => import('./stress/stress-testing.page').then((m) => m.StressTestingPage),
+      },
       { path: 'ai', loadComponent: () => import('./ai/ai-lab.page').then((m) => m.AiLabPage) },
-      { path: 'explainability', loadComponent: () => import('./ai/explainability.page').then((m) => m.ExplainabilityPage) },
-      { path: 'challenges', loadComponent: () => import('./challenges/challenges.page').then((m) => m.ChallengesPage) },
-      ...PREVIEW_MODULE_ROUTES.map((slug) => ({
+      {
+        path: 'explainability',
+        loadComponent: () => import('./ai/explainability.page').then((m) => m.ExplainabilityPage),
+      },
+      {
+        path: 'challenges',
+        loadComponent: () => import('./challenges/challenges.page').then((m) => m.ChallengesPage),
+      },
+      ...PREVIEW_MODULE_ROUTES.map((slug: string) => ({
         path: slug,
         data: { module: slug },
         loadComponent: () => import('./modules/module-preview.page').then((m) => m.ModulePreviewPage),
@@ -100,9 +160,18 @@ export const routes: Routes = [
         component: SettingsLayoutComponent,
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'profile' },
-          { path: 'profile', component: ProfilePage },
-          { path: 'security', component: SecurityPage },
-          { path: 'sessions', component: SessionsPage },
+          {
+            path: 'profile',
+            loadComponent: () => import('./settings/profile/profile.page').then((m) => m.ProfilePage),
+          },
+          {
+            path: 'security',
+            loadComponent: () => import('./settings/security/security.page').then((m) => m.SecurityPage),
+          },
+          {
+            path: 'sessions',
+            loadComponent: () => import('./settings/sessions/sessions.page').then((m) => m.SessionsPage),
+          },
         ],
       },
       pendingWorkspace,

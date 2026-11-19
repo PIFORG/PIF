@@ -95,8 +95,8 @@ export class ComparisonViewComponent {
     const nameA = sessionName(a);
     const nameB = sessionName(b);
     const series: ChartSeries[] = [
-      { label: nameA, values: a.equityCurve.map((p) => p.equity), tone: 'brand' },
-      { label: nameB, values: b.equityCurve.map((p) => p.equity), tone: 'cyan', dashed: true },
+      { label: nameA, values: a.equityCurve.map((p) => p.equity), tone: 'brand', area: true },
+      { label: nameB, values: b.equityCurve.map((p) => p.equity), tone: 'mauve', dashed: true },
     ];
     return {
       nameA,

@@ -64,11 +64,10 @@
 
 .db-hero {
   margin-bottom: var(--space-3);
-  padding: var(--space-4) var(--space-4) var(--space-3);
-  border-radius: var(--db-hero-radius);
-  border: 1px solid var(--mtr-border);
-  border-left: 3px solid var(--mtr-brand-strong);
-  background: var(--mtr-surface);
+  padding: var(--space-3) 0 var(--space-2);
+  border-radius: 0;
+  border: 0;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -79,8 +78,8 @@
   justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--mtr-border);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 75%, transparent);
 }
 
 .db-heroBrand {
@@ -99,8 +98,8 @@
 
 .db-heroTitle {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 650;
+  font-size: 1.05rem;
+  font-weight: 600;
   font-family: var(--font-display);
   color: var(--mtr-text);
   letter-spacing: -0.02em;
@@ -108,9 +107,10 @@
 
 .db-heroSubtitle {
   margin: var(--space-1) 0 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--mtr-text-2);
   max-width: 40rem;
+  line-height: 1.45;
 }
 
 .db-heroActions {
@@ -138,8 +138,7 @@
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   border: 1px solid var(--mtr-border);
-  background: var(--mtr-elevated);
-  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
 }
 
 .db-heroLabel {
@@ -152,9 +151,11 @@
 
 .db-heroEquity {
   margin: var(--space-2) 0 var(--space-1);
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 700;
-  line-height: 1.1;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.15;
   color: var(--mtr-text);
 }
 
@@ -171,8 +172,8 @@
 .db-heroOps {
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  border: 1px dashed var(--mtr-border-strong);
-  background: color-mix(in srgb, var(--mtr-surface) 60%, transparent);
+  border: 1px solid var(--mtr-border);
+  background: var(--mtr-surface);
 }
 
 .db-heroOpsLabel {
@@ -192,15 +193,15 @@
 
 /* KPI tiles inside hero — compact, not uniform cards */
 .db-hero .db-heroKpi.ws-kpi {
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--mtr-border);
   background: var(--mtr-surface);
   box-shadow: none;
 }
 
 .db-hero .db-heroKpiCompact .ws-kpiValue {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
@@ -228,9 +229,9 @@
   flex-direction: column;
   gap: var(--space-3);
   height: 100%;
-  padding: var(--space-4);
+  padding: var(--space-3);
   border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, var(--mtr-amber) 25%, var(--mtr-border));
+  border: 1px solid var(--mtr-border);
   background: var(--mtr-surface);
 }
 
@@ -282,10 +283,11 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
-  background: var(--mtr-canvas);
+  padding: var(--space-2) 0 0;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid var(--mtr-border);
+  background: transparent;
 }
 
 .db-readinessRing[data-level='complete'] {
@@ -363,10 +365,10 @@
   flex-shrink: 0;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: 999px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--mtr-border);
-  background: var(--mtr-elevated);
+  background: var(--mtr-surface);
   font-size: 0.8125rem;
 }
 
@@ -397,6 +399,12 @@
   align-items: start;
 }
 
+.db-modulesRail {
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--mtr-border);
+}
+
 .db-canvasCell {
   min-width: 0;
 }
@@ -424,6 +432,12 @@
 .db-canvasFull {
   grid-column: 1 / -1;
   margin-bottom: var(--space-4);
+}
+
+.db-canvasFull.ws-panel .table-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .db-compactTable th,
@@ -459,24 +473,29 @@
 
 .db-insights li {
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 1.25rem 1fr auto;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
-  background: color-mix(in srgb, var(--mtr-brand-soft) 35%, var(--mtr-elevated));
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
+  background: transparent;
+}
+
+.db-insights li:last-child {
+  border-bottom: 0;
 }
 
 .db-insightIcon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--mtr-brand-soft);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0;
+  background: transparent;
   color: var(--mtr-brand-text);
-  border: 1px solid color-mix(in srgb, var(--mtr-brand) 25%, transparent);
+  border: 0;
 }
 
 .db-insightText {

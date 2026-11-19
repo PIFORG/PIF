@@ -2,7 +2,7 @@
   <div class="form-error-banner" role="alert">{{ error() }}</div>
 }
 @if (supervision(); as s) {
-  <section mtr-panel panelId="supervision" heading="Supervision" [description]="s.note">
+  <section mtr-panel panelId="supervision" heading="Supervision" description="Vues de supervision en lecture seule. Les écritures utilisateurs restent sur la gestion des comptes.">
     <ul class="db-modules">
       @for (m of s.modules; track m.id) {
         <li class="db-module">
@@ -89,5 +89,23 @@
         </li>
       }
     </ul>
+  </section>
+}
+@if (challenges(); as ch) {
+  <section mtr-panel panelId="admin-challenges" heading="Défis virtuels" [description]="ch.note || 'Classement pédagogique — capital initial équitable.'">
+    @if (ch.challenges.length === 0) {
+      <p class="field-hint">Aucun défi en mémoire pour l’instant. La création se fait depuis l’espace Défis (rôle administrateur).</p>
+    } @else {
+      <ul class="db-sessionList">
+        @for (c of ch.challenges; track c.id) {
+          <li>
+            <span class="db-sessionText">
+              <strong>{{ c.title }}</strong>
+              <span class="mono">{{ c.id }}{{ c.open === false ? ' · fermé' : ' · ouvert' }}</span>
+            </span>
+          </li>
+        }
+      </ul>
+    }
   </section>
 }

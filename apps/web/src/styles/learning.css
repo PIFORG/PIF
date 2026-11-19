@@ -21,8 +21,8 @@
 .lr-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--mtr-text);
 }
@@ -84,9 +84,9 @@
 }
 
 .lr-continue {
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--mtr-border);
-  border-left: 3px solid var(--mtr-brand-strong);
+  border-left: 2px solid var(--mtr-brand-strong);
   border-radius: var(--radius-sm);
   background: var(--mtr-surface);
 }
@@ -403,9 +403,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
   padding: var(--space-4);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--mtr-border);
-  border-left: 3px solid var(--mtr-brand-strong);
   background: var(--mtr-surface);
   overflow: hidden;
   isolation: isolate;
@@ -524,7 +523,7 @@ html[data-theme='dark'] .lr-questMap {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--mtr-brand-text);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--mtr-brand) 18%, transparent);
+  box-shadow: none;
 }
 
 .lr-questStep[data-state='cleared'] .lr-questPin {
@@ -534,23 +533,14 @@ html[data-theme='dark'] .lr-questMap {
 }
 
 .lr-questStep[data-state='active'] .lr-questPin {
-  border-color: var(--mtr-cyan);
-  background: color-mix(in srgb, var(--mtr-cyan) 18%, var(--mtr-surface));
-  animation: lr-pulse 2.4s var(--ease) infinite;
+  border-color: var(--mtr-brand);
+  background: var(--mtr-brand-soft);
+  color: var(--mtr-brand-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mtr-brand) 30%, transparent);
 }
 
 .lr-questStep[data-state='tried'] .lr-questPin {
   border-color: var(--mtr-amber);
-}
-
-@keyframes lr-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--mtr-cyan) 35%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 6px transparent;
-  }
 }
 
 /* ---------- Mission nodes ---------- */
@@ -586,47 +576,44 @@ html[data-theme='dark'] .lr-questMap {
 .lr-mission {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: 1px solid var(--mtr-border);
   border-radius: var(--radius-md);
   background: var(--mtr-surface);
   color: inherit;
   text-decoration: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition:
-    border-color var(--dur-fast) var(--ease),
-    background-color var(--dur-fast) var(--ease),
-    box-shadow var(--dur-fast) var(--ease),
-    transform var(--dur-fast) var(--ease);
+    border-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    opacity var(--mtr-dur-select) var(--mtr-ease-standard);
+}
+
+a.lr-mission:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: 2px;
 }
 
 .lr-questNode {
   position: relative;
   min-width: 0;
-  border-radius: var(--radius-lg);
-  border-color: color-mix(in srgb, var(--mtr-brand) 28%, var(--mtr-border));
-  background: linear-gradient(155deg, color-mix(in srgb, var(--mtr-brand) 7%, var(--mtr-surface)), var(--mtr-surface));
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+  border-radius: var(--radius-md);
+  border-color: var(--mtr-border);
+  background: var(--mtr-surface);
+  box-shadow: none;
+  border-left: 2px solid var(--mtr-brand);
 }
 
 .lr-questNode::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  background: linear-gradient(180deg, var(--mtr-brand), var(--mtr-cyan));
-  opacity: 0.85;
+  content: none;
 }
 
 a.lr-questNode.lr-mission:hover {
   text-decoration: none;
-  border-color: color-mix(in srgb, var(--mtr-brand) 50%, var(--mtr-border-strong));
-  background: linear-gradient(155deg, color-mix(in srgb, var(--mtr-brand) 12%, var(--mtr-hover)), var(--mtr-hover));
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--mtr-brand) 12%, transparent);
-  transform: translateY(-2px);
+  border-color: var(--mtr-border-strong);
+  background: var(--mtr-hover);
+  box-shadow: none;
+  transform: none;
 }
 
 a.lr-mission:not(.lr-questNode):hover {
@@ -638,12 +625,13 @@ a.lr-mission:not(.lr-questNode):hover {
 
 .lr-mission[data-availability='PLANNED'],
 .lr-questNode[data-availability='PLANNED'] {
-  border-style: dashed;
-  opacity: 0.82;
+  border-style: solid;
+  opacity: 0.72;
+  background: var(--mtr-sunken);
 }
 
-.lr-questNode[data-availability='CONFIGURED']::before {
-  background: linear-gradient(180deg, var(--mtr-amber), var(--mtr-brand));
+.lr-questNode[data-availability='CONFIGURED'] {
+  border-left-color: var(--mtr-amber);
 }
 
 .lr-mission h4 {
@@ -974,6 +962,15 @@ a.lr-mission:not(.lr-questNode):hover {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    color var(--mtr-dur-hover) var(--mtr-ease-standard),
+    box-shadow var(--mtr-dur-select) var(--mtr-ease-standard);
+}
+
+.lr-segmented button:focus-visible {
+  outline: 2px solid var(--mtr-focus);
+  outline-offset: 1px;
 }
 
 .lr-segmented button[aria-pressed='true'][data-side='BUY'] {
@@ -1158,11 +1155,10 @@ a.lr-mission:not(.lr-questNode):hover {
 #time-machine.ws-panel {
   position: relative;
   overflow: hidden;
-  border-color: color-mix(in srgb, var(--mtr-cyan) 35%, var(--mtr-border));
-  background: linear-gradient(165deg, color-mix(in srgb, var(--mtr-brand) 10%, var(--mtr-surface)), var(--mtr-surface));
-  box-shadow:
-    var(--shadow-md),
-    inset 0 0 0 1px color-mix(in srgb, var(--mtr-brand) 8%, transparent);
+  border-color: var(--mtr-border);
+  border-left: 3px solid var(--mtr-brand);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .lr-timeMachineTag {

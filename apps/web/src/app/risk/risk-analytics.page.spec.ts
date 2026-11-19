@@ -144,10 +144,6 @@ async function settle<T>(fixture: ComponentFixture<T>) {
   }
 }
 
-function kpi(root: HTMLElement, label: string): HTMLElement | undefined {
-  return Array.from(root.querySelectorAll<HTMLElement>('.ws-kpi')).find((k) => k.querySelector('.ws-kpiLabel')?.textContent === label);
-}
-
 let portfolioApi: Record<string, ReturnType<typeof vi.fn>>;
 
 describe('RiskAnalyticsPage', () => {

@@ -36,6 +36,7 @@
               "src/styles/module-preview.css",
               "src/styles/actuarial.css",
               "src/styles/admin.css",
+              "src/styles/stress.css",
               "src/styles/interactions.css",
               "src/styles/market-tape.css",
               "src/styles.css"

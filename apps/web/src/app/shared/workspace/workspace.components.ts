@@ -16,7 +16,7 @@ const STATUS_ICON: Record<RouteStatus, IconName> = {
 };
 
 const STATUS_TITLE: Record<RouteStatus, string> = {
-  LIVE_INTEGRATED: 'Connecté à l\'API MTRS',
+  LIVE_INTEGRATED: 'Module connecté à la plateforme',
   DEMO_EXPLICITLY_LABELLED: 'Affiche uniquement des données d\'exemple identifiées',
   DESIGNED_PENDING_BACKEND: 'Écran conçu ; le moteur de ce module n\'est pas encore disponible',
 };

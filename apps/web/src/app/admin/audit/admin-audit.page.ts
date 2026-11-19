@@ -3,6 +3,7 @@ import { AdminApi, type AdminAuditQuery } from '../../core/api/admin-api';
 import { describeApiError } from '../../core/api/errors';
 import type { PaginatedAuditEvents } from '../../core/api/types';
 import { FormErrorComponent } from '../../shared/form-messages.component';
+import { labelSecurityEvent, labelSecurityOutcome } from '../admin-security-labels';
 
 interface Filters {
   eventType: string;
@@ -112,5 +113,13 @@ export class AdminAuditPage {
 
   protected formatDateTime(value: string): string {
     return new Date(value).toLocaleString('fr-FR');
+  }
+
+  protected eventLabel(eventType: string): string {
+    return labelSecurityEvent(eventType);
+  }
+
+  protected outcomeLabel(outcome: string): string {
+    return labelSecurityOutcome(outcome);
   }
 }

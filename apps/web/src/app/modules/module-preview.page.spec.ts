@@ -12,14 +12,14 @@ describe('ModulePreviewPage', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('states plainly that the module is not connected and lists its proposed contract', async () => {
+  it('states plainly that the module is not connected and lists pending integrations', async () => {
     const module = MODULES['stress-testing'];
     const root = await render(module);
     expect(root.querySelector('h1')?.textContent).toBe(module.title);
     expect(root.querySelector('.ws-status')?.textContent).toContain('Aperçu · moteur en attente');
-    expect(root.querySelector('.mp-notice')?.textContent).toContain('Designed, not yet connected.');
-    expect(Array.from(root.querySelectorAll('td.mono')).map((td) => td.textContent)).toContain(module.contracts[0].path);
-    expect(Array.from(root.querySelectorAll('.badge')).filter((b) => b.textContent === 'Proposed').length).toBe(module.contracts.length);
+    expect(root.querySelector('.mp-notice')?.textContent).toContain('Conception validée, moteur non connecté.');
+    expect(root.textContent).toContain(module.contracts[0].purpose);
+    expect(Array.from(root.querySelectorAll('.badge')).filter((b) => b.textContent === 'Prévu').length).toBe(module.contracts.length);
     expect(Array.from(root.querySelectorAll('.mp-block')).map((b) => b.getAttribute('data-span'))).toEqual(
       module.blueprint.map((b) => String(b.span)),
     );

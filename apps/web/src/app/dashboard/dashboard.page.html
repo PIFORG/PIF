@@ -1,10 +1,10 @@
 @if (user(); as user) {
   <div class="page-shell db-cockpit">
-    <mtr-page-heading [eyebrow]="greeting + ' · ' + user.firstName" [title]="'Vue d\'ensemble'">
+    <mtr-page-heading [title]="'Vue d\'ensemble'">
       <span mtrHeadingDescription class="db-identity">
+        <span class="db-identityNote">{{ greeting }}, {{ user.firstName }}</span>
         <mtr-account-status-badge [status]="user.status" />
-        <span class="badge badge-muted">{{ user.role === 'ADMIN' ? 'Administrateur' : 'Investisseur' }}</span>
-        <span class="badge badge-muted">{{ experienceLabel[user.experienceLevel] }}</span>
+        <span class="db-identityNote">{{ user.role === 'ADMIN' ? 'Administrateur' : 'Investisseur' }} · {{ experienceLabel[user.experienceLevel] }}</span>
       </span>
       <button
         mtrHeadingActions
@@ -104,23 +104,17 @@
               }
             </div>
             <div class="db-heroOps">
-              <div class="db-heroOpsLabel">Opérations</div>
-              <div mtr-kpi class="db-heroKpi db-heroKpiCompact" label="Sessions actives" icon="sessions">
-                @if (sessions(); as list) {
-                  <span class="db-heroSessionCount num">{{ list.length }}</span>
-                } @else if (sessionsError()) {
-                  <span mtr-pending-value></span>
+              <div class="db-heroOpsLabel">Liquidités</div>
+              <div mtr-kpi class="db-heroKpi db-heroKpiCompact" label="Trésorerie disponible" icon="portfolio" [hint]="sample() ? 'exemple' : showLive() ? 'cash du portefeuille simulé' : 'Créez un portefeuille pour afficher la trésorerie'">
+                @if (sample()) {
+                  <span class="db-heroSessionCount num">{{ cashSample() }}</span>
+                } @else if (liveCash(); as cash) {
+                  <span class="db-heroSessionCount num">{{ cash }}</span>
+                } @else if (liveLoading()) {
+                  <span class="skeleton" [style.height.px]="24" [style.width.px]="80"></span>
                 } @else {
-                  <span class="skeleton" [style.height.px]="24" [style.width.px]="40"></span>
+                  <span mtr-pending-value></span>
                 }
-                <span mtrKpiHint class="ws-kpiHint"
-                  >Connecté ·
-                  @if (user.mfaEnabled) {
-                    vérification en deux étapes activée
-                  } @else {
-                    <a routerLink="/settings/security">activer la vérification en deux étapes</a>
-                  }
-                </span>
               </div>
             </div>
           </div>
@@ -416,6 +410,8 @@
       </section>
     }
 
-    <mtr-modules-panel [context]="context()" [error]="error()" [user]="user" />
+    <section class="db-modulesRail" aria-label="Accès aux espaces de travail">
+      <mtr-modules-panel [context]="context()" [error]="error()" [user]="user" />
+    </section>
   </div>
 }

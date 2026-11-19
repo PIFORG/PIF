@@ -7,14 +7,15 @@
   <div class="mp-notice" role="note">
     <svg mtrIcon name="info" [size]="18" />
     <div>
-      <strong>Designed, not yet connected.</strong> This screen shows the planned layout only. It does not generate prices, orders, balances, scores or results, and nothing here is saved.@if (m.safeguard) {<span class="mp-safeguard">{{ m.safeguard }}</span>}
+      <strong>Conception validée, moteur non connecté.</strong>
+      Cet écran présente uniquement la mise en page prévue. Il ne calcule ni cours, ni ordres, ni soldes, ni scores, et rien n'est enregistré.@if (m.safeguard) {<span class="mp-safeguard">{{ m.safeguard }}</span>}
     </div>
   </div>
 
   <section aria-labelledby="layout-title" class="mp-section">
     <div class="mp-sectionHead">
-      <h2 id="layout-title">Designed layout</h2>
-      <span class="mp-layoutTag">Aperçu de mise en page · aucune donnée</span>
+      <h2 id="layout-title">Mise en page prévue</h2>
+      <span class="mp-layoutTag">Aperçu structurel · aucune donnée</span>
     </div>
     <div class="mp-blueprint">
       @for (block of m.blueprint; track block.title) {
@@ -34,14 +35,14 @@
   </section>
 
   <div class="mp-columns">
-    <section mtr-panel panelId="capabilities" heading="What this module will do">
+    <section mtr-panel panelId="capabilities" heading="Capacités prévues">
       <ul class="mp-capabilities">
         @for (item of m.capabilities; track item) {
           <li><svg mtrIcon name="check" [size]="14" />{{ item }}</li>
         }
       </ul>
     </section>
-    <section mtr-panel panelId="concepts" heading="Key concepts" description="Read these before the module goes live.">
+    <section mtr-panel panelId="concepts" heading="Concepts clés" description="À maîtriser avant la mise en service du module.">
       <dl class="mp-concepts">
         @for (c of m.concepts; track c.term) {
           <div>
@@ -57,35 +58,17 @@
     mtr-panel
     class="mp-contractPanel"
     panelId="contract"
-    heading="Backend contract required"
-    description="Proposed endpoints this screen needs. None of them exist in the API yet."
+    heading="Intégration en attente"
+    description="Fonctions métier à brancher pour activer ce module. Aucune n'est encore disponible."
   >
-    <div class="table-wrap">
-      <table class="data-table">
-        <caption class="sr-only">Proposed API endpoints for {{ m.title }}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Method</th>
-            <th scope="col">Path</th>
-            <th scope="col">Purpose</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (c of m.contracts; track c.method + ' ' + c.path) {
-            <tr>
-              <td>
-                <span class="mp-method" [attr.data-method]="c.method">{{ c.method }}</span>
-              </td>
-              <td class="mono">{{ c.path }}</td>
-              <td>{{ c.purpose }}</td>
-              <td>
-                <span class="badge badge-muted">Proposed</span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <ul class="mp-capabilities">
+      @for (c of m.contracts; track c.method + ' ' + c.path) {
+        <li>
+          <svg mtrIcon name="check" [size]="14" />
+          <span>{{ c.purpose }}</span>
+          <span class="badge badge-muted">Prévu</span>
+        </li>
+      }
+    </ul>
   </section>
 </div>

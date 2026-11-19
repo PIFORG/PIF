@@ -11,6 +11,7 @@ import { AccountStatusBadgeComponent } from '../../shared/account-status-badge.c
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { StepUpFieldsComponent } from '../../shared/fields/step-up-fields.component';
 import { FormErrorComponent, FormSuccessComponent } from '../../shared/form-messages.component';
+import { formatSecurityEventLine } from '../admin-security-labels';
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Actif',
@@ -93,6 +94,10 @@ export class AdminUserDetailPage {
 
   protected formatDateTime(value: string): string {
     return new Date(value).toLocaleString('fr-FR');
+  }
+
+  protected formatEventLine(eventType: string, outcome: string, detail: string): string {
+    return formatSecurityEventLine(eventType, outcome, detail);
   }
 
   protected openStatusDialog(event: Event): void {

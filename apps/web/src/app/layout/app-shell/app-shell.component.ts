@@ -31,14 +31,14 @@ function pathOf(url: string): string {
 }
 
 const HEALTH_TEXT: Record<ServiceHealth, string> = {
-  online: 'Services API disponibles',
+  online: 'Plateforme disponible',
   degraded: 'Base de données indisponible',
-  offline: 'API inaccessible',
+  offline: 'Plateforme inaccessible',
 };
 
 const HEALTH_SHORT: Record<ServiceHealth, string> = {
-  online: 'API',
-  degraded: 'Base',
+  online: 'En ligne',
+  degraded: 'Dégradé',
   offline: 'Hors ligne',
 };
 

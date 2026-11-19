@@ -67,7 +67,6 @@
       <div class="inv-utils">
         @if (health(); as h) {
           <span class="inv-status" [attr.data-health]="h" [attr.title]="healthText[h]" role="status">
-            <span class="inv-statusDot" aria-hidden="true"></span>
             <span class="inv-statusLabel">{{ healthShort[h] }}</span>
           </span>
         }

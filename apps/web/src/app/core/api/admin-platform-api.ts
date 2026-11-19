@@ -32,4 +32,8 @@ export class AdminPlatformApi {
   actuarial(): Promise<{ title: string; modules: { id: string; label: string; status: string }[]; note: string }> {
     return this.api.request('/admin/platform/actuarial', { method: 'GET' });
   }
+
+  challenges(): Promise<{ challenges: { id: string; title: string; status?: string }[]; note?: string }> {
+    return this.api.request('/admin/platform/challenges', { method: 'GET' });
+  }
 }

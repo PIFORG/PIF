@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { HealthApi } from '../../core/api/health';
 import { MarketApi } from '../../core/api/trading-api';
 import { NewsApi } from '../../core/api/news-api';
@@ -107,7 +107,7 @@ describe('Investor navbar menus (AppShell)', () => {
     }
   });
 
-  it('exposes Analyses > Risques with a real href', () => {
+  it('exposes Analyses > Analyser les risques with a real href', () => {
     const { fixture, root } = render();
     const analyzeBtn = Array.from(root.querySelectorAll('button.inv-link')).find((b) =>
       b.textContent?.includes('Analyses'),
@@ -115,7 +115,7 @@ describe('Investor navbar menus (AppShell)', () => {
     analyzeBtn.click();
     fixture.detectChanges();
     const risk = Array.from(root.querySelectorAll('#inv-menu-analyze a')).find((a) =>
-      a.textContent?.includes('Risques'),
+      a.textContent?.includes('Analyser les risques'),
     ) as HTMLAnchorElement;
     expect(risk.getAttribute('href')).toBe('/risk');
   });

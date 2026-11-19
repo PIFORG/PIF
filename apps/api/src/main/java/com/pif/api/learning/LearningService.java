@@ -82,7 +82,7 @@ public class LearningService {
       var p=progress.get(m.slug());
       var active=sessions.stream().filter(s->s.kind().equals("MISSION")&&s.status().equals("ACTIVE")&&s.slug().equals(m.slug())).findFirst().orElse(null);
       rows.add(map("slug",m.slug(),"version",m.version(),"order",m.order(),"title",LearningFr.missionTitle(m.slug(),m.title()),"level",m.level(),
-          "availability",m.availability(),"summary",m.summary(),"estimatedMinutes",m.estimatedMinutes(),
+          "availability",m.availability(),"summary",LearningFr.missionSummary(m.slug(),m.summary()),"estimatedMinutes",m.estimatedMinutes(),
           "competencies",LearningViews.competencies(m),"playable",MissionCatalog.isPlayable(m),
           "levelLocked",Definitions.LEVELS.indexOf(m.level())>Definitions.LEVELS.indexOf(unlocked),"relatedStorySlug",m.relatedStorySlug(),
           "progress",map("attempts",p==null?0:p.attempts(),"passed",p!=null&&p.passed(),"bestScore",p==null?null:p.bestScore(),

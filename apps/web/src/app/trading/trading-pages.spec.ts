@@ -213,10 +213,6 @@ function button(root: HTMLElement, name: string): HTMLButtonElement | undefined 
   return Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.trim() === name);
 }
 
-function kpi(root: HTMLElement, label: string): HTMLElement | undefined {
-  return Array.from(root.querySelectorAll<HTMLElement>('.ws-kpi')).find((k) => k.querySelector('.ws-kpiLabel')?.textContent === label);
-}
-
 let marketApi: Record<string, ReturnType<typeof vi.fn>>;
 let portfolioApi: Record<string, ReturnType<typeof vi.fn>>;
 
