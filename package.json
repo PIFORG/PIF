@@ -26,7 +26,10 @@
     "test:journey:actuarial": "node scripts/migration/angular-actuarial-journey.mjs",
     "test:openapi": "node scripts/migration/openapi-compare.mjs",
     "test:visual": "node scripts/migration/visual-parity.mjs",
-    "harness:generate": "npm run harness:generate -w @pif/db-harness"
+    "harness:generate": "npm run harness:generate -w @pif/db-harness",
+    "e2e:provision": "node tools/e2e/provision-e2e-users.mjs",
+    "e2e": "npm run e2e:provision && npm run e2e -w @mtrs/web",
+    "e2e:public": "npm run e2e:public -w @mtrs/web"
   },
   "engines": {
     "node": ">=20"

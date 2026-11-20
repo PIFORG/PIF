@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-dashboard';
 import { AuthApi } from '../core/api/auth-api';
 import { describeApiError } from '../core/api/errors';
 import { LEVEL_LABEL, LearningApi, type LearningProfile } from '../core/api/learning-api';

@@ -64,3 +64,13 @@ tools/db-harness/node_modules/
 
 # Sauvegardes locales
 backups/
+
+# Playwright E2E local secrets and storageState (never commit)
+apps/web/e2e/.auth/
+apps/web/test-results/
+apps/web/playwright-report/
+
+# Market data lake (local imports — do not commit bulk files)
+data/raw/
+data/reports/*.json
+data/reports/*.csv

@@ -62,7 +62,7 @@ public final class TradingDtos {
 
   private TradingDtos() {}
 
-  public record InstrumentQuery(String q, String assetClass) {}
+  public record InstrumentQuery(String q, String assetClass, String market) {}
 
   public record HistoryQuery(String range) {}
 
@@ -129,7 +129,8 @@ public final class TradingDtos {
     Parameter limit = optionalQuery("limit", withDefault(number("1", "200"), 100));
     return Map.of(
         "InstrumentQueryDto", List.of(optionalQuery("q", text(null, 40)),
-            optionalQuery("assetClass", ApiDocs.oneOf(ASSET_CLASSES))),
+            optionalQuery("assetClass", ApiDocs.oneOf(ASSET_CLASSES)),
+            optionalQuery("market", ApiDocs.oneOf(List.of("TN", "US", "ALL")))),
         "HistoryQueryDto", List.of(optionalQuery("range", withDefault(ApiDocs.oneOf(HISTORY_RANGES), "1M"))),
         "OrderListQueryDto", List.of(optionalQuery("status", withDefault(ApiDocs.oneOf(ORDER_STATUS_FILTERS), "all")),
             limit),
@@ -152,7 +153,7 @@ public final class TradingDtos {
   // ---------- queries ----------
 
   public static InstrumentQuery instruments(Map<String, Object> query) {
-    Checker c = new Checker(query, Set.of("q", "assetClass"));
+    Checker c = new Checker(query, Set.of("q", "assetClass", "market"));
     Object q = c.raw("q");
     if (q instanceof String s) q = Validation.jsTrim(s);
     if (q != null) {
@@ -161,8 +162,15 @@ public final class TradingDtos {
     }
     Object assetClass = c.raw("assetClass");
     if (assetClass != null && !isIn(assetClass, ASSET_CLASSES)) c.add(oneOf("assetClass", ASSET_CLASSES));
+    Object market = c.raw("market");
+    if (market instanceof String ms) market = Validation.jsTrim(ms);
+    if (market != null) {
+      if (!isString(market)) c.add(mustBeString("market"));
+      else if (!isIn(market, List.of("TN", "US", "ALL"))) c.add(oneOf("market", List.of("TN", "US", "ALL")));
+    }
     c.requireValid();
-    return new InstrumentQuery((String) q, (String) assetClass);
+    String marketVal = market == null || "ALL".equals(market) ? null : (String) market;
+    return new InstrumentQuery((String) q, (String) assetClass, marketVal);
   }
 
   public static HistoryQuery history(Map<String, Object> query) {

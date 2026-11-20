@@ -13,6 +13,7 @@ import com.pif.api.trading.TradingRepository.ExecutionRow;
 import com.pif.api.trading.TradingRepository.InstrumentRow;
 import com.pif.api.trading.TradingRepository.OrderRow;
 import com.pif.api.web.Messages;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,16 +33,60 @@ final class TradingViews {
     return amount == null ? null : dt(amount);
   }
 
+  /**
+   * Quote JSON for clients.
+   * <ul>
+   *   <li>{@code asOf} — observation time (sim bucket start <em>or</em> historical session close). Never rewritten.</li>
+   *   <li>{@code validUntil} — preview confirmation deadline: after this instant the client must refresh before
+   *       submit. For a live sim bucket still open, that is {@code asOf + 5m}. For a historical close whose native
+   *       window is already past, that is the end of the <em>current</em> sim bucket (paper-trading confirm TTL),
+   *       <strong>not</strong> a claim that the warehouse observation is fresh.</li>
+   *   <li>{@code freshness} / {@code dataKind} — observation provenance; set by {@link #enrichQuoteMeta}.</li>
+   * </ul>
+   */
   static Map<String, Object> quoteView(MarketQuote quote) {
+    return quoteView(quote, Instant.now());
+  }
+
+  static Map<String, Object> quoteView(MarketQuote quote, Instant now) {
     Map<String, Object> m = new LinkedHashMap<>();
     m.put("mid", dt(quote.mid()));
     m.put("bid", dt(quote.bid()));
     m.put("ask", dt(quote.ask()));
-    m.put("spreadBps", JsSemantics.round(((quote.ask() - quote.bid()) / quote.mid()) * 10_000 * 10) / 10);
+    double mid = quote.mid();
+    m.put("spreadBps", mid == 0 ? 0 : JsSemantics.round(((quote.ask() - quote.bid()) / mid) * 10_000 * 10) / 10);
     m.put("depth", quote.depth());
     m.put("asOf", Db.iso(quote.asOf()));
-    m.put("validUntil", Db.iso(quote.asOf().plusMillis(SimulatedMarketProvider.BUCKET_MS)));
+    Instant until = validUntil(quote.asOf(), now);
+    m.put("validUntil", Db.iso(until));
+    m.put("confirmUntil", Db.iso(until));
     return m;
+  }
+
+  /** Attach observation metadata so clients never confuse a historical close with a live/sim tick. */
+  static void enrichQuoteMeta(Map<String, Object> quoteJson, boolean historical, Instant observationAsOf) {
+    if (historical) {
+      quoteJson.put("dataKind", "HISTORICAL");
+      quoteJson.put("freshness", "LAST_AVAILABLE_SESSION_CLOSE");
+      quoteJson.put("observationAsOf", Db.iso(observationAsOf));
+      quoteJson.put("priceLabel", "Clôture historique (dernière séance disponible)");
+    } else {
+      quoteJson.put("dataKind", "FICTIONAL");
+      quoteJson.put("freshness", "SIMULATED_CONTINUOUS_5M");
+    }
+  }
+
+  /**
+   * Preview confirmation deadline. Does <em>not</em> rejuvenate a historical observation: {@code asOf} stays the
+   * warehouse session close; only the client confirm window advances with the current sim bucket.
+   */
+  static Instant validUntil(Instant asOf, Instant now) {
+    Instant nativeExpiry = asOf.plusMillis(SimulatedMarketProvider.BUCKET_MS);
+    if (nativeExpiry.isAfter(now)) return nativeExpiry;
+    long epoch = SimulatedMarketProvider.SIMULATION_EPOCH.toEpochMilli();
+    long bucket = Math.floorDiv(now.toEpochMilli() - epoch, SimulatedMarketProvider.BUCKET_MS);
+    if (bucket < 0) bucket = 0;
+    return Instant.ofEpochMilli(epoch + (bucket + 1) * SimulatedMarketProvider.BUCKET_MS);
   }
 
   static Map<String, Object> instrumentView(InstrumentRow instrument, Provenance provenance) {

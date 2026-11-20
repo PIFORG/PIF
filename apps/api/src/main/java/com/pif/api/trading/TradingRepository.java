@@ -23,7 +23,7 @@ public class TradingRepository {
 
   public record InstrumentRow(UUID id, String symbol, String name, String assetClass, String sector,
       String quoteCurrency, String status, int priceDecimals, int quantityDecimals, int lotSize, String providerId,
-      String providerSymbol, boolean fictional) {}
+      String providerSymbol, boolean fictional, String metadataJson) {}
 
   public record PortfolioRow(UUID id, UUID userId, String name, String baseCurrency, String status,
       long initialCapital, long cash, long netContributions, long realizedPnl, long feesPaid, long spreadCost,
@@ -64,7 +64,7 @@ public class TradingRepository {
 
   private static final String INSTRUMENT_COLUMNS = "i.id, i.symbol, i.name, i.asset_class::text AS asset_class, "
       + "i.sector, i.quote_currency, i.status::text AS status, i.price_decimals, i.quantity_decimals, i.lot_size, "
-      + "i.provider_id, i.provider_symbol, i.fictional";
+      + "i.provider_id, i.provider_symbol, i.fictional, i.metadata::text AS metadata_json";
 
   private static final String PORTFOLIO_COLUMNS = "id, user_id, name, base_currency, status::text AS status, "
       + "initial_capital_millimes, cash_millimes, net_contributions_millimes, realized_pnl_millimes, "
@@ -97,7 +97,7 @@ public class TradingRepository {
   }
 
   /** Prisma `contains` + mode "insensitive" on symbol, name or sector: ILIKE '%q%' with the value unescaped. */
-  public List<InstrumentRow> searchInstruments(String assetClass, String q) {
+  public List<InstrumentRow> searchInstruments(String assetClass, String q, String market) {
     StringBuilder sql = new StringBuilder("SELECT " + INSTRUMENT_COLUMNS + " FROM instruments i WHERE 1 = 1");
     List<Object> params = new ArrayList<>();
     if (assetClass != null) {
@@ -105,19 +105,35 @@ public class TradingRepository {
       params.add(assetClass);
     }
     if (q != null) {
-      sql.append(" AND (i.symbol ILIKE ? OR i.name ILIKE ? OR i.sector ILIKE ?)");
+      sql.append(" AND (i.symbol ILIKE ? OR i.name ILIKE ? OR i.sector ILIKE ? OR i.provider_symbol ILIKE ?)");
       String like = "%" + q + "%";
       params.add(like);
       params.add(like);
       params.add(like);
+      params.add(like);
     }
-    sql.append(" ORDER BY i.symbol ASC");
+    if ("TN".equalsIgnoreCase(market)) {
+      sql.append(" AND (i.quote_currency = 'TND' OR i.provider_id = 'CMF_BVMT_HIST' OR i.metadata->>'market' = 'TN')");
+    } else if ("US".equalsIgnoreCase(market)) {
+      sql.append(" AND (i.quote_currency = 'USD' OR i.provider_id IN ('YAHOO','STOOQ') OR i.metadata->>'market' = 'US')");
+    }
+    sql.append(" ORDER BY i.fictional ASC, i.symbol ASC");
     return jdbc.sql(sql.toString()).params(params).query(TradingRepository::instrument).list();
   }
 
   public Optional<InstrumentRow> instrumentBySymbol(String symbol) {
     return jdbc.sql("SELECT " + INSTRUMENT_COLUMNS + " FROM instruments i WHERE i.symbol = ?")
         .param(symbol).query(TradingRepository::instrument).optional();
+  }
+
+  /** Admin-only: ACTIVE or HALTED. Returns updated rows (0 when the symbol is unknown). */
+  public int updateInstrumentStatus(String symbol, String status) {
+    if (!"ACTIVE".equals(status) && !"HALTED".equals(status)) {
+      throw new IllegalArgumentException("status");
+    }
+    return jdbc.sql("UPDATE instruments SET status = ?::\"InstrumentStatus\", updated_at = ? WHERE symbol = ?")
+        .params(status, Db.ts(Db.now()), symbol)
+        .update();
   }
 
   public List<WatchRow> watchlist(UUID userId) {
@@ -392,7 +408,8 @@ public class TradingRepository {
     return new InstrumentRow(Db.uuid(rs, "id"), rs.getString("symbol"), rs.getString("name"),
         rs.getString("asset_class"), rs.getString("sector"), rs.getString("quote_currency"), rs.getString("status"),
         rs.getInt("price_decimals"), rs.getInt("quantity_decimals"), rs.getInt("lot_size"),
-        rs.getString("provider_id"), rs.getString("provider_symbol"), rs.getBoolean("fictional"));
+        rs.getString("provider_id"), rs.getString("provider_symbol"), rs.getBoolean("fictional"),
+        rs.getString("metadata_json"));
   }
 
   private static PortfolioRow portfolioRow(ResultSet rs, int n) throws SQLException {

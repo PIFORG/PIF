@@ -76,6 +76,7 @@ export const INVESTOR_NAV: InvestorNavSection[] = [
       },
       { href: '/stories', label: 'Histoires financières', icon: 'stories', status: 'LIVE_INTEGRATED' },
       { href: '/challenges', label: 'Défis boursiers', icon: 'challenge', status: 'LIVE_INTEGRATED' },
+      { href: '/rooms', label: 'Salles de marché', icon: 'challenge', status: 'LIVE_INTEGRATED', match: ['/rooms'] },
     ],
   },
 ];

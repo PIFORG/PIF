@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterRender
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import '../../styles/lazy-admin';
 import { ProtectedRouteComponent } from '../auth/protected-route.component';
 import type { UserRole } from '../core/api/types';
 import { FR } from '../core/i18n/fr';
@@ -164,8 +165,27 @@ export class AdminLayoutComponent {
       // ignore
     }
     const destroyRef = inject(DestroyRef);
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && this.drawerOpen()) this.closeDrawer(true);
+      if (e.key === 'Escape' && this.drawerOpen()) {
+        this.closeDrawer(true);
+        return;
+      }
+      if (e.key !== 'Tab' || !this.drawerOpen()) return;
+      const panel = this.drawer()?.nativeElement;
+      if (!panel) return;
+      const items = Array.from(panel.querySelectorAll<HTMLElement>(focusableSelector));
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
     destroyRef.onDestroy(() => document.removeEventListener('keydown', onKey));

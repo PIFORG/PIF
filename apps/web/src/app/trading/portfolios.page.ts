@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-trading';
 import { hasErrorCode } from '../core/api/errors';
 import {
   PortfolioApi,

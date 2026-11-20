@@ -10,8 +10,15 @@ export interface NewsFeed {
     sector: string;
     publishedAt: string;
     provenance: string;
+    sourceId?: string;
+    originalUrl?: string | null;
+    market?: string | null;
+    verification?: string;
   }[];
-  source: { id: string; kind: string; description: string };
+  source?: { id: string; kind: string; description: string };
+  availability?: string;
+  realNewsCount?: number;
+  adminPublishedCount?: number;
   limitations: string[];
 }
 

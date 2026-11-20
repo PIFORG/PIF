@@ -29,7 +29,7 @@ describe('ModulePreviewPage', () => {
     const root = await render(MODULES['trading']);
     const submit = Array.from(root.querySelectorAll('button')).find((b) => b.textContent === 'Review order') as HTMLButtonElement;
     expect(submit.closest('fieldset')?.disabled).toBe(true);
-    expect(root.textContent).toContain("moteur d'exécution simulé n'est pas connecté");
+    expect(root.textContent).toContain('Les prix sont simulés et étiquetés comme tels');
     expect(root.textContent).toContain("Aucun ordre n'est jamais envoyé sur un marché réel");
   });
 

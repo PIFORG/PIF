@@ -1,8 +1,18 @@
 @if (error()) {
   <div class="form-error-banner" role="alert">{{ error() }}</div>
 }
+@if (notice()) {
+  <p class="tr-toast" data-tone="pos" role="status">{{ notice() }}</p>
+}
+
 @if (supervision(); as s) {
-  <section mtr-panel panelId="supervision" heading="Supervision" description="Vues de supervision en lecture seule. Les écritures utilisateurs restent sur la gestion des comptes.">
+  <section class="adm-section" aria-labelledby="adm-sup-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-sup-title">Supervision</h2>
+        <p>{{ s.note }}</p>
+      </div>
+    </div>
     <ul class="db-modules">
       @for (m of s.modules; track m.id) {
         <li class="db-module">
@@ -10,64 +20,261 @@
         </li>
       }
     </ul>
+    @if (s.stats; as st) {
+      <dl class="adm-statStrip">
+        @for (entry of [
+          { k: 'Utilisateurs', v: st['users'] },
+          { k: 'Portefeuilles', v: st['portfolios'] },
+          { k: 'Sessions', v: st['learningSessions'] },
+          { k: 'Actualités admin', v: st['adminNews'] }
+        ]; track entry.k) {
+          @if (entry.v !== undefined) {
+            <div><dt>{{ entry.k }}</dt><dd>{{ entry.v }}</dd></div>
+          }
+        }
+      </dl>
+    }
   </section>
 }
+
+@if (simulation(); as sim) {
+  <section class="adm-section" aria-labelledby="adm-sim-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-sim-title">Paramètres de simulation</h2>
+        <p>Contrôle pédagogique du fil d'actualités et de l'échelle de profondeur affichée.</p>
+      </div>
+    </div>
+    <div class="adm-formRow">
+      <label class="field">
+        <span class="field-label">Profondeur ({{ depthScalePct }} %)</span>
+        <input class="input" type="range" min="25" max="200" step="5" [(ngModel)]="depthScalePct" [disabled]="busy()" />
+      </label>
+      <label class="field field-inline">
+        <input type="checkbox" [(ngModel)]="newsPaused" [disabled]="busy()" />
+        <span>Mettre le fil d'actualités en pause</span>
+      </label>
+      <button type="button" class="btn btn-primary btn-sm" (click)="saveSimulation()" [disabled]="busy()">Enregistrer</button>
+    </div>
+  </section>
+}
+
 @if (markets(); as mk) {
-  <section mtr-panel panelId="admin-markets" heading="Instruments" [description]="mk.description">
-    <table class="data-table">
-      <thead><tr><th>Symbole</th><th>Nom</th><th>Secteur</th><th class="num">Prix ref.</th></tr></thead>
-      <tbody>
-        @for (i of mk.instruments; track $any(i)['symbol']) {
+  <section class="adm-section" aria-labelledby="adm-mkt-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-mkt-title">Instruments &amp; warehouse</h2>
+        <p>{{ mk.description }}</p>
+        <p class="field-hint">
+          {{ mk.instrumentCount ?? mk.instruments.length }} instruments
+          @if (mk.historicalCount !== undefined && mk.historicalCount !== null) {
+            · {{ mk.historicalCount }} historiques
+          }
+          @if (mk.fictionalCount !== undefined && mk.fictionalCount !== null) {
+            · {{ mk.fictionalCount }} fictifs
+          }
+        </p>
+      </div>
+    </div>
+    @if (mk.warehouse; as wh) {
+      <dl class="tr-fundGrid" style="margin-bottom: 1rem">
+        <div><dt>Barres</dt><dd class="num">{{ $any(wh)['bars'] ?? '—' }}</dd></div>
+        <div><dt>Référentiel ext.</dt><dd class="num">{{ $any(wh)['instruments'] ?? '—' }}</dd></div>
+        <div><dt>Actualités RSS</dt><dd class="num">{{ $any(wh)['news'] ?? '—' }}</dd></div>
+        <div><dt>Crises</dt><dd class="num">{{ $any(wh)['crises'] ?? '—' }}</dd></div>
+      </dl>
+      @if ($any(wh)['bySource']; as sources) {
+        <div class="table-wrap" style="margin-bottom: 1rem">
+          <table class="data-table">
+            <caption class="sr-only">Couverture par source</caption>
+            <thead>
+              <tr><th>Source</th><th class="num">Barres</th><th>De</th><th>À</th></tr>
+            </thead>
+            <tbody>
+              @for (s of $any(sources); track $any(s)['sourceId']) {
+                <tr>
+                  <td class="mono">{{ $any(s)['sourceId'] }}</td>
+                  <td class="num">{{ $any(s)['bars'] }}</td>
+                  <td>{{ $any(s)['minDate'] || '—' }}</td>
+                  <td>{{ $any(s)['maxDate'] || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+    @if (mk.sources?.length) {
+      <div class="table-wrap" style="margin-bottom: 1rem">
+        <table class="data-table">
+          <caption class="sr-only">Sources configurées</caption>
+          <thead>
+            <tr><th>Id</th><th>Nom</th><th>Marché</th><th>Licence</th></tr>
+          </thead>
+          <tbody>
+            @for (s of mk.sources!; track $any(s)['id']) {
+              <tr>
+                <td class="mono">{{ $any(s)['id'] }}</td>
+                <td>{{ $any(s)['name'] }}</td>
+                <td>{{ $any(s)['market'] || $any(s)['kind'] }}</td>
+                <td>{{ $any(s)['licenseNotes'] || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (mk.importBatches?.length) {
+      <div class="table-wrap" style="margin-bottom: 1rem">
+        <table class="data-table">
+          <caption class="sr-only">Derniers imports</caption>
+          <thead>
+            <tr><th>Source</th><th>Statut</th><th class="num">Lus</th><th class="num">Insérés</th><th class="num">Rejetés</th><th>Début</th></tr>
+          </thead>
+          <tbody>
+            @for (b of mk.importBatches!; track $any(b)['id']) {
+              <tr>
+                <td class="mono">{{ $any(b)['sourceId'] }}</td>
+                <td>{{ $any(b)['status'] }}</td>
+                <td class="num">{{ $any(b)['rowsRead'] }}</td>
+                <td class="num">{{ $any(b)['rowsInserted'] }}</td>
+                <td class="num">{{ $any(b)['rowsRejected'] }}</td>
+                <td>{{ $any(b)['startedAt'] || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
           <tr>
-            <td class="mono">{{ $any(i)['symbol'] }}</td>
-            <td>{{ $any(i)['name'] }}</td>
-            <td>{{ $any(i)['sector'] }}</td>
-            <td class="num">{{ $any(i)['initialPrice'] }}</td>
+            <th>Symbole</th>
+            <th>Nom</th>
+            <th>Classe</th>
+            <th>Provenance</th>
+            <th>Statut</th>
+            <th><span class="sr-only">Action</span></th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (i of mk.instruments; track $any(i)['symbol']) {
+            <tr>
+              <td class="mono">{{ $any(i)['symbol'] }}</td>
+              <td>{{ $any(i)['name'] }}</td>
+              <td>{{ $any(i)['assetClass'] || $any(i)['sector'] }}</td>
+              <td>{{ $any(i)['provenance'] || ($any(i)['fictional'] ? 'FICTIONAL' : 'HISTORICAL') }}</td>
+              <td>{{ $any(i)['status'] || 'ACTIVE' }}</td>
+              <td>
+                @if (mk.writable) {
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    [disabled]="busy()"
+                    (click)="toggleInstrument('' + $any(i)['symbol'], '' + ($any(i)['status'] || 'ACTIVE'))"
+                  >
+                    {{ ($any(i)['status'] || 'ACTIVE') === 'HALTED' ? 'Réactiver' : 'Suspendre' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 }
+
 @if (learning(); as l) {
-  <section mtr-panel panelId="admin-learning" heading="Missions de formation" description="Catalogue pédagogique et disponibilité.">
-    <p class="field-hint">{{ l.stats['implemented'] }} implémentées · {{ l.stats['configured'] }} configurées · {{ l.stats['total'] }} au total</p>
-    <table class="data-table">
-      <thead><tr><th>Slug</th><th>Titre</th><th>Niveau</th><th>Disponibilité</th></tr></thead>
-      <tbody>
-        @for (m of l.missions; track m.slug) {
-          <tr>
-            <td class="mono">{{ m.slug }}</td>
-            <td>{{ m.title }}</td>
-            <td>{{ m.level }}</td>
-            <td>{{ m.availability }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+  <section class="adm-section" aria-labelledby="adm-learn-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-learn-title">Missions de formation</h2>
+        <p>{{ l.stats['implemented'] }} implementees · {{ l.stats['configured'] }} configurees · {{ l.stats['total'] }} au total</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Slug</th><th>Titre</th><th>Niveau</th><th>Etat</th><th><span class="sr-only">Action</span></th></tr>
+        </thead>
+        <tbody>
+          @for (m of l.missions; track m.slug) {
+            <tr>
+              <td class="mono">{{ m.slug }}</td>
+              <td>{{ m.title }}</td>
+              <td>{{ m.level }}</td>
+              <td>{{ m.adminDisabled ? 'Désactivée' : m.availability }}</td>
+              <td>
+                <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="toggleMission(m.slug, !!m.adminDisabled)">
+                  {{ m.adminDisabled ? 'Réactiver' : 'Désactiver' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 }
+
 @if (ai(); as a) {
-  <section mtr-panel panelId="admin-ai" heading="Modèles IA" [description]="a.disclaimer || 'Catalogue des modèles du laboratoire IA.'">
+  <section class="adm-section" aria-labelledby="adm-ai-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-ai-title">Modèles IA</h2>
+        <p>{{ a.disclaimer || 'Catalogue des modeles du laboratoire IA.' }}</p>
+      </div>
+    </div>
     <ul class="db-sessionList">
       @for (m of a.models || []; track m.id) {
         <li>
           <span class="db-sessionText">
             <strong>{{ m.title }}</strong>
-            <span class="mono">{{ m.id }}</span>
+            <span class="mono">{{ m.id }}{{ m.adminDisabled ? ' · désactivé' : '' }}</span>
           </span>
+          <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="toggleAi(m.id, !!m.adminDisabled)">
+            {{ m.adminDisabled ? 'Réactiver' : 'Désactiver' }}
+          </button>
         </li>
       }
     </ul>
   </section>
 }
-@if (stress()) {
-  <section mtr-panel panelId="admin-stress" heading="Stress bancaire" description="Scénarios et profils disponibles pour la supervision.">
-    <p class="field-hint">Catalogue de stress chargé. Exécutions détaillées via « Simuler une crise bancaire ».</p>
+
+@if (stress(); as st) {
+  <section class="adm-section" aria-labelledby="adm-stress-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-stress-title">Scénarios de stress</h2>
+        <p>Activation ou desactivation des presets proposes aux investisseurs.</p>
+      </div>
+    </div>
+    <ul class="db-sessionList">
+      @for (p of st.presets || []; track p.id) {
+        <li>
+          <span class="db-sessionText">
+            <strong>{{ p.name }}</strong>
+            <span class="mono">{{ p.id }}{{ p.adminDisabled ? ' · désactivé' : '' }}</span>
+          </span>
+          <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="toggleStress(p.id, !!p.adminDisabled)">
+            {{ p.adminDisabled ? 'Réactiver' : 'Désactiver' }}
+          </button>
+        </li>
+      }
+    </ul>
   </section>
 }
+
 @if (actuarial(); as act) {
-  <section mtr-panel panelId="admin-actuarial" heading="Actuariat" [description]="act.note">
+  <section class="adm-section" aria-labelledby="adm-act-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-act-title">Actuariat</h2>
+        <p>{{ act.note }}</p>
+      </div>
+    </div>
     <ul class="db-modules">
       @for (m of act.modules; track m.id) {
         <li class="db-module">
@@ -77,31 +284,59 @@
     </ul>
   </section>
 }
+
 @if (news(); as n) {
-  <section mtr-panel panelId="admin-news" heading="Actualités pédagogiques" [description]="n.source.description">
+  <section class="adm-section" aria-labelledby="adm-news-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-news-title">Actualités pédagogiques</h2>
+        <p>{{ n.source.description }}</p>
+      </div>
+    </div>
+    <div class="adm-formGrid">
+      <label class="field"><span class="field-label">Titre</span><input class="input" [(ngModel)]="newsTitle" [disabled]="busy()" /></label>
+      <label class="field"><span class="field-label">Symbole (optionnel)</span><input class="input" [(ngModel)]="newsSymbol" [disabled]="busy()" /></label>
+      <label class="field adm-span2"><span class="field-label">Resume</span><textarea class="input" rows="2" [(ngModel)]="newsSummary" [disabled]="busy()"></textarea></label>
+      <button type="button" class="btn btn-primary btn-sm" (click)="publishNews()" [disabled]="busy()">Publier</button>
+    </div>
     <ul class="db-sessionList">
-      @for (item of n.items; track item.title) {
+      @for (item of n.items; track item.id || item.title) {
         <li>
           <span class="db-sessionText">
             <strong>{{ item.title }}</strong>
-            <span>{{ item.publishedAt }} · {{ item.symbol || 'Macro' }}</span>
+            <span>{{ item.publishedAt }} · {{ item.symbol || 'Macro' }}{{ item.adminManaged ? ' · admin' : '' }}</span>
           </span>
+          @if (item.adminManaged && item.id) {
+            <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="removeNews(item.id!)">Retirer</button>
+          }
         </li>
       }
     </ul>
   </section>
 }
+
 @if (challenges(); as ch) {
-  <section mtr-panel panelId="admin-challenges" heading="Défis virtuels" [description]="ch.note || 'Classement pédagogique — capital initial équitable.'">
+  <section class="adm-section" aria-labelledby="adm-ch-title">
+    <div class="adm-sectionHead">
+      <div>
+        <h2 id="adm-ch-title">Défis virtuels</h2>
+        <p>{{ ch.note || 'Classement pedagogique — capital initial equitable.' }}</p>
+      </div>
+    </div>
+    <div class="adm-formRow">
+      <label class="field"><span class="field-label">Titre</span><input class="input" [(ngModel)]="challengeTitle" [disabled]="busy()" /></label>
+      <label class="field"><span class="field-label">Capital (DT)</span><input class="input" type="number" [(ngModel)]="challengeCapital" [disabled]="busy()" /></label>
+      <button type="button" class="btn btn-primary btn-sm" (click)="createChallenge()" [disabled]="busy()">Creer</button>
+    </div>
     @if (ch.challenges.length === 0) {
-      <p class="field-hint">Aucun défi en mémoire pour l’instant. La création se fait depuis l’espace Défis (rôle administrateur).</p>
+      <p class="field-hint">Aucun defi pour l'instant.</p>
     } @else {
       <ul class="db-sessionList">
         @for (c of ch.challenges; track c.id) {
           <li>
             <span class="db-sessionText">
               <strong>{{ c.title }}</strong>
-              <span class="mono">{{ c.id }}{{ c.open === false ? ' · fermé' : ' · ouvert' }}</span>
+              <span class="mono">{{ c.id }}{{ c.open === false ? ' · ferme' : ' · ouvert' }}</span>
             </span>
           </li>
         }

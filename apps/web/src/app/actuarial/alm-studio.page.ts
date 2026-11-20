@@ -1,3 +1,4 @@
+import '../../styles/lazy-actuarial';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActuarialApi } from '../core/api/actuarial-api';
 import { PageHeadingComponent } from '../shared/page-heading/page-heading.component';

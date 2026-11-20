@@ -1,0 +1,232 @@
+<div class="page-shell">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <p class="eyebrow"><a routerLink="/rooms" class="tr-inlineLink">Salles</a></p>
+      @if (room(); as r) {
+        <h1 class="tr-pageTitle">{{ r.title }}</h1>
+        <p class="tr-pageLede">
+          Code {{ r.code }} · {{ r.status }} · {{ r.mode }} ·
+          {{ r.market?.['label'] || r.marketScope }}
+          @if (r.simClockDate) {
+            · horloge {{ r.simClockDate }}
+          }
+        </p>
+      } @else {
+        <h1 class="tr-pageTitle">Salle</h1>
+        <p class="tr-pageLede">Chargement…</p>
+      }
+    </div>
+    <div class="rs-actions">
+      @if (room()?.canModerate) {
+        <button type="button" class="btn btn-primary btn-sm" [disabled]="busy()" (click)="start()">Démarrer</button>
+        <button type="button" class="btn btn-secondary btn-sm" [disabled]="busy()" (click)="pause()">Pause</button>
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="end()">Terminer</button>
+        @if (room()?.marketScope !== 'FICTIONAL') {
+          <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="advance()">Avancer le jour</button>
+        }
+      }
+      <button type="button" class="btn btn-ghost btn-sm" [disabled]="busy()" (click)="leave()">Quitter</button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <p class="field-hint" role="status">{{ notice() }}</p>
+  }
+
+  @if (room(); as r) {
+    <div class="rs-kpis" aria-label="Vos soldes">
+      <div class="rs-kpi">
+        <span class="rm-meta">Valeur nette (mark-to-market)</span>
+        <strong>{{ formatMoney(num(portfolio()?.['netWorth'] ?? r.you?.['netWorth'] ?? portfolio()?.['equity'] ?? portfolio()?.['cash']), 'TND') }}</strong>
+      </div>
+      <div class="rs-kpi">
+        <span class="rm-meta">Points d’apprentissage</span>
+        <strong>{{ num(r.you?.['learningPoints']) }}</strong>
+      </div>
+      <div class="rs-kpi">
+        <span class="rm-meta">Dette de crédit virtuel</span>
+        <strong>{{ formatMoney(num(r.you?.['creditDebt']), 'TND') }}</strong>
+      </div>
+      <div class="rs-kpi">
+        <span class="rm-meta">Niveau</span>
+        <strong>{{ r.you?.['level'] || '—' }}</strong>
+      </div>
+    </div>
+    <p class="field-hint">
+      Trois soldes distincts : la valeur nette reflète trésorerie + positions au prix de l’horloge − dette ;
+      les points récompensent l’apprentissage ; le crédit est un emprunt fictif, jamais un gain.
+      @if (portfolio()?.['valuationWarning']) {
+        <span role="status"> {{ portfolio()?.['valuationWarning'] }}</span>
+      }
+    </p>
+
+    @if (r.you?.['tradingLocked']) {
+      <p class="form-error-banner" role="status">
+        {{ r.you?.['lockReason'] || 'Trading limité.' }}
+        Vous gardez l’accès aux formations, au chat, aux ventes et au remboursement.
+      </p>
+    }
+
+    <div class="rs-layout">
+      <div>
+        <section mtr-panel heading="Simulation" description="Ordres validés côté serveur — portefeuille isolé à cette salle.">
+          <form class="rm-form" (ngSubmit)="trade()">
+            <div class="rm-row">
+              <label class="field">
+                <span class="field-label">Symbole</span>
+                <input class="input" name="sym" [(ngModel)]="orderSymbol" [disabled]="busy()" />
+              </label>
+              <label class="field">
+                <span class="field-label">Quantité</span>
+                <input class="input" type="number" min="1" name="qty" [(ngModel)]="orderQty" [disabled]="busy()" />
+              </label>
+              <label class="field">
+                <span class="field-label">Sens</span>
+                <select class="select" name="side" [(ngModel)]="orderSide" [disabled]="busy()">
+                  <option value="BUY">Acheter</option>
+                  <option value="SELL">Vendre</option>
+                </select>
+              </label>
+              <button type="submit" class="btn btn-primary" [disabled]="busy() || r.status !== 'ACTIVE'">Exécuter (simulé)</button>
+            </div>
+          </form>
+          <p class="field-hint">Le trading individuel hors salle reste inchangé. Ici, chaque membre a son propre portefeuille de salle.</p>
+        </section>
+
+        <section mtr-panel heading="Progression & financement" description="Points ≠ capital ≠ crédit.">
+          <div class="rm-row">
+            <label class="field">
+              <span class="field-label">Convertir des points</span>
+              <input class="input" type="number" min="1" [(ngModel)]="convertPts" name="pts" [disabled]="busy()" />
+            </label>
+            <button type="button" class="btn btn-secondary" [disabled]="busy()" (click)="convert()">Convertir</button>
+          </div>
+          <p class="field-hint">
+            Taux affiché : {{ formatNumber(num(r.rules['pointsToCapitalRate']), 0) }} points = 1 unité de capital
+            (plafond {{ formatMoney(num(r.rules['maxConversionCapital']), 'TND') }}).
+          </p>
+          <div class="rm-row">
+            <label class="field">
+              <span class="field-label">Demander un crédit fictif</span>
+              <input class="input" type="number" min="1" [(ngModel)]="creditAmount" name="cr" [disabled]="busy()" />
+            </label>
+            <button type="button" class="btn btn-secondary" [disabled]="busy()" (click)="askCredit()">Demander</button>
+          </div>
+          @if (credit(); as c) {
+            <p class="field-hint">
+              Capacité {{ formatMoney(num(c['availableCredit']), 'TND') }} · plafond {{ formatMoney(num(c['ceiling']), 'TND') }} ·
+              {{ c['disclaimer'] }}
+            </p>
+          }
+          <div class="rm-row">
+            <label class="field">
+              <span class="field-label">Rembourser</span>
+              <input class="input" type="number" min="1" [(ngModel)]="repayAmount" name="rp" [disabled]="busy()" />
+            </label>
+            <button type="button" class="btn btn-ghost" [disabled]="busy()" (click)="repay()">Rembourser</button>
+          </div>
+          <div class="rm-row">
+            <label class="field">
+              <span class="field-label">Récompense tutoriel (une fois)</span>
+              <input class="input" [(ngModel)]="rewardRef" name="rw" [disabled]="busy()" />
+            </label>
+            <button type="button" class="btn btn-ghost" [disabled]="busy()" (click)="claimTutorial()">Réclamer points</button>
+          </div>
+          <p class="field-hint">Pour une mission MarketQuest : terminez-la puis réclamez avec source MISSION (API).</p>
+        </section>
+
+        <section mtr-panel heading="Classement pédagogique" description="Performance, risque et apprentissage — pas le gain brut seul.">
+          @if (r.scoreExplanation?.fr) {
+            <p class="field-hint">{{ r.scoreExplanation.fr }}</p>
+          }
+          <table class="rs-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Participant</th>
+                <th>Score</th>
+                <th>Points</th>
+                <th>Rendement trading</th>
+                <th>Valeur nette</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of r.leaderboard; track $any(row)['displayName']) {
+                <tr>
+                  <td>{{ $any(row)['rank'] }}</td>
+                  <td>{{ $any(row)['displayName'] }}</td>
+                  <td>
+                    @if ($any(row)['score'] === null || $any(row)['score'] === undefined) {
+                      —
+                      <span class="rm-meta">provisoire</span>
+                    } @else {
+                      {{ $any(row)['score'] }}
+                    }
+                  </td>
+                  <td>{{ $any(row)['learningPoints'] }}</td>
+                  <td>{{ $any(row)['tradingReturnPct'] }} %</td>
+                  <td>{{ formatMoney(num($any(row)['netWorth'] ?? $any(row)['equity']), 'TND') }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (r.leaderboard.some((row) => !!row['scoreProvisional'])) {
+            <p class="field-hint" role="status">
+              Certains cours manquent à l’horloge de simulation — le classement n’est pas présenté comme exact.
+            </p>
+          }
+        </section>
+      </div>
+
+      <aside>
+        <section mtr-panel heading="Participants" description="Présence synchronisée.">
+          <ul class="rm-list">
+            @for (m of r.members; track m.displayName + m.joinedAt) {
+              <li class="rm-card">
+                <div>
+                  <strong>{{ m.displayName }}</strong>
+                  <div class="rm-meta">{{ m.role }} · {{ m.level }} · {{ m.learningPoints }} pts</div>
+                </div>
+                @if (m.tradingLocked) {
+                  <span class="badge">Limité</span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+
+        <section mtr-panel heading="Discussion" description="Chat texte réel. Voix de salle non déployée.">
+          <div class="rs-chat" aria-live="polite">
+            @for (msg of messages(); track msg.id) {
+              <div class="rs-msg">
+                <strong>{{ msg.senderName }}</strong>
+                <div>{{ msg.body }}</div>
+              </div>
+            } @empty {
+              <p class="rm-meta">Aucun message pour l’instant.</p>
+            }
+          </div>
+          <form class="rm-row" style="margin-top: 0.75rem" (ngSubmit)="sendChat()">
+            <input class="input" [(ngModel)]="chatBody" name="chat" placeholder="Écrire un message…" [disabled]="busy()" />
+            <button type="submit" class="btn btn-secondary btn-sm" [disabled]="busy()">Envoyer</button>
+          </form>
+          <p class="field-hint">{{ r.voice.reason }}</p>
+        </section>
+
+        <section mtr-panel heading="Événements" description="Flux salle : SSE authentifié (en-tête) + récupération polling.">
+          <p class="rm-meta">Flux : {{ streamStatus() }}</p>
+          <ul class="rs-feed">
+            @for (e of events(); track $any(e)['seq']) {
+              <li class="rm-meta">#{{ $any(e)['seq'] }} · {{ $any(e)['type'] }}</li>
+            } @empty {
+              <li class="rm-meta">En attente d’événements…</li>
+            }
+          </ul>
+        </section>
+      </aside>
+    </div>
+  }
+</div>

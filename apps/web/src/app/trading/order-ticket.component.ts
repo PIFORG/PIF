@@ -11,7 +11,7 @@ import {
 } from '../core/api/trading-api';
 import { EmptyStateComponent } from '../shared/workspace/workspace.components';
 import { emptyTicket, termsKey, ticketErrors, toOrderTerms, type TicketDraft } from './ticket-draft';
-import { describeTradingError, dt, price, shortTime, units } from './trading-format';
+import { dateTime, describeTradingError, dt, price, shortTime, units } from './trading-format';
 
 const TYPE_LABEL: Record<TradeOrderType, string> = {
   MARKET: 'Marché',
@@ -62,6 +62,11 @@ export class OrderTicketComponent {
   protected readonly price = price;
   protected readonly units = units;
   protected readonly shortTime = shortTime;
+  protected readonly dateTime = dateTime;
+  protected readonly quoteIsHistorical = computed(() => {
+    const q = this.review()?.quote;
+    return q?.dataKind === 'HISTORICAL' || q?.freshness === 'LAST_AVAILABLE_SESSION_CLOSE';
+  });
 
   protected readonly instrument = computed(() => this.instruments().find((i) => i.symbol === this.draft().symbol) ?? null);
   protected readonly errors = computed(() => ticketErrors(this.draft(), this.instrument()?.lotSize ?? 1));

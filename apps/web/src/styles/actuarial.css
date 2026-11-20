@@ -30,21 +30,21 @@
 }
 
 .ac-specColumn .ws-panel {
-  border-color: color-mix(in srgb, var(--mtr-brand) 22%, var(--mtr-border));
+  border-color: color-mix(in srgb, var(--mtr-border) 70%, transparent);
   background: var(--color-surface);
 }
 
 .ac-specColumn .ws-panelHead {
-  border-bottom-color: color-mix(in srgb, var(--mtr-brand) 18%, var(--mtr-border));
+  border-bottom-color: color-mix(in srgb, var(--mtr-border) 55%, transparent);
 }
 
 .ac-vizColumn .ws-panel {
-  border-color: color-mix(in srgb, var(--mtr-cyan) 18%, var(--mtr-border));
+  border-color: color-mix(in srgb, var(--mtr-border) 70%, transparent);
 }
 
 .ac-researchKpis .ws-kpi {
-  border-color: color-mix(in srgb, var(--mtr-brand) 20%, var(--mtr-border));
-  background: var(--color-surface);
+  border-color: transparent;
+  background: transparent;
 }
 
 .ac-researchPods .ac-workspace {
@@ -73,43 +73,46 @@
 .ac-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-1);
   margin: 0 0 var(--space-4);
   padding: 0;
   list-style: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
 }
 
 .ac-tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 2.25rem;
+  min-height: 2.1rem;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
-  background: var(--mtr-surface);
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
   color: var(--mtr-text-2);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
+  margin-bottom: -1px;
 }
 
 a.ac-tab:hover {
   color: var(--mtr-text);
-  border-color: var(--mtr-border-strong);
+  border-color: transparent;
 }
 
 .ac-tab[aria-current='page'] {
   color: var(--mtr-brand-text);
-  background: var(--mtr-brand-soft);
-  border-color: color-mix(in srgb, var(--mtr-brand) 40%, var(--mtr-border));
-  box-shadow: inset 0 -2px 0 var(--mtr-brand);
+  background: transparent;
+  border-bottom-color: var(--mtr-brand);
+  box-shadow: none;
 }
 
 .ac-tab[aria-disabled='true'] {
   color: var(--mtr-text-3);
   background: transparent;
-  border-style: dashed;
+  opacity: 0.65;
 }
 
 .ac-tabNote {
@@ -123,13 +126,14 @@ a.ac-tab:hover {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
-  background: var(--mtr-surface);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 55%, transparent);
+  background: transparent;
   color: var(--mtr-text-2);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 }
 
 .ac-provenance strong {
@@ -207,9 +211,9 @@ a.ac-tab:hover {
 .ac-fieldset legend {
   padding: 0;
   margin-bottom: var(--space-2);
-  font-size: 0.75rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
 }
@@ -411,11 +415,11 @@ a.ac-tab:hover {
   gap: var(--space-2);
   align-content: start;
   height: 100%;
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
   background: var(--mtr-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .ac-workspace > :last-child {

@@ -21,6 +21,7 @@ const FR = {
     marketQuest: 'Mon parcours',
     finStories: 'Histoires financières',
     challenges: 'Défis boursiers',
+    marketRooms: 'Salles de marché',
     actuarialLab: 'Assurance et actuariat',
     profile: 'Profil',
     security: 'Sécurité',

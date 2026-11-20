@@ -38,9 +38,9 @@
 
 .mtr-auth-shell .card {
   width: min(100%, 22.5rem);
-  padding: 1.6rem 1.4rem 1.4rem;
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-md);
+  padding: 1.5rem 1.35rem 1.35rem;
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
+  border-radius: var(--radius-sm);
   background: var(--mtr-surface);
   box-shadow: none;
 }
@@ -48,18 +48,18 @@
 .mtr-auth-shell .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   line-height: 1.25;
   color: var(--mtr-text);
 }
 
 .mtr-auth-shell .lead {
-  margin: 0.4rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--mtr-text-2);
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--mtr-text-3);
 }
 
 .mtr-auth-shell .body {

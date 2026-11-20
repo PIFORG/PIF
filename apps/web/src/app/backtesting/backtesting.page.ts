@@ -8,7 +8,7 @@ import {
   type BacktestResult,
   type BacktestStrategyId,
 } from '../core/api/backtest-api';
-import { MarketApi, type InstrumentView } from '../core/api/trading-api';
+import { MarketApi, type CrisisEpisode, type InstrumentView } from '../core/api/trading-api';
 import { formatNumber } from '../core/format/finance';
 import { FR } from '../core/i18n/fr';
 import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.components';
@@ -37,6 +37,8 @@ export class BacktestingPage {
   protected readonly nav = FR.nav;
   protected readonly strategies = BACKTEST_STRATEGIES;
   protected readonly instruments = signal<InstrumentView[] | null>(null);
+  protected readonly crises = signal<CrisisEpisode[]>([]);
+  protected readonly instrumentQuery = signal('');
   protected readonly loadError = signal<string | null>(null);
   protected readonly runError = signal<string | null>(null);
   protected readonly running = signal(false);
@@ -46,6 +48,7 @@ export class BacktestingPage {
   protected readonly selected = signal<string[]>(['CTB']);
   protected readonly start = signal('2026-01-01T00:00:00.000Z');
   protected readonly end = signal(new Date().toISOString());
+  protected readonly crisisId = signal('');
   protected readonly initialCash = signal(100_000);
   protected readonly feeBps = signal(25);
   protected readonly slippageBps = signal(5);
@@ -61,6 +64,27 @@ export class BacktestingPage {
 
   protected readonly showMaParams = computed(() => this.strategy() === 'MA_CROSSOVER');
   protected readonly showRebalanceParams = computed(() => this.strategy() === 'PERIODIC_REBALANCE');
+  protected readonly instrumentChoices = computed(() => {
+    const all = this.instruments() ?? [];
+    const q = this.instrumentQuery().trim().toLowerCase();
+    const selected = new Set(this.selected());
+    let list = all;
+    if (q) {
+      list = list.filter(
+        (i) =>
+          i.symbol.toLowerCase().includes(q) ||
+          i.name.toLowerCase().includes(q) ||
+          (i.market ?? '').toLowerCase().includes(q),
+      );
+    }
+    const prioritized = [
+      ...list.filter((i) => selected.has(i.symbol)),
+      ...list.filter((i) => !selected.has(i.symbol) && i.fictional),
+      ...list.filter((i) => !selected.has(i.symbol) && i.tradable !== false),
+      ...list.filter((i) => !selected.has(i.symbol) && i.tradable === false),
+    ];
+    return prioritized.slice(0, 48);
+  });
 
   protected readonly equityChart = computed(() => {
     const points = this.result()?.equityCurve ?? [];
@@ -105,21 +129,51 @@ export class BacktestingPage {
         if (raw && ids.has(raw as BacktestStrategyId)) {
           this.strategy.set(raw as BacktestStrategyId);
         }
+        const symbol = params.get('symbol');
+        if (symbol) this.selected.set([symbol.toUpperCase()]);
       });
     void this.loadInstruments();
   }
 
   private async loadInstruments(): Promise<void> {
     try {
-      const snap = await this.market.instruments();
+      const [snap, crisisRes] = await Promise.all([
+        this.market.instruments(),
+        this.market.crises().catch(() => ({ episodes: [] as CrisisEpisode[] })),
+      ]);
       if (this.destroyed) return;
       this.instruments.set(snap.instruments);
+      this.crises.set(crisisRes.episodes ?? []);
       this.loadError.set(null);
-      if (!this.selected().length && snap.instruments[0]) this.selected.set([snap.instruments[0].symbol]);
+      if (!this.selected().length && snap.instruments[0]) {
+        const first =
+          snap.instruments.find((i) => i.fictional && i.tradable !== false) ??
+          snap.instruments.find((i) => i.tradable !== false) ??
+          snap.instruments[0];
+        this.selected.set([first.symbol]);
+      }
     } catch (err) {
       if (this.destroyed) return;
       this.instruments.set([]);
       this.loadError.set(describeTradingError(err, 'Les instruments n\'ont pas pu être chargés.'));
+    }
+  }
+
+  protected applyCrisis(event: Event): void {
+    const id = (event.target as HTMLSelectElement).value;
+    this.crisisId.set(id);
+    const ep = this.crises().find((c) => c.id === id);
+    if (!ep) return;
+    this.start.set(`${ep.startDate}T00:00:00.000Z`);
+    this.end.set(`${ep.endDate}T23:59:59.000Z`);
+    if (!ep.usCoverage && ep.bvmtCoverage === false) {
+      this.runError.set('Couverture insuffisante pour cet épisode.');
+    } else if (!ep.bvmtCoverage) {
+      this.runError.set(
+        'BVMT absente sur cette période (données dès 2018). Utilisez des symboles US Yahoo (ex. SPY, AAPL).',
+      );
+    } else {
+      this.runError.set(null);
     }
   }
 

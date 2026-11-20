@@ -225,7 +225,7 @@
         } @else {
           <mtr-order-ticket
             [portfolio]="portfolio()"
-            [instruments]="market()!.instruments"
+            [instruments]="tradableInstruments()"
             [(draft)]="draft"
             (result)="onResult($event)"
             (stale)="onStale()"

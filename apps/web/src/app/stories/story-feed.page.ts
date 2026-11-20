@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Injector, a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import '../../styles/lazy-stories';
 import { describeApiError } from '../core/api/errors';
 import { COMPETENCY_LABEL, LEVEL_LABEL } from '../core/api/learning-api';
 import { StoriesApi, type Competency, type StorySummary } from '../core/api/stories-api';

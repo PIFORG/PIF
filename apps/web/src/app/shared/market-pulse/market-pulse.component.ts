@@ -21,8 +21,8 @@ export interface PulseItem {
   host: { class: 'mp-root', role: 'region', 'aria-label': 'Bandeau de cotations simulées' },
   template: `
     <div class="mp-bar">
-      <span class="mp-source" title="Cotations pédagogiques issues du serveur de simulation">
-        Marché simulé
+      <span class="mp-source" [title]="sourceTitle()">
+        {{ sourceLabel() }}
         @if (asOf()) {
           <time class="mp-asOf" [attr.datetime]="asOf()">· {{ asOfLabel() }}</time>
         }
@@ -48,7 +48,9 @@ export interface PulseItem {
               @for (item of items(); track item.symbol) {
                 <a class="mp-item" [routerLink]="['/trading']" [queryParams]="{ symbol: item.symbol }">
                   <span class="mp-sym">{{ item.symbol }}</span>
+                  <span class="mp-sep" aria-hidden="true"></span>
                   <span class="mp-px num">{{ formatMid(item) }}</span>
+                  <span class="mp-sep" aria-hidden="true"></span>
                   @if (item.changePct !== null) {
                     <span mtr-signed-amount [value]="item.changePct / 100" kind="pct"></span>
                   } @else {
@@ -62,7 +64,9 @@ export interface PulseItem {
                 @for (item of items(); track item.symbol + '-dup') {
                   <span class="mp-item">
                     <span class="mp-sym">{{ item.symbol }}</span>
+                    <span class="mp-sep" aria-hidden="true"></span>
                     <span class="mp-px num">{{ formatMid(item) }}</span>
+                    <span class="mp-sep" aria-hidden="true"></span>
                     @if (item.changePct !== null) {
                       <span mtr-signed-amount [value]="item.changePct / 100" kind="pct"></span>
                     } @else {
@@ -112,6 +116,13 @@ export class MarketPulseComponent {
   protected readonly loading = signal(true);
   protected readonly paused = signal(false);
   protected readonly reduceMotion = signal(false);
+  protected readonly historicalCount = signal(0);
+  protected readonly sourceLabel = computed(() => 'Marché');
+  protected readonly sourceTitle = computed(() =>
+    this.historicalCount() > 0
+      ? 'Cotations de la base (dernières clôtures) — pas un cours en direct.'
+      : 'Cotations pédagogiques du serveur de simulation.',
+  );
 
   protected readonly asOfLabel = computed(() => {
     const raw = this.asOf();
@@ -176,6 +187,10 @@ export class MarketPulseComponent {
     try {
       const snap = await this.api.instruments();
       if (this.destroyed) return;
+      const historical = snap.instruments.filter(
+        (i) => !i.fictional && (i.dataKind === 'HISTORICAL' || !!i.quote),
+      );
+      this.historicalCount.set(historical.filter((i) => !!i.quote).length);
       this.items.set(this.toItems(snap));
       this.asOf.set(snap.asOf);
       this.error.set(null);
@@ -187,21 +202,44 @@ export class MarketPulseComponent {
   }
 
   private toItems(snap: MarketSnapshot): PulseItem[] {
-    const withQuote = snap.instruments.filter((i) => i.quote || i.changePct !== null);
-    const ranked = [...withQuote].sort((a, b) => Math.abs(b.changePct ?? 0) - Math.abs(a.changePct ?? 0));
+    const withQuote = snap.instruments.filter(
+      (i) => (i.quote || i.changePct !== null) && (i.quote?.mid === undefined || i.quote?.mid === null || i.quote.mid > 0),
+    );
+    // Prefer Tunisian / TND names so the tape reads in a French local-market context.
+    const tn = withQuote.filter(
+      (i) => i.market === 'TN' || i.currency === 'TND' || (!i.fictional && i.dataKind === 'HISTORICAL' && i.currency === 'TND'),
+    );
+    const historical = withQuote.filter((i) => !i.fictional || i.dataKind === 'HISTORICAL');
+    const pool = tn.length >= 8 ? tn : historical.length >= 8 ? historical : withQuote;
+    // Prefer credible session moves; fall back to price-bearing quotes if few remain.
+    const credible = pool.filter((i) => i.changePct !== null && Math.abs(i.changePct) <= 40);
+    const rankedSource = credible.length >= 8 ? credible : pool.filter((i) => i.quote?.mid);
+    const ranked = [...rankedSource].sort((a, b) => Math.abs(b.changePct ?? 0) - Math.abs(a.changePct ?? 0));
     const ordered = ranked.length ? ranked : snap.instruments;
-    return ordered.map((i) => this.mapInstrument(i));
+    return ordered.slice(0, 28).map((i) => this.mapInstrument(i));
   }
 
   private mapInstrument(i: InstrumentView): PulseItem {
     return {
-      symbol: i.symbol,
+      symbol: frenchTapeSymbol(i),
       label: shortLabel(i),
       mid: i.quote?.mid ?? null,
       changePct: i.changePct,
       decimals: i.priceDecimals || 2,
     };
   }
+}
+
+/** Affiche un libellé lisible (nom) plutôt qu'un ISIN / code technique. */
+function frenchTapeSymbol(i: InstrumentView): string {
+  const sym = i.symbol?.trim() ?? '';
+  const name = i.name?.trim() ?? '';
+  const looksIsin = /^[A-Z]{2}[A-Z0-9]{9,}$/i.test(sym) || sym.length > 10;
+  if (looksIsin && name) {
+    const short = name.replace(/\s*\(.*?\)\s*/g, ' ').trim().split(/\s+/)[0];
+    return short || name.slice(0, 12);
+  }
+  return sym || name;
 }
 
 function shortLabel(i: InstrumentView): string {

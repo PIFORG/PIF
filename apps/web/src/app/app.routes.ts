@@ -1,5 +1,4 @@
 import type { Route, Routes, UrlSegment } from '@angular/router';
-import { AdminLayoutComponent } from './admin/admin-layout.component';
 import { adminGuard } from './core/auth/guards';
 import { MIGRATED_ROUTES, WORKSPACE_NAV } from './core/navigation/workspace-nav';
 import { WorkspaceLayoutComponent } from './layout/workspace-layout.component';
@@ -58,7 +57,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./marketing/landing.page').then((m) => m.LandingPage) },
   {
     path: 'admin',
-    component: AdminLayoutComponent,
+    loadComponent: () => import('./admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
     canActivate: [adminGuard],
     canActivateChild: [adminGuard],
     children: [
@@ -149,6 +148,14 @@ export const routes: Routes = [
       {
         path: 'challenges',
         loadComponent: () => import('./challenges/challenges.page').then((m) => m.ChallengesPage),
+      },
+      {
+        path: 'rooms',
+        loadComponent: () => import('./rooms/rooms.page').then((m) => m.RoomsPage),
+      },
+      {
+        path: 'rooms/:id',
+        loadComponent: () => import('./rooms/room-session.page').then((m) => m.RoomSessionPage),
       },
       ...PREVIEW_MODULE_ROUTES.map((slug: string) => ({
         path: slug,

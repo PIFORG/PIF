@@ -19,7 +19,6 @@ interface WireItem {
   template: `
     <div class="nw-bar">
       <span class="nw-label">Actualités</span>
-      <span class="nw-source" [title]="sourceTitle()">{{ sourceChip() }}</span>
 
       @if (error()) {
         <p class="nw-error" role="status">{{ error() }}</p>
@@ -41,6 +40,7 @@ interface WireItem {
               @for (item of items(); track item.id) {
                 <button type="button" class="nw-item" (click)="select(item.id)" [attr.aria-expanded]="selected() === item.id">
                   <span class="nw-sector">{{ item.sector }}</span>
+                  <span class="nw-sep" aria-hidden="true"></span>
                   <span class="nw-title">{{ item.title }}</span>
                 </button>
               }
@@ -50,6 +50,7 @@ interface WireItem {
                 @for (item of items(); track item.id + '-dup') {
                   <span class="nw-item">
                     <span class="nw-sector">{{ item.sector }}</span>
+                    <span class="nw-sep" aria-hidden="true"></span>
                     <span class="nw-title">{{ item.title }}</span>
                   </span>
                 }
@@ -77,7 +78,7 @@ interface WireItem {
     </div>
 
     @if (selectedItem(); as detail) {
-      <div class="nw-detail" role="dialog" aria-label="Détail de l'actualité">
+      <div class="nw-detail" role="dialog" aria-modal="true" aria-label="Détail de l'actualité">
         <div class="nw-detailInner">
           <p class="nw-detailMeta">
             <span>{{ detail.sector }}</span>
@@ -131,16 +132,6 @@ export class FinancialNewsWireComponent {
     destroyRef.onDestroy(() => window.clearInterval(timer));
   }
 
-  protected sourceChip(): string {
-    const kind = this.feed?.source.kind ?? '';
-    if (kind.includes('SYNTHETIC') || kind.includes('PEDAGOGICAL') || kind === 'FICTIONAL') return 'Données pédagogiques';
-    return this.feed?.source.id ? `Source · ${this.feed.source.id}` : 'Fil marché';
-  }
-
-  protected sourceTitle(): string {
-    return this.feed?.source.description ?? 'Fil d\'actualités pédagogiques';
-  }
-
   protected select(id: string): void {
     const raw = this.feed?.items.find((i) => i.id === id);
     if (!raw) return;
@@ -182,7 +173,7 @@ export class FinancialNewsWireComponent {
           title: i.title,
           sector: i.sector || 'Marchés',
           provenance: i.provenance,
-          pedagogical: isPedagogical(i.provenance) || isPedagogical(feed.source.kind),
+          pedagogical: isPedagogical(i.provenance) || isPedagogical(feed.source?.kind ?? feed.availability ?? ''),
         })),
       );
       this.error.set(null);

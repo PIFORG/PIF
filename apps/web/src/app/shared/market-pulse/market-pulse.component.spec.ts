@@ -51,8 +51,87 @@ describe('MarketPulseComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Marché simulé');
+    expect(text).toContain('Marché');
     expect(text).toContain('TEK');
+  });
+
+  it('privilegie les cotations historiques de la base quand elles sont presentes', async () => {
+    const api = {
+      instruments: async () => ({
+        provenance: { providerId: 'wh', kind: 'HISTORICAL' as const, currency: 'TND', description: 'warehouse' },
+        asOf: '2026-11-15T12:00:00Z',
+        instruments: [
+          {
+            id: '1',
+            symbol: 'BIAT',
+            name: 'BIAT',
+            assetClass: 'EQUITY' as const,
+            sector: 'Banque',
+            currency: 'TND',
+            status: 'ACTIVE' as const,
+            priceDecimals: 3,
+            quantityDecimals: 0,
+            lotSize: 1,
+            fees: { feeBps: 10, minFee: 1 },
+            fictional: false,
+            dataKind: 'HISTORICAL' as const,
+            provenance: { providerId: 'wh', kind: 'HISTORICAL' as const, currency: 'TND', description: 'warehouse' },
+            quote: {
+              mid: 90,
+              bid: 89.9,
+              ask: 90.1,
+              spreadBps: 22,
+              depth: 100,
+              asOf: '2024-06-01T15:00:00Z',
+              validUntil: '2024-06-01T15:05:00Z',
+            },
+            previousClose: 88,
+            changePct: 2.27,
+          },
+          {
+            id: '2',
+            symbol: 'TEK',
+            name: 'TunisTech',
+            assetClass: 'EQUITY' as const,
+            sector: 'Tech',
+            currency: 'TND',
+            status: 'ACTIVE' as const,
+            priceDecimals: 3,
+            quantityDecimals: 0,
+            lotSize: 1,
+            fees: { feeBps: 10, minFee: 1 },
+            fictional: true,
+            dataKind: 'FICTIONAL' as const,
+            provenance: { providerId: 'sim', kind: 'FICTIONAL' as const, currency: 'TND', description: 'simule' },
+            quote: {
+              mid: 50,
+              bid: 49.9,
+              ask: 50.1,
+              spreadBps: 40,
+              depth: 100,
+              asOf: '2026-11-15T12:00:00Z',
+              validUntil: '2026-11-15T12:05:00Z',
+            },
+            previousClose: 49,
+            changePct: 0.1,
+          },
+        ],
+      }),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [MarketPulseComponent],
+      providers: [provideRouter([]), { provide: MarketApi, useValue: api }],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(MarketPulseComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Marché');
+    expect(text).toContain('BIAT');
   });
 
   it('signale une erreur API sans inventer de cotations', async () => {

@@ -22,8 +22,19 @@ export interface Quote {
   ask: number;
   spreadBps: number;
   depth: number;
+  /** Observation time (sim bucket start or historical session close). Never rewritten by the client. */
   asOf: string;
+  /**
+   * Preview confirmation deadline. After this instant the ticket must refresh before submit.
+   * For HISTORICAL closes this is a paper-trading confirm TTL — not a claim the observation is live/fresh.
+   */
   validUntil: string;
+  /** Alias of validUntil for explicit confirm-window semantics. */
+  confirmUntil?: string;
+  dataKind?: 'FICTIONAL' | 'HISTORICAL';
+  freshness?: string;
+  observationAsOf?: string;
+  priceLabel?: string;
 }
 
 export interface InstrumentView {
@@ -44,6 +55,14 @@ export interface InstrumentView {
   previousClose: number | null;
   /** Percent, as in the learning API: 2.11 means +2.11 %. */
   changePct: number | null;
+  /** TN | US | UNKNOWN when provided by the warehouse-backed API. */
+  market?: string;
+  tradable?: boolean;
+  dataKind?: 'FICTIONAL' | 'HISTORICAL';
+  freshness?: string;
+  observationAsOf?: string | null;
+  priceLabel?: string;
+  coverage?: { from?: string; to?: string; bars?: number; sourceId?: string; sourceSymbol?: string };
 }
 
 export interface MarketStatus {
@@ -54,6 +73,8 @@ export interface MarketStatus {
   currentPeriod: { start: string; end: string } | null;
   tradingHours: string;
   dataKinds?: string[];
+  freshnessPolicy?: Record<string, string>;
+  warehouse?: Record<string, unknown>;
   quality?: {
     missingObservationPolicy: string;
     corporateActions: string;
@@ -66,6 +87,34 @@ export interface MarketSnapshot {
   provenance: Provenance;
   asOf: string;
   instruments: InstrumentView[];
+  count?: number;
+  marketFilter?: string | null;
+}
+
+export interface CrisisEpisode {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  summary: string;
+  instrumentsHint?: string;
+  kind?: string;
+  bvmtCoverage?: boolean;
+  usCoverage?: boolean;
+  series?: {
+    sourceId: string;
+    sourceSymbol: string;
+    bars: number;
+    from: string;
+    to: string;
+    rangePct?: number;
+  }[];
+}
+
+export interface CrisisEpisodesResponse {
+  kind: string;
+  note: string;
+  episodes: CrisisEpisode[];
 }
 
 export interface PriceHistory {
@@ -376,12 +425,17 @@ export class MarketApi {
     return this.api.request<MarketStatus>('/market/status', { method: 'GET' });
   }
 
-  instruments(query: { q?: string; assetClass?: AssetClass } = {}): Promise<MarketSnapshot> {
+  instruments(query: { q?: string; assetClass?: AssetClass; market?: string } = {}): Promise<MarketSnapshot> {
     const params = new URLSearchParams();
     if (query.q) params.set('q', query.q);
     if (query.assetClass) params.set('assetClass', query.assetClass);
+    if (query.market) params.set('market', query.market);
     const suffix = params.size ? `?${params.toString()}` : '';
     return this.api.request<MarketSnapshot>(`/market/instruments${suffix}`, { method: 'GET' });
+  }
+
+  crises(): Promise<CrisisEpisodesResponse> {
+    return this.api.request<CrisisEpisodesResponse>('/market/crises', { method: 'GET' });
   }
 
   instrument(symbol: string): Promise<InstrumentView> {

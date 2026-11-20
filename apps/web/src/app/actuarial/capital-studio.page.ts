@@ -1,3 +1,4 @@
+import '../../styles/lazy-actuarial';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActuarialApi } from '../core/api/actuarial-api';

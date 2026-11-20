@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-learning';
 import { describeApiError } from '../core/api/errors';
 import {
   COMPETENCY_LABEL,

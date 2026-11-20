@@ -84,6 +84,18 @@ export class AuthService {
   }
 
   private async restore(): Promise<User | null> {
+    // Playwright E2E can inject a short-lived access token (never persisted) to avoid
+    // refresh-token rotation + login rate limits across dozens of route tests.
+    const e2eWin =
+      typeof window !== 'undefined'
+        ? (window as Window & { __E2E_ACCESS_TOKEN__?: string; __E2E_USER__?: User })
+        : undefined;
+    const e2eToken = e2eWin?.__E2E_ACCESS_TOKEN__;
+    if (e2eToken) {
+      this.tokens.set(e2eToken);
+      if (e2eWin?.__E2E_USER__) return e2eWin.__E2E_USER__;
+      return this.authApi.fetchCurrentUser();
+    }
     const token = await this.api.refreshAccessToken();
     if (!token) return null;
     return this.authApi.fetchCurrentUser();

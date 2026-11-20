@@ -3,10 +3,10 @@
 /* ---------- Page ---------- */
 
 .st-pageEyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.08em;
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
 }
@@ -16,23 +16,23 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--mtr-border);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 55%, transparent);
 }
 
 .st-pageTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 .st-pageLede {
-  margin: 0.2rem 0 0;
-  font-size: 0.8125rem;
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
   color: var(--mtr-text-3);
 }
 
@@ -51,13 +51,13 @@
   max-width: calc(100vw - 2rem);
   aspect-ratio: 9 / 16;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  border: 1px solid color-mix(in srgb, var(--story-accent) 28%, #1a2744);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--story-accent) 20%, #1a2744);
   background:
-    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--story-accent) 22%, transparent), transparent 65%),
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--story-accent) 14%, transparent), transparent 65%),
     linear-gradient(180deg, #0b1733 0%, #091229 100%);
   color: #f4f8ff;
-  box-shadow: var(--mtr-shadow-md);
+  box-shadow: none;
   isolation: isolate;
 }
 
@@ -666,25 +666,23 @@
   height: 100%;
   padding: 0;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  border: 1px solid color-mix(in srgb, var(--story-accent) 22%, var(--mtr-border));
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
   background: var(--mtr-surface);
   color: var(--mtr-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition:
-    transform var(--mtr-dur-panel) var(--mtr-ease-standard),
-    box-shadow var(--mtr-dur-hover) var(--mtr-ease-standard),
     border-color var(--mtr-dur-hover) var(--mtr-ease-standard),
     background-color var(--mtr-dur-hover) var(--mtr-ease-standard);
 }
 
 .st-card:hover {
   transform: none;
-  border-color: var(--mtr-border-strong);
-  box-shadow: var(--mtr-shadow-sm);
+  border-color: color-mix(in srgb, var(--mtr-brand) 35%, var(--mtr-border));
+  box-shadow: none;
 }
 
 .st-card:active {
@@ -787,14 +785,13 @@
 
 .st-posterChip {
   margin-left: auto;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 0.66rem;
-  font-weight: 750;
-  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.18);
-  /* glass reduced */
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .st-posterChip[data-status='NEW'] {

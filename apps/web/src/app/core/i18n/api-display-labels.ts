@@ -12,6 +12,7 @@ const MODULE_LABELS: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   LIVE: 'En service',
+  LIVE_WRITES: 'En service (écritures)',
   PLANNED: 'Planifié',
   PARTIAL: 'Partiel',
   OFFLINE: 'Hors service',

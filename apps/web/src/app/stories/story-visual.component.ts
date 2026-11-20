@@ -37,9 +37,14 @@ export const CHARACTER_NAME: Record<StoryCharacter, string> = { SARAH: 'Sarah', 
         <strong>{{ v.text }}</strong>
       </div>
       @if (scene().kind === 'DECISION') {
-        <div class="st-choices" aria-hidden="true" [style.opacity]="choicesOpacity()">
-          <p><span>A</span> ou <span>B</span> ?</p>
-          <small>Choisissez mentalement — l'histoire montre les deux chemins.</small>
+        <div
+          class="st-choices"
+          role="note"
+          aria-label="Choix réflexif : A ou B. Choisissez mentalement — l'histoire montre les deux chemins, sans bouton cliquable."
+          [style.opacity]="choicesOpacity()"
+        >
+          <p aria-hidden="true"><span>A</span> ou <span>B</span> ?</p>
+          <small>Choisissez mentalement — l'histoire montre les deux chemins (pas de bouton à cliquer).</small>
         </div>
       }
     } @else if (allocation(); as v) {

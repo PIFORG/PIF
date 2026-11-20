@@ -3,7 +3,7 @@
 .mp-root,
 .nw-root {
   display: block;
-  border-bottom: 1px solid var(--mtr-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
   background: var(--mtr-surface);
   font-size: 0.75rem;
   line-height: 1.2;
@@ -56,11 +56,11 @@
   display: flex;
   width: max-content;
   gap: 0;
-  animation: mtr-tape-scroll 55s linear infinite;
+  animation: mtr-tape-scroll 120s linear infinite;
 }
 
 .nw-track {
-  animation-duration: 70s;
+  animation-duration: 120s;
 }
 
 .mp-track.mp-paused,
@@ -121,6 +121,12 @@ button.nw-item:hover {
   text-transform: uppercase;
   font-size: 0.625rem;
   letter-spacing: 0.03em;
+}
+
+.nw-sep {
+  flex-shrink: 0;
+  width: 0.35rem;
+  align-self: stretch;
 }
 
 .nw-title {

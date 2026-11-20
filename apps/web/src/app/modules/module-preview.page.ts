@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import '../../styles/lazy-module-preview';
 import { FR } from '../core/i18n/fr';
 import { IconComponent } from '../shared/icon/icon.component';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';

@@ -36,6 +36,29 @@
     >
       <mtr-create-portfolio-form (created)="onCreated($event)" />
     </section>
+    <section class="tr-booksPreview" aria-label="Aperçu de gestion">
+      <div class="tr-tapeStrip tr-booksStrip" role="presentation">
+        <div class="tr-tapeCell">
+          <span class="tr-tapeLabel">Capitaux propres</span>
+          <span class="tr-tapeValue num tr-tapeMuted">—</span>
+        </div>
+        <div class="tr-tapeCell">
+          <span class="tr-tapeLabel">Profit</span>
+          <span class="tr-tapeValue num tr-tapeMuted">—</span>
+        </div>
+        <div class="tr-tapeCell">
+          <span class="tr-tapeLabel">Allocation</span>
+          <span class="tr-tapeValue tr-tapeMuted">En attente d'ouverture</span>
+        </div>
+        <div class="tr-tapeCell">
+          <span class="tr-tapeLabel">Prochaine étape</span>
+          <span class="tr-tapeValue"><a routerLink="/markets" class="tr-inlineLink">Explorer les marchés</a></span>
+        </div>
+      </div>
+      <p class="tr-booksHint">
+        Après création : valorisation, allocation, VaR et historique d'ordres s'affichent ici — desk de gestion, pas une page vide.
+      </p>
+    </section>
   }
 
   @if (portfolio(); as p) {

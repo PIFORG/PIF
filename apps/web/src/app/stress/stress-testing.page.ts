@@ -1,3 +1,4 @@
+import '../../styles/lazy-stress';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { describeApiError } from '../core/api/errors';
 import {

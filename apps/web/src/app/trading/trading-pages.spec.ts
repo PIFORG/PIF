@@ -296,7 +296,7 @@ describe('Markets page', () => {
     expect(tapeOf('Meilleure perf.')?.textContent).toContain('CTB · CTB Holdings');
     expect(tapeOf('Pire perf.')?.textContent).toContain('MDX · MDX Holdings');
     const captions = Array.from(root.querySelectorAll('caption')).map((c) => c.textContent);
-    expect(captions).toEqual(['Univers négociable']);
+    expect(captions).toEqual(["Référentiel d'instruments"]);
     expect(root.textContent).toContain('Actions 0.25 % (min 0,500 DT) · Fonds 0.10 % (min 0,250 DT)');
     expect(root.querySelector<HTMLAnchorElement>('a.btn[href="/trading?symbol=MDX"]')).toBeTruthy();
     expect(root.querySelector<HTMLAnchorElement>('a.btn[href="/trading?symbol=CTB"]')).toBeTruthy();

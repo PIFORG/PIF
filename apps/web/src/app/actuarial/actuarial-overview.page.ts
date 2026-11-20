@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-actuarial';
 import { ActuarialApi, type ActuarialOverview } from '../core/api/actuarial-api';
 import { FR } from '../core/i18n/fr';
 import { HeadingActionsSlot, PageHeadingComponent } from '../shared/page-heading/page-heading.component';

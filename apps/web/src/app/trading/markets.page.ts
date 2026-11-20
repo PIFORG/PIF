@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-trading';
 import { NewsApi, type NewsFeed } from '../core/api/news-api';
 import { MarketApi, type AssetClass, type InstrumentView, type MarketSnapshot, type MarketStatus } from '../core/api/trading-api';
 import { IconComponent } from '../shared/icon/icon.component';
@@ -69,8 +70,22 @@ function mover(instrument: InstrumentView | undefined): { change: number; hint: 
                   @if (i.status === 'HALTED') {
                     <span class="badge badge-danger">Suspendu</span>
                   }
+                  @if (i.fictional === false) {
+                    <span class="badge">Historique</span>
+                  }
+                  @if (i.tradable === false) {
+                    <span class="badge">Indice</span>
+                  }
                 </span>
-                <div class="field-hint">{{ i.name }} · {{ assetClassLabel(i.assetClass) }} · {{ sectorLabel(i.sector) }}</div>
+                <div class="field-hint">
+                  {{ i.name }} · {{ assetClassLabel(i.assetClass) }} · {{ sectorLabel(i.sector) }}
+                  @if (i.market) {
+                    · {{ i.market }}
+                  }
+                  @if (i.coverage?.to) {
+                    · dernière {{ i.coverage!.to }}
+                  }
+                </div>
               </th>
               <td class="num">{{ price(i.quote?.bid) }}</td>
               <td class="num">{{ price(i.quote?.ask) }}</td>
@@ -87,7 +102,11 @@ function mover(instrument: InstrumentView | undefined): { change: number; hint: 
               <td class="num">{{ i.quote ? units(i.quote.depth) : dash }}</td>
               <td class="num">{{ (i.fees.feeBps / 100).toFixed(2) }} %</td>
               <td>
-                <a routerLink="/trading" [queryParams]="{ symbol: i.symbol }" class="btn btn-ghost btn-sm">Négocier<span class="sr-only"> {{ i.symbol }}</span></a>
+                @if (i.tradable === false) {
+                  <a routerLink="/backtesting" [queryParams]="{ symbol: i.symbol }" class="btn btn-ghost btn-sm">Historique<span class="sr-only"> {{ i.symbol }}</span></a>
+                } @else {
+                  <a routerLink="/trading" [queryParams]="{ symbol: i.symbol }" class="btn btn-ghost btn-sm">Négocier<span class="sr-only"> {{ i.symbol }}</span></a>
+                }
               </td>
             </tr>
           }
@@ -129,6 +148,9 @@ export class MarketsPage {
   protected readonly query = signal('');
   protected readonly assetClass = signal<'ALL' | AssetClass>('ALL');
   protected readonly sector = signal('ALL');
+  protected readonly marketFilter = signal<'ALL' | 'TN' | 'US'>('ALL');
+  protected readonly kindFilter = signal<'ALL' | 'HISTORICAL' | 'FICTIONAL'>('ALL');
+  protected readonly pageSize = signal(100);
 
   protected readonly dash = '\u2014';
   protected readonly dateTime = dateTime;
@@ -139,21 +161,56 @@ export class MarketsPage {
   protected readonly sectors = computed(() =>
     [...new Set((this.market()?.instruments ?? []).map((i) => i.sector))].sort((a, b) => a.localeCompare(b, 'fr')),
   );
-  protected readonly visible = computed(() => {
+  protected readonly filtered = computed(() => {
     const text = this.query().trim().toLowerCase();
     const assetClass = this.assetClass();
     const sector = this.sector();
-    return (this.market()?.instruments ?? []).filter(
-      (i) =>
-        (assetClass === 'ALL' || i.assetClass === assetClass) &&
-        (sector === 'ALL' || i.sector === sector) &&
-        (!text || i.symbol.toLowerCase().includes(text) || i.name.toLowerCase().includes(text) || i.sector.toLowerCase().includes(text)),
-    );
+    const market = this.marketFilter();
+    const kind = this.kindFilter();
+    return (this.market()?.instruments ?? []).filter((i) => {
+      if (assetClass !== 'ALL' && i.assetClass !== assetClass) return false;
+      if (sector !== 'ALL' && i.sector !== sector) return false;
+      if (market !== 'ALL' && (i.market ?? '') !== market) return false;
+      if (kind === 'HISTORICAL' && i.fictional !== false) return false;
+      if (kind === 'FICTIONAL' && i.fictional !== true) return false;
+      if (
+        text &&
+        !i.symbol.toLowerCase().includes(text) &&
+        !i.name.toLowerCase().includes(text) &&
+        !i.sector.toLowerCase().includes(text)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  });
+  /** Paginated view of filtered instruments (full catalog remains searchable). */
+  protected readonly visible = computed(() => this.filtered().slice(0, this.pageSize()));
+  protected readonly hasMore = computed(() => this.filtered().length > this.pageSize());
+  protected readonly pageLede = computed(() => {
+    const snap = this.market();
+    const st = this.status();
+    if (!snap) return 'Chargement du référentiel…';
+    const hist = snap.instruments.filter((i) => i.fictional === false).length;
+    const fict = snap.instruments.length - hist;
+    const kinds = st?.provenance.kind === 'HISTORICAL' || hist > 0
+      ? `${hist} historique${hist > 1 ? 's' : ''} · ${fict} fictif${fict > 1 ? 's' : ''}`
+      : 'Univers pédagogique fictif';
+    return `${kinds} · clôtures datées (pas de live)`;
+  });
+  protected readonly newsLabel = computed(() => {
+    const feed = this.news();
+    if (!feed) return '';
+    if (feed.availability === 'WAREHOUSE_FR' || feed.availability === 'WAREHOUSE' || (feed.realNewsCount ?? 0) > 0) {
+      return 'Actualités';
+    }
+    if (feed.availability === 'PAUSED_BY_ADMIN') return 'En pause';
+    return 'Pédagogiques';
   });
   protected readonly watchlist = computed(() => (this.market()?.instruments ?? []).filter((i) => this.watched().has(i.symbol)));
   private readonly movers = computed(() =>
     [...(this.market()?.instruments ?? [])]
-      .filter((i) => i.changePct !== null)
+      .filter((i) => i.changePct !== null && Math.abs(i.changePct!) <= 40)
       .sort((x, y) => (y.changePct ?? 0) - (x.changePct ?? 0)),
   );
   protected readonly best = computed(() => mover(this.movers()[0]));
@@ -232,10 +289,22 @@ export class MarketsPage {
 
   protected setAssetClass(event: Event): void {
     this.assetClass.set(this.value(event) as 'ALL' | AssetClass);
+    this.pageSize.set(100);
   }
 
   protected setSector(event: Event): void {
     this.sector.set(this.value(event));
+    this.pageSize.set(100);
+  }
+
+  protected setMarketFilter(event: Event): void {
+    this.marketFilter.set(this.value(event) as 'ALL' | 'TN' | 'US');
+    this.pageSize.set(100);
+  }
+
+  protected setKindFilter(event: Event): void {
+    this.kindFilter.set(this.value(event) as 'ALL' | 'HISTORICAL' | 'FICTIONAL');
+    this.pageSize.set(100);
   }
 
   protected async loadFundamentals(symbol: string): Promise<void> {

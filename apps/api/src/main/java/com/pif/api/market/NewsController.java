@@ -16,10 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Actualites")
 public class NewsController {
 
+  private final NewsService news;
+
+  public NewsController(NewsService news) {
+    this.news = news;
+  }
+
   @GetMapping
   @Operation(summary = "Fil d'actualites pedagogiques synthetiques")
   public Map<String, Object> feed(HttpServletRequest req) {
     AuthUser.from(req);
-    return NewsCatalog.feed();
+    return news.feed();
   }
 }

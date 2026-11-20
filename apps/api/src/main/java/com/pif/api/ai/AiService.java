@@ -1,5 +1,6 @@
 package com.pif.api.ai;
 
+import com.pif.api.admin.PlatformAdminStore;
 import com.pif.api.security.AuthUser;
 import com.pif.api.stress.ml.Explanations;
 import com.pif.api.trading.PortfoliosService;
@@ -19,15 +20,18 @@ public class AiService {
 
   private final AiModelRegistry registry = new AiModelRegistry();
   private final PortfoliosService portfolios;
+  private final PlatformAdminStore platformFlags;
 
   @Autowired
-  public AiService(ObjectProvider<PortfoliosService> portfolios) {
-    this.portfolios = portfolios == null ? null : portfolios.getIfAvailable();
+  public AiService(@Autowired(required = false) PortfoliosService portfolios,
+      @Autowired(required = false) PlatformAdminStore platformFlags) {
+    this.portfolios = portfolios;
+    this.platformFlags = platformFlags;
   }
 
   /** Constructeur de test sans portefeuille lié. */
   AiService(PortfoliosService portfolios) {
-    this.portfolios = portfolios;
+    this(portfolios, null);
   }
 
   public Map<String, Object> overview() {
@@ -172,6 +176,10 @@ public class AiService {
   }
 
   private AiModelRegistry.Fitted fitted(String id) {
+    if (platformFlags != null && platformFlags.isDisabled(PlatformAdminStore.FLAG_AI_PREFIX + id)) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "MODEL_DISABLED",
+          "Ce modèle a été désactivé par un administrateur.");
+    }
     AiModelRegistry.Fitted f = registry.ensure().get(id);
     if (f == null) throw new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "Modèle introuvable : " + id);
     return f;

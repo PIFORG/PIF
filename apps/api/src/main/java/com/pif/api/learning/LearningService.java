@@ -2,6 +2,7 @@ package com.pif.api.learning;
 
 import static com.pif.api.learning.LearningRepository.map;
 import static com.pif.api.learning.engine.MissionCatalog.MISSIONS;
+import com.pif.api.admin.PlatformAdminStore;
 import com.pif.api.data.Db;
 import com.pif.api.finance.Money;
 import com.pif.api.learning.LearningRepository.Session;
@@ -14,6 +15,7 @@ import com.pif.api.web.ApiException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -24,8 +26,16 @@ public class LearningService {
   private final LearningRepository repo;
   private final TransactionTemplate tx;
   private final Clock clock;
-  public LearningService(LearningRepository repo, TransactionTemplate tx, Clock clock) {
+  private final PlatformAdminStore platformFlags;
+  @Autowired
+  public LearningService(LearningRepository repo, TransactionTemplate tx, Clock clock,
+      @Autowired(required = false) PlatformAdminStore platformFlags) {
     this.repo=repo; this.tx=tx; this.clock=clock;
+    this.platformFlags = platformFlags;
+  }
+  /** Test constructor. */
+  LearningService(LearningRepository repo, TransactionTemplate tx, Clock clock) {
+    this(repo, tx, clock, null);
   }
   private Instant now() { return clock.instant(); }
   private static ApiException error(HttpStatus status,String code,String message) { return new ApiException(status,code,message); }
@@ -81,9 +91,14 @@ public class LearningService {
     for(var m:MISSIONS) {
       var p=progress.get(m.slug());
       var active=sessions.stream().filter(s->s.kind().equals("MISSION")&&s.status().equals("ACTIVE")&&s.slug().equals(m.slug())).findFirst().orElse(null);
+      boolean adminDisabled = platformFlags != null
+          && platformFlags.isDisabled(PlatformAdminStore.FLAG_MISSION_PREFIX + m.slug());
       rows.add(map("slug",m.slug(),"version",m.version(),"order",m.order(),"title",LearningFr.missionTitle(m.slug(),m.title()),"level",m.level(),
-          "availability",m.availability(),"summary",LearningFr.missionSummary(m.slug(),m.summary()),"estimatedMinutes",m.estimatedMinutes(),
-          "competencies",LearningViews.competencies(m),"playable",MissionCatalog.isPlayable(m),
+          "availability",adminDisabled ? "DISABLED_BY_ADMIN" : m.availability(),
+          "summary",LearningFr.missionSummary(m.slug(),m.summary()),"estimatedMinutes",m.estimatedMinutes(),
+          "competencies",LearningViews.competencies(m),
+          "playable",!adminDisabled && MissionCatalog.isPlayable(m),
+          "adminDisabled",adminDisabled,
           "levelLocked",Definitions.LEVELS.indexOf(m.level())>Definitions.LEVELS.indexOf(unlocked),"relatedStorySlug",m.relatedStorySlug(),
           "progress",map("attempts",p==null?0:p.attempts(),"passed",p!=null&&p.passed(),"bestScore",p==null?null:p.bestScore(),
               "activeSessionId",active==null?null:active.id())));
@@ -92,6 +107,9 @@ public class LearningService {
   }
   public Map<String,Object> start(AuthUser user,String slug,String mode) {
     var m=mission(slug);
+    if(platformFlags != null && platformFlags.isDisabled(PlatformAdminStore.FLAG_MISSION_PREFIX + slug)) {
+      throw error(HttpStatus.FORBIDDEN,"MISSION_DISABLED","Cette mission a été désactivée par un administrateur.");
+    }
     if(!MissionCatalog.isPlayable(m))throw error(HttpStatus.CONFLICT,"MISSION_NOT_AVAILABLE",com.pif.api.web.Messages.get("learning.mission_unavailable"));
     return tx.execute(status->{
       // Lock the owner, as no active-session uniqueness constraint exists in the preserved schema.

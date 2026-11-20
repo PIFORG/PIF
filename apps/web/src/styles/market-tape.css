@@ -57,11 +57,11 @@
   display: flex;
   width: max-content;
   gap: 0;
-  animation: mtr-tape-scroll 55s linear infinite;
+  animation: mtr-tape-scroll 120s linear infinite;
 }
 
 .nw-track {
-  animation-duration: 70s;
+  animation-duration: 120s;
 }
 
 .mp-track.mp-paused,

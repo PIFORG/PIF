@@ -1,3 +1,4 @@
+import '../../styles/lazy-actuarial';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { ActuarialApi, type ReservingBasis, type ReservingCatalogue, type ReservingMethod, type ReservingResult, type ReservingRunSummary } from '../core/api/actuarial-api';
 import { FR } from '../core/i18n/fr';

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import '../../styles/lazy-trading';
 import {
   MarketApi,
   PortfolioApi,
@@ -172,6 +173,10 @@ export class TradingDeskPage {
       return !text || i.symbol.toLowerCase().includes(text) || i.name.toLowerCase().includes(text) || i.sector.toLowerCase().includes(text);
     });
   });
+  /** Order ticket: only instruments eligible for paper trading (excludes non-tradable indices). */
+  protected readonly tradableInstruments = computed(() =>
+    (this.market()?.instruments ?? []).filter((i) => i.tradable !== false),
+  );
 
   /** The chart of the selected instrument, or null while its history is missing or belongs to another symbol. */
   protected readonly chart = computed(() => {
@@ -231,12 +236,19 @@ export class TradingDeskPage {
       this.marketApi
         .history(symbol, range)
         .then((data) => {
-          if (!cancelled) this.history.set(data);
+          if (cancelled) return;
+          this.history.set(data);
+          this.historyError.set(null);
         })
         .catch((err) => {
           if (!cancelled) {
             this.history.set(null);
-            this.historyError.set(describeTradingError(err, 'L\'historique des prix n\'a pas pu être chargé.'));
+            this.historyError.set(
+              describeTradingError(
+                err,
+                'L\'historique des prix n\'a pas pu être chargé. Réessayez ou choisissez un autre instrument.',
+              ),
+            );
           }
         });
       onCleanup(() => (cancelled = true));
@@ -272,7 +284,12 @@ export class TradingDeskPage {
       this.draft.update((d) => {
         if (d.symbol) return d;
         const requested = new URLSearchParams(window.location.search).get('symbol');
-        const initial = data.instruments.find((i) => i.symbol === requested) ?? data.instruments[0];
+        const tradable = data.instruments.filter((i) => i.tradable !== false);
+        const initial =
+          tradable.find((i) => i.symbol === requested) ??
+          tradable.find((i) => i.fictional) ??
+          tradable[0] ??
+          data.instruments[0];
         return { ...d, symbol: initial?.symbol ?? '' };
       });
     } catch (err) {

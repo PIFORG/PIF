@@ -45,8 +45,8 @@
 .ws-panel {
   min-width: 0;
   background: var(--mtr-surface);
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 80%, transparent);
+  border-radius: var(--radius-sm);
   padding: var(--space-3);
   box-shadow: none;
 }
@@ -63,7 +63,7 @@
   gap: var(--space-3);
   margin: 0 0 var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 45%, transparent);
 }
 
 .ws-panelTitles {
@@ -79,17 +79,17 @@
 
 .ws-panelTitle {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--mtr-text);
 }
 
 .ws-panelDescription {
-  margin: 4px 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--mtr-text-2);
+  margin: 3px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--mtr-text-3);
 }
 
 .ws-panelActions {
@@ -103,13 +103,13 @@
 .ws-kpi {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
   min-width: 0;
-  padding: 0.65rem 0.85rem;
+  padding: 0.55rem 0.75rem;
   background: var(--mtr-surface);
-  border: 1px solid var(--mtr-border);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 75%, transparent);
   border-radius: var(--radius-sm);
-  border-left: 2px solid var(--mtr-border-strong);
+  border-left: 2px solid var(--mtr-border);
 }
 
 .ws-kpiTop {
@@ -120,8 +120,8 @@
 }
 
 .ws-kpiLabel {
-  font-size: 0.7rem;
-  font-weight: 550;
+  font-size: 0.6875rem;
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--mtr-text-3);
 }
@@ -165,7 +165,7 @@
 .ws-kpiValue {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;

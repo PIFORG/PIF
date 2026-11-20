@@ -101,4 +101,11 @@ public class MarketController {
   public Map<String, Object> unwatch(HttpServletRequest req, @PathVariable("symbol") String symbol) {
     return market.removeFromWatchlist(AuthUser.from(req), symbol);
   }
+
+  @GetMapping("/crises")
+  @Operation(summary = "Historical crisis episodes",
+      description = "Documented stress periods since 2008 for simulations. Not live news.")
+  public Map<String, Object> crises() {
+    return market.crisisEpisodes();
+  }
 }

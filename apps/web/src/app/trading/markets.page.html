@@ -2,12 +2,18 @@
   <header class="tr-pageTop">
     <div class="tr-pageTopText">
       <h1 class="tr-pageTitle">Marchés</h1>
-      <p class="tr-pageLede">Univers fictif · prix simulés · cotation pédagogique</p>
+      <p class="tr-pageLede">{{ pageLede() }}</p>
     </div>
     <div class="tr-pageTopActions">
       @if (market(); as snap) {
         <p class="tr-sourceLine tr-sourceInline" aria-label="Provenance des cotations">
-          <span class="tr-sourceTag">{{ snap.provenance.kind === 'FICTIONAL' ? 'Prix fictifs' : snap.provenance.kind }}</span>
+          <span class="tr-sourceTag">{{
+            snap.provenance.kind === 'FICTIONAL'
+              ? 'Prix fictifs'
+              : snap.provenance.kind === 'HISTORICAL'
+                ? 'Historique (clôture)'
+                : snap.provenance.kind
+          }}</span>
           <span>{{ snap.provenance.currency }}</span>
           <span class="tr-sourceSep" aria-hidden="true">·</span>
           <span>{{ dateTime(snap.asOf) }}</span>
@@ -60,10 +66,13 @@
     <section class="tr-marketsMain" aria-labelledby="markets-universe-title">
       <div class="tr-marketsMainHead">
         <div>
-          <h2 id="markets-universe-title" class="tr-sectionTitle">Univers négociable</h2>
+          <h2 id="markets-universe-title" class="tr-sectionTitle">Référentiel d'instruments</h2>
           <p class="tr-sectionMeta">
             @if (market(); as snap) {
-              {{ visible().length }} affiché{{ visible().length > 1 ? 's' : '' }} sur {{ snap.instruments.length }}
+              {{ visible().length }} affiché{{ visible().length > 1 ? 's' : '' }}
+              / {{ filtered().length }} filtrés
+              ({{ snap.instruments.length }} au total)
+              · indices consultables, non négociables
             } @else {
               Chargement des instruments…
             }
@@ -81,6 +90,18 @@
           [value]="query()"
           (input)="query.set(value($event))"
         />
+        <label class="sr-only" for="markets-market">Marché</label>
+        <select id="markets-market" class="select" (change)="setMarketFilter($event)">
+          <option value="ALL" [selected]="marketFilter() === 'ALL'">Tous les marchés</option>
+          <option value="TN" [selected]="marketFilter() === 'TN'">Tunisie (BVMT)</option>
+          <option value="US" [selected]="marketFilter() === 'US'">États-Unis</option>
+        </select>
+        <label class="sr-only" for="markets-kind">Nature</label>
+        <select id="markets-kind" class="select" (change)="setKindFilter($event)">
+          <option value="ALL" [selected]="kindFilter() === 'ALL'">Toutes les natures</option>
+          <option value="HISTORICAL" [selected]="kindFilter() === 'HISTORICAL'">Historiques</option>
+          <option value="FICTIONAL" [selected]="kindFilter() === 'FICTIONAL'">Fictifs</option>
+        </select>
         <label class="sr-only" for="markets-class">Classe d'actifs</label>
         <select id="markets-class" class="select" (change)="setAssetClass($event)">
           <option value="ALL" [selected]="assetClass() === 'ALL'">Toutes les classes</option>
@@ -111,9 +132,16 @@
         <mtr-instrument-table
           [instruments]="visible()"
           [watched]="watched()"
-          caption="Univers négociable"
+          caption="Référentiel d'instruments"
           (toggleWatch)="toggleWatch($event)"
         />
+        @if (hasMore()) {
+          <div class="tr-marketsMore">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="pageSize.update((n) => n + 100)">
+              Afficher plus ({{ filtered().length - visible().length }} restants)
+            </button>
+          </div>
+        }
       }
     </section>
 
@@ -156,16 +184,36 @@
         <section class="tr-railBlock" aria-labelledby="markets-news-title">
           <div class="tr-railHead">
             <h2 id="markets-news-title" class="tr-sectionTitle">Actualités</h2>
-            <span class="tr-sectionMeta">Pédagogiques</span>
+            <span class="tr-sectionMeta">{{ newsLabel() }}</span>
           </div>
-          <ul class="tr-newsList">
-            @for (item of feed.items.slice(0, 5); track item.id) {
-              <li>
-                <strong>{{ item.title }}</strong>
-                <span>{{ item.symbol || item.sector }} · {{ item.provenance }}</span>
-              </li>
-            }
-          </ul>
+          @if (feed.items.length === 0) {
+            <p class="tr-railEmpty">
+              @if (feed.availability === 'PAUSED_BY_ADMIN') {
+                Fil en pause (administration).
+              } @else {
+                Aucune actualité récente disponible.
+              }
+            </p>
+          } @else {
+            <ul class="tr-newsList">
+              @for (item of feed.items.slice(0, 8); track item.id) {
+                <li>
+                  @if (item.originalUrl) {
+                    <a [href]="item.originalUrl" target="_blank" rel="noopener noreferrer"><strong>{{ item.title }}</strong></a>
+                  } @else {
+                    <strong>{{ item.title }}</strong>
+                  }
+                  <span>
+                    {{ item.sourceId || item.provenance }}
+                    @if (item.market) {
+                      · {{ item.market }}
+                    }
+                    · {{ dateTime(item.publishedAt) }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
           @if (feed.limitations[0]; as lim) {
             <p class="field-hint">{{ lim }}</p>
           }
@@ -231,9 +279,12 @@
           <h2 id="markets-meta-title" class="tr-sectionTitle">Production des prix</h2>
           <dl class="tr-fundGrid">
             <div><dt>Source</dt><dd>{{ s.provenance.providerId }}</dd></div>
-            <div><dt>Nature</dt><dd>{{ s.provenance.kind === 'FICTIONAL' ? 'Fictives' : s.provenance.kind }}</dd></div>
+            <div><dt>Nature</dt><dd>{{ s.provenance.kind === 'FICTIONAL' ? 'Fictives' : s.provenance.kind === 'HISTORICAL' ? 'Historiques (clôture)' : s.provenance.kind }}</dd></div>
             <div><dt>Horaires</dt><dd>{{ s.tradingHours }}</dd></div>
             <div><dt>Frais</dt><dd>{{ feeSummary() || dash }}</dd></div>
+            @if (s.freshnessPolicy?.['historical']; as fh) {
+              <div><dt>Fraîcheur hist.</dt><dd>{{ fh }}</dd></div>
+            }
           </dl>
         </section>
       }

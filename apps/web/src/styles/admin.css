@@ -40,8 +40,8 @@
 
 .adm-section {
   padding: var(--space-4);
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
+  border-radius: var(--radius-sm);
   background: var(--mtr-surface);
   box-shadow: none;
 }
@@ -62,9 +62,9 @@
 .adm-sectionHead h2 {
   margin: 0 0 var(--space-1);
   font-family: var(--font-display);
-  font-size: 1.125rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 .adm-sectionHead p {
@@ -76,17 +76,82 @@
 
 .adm-section h3 {
   margin: 0 0 var(--space-3);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--mtr-brand-text);
+  color: var(--mtr-text-3);
 }
 
 .adm-sectionBlock {
   margin-top: var(--space-5);
   padding-top: var(--space-4);
   border-top: 1px solid color-mix(in srgb, var(--mtr-brand) 12%, var(--mtr-border));
+}
+
+.adm-statStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+
+.adm-statStrip > div {
+  margin: 0;
+  padding: var(--space-2) 0 0;
+  border-top: 1px solid var(--mtr-border);
+}
+
+.adm-statStrip dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--mtr-text-3);
+}
+
+.adm-statStrip dd {
+  margin: var(--space-1) 0 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--mtr-text);
+}
+
+.adm-formRow,
+.adm-formGrid {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  align-items: end;
+}
+
+.adm-formRow {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.adm-formGrid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.adm-formGrid .adm-span2 {
+  grid-column: 1 / -1;
+}
+
+.adm-formRow .field-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+}
+
+.db-sessionList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 /* ---------- Stats grid (overview) ---------- */

@@ -33,7 +33,8 @@ describe('FinancialNewsWireComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Données pédagogiques');
+    expect(text).toContain('Actualités');
+    expect(text).not.toContain('RSS réels');
     expect(text).toContain('Hausse des benefices bancaires simules');
   });
 });

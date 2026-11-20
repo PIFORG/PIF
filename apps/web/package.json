@@ -11,7 +11,12 @@
     "test": "ng test --watch=false",
     "lint": "ng lint",
     "serve:host": "node server/host.mjs",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit"
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+    "e2e": "playwright test",
+    "e2e:provision": "node ../../tools/e2e/provision-e2e-users.mjs",
+    "e2e:auth": "playwright test --project=setup",
+    "e2e:public": "playwright test --project=public",
+    "e2e:report": "playwright show-report playwright-report"
   },
   "dependencies": {
     "@angular/common": "^22.2.0",
@@ -28,6 +33,7 @@
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "^1.56.1",
     "angular-eslint": "22.6.0",
     "eslint": "10.14.0",
     "globals": "17.14.0",

@@ -154,8 +154,19 @@
           </ul>
         }
         <p class="tr-muted">
-          Cotation {{ price(r.quote.bid) }} / {{ price(r.quote.ask) }} à {{ shortTime(r.quote.asOf) }}.
-          {{ expired() ? "Cette cotation a expiré ; la confirmation actualisera d'abord l'aperçu." : 'Valable jusqu\'à ' + shortTime(r.quote.validUntil) + '.' }}
+          Cotation {{ price(r.quote.bid) }} / {{ price(r.quote.ask) }}.
+          @if (quoteIsHistorical()) {
+            Observation : clôture historique du {{ dateTime(r.quote.observationAsOf || r.quote.asOf) }}
+            (pas un cours live).
+            {{ expired()
+              ? "La fenêtre de confirmation de cet aperçu est terminée ; actualisez avant de confirmer."
+              : 'Confirmation de cet aperçu jusqu\'à ' + shortTime(r.quote.confirmUntil || r.quote.validUntil) + '.' }}
+          } @else {
+            À {{ shortTime(r.quote.asOf) }}.
+            {{ expired()
+              ? "Cette cotation a expiré ; la confirmation actualisera d'abord l'aperçu."
+              : 'Valable jusqu\'à ' + shortTime(r.quote.validUntil) + '.' }}
+          }
         </p>
       </section>
     }

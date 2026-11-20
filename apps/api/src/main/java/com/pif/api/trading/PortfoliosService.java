@@ -1,6 +1,7 @@
 package com.pif.api.trading;
 
 import static com.pif.api.trading.TradingViews.dt;
+import static com.pif.api.trading.TradingViews.enrichQuoteMeta;
 import static com.pif.api.trading.TradingViews.evaluationView;
 import static com.pif.api.trading.TradingViews.executionView;
 import static com.pif.api.trading.TradingViews.orderView;
@@ -16,6 +17,7 @@ import com.pif.api.finance.OrderType;
 import com.pif.api.finance.Valuation;
 import com.pif.api.market.MarketQuote;
 import com.pif.api.market.PricePoint;
+import com.pif.api.market.Provenance;
 import com.pif.api.market.SimulatedMarketProvider;
 import com.pif.api.security.AuthUser;
 import com.pif.api.trading.Analytics.AnalyticsInput;
@@ -82,13 +84,16 @@ public class PortfoliosService {
 
   private final TradingRepository repo;
   private final SimulatedMarketProvider provider;
+  private final com.pif.api.market.MarketDataWarehouseRepository warehouse;
   private final Clock clock;
   private final TransactionTemplate tx;
 
-  public PortfoliosService(TradingRepository repo, SimulatedMarketProvider provider, Clock clock,
+  public PortfoliosService(TradingRepository repo, SimulatedMarketProvider provider,
+      com.pif.api.market.MarketDataWarehouseRepository warehouse, Clock clock,
       PlatformTransactionManager txManager) {
     this.repo = repo;
     this.provider = provider;
+    this.warehouse = warehouse;
     this.clock = clock;
     this.tx = new TransactionTemplate(txManager);
     this.tx.setTimeout(20);
@@ -164,6 +169,7 @@ public class PortfoliosService {
     OrderRequest request = toRequest(dto);
     return run(user, id, ctx -> {
       InstrumentRow instrument = instrument(ctx, request.symbol());
+      assertTradable(instrument);
       MarketQuote quote = quote(ctx, instrument.symbol());
       double depthUsed = depthUsed(ctx, instrument.id(), request.side(), quote);
       Function<String, InstrumentTerms> termsOf = termsOf(ctx);
@@ -171,11 +177,12 @@ public class PortfoliosService {
           s -> quote(ctx, s).mid(), depthUsed);
       Map<String, Object> quoteJson = new LinkedHashMap<>();
       quoteJson.put("symbol", instrument.symbol());
-      quoteJson.putAll(quoteView(quote));
+      quoteJson.putAll(quoteView(quote, ctx.now));
+      enrichQuoteMeta(quoteJson, !instrument.fictional(), quote.asOf());
       Map<String, Object> m = new LinkedHashMap<>();
       m.put("portfolioVersion", ctx.row.version());
       m.put("quote", quoteJson);
-      m.put("provenance", provider.provenance().toJson());
+      m.put("provenance", (instrument.fictional() ? provider.provenance() : Provenance.WAREHOUSE_HISTORICAL).toJson());
       m.putAll(evaluationView(evaluation));
       return m;
     });
@@ -199,11 +206,12 @@ public class PortfoliosService {
               Map.of("currentVersion", ctx.row.version()));
         }
         InstrumentRow instrument = instrument(ctx, request.symbol());
+        assertTradable(instrument);
         MarketQuote quote = quote(ctx, instrument.symbol());
         Instant previewed = AdminDtos.jsDateOrNull(dto.quoteAsOf());
         if (previewed == null || !quote.asOf().equals(previewed)) {
           throw new ApiException(HttpStatus.CONFLICT, "QUOTE_CHANGED", Messages.get("portfolio.quote_changed"),
-              Map.of("quote", quoteView(quote)));
+              Map.of("quote", quoteView(quote, ctx.now)));
         }
         double depthUsed = depthUsed(ctx, instrument.id(), request.side(), quote);
         Function<String, InstrumentTerms> termsOf = termsOf(ctx);
@@ -452,7 +460,7 @@ public class PortfoliosService {
 
       Map<String, Object> quoteJson = new LinkedHashMap<>();
       quoteJson.put("symbol", instrument.symbol());
-      quoteJson.putAll(quoteView(quote));
+      quoteJson.putAll(quoteView(quote, ctx.now));
       Map<String, Object> m = new LinkedHashMap<>();
       m.put("portfolioId", id.toString());
       m.put("asOf", Db.iso(ctx.now));
@@ -788,7 +796,25 @@ public class PortfoliosService {
     MarketQuote quote = ctx.quotes.get(symbol);
     if (quote == null) {
       InstrumentRow instrument = instrument(ctx, symbol);
-      MarketQuote q = provider.quote(instrument.providerSymbol(), ctx.now);
+      MarketQuote q = null;
+      if (!instrument.fictional() && warehouse != null && warehouse.tablesPresent()) {
+        java.time.LocalDate roomAsOf = com.pif.api.rooms.RoomQuoteContext.asOf();
+        var resolved = warehouse.resolveSourceSymbol(instrument.providerSymbol(), instrument.symbol());
+        String src = resolved.orElse(instrument.providerSymbol());
+        var bar = roomAsOf != null
+            ? warehouse.barOnOrBefore(src, roomAsOf)
+            : warehouse.latestBar(src);
+        if (bar.isPresent()) {
+          var b = bar.get();
+          double mid = b.close();
+          double half = Math.max(1, Math.round(mid * 0.001));
+          q = new MarketQuote(symbol, b.sessionDate().atTime(15, 0).toInstant(java.time.ZoneOffset.UTC), mid,
+              Math.max(1, mid - half), mid + half, 10_000);
+        }
+      }
+      if (q == null) {
+        q = provider.quote(instrument.providerSymbol(), ctx.now);
+      }
       if (q == null) {
         throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, "NO_PRICE", Messages.get("portfolio.no_price"));
       }
@@ -796,6 +822,18 @@ public class PortfoliosService {
       ctx.quotes.put(symbol, quote);
     }
     return quote;
+  }
+
+  private void assertTradable(InstrumentRow instrument) {
+    if (instrument.fictional()) return;
+    String json = instrument.metadataJson();
+    boolean tradable = true;
+    if (json != null && json.contains("\"tradable\":false")) tradable = false;
+    if ("Indice".equalsIgnoreCase(instrument.sector())) tradable = false;
+    if (!tradable) {
+      throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, "INSTRUMENT_NOT_TRADABLE",
+          "Cet instrument est consultable (historique) mais non négociable en paper trading.");
+    }
   }
 
   private Function<String, InstrumentTerms> termsOf(Ctx ctx) {

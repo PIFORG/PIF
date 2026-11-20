@@ -1,0 +1,105 @@
+<div class="page-shell">
+  <header class="tr-pageTop">
+    <div class="tr-pageTopText">
+      <p class="eyebrow">Apprentissage collaboratif</p>
+      <h1 class="tr-pageTitle">Salles de marché</h1>
+      <p class="tr-pageLede">
+        Simulez ensemble : capital fictif, points d’apprentissage et crédit virtuel — aucune transaction réelle.
+      </p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="form-error-banner" role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <p class="field-hint" role="status">{{ notice() }}</p>
+  }
+  @if (disclaimer()) {
+    <p class="field-hint">{{ disclaimer() }}</p>
+  }
+
+  <div class="rm-steps" aria-label="Parcours">
+    @for (s of steps(); track s) {
+      <span>{{ s }}</span>
+    }
+  </div>
+
+  <div class="rm-grid">
+    <section mtr-panel heading="Salles accessibles" description="Rejoignez une salle publique ou utilisez un code privé.">
+      @if (rooms().length === 0) {
+        <div mtr-empty-state icon="challenge" heading="Aucune salle ouverte" description="Créez la première salle pour démarrer une simulation collaborative."></div>
+      } @else {
+        <ul class="rm-list">
+          @for (r of rooms(); track r.id) {
+            <li class="rm-card">
+              <div>
+                <strong>{{ r.title }}</strong>
+                <div class="rm-meta">
+                  {{ statusLabel(r.status) }} · {{ r.mode }} · {{ r.participantCount }}/{{ r.maxParticipants }}
+                  · {{ r.visibility === 'PRIVATE' ? 'Privée' : 'Publique' }}
+                </div>
+              </div>
+              <a class="btn btn-primary btn-sm" [routerLink]="['/rooms', r.id]">Ouvrir</a>
+            </li>
+          }
+        </ul>
+      }
+
+      <form class="rm-form" style="margin-top: 1rem" (ngSubmit)="join()">
+        <label class="field">
+          <span class="field-label">Code d’invitation</span>
+          <div class="rm-row">
+            <input class="input" name="code" [(ngModel)]="joinCode" placeholder="ABC123" [disabled]="busy()" />
+            <button type="submit" class="btn btn-secondary" [disabled]="busy() || !joinCode.trim()">Rejoindre</button>
+          </div>
+        </label>
+      </form>
+    </section>
+
+    <aside class="rm-side">
+      <section mtr-panel heading="Créer une salle" description="Valeurs pédagogiques par défaut — personnalisation possible ensuite.">
+        <form class="rm-form" (ngSubmit)="create()">
+          <label class="field">
+            <span class="field-label">Titre</span>
+            <input class="input" name="title" [(ngModel)]="title" [disabled]="busy()" />
+          </label>
+          <label class="field">
+            <span class="field-label">Mode</span>
+            <select class="select" name="mode" [(ngModel)]="mode" [disabled]="busy()">
+              <option value="LEARNING">Apprentissage</option>
+              <option value="COMPETITION">Compétition</option>
+              <option value="CLASSROOM">Salle de classe</option>
+              <option value="PRACTICE">Entraînement</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Visibilité</span>
+            <select class="select" name="visibility" [(ngModel)]="visibility" [disabled]="busy()">
+              <option value="PUBLIC">Publique</option>
+              <option value="PRIVATE">Privée (code)</option>
+            </select>
+          </label>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Créer et entrer</button>
+        </form>
+      </section>
+
+      <section mtr-panel heading="Trois soldes distincts" description="Toujours visibles dans la salle.">
+        <div class="rm-balances">
+          <div class="rm-balance">
+            <strong>Valeur nette (capital fictif)</strong>
+            <p class="rm-meta">Trésorerie + positions au prix de l’horloge − dette virtuelle.</p>
+          </div>
+          <div class="rm-balance">
+            <strong>Points d’apprentissage</strong>
+            <p class="rm-meta">Gagnés via missions et quiz — pas via la spéculation seule.</p>
+          </div>
+          <div class="rm-balance">
+            <strong>Crédit virtuel</strong>
+            <p class="rm-meta">Emprunt fictif = dette. Ce n’est jamais un gain.</p>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>

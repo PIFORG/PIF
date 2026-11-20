@@ -1,3 +1,4 @@
+import '../../styles/lazy-actuarial';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { ActuarialApi, type ActuarialPreset, type PricingAssumptions, type PricingResult, type ScenarioSummary } from '../core/api/actuarial-api';
 import { hasErrorCode } from '../core/api/errors';

@@ -3,9 +3,9 @@
 .mp-root,
 .nw-root {
   display: block;
-  border-bottom: 1px solid var(--mtr-border);
-  background: color-mix(in srgb, var(--mtr-surface) 92%, var(--mtr-elevated));
-  font-size: 0.72rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
+  background: var(--mtr-surface);
+  font-size: 0.6875rem;
   line-height: 1.2;
 }
 
@@ -64,11 +64,12 @@
   display: flex;
   width: max-content;
   gap: 0;
-  animation: mtr-tape-scroll 55s linear infinite;
+  /* Même vitesse pour marché et actualités. */
+  animation: mtr-tape-scroll 120s linear infinite;
 }
 
 .nw-track {
-  animation-duration: 70s;
+  animation-duration: 120s;
 }
 
 .mp-track.mp-paused,
@@ -103,6 +104,12 @@
 a.mp-item:hover,
 button.nw-item:hover {
   background: var(--mtr-hover);
+}
+
+.mp-sep {
+  flex-shrink: 0;
+  width: 0.35rem;
+  align-self: stretch;
 }
 
 .mp-sym {

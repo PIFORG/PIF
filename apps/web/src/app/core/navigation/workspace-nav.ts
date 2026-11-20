@@ -86,6 +86,7 @@ export const WORKSPACE_NAV: NavGroup[] = [
       { href: '/learn', label: FR.nav.marketQuest, icon: 'academy', status: 'LIVE_INTEGRATED' },
       { href: '/stories', label: FR.nav.finStories, icon: 'stories', status: 'LIVE_INTEGRATED' },
       { href: '/challenges', label: FR.nav.challenges, icon: 'challenge', status: 'LIVE_INTEGRATED' },
+      { href: '/rooms', label: FR.nav.marketRooms, icon: 'challenge', status: 'LIVE_INTEGRATED', match: ['/rooms'] },
     ],
   },
   {
@@ -158,6 +159,7 @@ export const MIGRATED_ROUTES: string[] = [
   '/stress-testing',
   '/explainability',
   '/challenges',
+  '/rooms',
   '/actuarial',
   '/settings/profile',
   '/settings/security',

@@ -1,5 +1,6 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, DOCUMENT, effect, inject, Injector } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import '../../styles/lazy-marketing';
 import { AuthService } from '../core/auth/auth.service';
 import { BrandLockupComponent } from '../shared/brand/brand.component';
 import { IconComponent, type IconName } from '../shared/icon/icon.component';

@@ -1,5 +1,6 @@
 package com.pif.api.stress;
 
+import com.pif.api.admin.PlatformAdminStore;
 import com.pif.api.stress.BankProfile.CreditSegment;
 import com.pif.api.stress.BankProfile.Liability;
 import com.pif.api.stress.BankProfile.PlsSegment;
@@ -8,6 +9,7 @@ import com.pif.api.stress.StressEngine.Impact;
 import com.pif.api.stress.StressEngine.Outcome;
 import com.pif.api.stress.StressEngine.Ratios;
 import com.pif.api.stress.ml.ScenarioDataset;
+import com.pif.api.web.ApiException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,9 +33,18 @@ import org.springframework.stereotype.Service;
 public class StressService {
 
   private final StressModelService models;
+  private final PlatformAdminStore platformFlags;
 
-  public StressService(StressModelService models) {
+  @Autowired
+  public StressService(StressModelService models,
+      @Autowired(required = false) PlatformAdminStore platformFlags) {
     this.models = models;
+    this.platformFlags = platformFlags;
+  }
+
+  /** Test constructor. */
+  StressService(StressModelService models) {
+    this(models, null);
   }
 
   static final double[] SENSITIVITY_INTENSITIES = {0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2};
@@ -181,6 +194,11 @@ public class StressService {
   public Map<String, Object> run(StressDtos.RunRequest request) {
     StressFactors factors = request.factors().scaled(request.intensity());
     StressFactors.Preset preset = request.presetId() == null ? null : StressFactors.preset(request.presetId());
+    if (preset != null && platformFlags != null
+        && platformFlags.isDisabled(PlatformAdminStore.FLAG_STRESS_PREFIX + preset.id())) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "SCENARIO_DISABLED",
+          "Ce scénario a été désactivé par un administrateur.");
+    }
 
     Map<String, Object> out = new LinkedHashMap<>();
     out.put("modelVersion", StressEngine.MODEL_VERSION);

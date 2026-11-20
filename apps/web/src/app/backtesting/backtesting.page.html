@@ -43,6 +43,30 @@
         </label>
       }
 
+      @if (crises().length) {
+        <label>
+          Épisode de crise (optionnel)
+          <select class="input" name="crisis" [ngModel]="crisisId()" (ngModelChange)="crisisId.set($event)" (change)="applyCrisis($event)">
+            <option value="">— Période libre —</option>
+            @for (ep of crises(); track ep.id) {
+              <option [value]="ep.id">{{ ep.title }} ({{ ep.startDate }} → {{ ep.endDate }})</option>
+            }
+          </select>
+        </label>
+        @if (crisisId(); as cid) {
+          @if (crises().find((c) => c.id === cid); as ep) {
+            <p class="field-hint">
+              {{ ep.summary }}
+              · US {{ ep.usCoverage ? 'oui' : 'non' }}
+              · BVMT {{ ep.bvmtCoverage ? 'oui' : 'non (dès 2018)' }}
+              @if (ep.series?.length) {
+                · {{ ep.series!.length }} séries couvertes
+              }
+            </p>
+          }
+        }
+      }
+
       <div class="tr-formRow">
         <label>
           Début (UTC)
@@ -71,11 +95,21 @@
 
       <fieldset>
         <legend>Instruments</legend>
+        <label class="sr-only" for="bt-inst-search">Filtrer les instruments</label>
+        <input
+          id="bt-inst-search"
+          class="input"
+          type="search"
+          placeholder="Rechercher (symbole, marché…)"
+          [ngModel]="instrumentQuery()"
+          (ngModelChange)="instrumentQuery.set($event)"
+          name="instQ"
+        />
         @if (instruments() === null) {
           <div mtr-panel-skeleton [rows]="2"></div>
         } @else {
           <div class="tr-chipRow">
-            @for (inst of instruments()!; track inst.symbol) {
+            @for (inst of instrumentChoices(); track inst.symbol) {
               <label class="tr-chip">
                 <input type="checkbox" [checked]="isSelected(inst.symbol)" (change)="toggleSymbol(inst.symbol, $any($event.target).checked)" />
                 {{ inst.symbol }}

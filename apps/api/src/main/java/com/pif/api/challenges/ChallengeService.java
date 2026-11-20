@@ -1,7 +1,10 @@
 package com.pif.api.challenges;
 
+import com.pif.api.data.Db;
 import com.pif.api.security.AuthUser;
 import com.pif.api.web.ApiException;
+import jakarta.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,16 +13,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 /**
- * Virtual trading challenges with fair starting capital and ranking. In-memory for this slice
- * (no production schema change). Scores are submitted after a simulated run; the engine does not
- * claim live market alpha.
+ * Virtual trading challenges with fair starting capital and ranking.
+ * Persisted to platform_challenges when the admin-content migration is present.
  */
 @Service
 public class ChallengeService {
+
+  private static final Logger log = LoggerFactory.getLogger(ChallengeService.class);
 
   public record Challenge(String id, String title, String description, double startingCapital, String createdBy,
       Instant createdAt, boolean open) {}
@@ -29,14 +40,110 @@ public class ChallengeService {
 
   private final ConcurrentHashMap<String, Challenge> challenges = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, Entry>> entries = new ConcurrentHashMap<>();
+  private final JdbcClient jdbc;
+  private volatile Boolean schemaReady;
 
+  @Autowired
+  public ChallengeService(@Autowired(required = false) JdbcClient jdbc) {
+    this.jdbc = jdbc;
+  }
+
+  /** Unit-test constructor. */
   public ChallengeService() {
-    Challenge seed = new Challenge("challenge-demo-diversify", "Défi diversification",
-        "Partir de 100 000 DT virtuels et terminer avec au moins quatre positions sans concentration extrême. "
-            + "Environnement simulé pédagogique.",
+    this.jdbc = null;
+    seedDemoIfEmpty();
+  }
+
+  @PostConstruct
+  public void init() {
+    reload();
+    seedDemoIfEmpty();
+  }
+
+  @EventListener(ApplicationReadyEvent.class)
+  public void onApplicationReady() {
+    resetSchemaProbe();
+    reload();
+    seedDemoIfEmpty();
+  }
+
+  public synchronized void reload() {
+    challenges.clear();
+    entries.clear();
+    if (!schemaReady()) {
+      log.info("Challenges: in-memory only (platform_challenges missing).");
+      return;
+    }
+    jdbc.sql("SELECT id, title, description, starting_capital, created_by, created_at, open FROM platform_challenges")
+        .query((rs, i) -> {
+          Challenge c = new Challenge(
+              rs.getString("id"),
+              rs.getString("title"),
+              rs.getString("description"),
+              rs.getDouble("starting_capital"),
+              rs.getString("created_by"),
+              rs.getTimestamp("created_at").toInstant(),
+              rs.getBoolean("open"));
+          challenges.put(c.id(), c);
+          entries.put(c.id(), new ConcurrentHashMap<>());
+          return null;
+        }).list();
+    jdbc.sql("SELECT challenge_id, user_id, display_name, score, final_equity, joined_at, submitted_at "
+            + "FROM platform_challenge_entries")
+        .query((rs, i) -> {
+          String cid = rs.getString("challenge_id");
+          ConcurrentHashMap<String, Entry> map = entries.computeIfAbsent(cid, k -> new ConcurrentHashMap<>());
+          Double score = (Double) rs.getObject("score");
+          Double equity = (Double) rs.getObject("final_equity");
+          Timestamp submitted = rs.getTimestamp("submitted_at");
+          map.put(rs.getString("user_id"), new Entry(
+              rs.getString("user_id"),
+              rs.getString("display_name"),
+              score,
+              equity,
+              rs.getTimestamp("joined_at").toInstant(),
+              submitted == null ? null : submitted.toInstant()));
+          return null;
+        }).list();
+    log.info("Challenges reloaded: {} challenges.", challenges.size());
+  }
+
+  public boolean durable() {
+    return schemaReady();
+  }
+
+  private boolean schemaReady() {
+    if (jdbc == null) return false;
+    Boolean cached = schemaReady;
+    if (Boolean.TRUE.equals(cached)) return true;
+    try {
+      Integer n = jdbc.sql(
+          "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' "
+              + "AND table_name = 'platform_challenges'")
+          .query(Integer.class).single();
+      boolean ok = n != null && n == 1;
+      schemaReady = ok ? true : false;
+      return ok;
+    } catch (DataAccessException e) {
+      log.debug("platform_challenges schema probe deferred: {}", e.getMessage());
+      schemaReady = null;
+      return false;
+    }
+  }
+
+  public void resetSchemaProbe() {
+    schemaReady = null;
+  }
+
+  private void seedDemoIfEmpty() {
+    if (!challenges.isEmpty()) return;
+    Challenge seed = new Challenge("challenge-demo-diversify", "Defi diversification",
+        "Partir de 100 000 DT virtuels et terminer avec au moins quatre positions sans concentration extreme. "
+            + "Environnement simule pedagogique.",
         100_000, "system", Instant.parse("2026-11-15T12:00:00Z"), true);
     challenges.put(seed.id(), seed);
     entries.put(seed.id(), new ConcurrentHashMap<>());
+    if (schemaReady()) persistChallenge(seed);
   }
 
   public Map<String, Object> list() {
@@ -45,7 +152,7 @@ public class ChallengeService {
         .map(this::challengeView)
         .toList();
     return Map.of("challenges", items, "note",
-        "Défis virtuels à capital initial équitable — classement pédagogique, pas une compétition réelle.");
+        "Defis virtuels a capital initial equitable — classement pedagogique, pas une competition reelle.");
   }
 
   public Map<String, Object> create(AuthUser user, String title, String description, Double capital) {
@@ -64,6 +171,7 @@ public class ChallengeService {
     Challenge c = new Challenge(id, t, description == null || description.isBlank()
         ? "Defi de trading virtuel a conditions equitables."
         : description.trim(), start, user.user().id().toString(), Instant.now(), true);
+    if (schemaReady()) persistChallenge(c);
     challenges.put(id, c);
     entries.put(id, new ConcurrentHashMap<>());
     return challengeView(c);
@@ -73,8 +181,11 @@ public class ChallengeService {
     Challenge c = require(challengeId);
     if (!c.open()) throw new ApiException(HttpStatus.CONFLICT, "CLOSED", "Ce defi est ferme.");
     String uid = user.user().id().toString();
-    entries.get(c.id()).computeIfAbsent(uid,
-        id -> new Entry(uid, user.user().firstName() + " " + user.user().lastName(), null, null, Instant.now(), null));
+    Entry entry = new Entry(uid, user.user().firstName() + " " + user.user().lastName(), null, null, Instant.now(), null);
+    entries.get(c.id()).computeIfAbsent(uid, id -> {
+      if (schemaReady()) persistEntry(c.id(), entry);
+      return entry;
+    });
     return detail(challengeId);
   }
 
@@ -90,7 +201,9 @@ public class ChallengeService {
       throw new ApiException(HttpStatus.CONFLICT, "NOT_JOINED", "Rejoignez le defi avant de soumettre un score.");
     }
     double score = Math.round((finalEquity / c.startingCapital() - 1.0) * 10_000.0) / 100.0;
-    map.put(uid, new Entry(uid, existing.displayName(), score, finalEquity, existing.joinedAt(), Instant.now()));
+    Entry updated = new Entry(uid, existing.displayName(), score, finalEquity, existing.joinedAt(), Instant.now());
+    if (schemaReady()) persistEntry(c.id(), updated);
+    map.put(uid, updated);
     return detail(challengeId);
   }
 
@@ -112,6 +225,28 @@ public class ChallengeService {
     body.put("ranking", ranking);
     body.put("participants", entries.getOrDefault(c.id(), new ConcurrentHashMap<>()).size());
     return body;
+  }
+
+  private void persistChallenge(Challenge c) {
+    jdbc.sql("INSERT INTO platform_challenges (id, title, description, starting_capital, created_by, created_at, open) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            + "ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, "
+            + "starting_capital = EXCLUDED.starting_capital, open = EXCLUDED.open")
+        .params(c.id(), c.title(), c.description(), c.startingCapital(), c.createdBy(),
+            Timestamp.from(c.createdAt()), c.open())
+        .update();
+  }
+
+  private void persistEntry(String challengeId, Entry e) {
+    jdbc.sql("INSERT INTO platform_challenge_entries "
+            + "(challenge_id, user_id, display_name, score, final_equity, joined_at, submitted_at) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            + "ON CONFLICT (challenge_id, user_id) DO UPDATE SET display_name = EXCLUDED.display_name, "
+            + "score = EXCLUDED.score, final_equity = EXCLUDED.final_equity, submitted_at = EXCLUDED.submitted_at")
+        .params(challengeId, e.userId(), e.displayName(), e.score(), e.finalEquity(),
+            Timestamp.from(e.joinedAt()),
+            e.submittedAt() == null ? null : Timestamp.from(e.submittedAt()))
+        .update();
   }
 
   private Challenge require(String id) {

@@ -13,25 +13,25 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--mtr-border);
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 55%, transparent);
 }
 
 .lr-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   color: var(--mtr-text);
 }
 
 .lr-lede {
-  margin: 0.25rem 0 0;
+  margin: 0.2rem 0 0;
   max-width: 42rem;
-  font-size: 0.875rem;
-  color: var(--mtr-text-2);
+  font-size: 0.75rem;
+  color: var(--mtr-text-3);
 }
 
 .lr-topNav {
@@ -44,7 +44,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0;
-  border: 1px solid var(--mtr-border);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
   border-radius: var(--radius-sm);
   background: var(--mtr-surface);
   overflow: hidden;
@@ -53,8 +53,12 @@
 .lr-progressItem {
   flex: 1 1 8.5rem;
   min-width: 7.5rem;
-  padding: 0.65rem 0.9rem;
-  border-right: 1px solid var(--mtr-border);
+  padding: 0.55rem 0.8rem;
+  border-right: 1px solid color-mix(in srgb, var(--mtr-border) 55%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
 }
 
 .lr-progressItem:last-child {
@@ -67,26 +71,30 @@
 
 .lr-progressLabel {
   display: block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  width: 100%;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--mtr-text-3);
+  line-height: 1.3;
 }
 
 .lr-progressValue {
   display: block;
-  margin-top: 0.2rem;
+  width: 100%;
+  margin-top: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--mtr-text);
   font-variant-numeric: tabular-nums;
+  line-height: 1.35;
 }
 
 .lr-continue {
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--mtr-border);
-  border-left: 2px solid var(--mtr-brand-strong);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
+  border-left: 2px solid var(--mtr-brand);
   border-radius: var(--radius-sm);
   background: var(--mtr-surface);
 }
@@ -103,7 +111,7 @@
 .lr-continueHead h2 {
   margin: 0;
   font-size: 1rem;
-  font-weight: 650;
+  font-weight: 600;
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
 }
@@ -129,8 +137,8 @@
 
 .lr-continueMission {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 650;
+  font-size: 1.0625rem;
+  font-weight: 600;
   color: var(--mtr-text);
   font-family: var(--font-sans);
 }
@@ -198,7 +206,7 @@
 
 .lr-railBlock {
   padding: var(--space-3);
-  border: 1px solid var(--mtr-border);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
   border-radius: var(--radius-sm);
   background: var(--mtr-surface);
 }
@@ -206,7 +214,7 @@
 .lr-railBlock h2 {
   margin: 0 0 var(--space-2);
   font-size: 0.8125rem;
-  font-weight: 650;
+  font-weight: 600;
   font-family: var(--font-sans);
   letter-spacing: 0.01em;
   color: var(--mtr-text);
@@ -401,10 +409,10 @@
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--mtr-border);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
   background: var(--mtr-surface);
   overflow: hidden;
   isolation: isolate;
@@ -444,11 +452,11 @@ html[data-theme='dark'] .lr-questMap {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in srgb, var(--mtr-brand) 25%, var(--mtr-border));
-  background: color-mix(in srgb, var(--mtr-brand) 8%, var(--mtr-surface));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 70%, transparent);
+  background: var(--mtr-surface);
+  box-shadow: none;
 }
 
 .lr-levelGate h3 {
@@ -513,15 +521,15 @@ html[data-theme='dark'] .lr-questMap {
 .lr-questPin {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  margin-top: var(--space-4);
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--mtr-brand) 45%, var(--mtr-border));
-  background: var(--mtr-elevated);
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-top: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--mtr-brand) 35%, var(--mtr-border));
+  background: var(--mtr-surface);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.6875rem;
+  font-weight: 600;
   color: var(--mtr-brand-text);
   box-shadow: none;
 }
@@ -577,8 +585,8 @@ html[data-theme='dark'] .lr-questMap {
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--mtr-border) 65%, transparent);
+  border-radius: var(--radius-sm);
   background: var(--mtr-surface);
   color: inherit;
   text-decoration: none;
@@ -866,12 +874,13 @@ a.lr-mission:not(.lr-questNode):hover {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--mtr-border);
-  border-radius: var(--radius-lg);
-  background: var(--mtr-surface);
-  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mtr-border) 55%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .lr-sessionHead {
@@ -881,9 +890,9 @@ a.lr-mission:not(.lr-questNode):hover {
 .lr-sessionTitle {
   margin: 0.1rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2vw, 1.45rem);
-  font-weight: 650;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.125rem, 1.8vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
   color: var(--mtr-text);
 }
 
@@ -897,11 +906,10 @@ a.lr-mission:not(.lr-questNode):hover {
 
 .lr-cockpitBar {
   position: relative;
-  border-color: color-mix(in srgb, var(--mtr-brand) 28%, var(--mtr-border));
+  border-color: color-mix(in srgb, var(--mtr-border) 70%, transparent);
   background: var(--mtr-surface);
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 -2px 0 var(--mtr-brand);
+  box-shadow: none;
+  border-bottom: 1px solid var(--mtr-brand);
 }
 
 .lr-clock {
