@@ -65,6 +65,18 @@ class NestCryptoCompatibilityTest {
   }
 
   @Test
+  void verifiesBcryptHashesWithoutChangingRegistrationHashing() {
+    PasswordHasher hasher = new PasswordHasher();
+    String password = "Test123456";
+    String hash = hasher.hashBcrypt(password);
+
+    assertThat(hash).startsWith("$2");
+    assertThat(hasher.verify(hash, password)).isTrue();
+    assertThat(hasher.verify(hash, password + "x")).isFalse();
+    assertThat(hasher.hash("registration-password")).startsWith("$argon2id$");
+  }
+
+  @Test
   void dummyHashIsWellFormedAndNeverMatches() {
     PasswordHasher hasher = new PasswordHasher();
     assertThat(hasher.verify(PasswordHasher.DUMMY_HASH, "anything")).isFalse();

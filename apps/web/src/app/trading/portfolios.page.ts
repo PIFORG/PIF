@@ -1,3 +1,4 @@
+import { EchoContextService } from '../core/echo/echo-context.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import '../../styles/lazy-trading';
@@ -235,6 +236,8 @@ export class PortfoliosPage {
 
   constructor() {
     void this.loadPortfolios();
+    const echoCtx = inject(EchoContextService);
+    effect(() => echoCtx.publish({ portfolioId: this.activeId() }));
     inject(DestroyRef).onDestroy(() => (this.destroyed = true));
 
     effect(() => {

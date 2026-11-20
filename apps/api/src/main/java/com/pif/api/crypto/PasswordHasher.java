@@ -1,6 +1,7 @@
 package com.pif.api.crypto;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,14 +17,22 @@ public class PasswordHasher {
       "$argon2id$v=19$m=19456,t=2,p=1$alUobNvgu1tuBMUZNRqvVg$jfNVQH4G1DIHiyJwQp7rk4KxYlNKCV3tUlEcEVQXuXk";
 
   private final Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(16, 32, 1, 19456, 2);
+  private final BCryptPasswordEncoder bcryptEncoder = new BCryptPasswordEncoder();
 
   public String hash(String password) {
     return encoder.encode(password);
   }
 
+  public String hashBcrypt(String password) {
+    return bcryptEncoder.encode(password);
+  }
+
   public boolean verify(String hash, String password) {
     if (hash == null || password == null) return false;
     try {
+      if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
+        return bcryptEncoder.matches(password, hash);
+      }
       return encoder.matches(password, hash);
     } catch (RuntimeException e) {
       return false;

@@ -1,3 +1,5 @@
+import type { EchoOrderDraft } from '../core/echo/echo-api';
+import { EchoContextService } from '../core/echo/echo-context.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import '../../styles/lazy-trading';
@@ -19,7 +21,7 @@ import { LineChartComponent, type ChartSeries } from '../shared/charts/charts.co
 import { IconComponent } from '../shared/icon/icon.component';
 import { WORKSPACE_PRIMITIVES } from '../shared/workspace/workspace.components';
 import { OrderTicketComponent } from './order-ticket.component';
-import { emptyTicket, type TicketDraft } from './ticket-draft';
+import { emptyTicket, toOrderTerms, type TicketDraft } from './ticket-draft';
 import {
   assetClassLabel,
   dateTime,
@@ -199,11 +201,25 @@ export class TradingDeskPage {
       rangeChange,
     };
   });
+  /** Parsed ticket for ÉCHO's pre-trade check; null until symbol and a positive quantity are typed. */
+  protected readonly echoDraft = computed<EchoOrderDraft | null>(() => {
+    const d = this.draft();
+    const qty = Number(d.quantity.trim());
+    if (!d.symbol || !(qty > 0)) return null;
+    const t = toOrderTerms(d);
+    return { symbol: t.symbol, side: t.side, type: t.type, quantity: t.quantity, limitPrice: t.limitPrice ?? null, stopPrice: t.stopPrice ?? null };
+  });
+  private readonly echo = inject(EchoContextService);
+  protected examineWithEcho(): void {
+    this.echo.askEcho('Examiner le risque de cet ordre');
+  }
   protected readonly formatAxis = (v: number) => v.toFixed(2);
 
   constructor() {
     void this.loadPortfolios();
     void this.loadMarket();
+    const echoCtx = inject(EchoContextService);
+    effect(() => echoCtx.publish({ symbol: this.symbol() || null, portfolioId: this.activeId(), orderDraft: this.echoDraft() }));
     inject(DestroyRef).onDestroy(() => (this.destroyed = true));
 
     effect(() => {

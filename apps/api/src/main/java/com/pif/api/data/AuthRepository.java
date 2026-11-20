@@ -272,6 +272,16 @@ public class AuthRepository {
         .update();
   }
 
+  /** Inserts the non-production test account without replacing an account with the same email. */
+  public int insertTestUserIfAbsent(UUID id, String email, String firstName, String lastName, String passwordHash,
+      Instant now) {
+    return jdbc.sql("INSERT INTO users (id, email, first_name, last_name, password_hash, role, email_verified, "
+            + "email_verified_at, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'INVESTOR'::\"UserRole\", "
+            + "true, ?, 'ACTIVE'::\"UserStatus\", ?, ?) ON CONFLICT (email) DO NOTHING")
+        .params(id, email, firstName, lastName, passwordHash, Db.ts(now), Db.ts(now), Db.ts(now))
+        .update();
+  }
+
   public boolean emailInUse(String email) {
     return jdbc.sql("SELECT 1 FROM users WHERE email = ?::citext").param(email).query(Integer.class).optional()
         .isPresent();

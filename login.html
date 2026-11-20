@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — Market Trading Room</title>
+  <meta name="description" content="Connectez-vous à votre espace Market Trading Room avec votre adresse courriel et mot de passe." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #00c4b4;
+      --brand-dark:  #009e90;
+      --brand-glow:  rgba(0, 196, 180, 0.18);
+      --canvas:      #0d0f14;
+      --surface:     #13161e;
+      --surface-2:   #1a1e28;
+      --border:      rgba(255,255,255,0.08);
+      --border-focus:rgba(0, 196, 180, 0.6);
+      --text:        #eef0f4;
+      --text-2:      #8891a4;
+      --text-3:      #525a6b;
+      --danger:      #f87272;
+      --radius:      12px;
+      --radius-sm:   8px;
+      --shadow:      0 24px 48px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--canvas);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* ── Fond animé ─────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(0,196,180,0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 40% at 85% 10%, rgba(99,102,241,0.07) 0%, transparent 55%);
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(19,22,30,0.85);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--brand) 0%, #00897b 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px var(--brand-glow);
+    }
+
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-name span {
+      color: var(--brand);
+    }
+
+    /* ── Scène principale ───────────────────────────────────── */
+    main {
+      display: grid;
+      place-items: center;
+      padding: 2rem 1rem 3rem;
+      position: relative;
+    }
+
+    /* ── Carte ──────────────────────────────────────────────── */
+    .card {
+      width: min(100%, 400px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--brand);
+      border-radius: var(--radius);
+      padding: 2rem 2rem 1.75rem;
+      box-shadow: var(--shadow);
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header { margin-bottom: 1.75rem; }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .lead {
+      font-size: 0.875rem;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    /* ── Formulaire ─────────────────────────────────────────── */
+    form {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .field-label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+
+    .field-link {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--brand);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .field-link:hover { opacity: 0.75; text-decoration: underline; }
+
+    /* ── Inputs ─────────────────────────────────────────────── */
+    .input-wrap {
+      position: relative;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input[type="password"],
+    input[type="text"] {
+      padding-right: 3rem;
+    }
+
+    input::placeholder { color: var(--text-3); }
+
+    input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0,196,180,0.12);
+      background: var(--canvas);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: rgba(248,114,114,0.6);
+    }
+
+    input[aria-invalid="true"]:focus {
+      box-shadow: 0 0 0 3px rgba(248,114,114,0.12);
+    }
+
+    /* ── Toggle mot de passe ────────────────────────────────── */
+    .pwd-toggle {
+      position: absolute;
+      right: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-2);
+      padding: 0.25rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .pwd-toggle:hover { color: var(--text); }
+
+    .pwd-toggle svg { width: 18px; height: 18px; }
+
+    /* ── Messages d'erreur ──────────────────────────────────── */
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-banner {
+      background: rgba(248,114,114,0.08);
+      border: 1px solid rgba(248,114,114,0.25);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.8125rem;
+      color: var(--danger);
+      display: none;
+      align-items: flex-start;
+      gap: 0.5rem;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .error-banner.visible { display: flex; }
+
+    /* ── Bouton principal ───────────────────────────────────── */
+    .btn-primary {
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+      box-shadow: 0 4px 16px rgba(0,196,180,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.08);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover::after { opacity: 1; }
+
+    .btn-primary:active { transform: scale(0.985); }
+
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn-primary.loading .spinner { display: block; }
+    .btn-primary.loading .btn-label { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer de la carte ─────────────────────────────────── */
+    .card-footer {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--text-2);
+      text-align: center;
+    }
+
+    .card-footer a {
+      color: var(--brand);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .card-footer a:hover { text-decoration: underline; }
+
+    /* ── Pied de page légal ─────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.6875rem;
+      color: var(--text-3);
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .card {
+        border: none;
+        border-top: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 1.5rem 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── En-tête ──────────────────────────────────────────────────────── -->
+  <header>
+    <a href="/" class="brand" aria-label="Market Trading Room — accueil">
+      <div class="brand-icon">📈</div>
+      <span class="brand-name">Market <span>Trading</span> Room</span>
+    </a>
+  </header>
+
+  <!-- ── Contenu principal ────────────────────────────────────────────── -->
+  <main>
+    <div class="card" role="region" aria-label="Formulaire de connexion">
+      <div class="card-header">
+        <h1>Connexion</h1>
+        <p class="lead">Accédez à votre espace Market Trading Room.</p>
+      </div>
+
+      <!-- Bannière d'erreur globale -->
+      <div id="error-banner" class="error-banner" role="alert" aria-live="assertive">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+        </svg>
+        <span id="error-message"></span>
+      </div>
+
+      <form id="login-form" novalidate>
+
+        <!-- Champ email -->
+        <div class="field">
+          <label for="email">Adresse courriel</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="vous@exemple.com"
+            aria-required="true"
+          />
+          <span id="email-error" class="field-error" role="alert" style="display:none">
+            ⚠ Saisissez une adresse courriel valide
+          </span>
+        </div>
+
+        <!-- Champ mot de passe -->
+        <div class="field">
+          <div class="field-label-row">
+            <label for="password">Mot de passe</label>
+            <a href="/forgot-password" class="field-link">Oublié ?</a>
+          </div>
+          <div class="input-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              aria-required="true"
+            />
+            <button
+              type="button"
+              class="pwd-toggle"
+              id="pwd-toggle"
+              aria-label="Afficher le mot de passe"
+              aria-pressed="false"
+            >
+              <!-- Icône œil -->
+              <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <!-- Icône œil barré -->
+              <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <span id="password-error" class="field-error" role="alert" style="display:none">
+            ⚠ Le mot de passe est obligatoire
+          </span>
+        </div>
+
+        <!-- Bouton de connexion -->
+        <button type="submit" class="btn-primary" id="submit-btn">
+          <div class="spinner"></div>
+          <span class="btn-label">Se connecter</span>
+        </button>
+      </form>
+
+      <!-- Pied de carte -->
+      <div class="card-footer">
+        Pas encore de compte ? <a href="/register">Créer un compte</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Pied de page légal ──────────────────────────────────────────── -->
+  <footer>
+    <p>Marchés et capitaux simulés · usage pédagogique · aucun conseil en investissement</p>
+  </footer>
+
+  <script>
+    // ── Éléments du DOM ──────────────────────────────────────────────────
+    const form        = document.getElementById('login-form');
+    const emailInput  = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn   = document.getElementById('submit-btn');
+    const errorBanner = document.getElementById('error-banner');
+    const errorMsg    = document.getElementById('error-message');
+    const emailError  = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+    const pwdToggle   = document.getElementById('pwd-toggle');
+    const iconEye     = document.getElementById('icon-eye');
+    const iconEyeOff  = document.getElementById('icon-eye-off');
+
+    let submitted = false;
+
+    // ── Validation email ─────────────────────────────────────────────────
+    const EMAIL_REGEX = /^(?!\.)(?!.*\.\.)[A-Z0-9_'+\-.]*[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i;
+
+    function validateEmail(value) {
+      return EMAIL_REGEX.test(value.trim());
+    }
+
+    function validatePassword(value) {
+      return value.length > 0;
+    }
+
+    function showFieldError(input, errorEl, show) {
+      errorEl.style.display = show ? 'flex' : 'none';
+      input.setAttribute('aria-invalid', show ? 'true' : 'false');
+    }
+
+    function showBanner(message) {
+      errorMsg.textContent = message;
+      errorBanner.classList.add('visible');
+    }
+
+    function hideBanner() {
+      errorBanner.classList.remove('visible');
+    }
+
+    // ── Validation en temps réel (après 1re tentative) ───────────────────
+    emailInput.addEventListener('input', () => {
+      if (!submitted) return;
+      showFieldError(emailInput, emailError, !validateEmail(emailInput.value));
+    });
+
+    passwordInput.addEventListener('input', () => {
+      if (!submitted) return;
+      showFieldError(passwordInput, passwordError, !validatePassword(passwordInput.value));
+    });
+
+    // ── Toggle afficher/masquer mot de passe ─────────────────────────────
+    pwdToggle.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      pwdToggle.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+      pwdToggle.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+      iconEye.style.display    = isPassword ? 'none' : 'block';
+      iconEyeOff.style.display = isPassword ? 'block' : 'none';
+    });
+
+    // ── Soumission du formulaire ─────────────────────────────────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitted = true;
+      hideBanner();
+
+      const email    = emailInput.value;
+      const password = passwordInput.value;
+      const emailOk  = validateEmail(email);
+      const pwdOk    = validatePassword(password);
+
+      showFieldError(emailInput,    emailError,    !emailOk);
+      showFieldError(passwordInput, passwordError, !pwdOk);
+
+      if (!emailOk || !pwdOk) return;
+
+      // ── Loading ─────────────────────────────────────────────────────────
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+
+      try {
+        // 🔧 Remplace l'URL ci-dessous par ton vrai endpoint de connexion
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), password }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.message || 'Identifiants incorrects. Vérifiez votre courriel et mot de passe.');
+        }
+
+        // ✅ Connexion réussie → redirige vers le tableau de bord
+        window.location.href = '/dashboard';
+
+      } catch (err) {
+        passwordInput.value = '';
+        showBanner(err.message || 'Une erreur est survenue. Réessayez.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -83,6 +83,17 @@ class IdentityDatabaseTest {
     sink.clear();
   }
 
+  @Test
+  void nonProductionTestAccountIsReadyForTheNormalLoginFlow() {
+    UserRow testUser = repo.findUserByEmail("test@gmail.com").orElseThrow();
+
+    assertThat(testUser.emailVerified()).isTrue();
+    assertThat(testUser.status()).isEqualTo("ACTIVE");
+    assertThat(testUser.role()).isEqualTo("INVESTOR");
+    assertThat(hasher.verify(testUser.passwordHash(), "Test123456")).isTrue();
+    assertThat(auth.login("test@gmail.com", "Test123456", META)).isInstanceOf(SignedIn.class);
+  }
+
   @AfterEach
   void removeDisposableUsers() {
     mail.awaitPending(Duration.ofSeconds(10));

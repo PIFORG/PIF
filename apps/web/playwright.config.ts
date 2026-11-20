@@ -47,7 +47,7 @@ export default defineConfig({
     {
       name: 'investor',
       testMatch:
-        /journeys-investor\.spec\.ts|journeys-trading-deep\.spec\.ts|journeys-learn-deep\.spec\.ts|journeys-stories-deep\.spec\.ts|journeys-marketquest-outcomes\.spec\.ts|routes-investor\.spec\.ts/,
+        /journeys-investor\.spec\.ts|journeys-trading-deep\.spec\.ts|journeys-learn-deep\.spec\.ts|journeys-stories-deep\.spec\.ts|journeys-marketquest-outcomes\.spec\.ts|routes-investor\.spec\.ts|journeys-echo\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {

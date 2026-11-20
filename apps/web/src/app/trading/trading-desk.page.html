@@ -230,6 +230,9 @@
             (result)="onResult($event)"
             (stale)="onStale()"
           />
+          @if (echoDraft()) {
+            <button type="button" class="tr-echoCheck" (click)="examineWithEcho()">Examiner le risque avec ÉCHO</button>
+          }
         }
       </section>
 

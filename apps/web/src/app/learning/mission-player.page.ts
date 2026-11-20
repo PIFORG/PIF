@@ -1,3 +1,4 @@
+import { EchoContextService } from '../core/echo/echo-context.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -185,6 +186,8 @@ export class MissionPlayerPage {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => (this.destroyed = true));
+    const echoCtx = inject(EchoContextService);
+    effect(() => echoCtx.publish({ sessionId: this.sessionId() || null }));
     effect(() => {
       const id = this.sessionId();
       untracked(() => {

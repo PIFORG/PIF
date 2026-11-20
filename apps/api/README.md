@@ -18,6 +18,11 @@ Fichier chargé : `apps/api/.env` (pas le `.env` racine du monorepo).
 
 Port par défaut : **3002** (`SPRING_API_PORT`).
 
+En environnement autre que `production`, le démarrage crée le compte de test `test@gmail.com` / `Test123456`
+s'il n'existe pas déjà. Il est inséré comme utilisateur `INVESTOR` actif et vérifié, puis la connexion passe par
+le flux normal (mot de passe BCrypt, session et JWT). Un compte préexistant avec cette adresse n'est jamais modifié.
+Le seed est désactivé lorsque `NODE_ENV=production`. Les nouvelles inscriptions conservent leur hash Argon2id.
+
 ## Démarrage
 
 Depuis la racine du dépôt :

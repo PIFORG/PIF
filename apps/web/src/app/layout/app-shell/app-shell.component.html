@@ -95,6 +95,7 @@
   <main id="main-content" class="inv-main" tabindex="-1">
     <ng-content />
   </main>
+  @defer (on idle) { <mtr-echo-panel /> }
 
   @if (drawerOpen()) {
     <div class="inv-drawerLayer">

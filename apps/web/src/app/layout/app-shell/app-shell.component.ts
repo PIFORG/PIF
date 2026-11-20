@@ -24,6 +24,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
 import { MarketPulseComponent } from '../../shared/market-pulse/market-pulse.component';
 import { FinancialNewsWireComponent } from '../../shared/news-wire/news-wire.component';
 import { ThemeToggleComponent } from '../../shared/theme-toggle/theme-toggle.component';
+import { EchoPanelComponent } from '../../echo/echo-panel.component';
 import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.component';
 
 function pathOf(url: string): string {
@@ -54,6 +55,7 @@ const HEALTH_SHORT: Record<ServiceHealth, string> = {
     ProfileDropdownComponent,
     MarketPulseComponent,
     FinancialNewsWireComponent,
+    EchoPanelComponent,
   ],
   host: { style: 'display: contents' },
   styleUrl: './app-shell.component.css',

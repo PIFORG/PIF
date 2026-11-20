@@ -1,0 +1,220 @@
+<button
+  #launcher
+  type="button"
+  class="ec-launcher"
+  [class.ec-launcherHidden]="open()"
+  aria-controls="echo-panel"
+  [attr.aria-expanded]="open()"
+  [attr.aria-label]="'Ouvrir ÉCHO, assistant financier' + (unread() ? ', ' + unread() + ' alerte(s) non lue(s)' : '')"
+  title="ÉCHO — Alt+E"
+  (click)="show(unread() ? 'alerts' : 'chat')"
+>
+  <span class="ec-mark" aria-hidden="true"></span>
+  <span class="ec-launcherText">ÉCHO</span>
+  @if (unread()) {
+    <span class="ec-badge" aria-hidden="true">{{ unread() }}</span>
+  }
+</button>
+
+@if (open()) {
+  <section id="echo-panel" class="ec-panel" role="dialog" aria-modal="false" aria-labelledby="echo-title">
+    <header class="ec-head">
+      <div class="ec-titleRow">
+        <h2 id="echo-title"><span class="ec-mark" aria-hidden="true"></span>ÉCHO</h2>
+        <div class="ec-headActions">
+          @if (voice.speaking()) {
+            <button type="button" class="ec-icon" (click)="voice.stop()" aria-label="Arrêter la lecture vocale">■</button>
+          }
+          <button type="button" class="ec-icon" (click)="newConversation()" aria-label="Nouvelle conversation" title="Nouvelle conversation">＋</button>
+          <button type="button" class="ec-icon" (click)="close()" aria-label="Fermer ÉCHO">✕</button>
+        </div>
+      </div>
+      <p class="ec-context" aria-label="Contexte transmis à ÉCHO">
+        @for (c of contextChips(); track c) { <span>{{ c }}</span> }
+      </p>
+      <nav class="ec-tabs" role="tablist" aria-label="Sections d'ÉCHO">
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'chat'" (click)="show('chat')">Analyse</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'journal'" (click)="show('journal')">Journal</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'alerts'" (click)="show('alerts')">
+          Alertes @if (unread()) { <span class="ec-count">{{ unread() }}</span> }
+        </button>
+        <button type="button" role="tab" [attr.aria-selected]="tab() === 'settings'" (click)="show('settings')">Réglages</button>
+      </nav>
+    </header>
+
+    @if (unavailable(); as u) {
+      <p class="ec-error" role="alert">{{ u }}</p>
+    }
+
+    @switch (tab()) {
+      @case ('chat') {
+        <div #log class="ec-log" role="log" aria-live="polite" aria-relevant="additions">
+          @if (!turns().length) {
+            <div class="ec-empty">
+              <p>Questions possibles sur cette page :</p>
+              <div class="ec-chips">
+                @for (s of suggestions(); track s) {
+                  <button type="button" class="ec-chip" (click)="send(s)">{{ s }}</button>
+                }
+              </div>
+            </div>
+          }
+          @for (t of turns(); track t.id) {
+            <article class="ec-turn">
+              <p class="ec-q"><span class="ec-visuallyHidden">Vous : </span>{{ t.question }}</p>
+              @if (t.answer) {
+                <div class="ec-a">
+                  <span class="ec-visuallyHidden">ÉCHO : </span>
+                  <mtr-echo-answer [answer]="t.answer" (action)="onAction($event)" (choose)="onChoose($event)" />
+                </div>
+              } @else if (t.error) {
+                <p class="ec-error" role="alert">{{ t.error }}</p>
+              } @else {
+                <p class="ec-pending">Analyse des données…</p>
+              }
+            </article>
+          }
+        </div>
+        <form class="ec-compose" (submit)="$event.preventDefault(); send()">
+          <label for="echo-input" class="ec-visuallyHidden">Question pour ÉCHO</label>
+          <textarea
+            #input
+            id="echo-input"
+            rows="2"
+            maxlength="1000"
+            placeholder="Posez une question sur vos données…"
+            [value]="draft()"
+            (input)="draft.set($any($event.target).value)"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+          <div class="ec-composeActions">
+            @if (prefs()?.voiceEnabled && voice.recognitionSupported) {
+              <button
+                type="button"
+                class="ec-icon"
+                [class.ec-listening]="voice.listen() === 'listening'"
+                [attr.aria-pressed]="voice.listen() === 'listening'"
+                [attr.aria-label]="voice.listen() === 'listening' ? 'Arrêter l\'écoute' : 'Dicter une question (appuyer pour parler)'"
+                (click)="voice.listen() === 'listening' ? voice.stopListening() : talk()"
+              >🎙</button>
+            }
+            <button type="submit" class="ec-send" [disabled]="busy() || !draft().trim()">Envoyer</button>
+          </div>
+          @if (voice.listen() === 'listening') {
+            <p class="ec-note" role="status">Micro actif — parlez, puis vérifiez la transcription avant d'envoyer.</p>
+          } @else if (voice.listen() === 'denied') {
+            <p class="ec-note" role="status">Micro refusé par le navigateur. La saisie au clavier reste disponible.</p>
+          }
+        </form>
+      }
+
+      @case ('journal') {
+        <div class="ec-body">
+          @if (prefs() && !prefs()!.memoryEnabled) {
+            <p class="ec-note">
+              La mémoire décisionnelle est désactivée : ÉCHO n'enregistre aucune intention.
+              <button type="button" class="ec-link" (click)="savePrefs({ memoryEnabled: true }); loadJournal()">Activer la mémoire</button>
+            </p>
+          } @else {
+            <form class="ec-intent" (submit)="$event.preventDefault(); saveIntent()">
+              <p class="ec-formTitle">
+                Noter mon intention
+                @if (ctx.context().orderDraft; as o) { <small>pour l'ordre {{ o.side === 'BUY' ? 'd\'achat' : 'de vente' }} {{ o.quantity }} {{ o.symbol }}</small> }
+                @else if (ctx.context().symbol) { <small>sur {{ ctx.context().symbol }}</small> }
+              </p>
+              <label>Objectif
+                <select [value]="intentForm().intent" (change)="patchIntent('intent', $any($event.target).value)">
+                  @for (i of intents(); track i.id) { <option [value]="i.id">{{ i.label }}</option> }
+                </select>
+              </label>
+              <label>Précision (facultatif)
+                <input type="text" maxlength="500" [value]="intentForm().intentNote" (input)="patchIntent('intentNote', $any($event.target).value)" />
+              </label>
+              <label>Hypothèse (facultatif)
+                <input type="text" maxlength="500" [value]="intentForm().hypothesis" (input)="patchIntent('hypothesis', $any($event.target).value)" />
+              </label>
+              <button type="submit" class="ec-send">Enregistrer</button>
+            </form>
+          }
+          @if (journalError(); as e) { <p class="ec-error" role="alert">{{ e }}</p> }
+          @if (decisions(); as list) {
+            @if (!list.length) { <p class="ec-note">Aucune décision enregistrée.</p> }
+            <ul class="ec-list">
+              @for (d of list; track d.id) {
+                <li>
+                  <p class="ec-itemHead">
+                    <strong>{{ intentLabel(d.intent) }}</strong>
+                    <span>{{ d.symbol ?? '' }} {{ d.side === 'BUY' ? 'achat' : d.side === 'SELL' ? 'vente' : '' }} · {{ d.createdAt.slice(0, 10) }}</span>
+                  </p>
+                  @if (d.intentNote) { <p class="ec-small">« {{ d.intentNote }} »</p> }
+                  @if (d.review) {
+                    <mtr-echo-answer [answer]="d.review.answer" (action)="onAction($event)" />
+                  }
+                  <div class="ec-chips">
+                    <button type="button" class="ec-chip" [disabled]="reviewing() === d.id" (click)="review(d)">
+                      {{ reviewing() === d.id ? 'Calcul…' : 'Comparer intention et résultat' }}
+                    </button>
+                    <button type="button" class="ec-chip ec-chipDanger" (click)="removeDecision(d)">Supprimer</button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      @case ('alerts') {
+        <div class="ec-body">
+          @if (!alerts().length) {
+            <p class="ec-note">Aucune alerte active. ÉCHO n'alerte que sur des seuils calculés (concentration, VaR, liquidités, moins-values).</p>
+          }
+          <ul class="ec-list">
+            @for (a of alerts(); track a.id) {
+              <li [attr.data-severity]="a.severity" [class.ec-unread]="!a.read">
+                <p class="ec-itemHead"><strong>{{ a.title }}</strong><span>{{ a.createdAt.slice(0, 10) }}</span></p>
+                <p class="ec-small">{{ a.message }}</p>
+                <div class="ec-chips">
+                  @if (a.action) { <button type="button" class="ec-chip ec-chipNav" (click)="readAlert(a)">{{ a.action.label }}</button> }
+                  @else if (!a.read) { <button type="button" class="ec-chip" (click)="readAlert(a)">Marquer comme lue</button> }
+                  @if (prefs()?.voiceEnabled) { <button type="button" class="ec-chip" (click)="speakAlert(a)">Écouter</button> }
+                  <button type="button" class="ec-chip" (click)="dismissAlert(a)">Ignorer</button>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @case ('settings') {
+        <div class="ec-body">
+          @if (prefs(); as p) {
+            <fieldset class="ec-settings">
+              <legend class="ec-visuallyHidden">Préférences d'ÉCHO</legend>
+              <label><input type="checkbox" [checked]="p.memoryEnabled" (change)="savePrefs({ memoryEnabled: $any($event.target).checked })" />
+                Mémoire décisionnelle <small>Enregistre uniquement les intentions que vous saisissez.</small></label>
+              <label><input type="checkbox" [checked]="p.alertsEnabled" (change)="savePrefs({ alertsEnabled: $any($event.target).checked })" />
+                Alertes calculées <small>Concentration, VaR, liquidités, moins-values.</small></label>
+              <label><input type="checkbox" [checked]="p.voiceEnabled" [disabled]="!voice.synthesisSupported" (change)="savePrefs({ voiceEnabled: $any($event.target).checked })" />
+                Réponses vocales <small>{{ voice.synthesisSupported ? 'Synthèse vocale du navigateur, en français.' : 'Non prise en charge par ce navigateur.' }}</small></label>
+              <label><input type="checkbox" [checked]="p.proactiveVoice" [disabled]="!p.voiceEnabled" (change)="savePrefs({ proactiveVoice: $any($event.target).checked })" />
+                Alertes parlées <small>Lit les nouvelles alertes importantes. Jamais pendant une narration FinStories.</small></label>
+              <label>Niveau d'aide
+                <select [value]="p.helpLevel" (change)="savePrefs({ helpLevel: $any($event.target).value })">
+                  <option value="DEBUTANT">Débutant</option>
+                  <option value="INTERMEDIAIRE">Intermédiaire</option>
+                  <option value="AVANCE">Avancé</option>
+                </select>
+              </label>
+            </fieldset>
+            @if (prefsError(); as e) { <p class="ec-error" role="alert">{{ e }}</p> }
+            <p class="ec-note">
+              ÉCHO fonctionne par règles déterministes et appelle les moteurs de calcul de la plateforme en lecture seule.
+              Il ne passe aucun ordre. Le micro n'est utilisé que lorsque vous appuyez sur le bouton de dictée.
+            </p>
+            <button type="button" class="ec-chip ec-chipDanger" (click)="forgetConversations()">Effacer l'historique des conversations</button>
+          }
+        </div>
+      }
+    }
+  </section>
+}

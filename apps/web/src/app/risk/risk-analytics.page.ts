@@ -1,3 +1,4 @@
+import { EchoContextService } from '../core/echo/echo-context.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -156,6 +157,8 @@ export class RiskAnalyticsPage {
 
   constructor() {
     void this.loadPortfolios();
+    const echoCtx = inject(EchoContextService);
+    effect(() => echoCtx.publish({ portfolioId: this.activeId() }));
     inject(DestroyRef).onDestroy(() => (this.destroyed = true));
 
     effect(() => {

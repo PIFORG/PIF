@@ -349,6 +349,33 @@ public class LearningService {
         "note", LearningFr.timemachineCompareNote(),
         "sessions",List.of(comparison(a),comparison(b)));
   }
+  /**
+   * Read-only Time Machine for ÉCHO: replays the recorded decisions before {@code from}, then holds until the
+   * end (same rule as a HOLD branch). Nothing is persisted, no command is appended, scoring is untouched.
+   */
+  public Map<String,Object> whatIfHold(AuthUser user,UUID id,int from) {
+    var l=load(user.id(),id,false);
+    if(l.session().status().equals("ACTIVE"))throw error(HttpStatus.CONFLICT,"BRANCH_REQUIRES_ENDED_SESSION",
+        com.pif.api.web.Messages.get("learning.branch_requires_ended"));
+    int last=Math.max(1,l.session().seq());
+    int seq=Math.max(1,Math.min(from,last));
+    var log=l.commands().stream().map(c->new Simulator.RecordedCommand(c.seq(),c.command())).toList();
+    var played=TimeMachine.play(l.ctx(),TimeMachine.branchCommands(l.ctx(),log,seq,"HOLD")).state();
+    var actual=l.state();
+    var decisions=l.commands().stream().filter(c->c.command().isPlaceOrder()||c.command().type().equals("CANCEL_ORDER"))
+        .map(c->map("seq",c.seq(),"step",c.step(),"outcome",c.outcome(),"command",c.command().toJson())).toList();
+    return map("sessionId",id,"missionSlug",l.session().slug(),
+        "missionTitle",LearningFr.missionTitle(l.ctx().mission().slug(),l.ctx().mission().title()),
+        "fromSeq",seq,"strategy","HOLD","persisted",false,"decisions",decisions,
+        "actual",outcome(l.ctx(),actual),"alternative",outcome(l.ctx(),played));
+  }
+  private Map<String,Object> outcome(Context ctx,SimState state) {
+    var a=state.status.equals("ACTIVE")?null:Assessments.assessSession(ctx,state);
+    return map("status",state.status,"metrics",LearningViews.metricsView(ctx,state),
+        "assessment",a==null?null:map("total",a.total(),"passed",a.passed(),
+            "components",a.components().stream().map(c->map("key",c.key(),"score",c.score())).toList()),
+        "equityCurve",curve(state));
+  }
   public Map<String,Object> profile(AuthUser user) {
     var progress=progress(user.id());var mastery=Mastery.computeMastery(repo.observations(user.id()));var sessions=repo.sessions(user.id());
     var assessments=sessions.stream().filter(s->s.kind().equals("MISSION")).map(s->{
